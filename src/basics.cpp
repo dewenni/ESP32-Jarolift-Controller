@@ -330,6 +330,7 @@ void sendSysInfo() {
   sysInfoJSON["restart_reason"] = restartReason;
   sysInfoJSON["heap"] = heap;
   sysInfoJSON["flash"] = flash;
+  sysInfoJSON["sw_version"] = VERSION;
   char sendInfoJSON[255] = {'\0'};
   serializeJson(sysInfoJSON, sendInfoJSON);
   mqttPublish(addTopic("/sysinfo"), sendInfoJSON, false);

@@ -1,4 +1,4 @@
-# v1.1.1
+# v1.x.x
 
 ## what's new
 
@@ -11,4 +11,4 @@ If you have any further questions, suggestions or requests, please use the discu
 
 ## changelog
 
-- extend internal check if cc1101 is connected to avoid infinite-loop #2
+- fix missing SW-Version in MQTT-SysInfo and Home Assistant
