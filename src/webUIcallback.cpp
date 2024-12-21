@@ -282,28 +282,28 @@ void webCallback(const char *elementId, const char *value) {
       snprintf(config.jaro.ch_name[i], sizeof(config.jaro.ch_name[i]), "%s", value);
     }
     if (strcmp(elementId, setShadeId) == 0) {
-      jaroCmdSetShade(i);
+      jaroCmd(CMD_SET_SHADE, i);
       MY_LOGI(TAG, "cmd set shade - channel %i", i + 1);
     }
     if (strcmp(elementId, learnId) == 0) {
-      jaroCmdLearn(i);
+      jaroCmd(CMD_LEARN, i);
       MY_LOGI(TAG, "cmd learn - channel %i", i + 1);
     }
     if (strcmp(elementId, cmdUpId) == 0) {
       MY_LOGI(TAG, "cmd up - channel %i", i + 1);
-      jaroCmdUp(i);
+      jaroCmd(CMD_UP, i);
     }
     if (strcmp(elementId, cmdStopId) == 0) {
       MY_LOGI(TAG, "cmd stop - channel %i", i + 1);
-      jaroCmdStop(i);
+      jaroCmd(CMD_STOP, i);
     }
     if (strcmp(elementId, cmdDownId) == 0) {
       MY_LOGI(TAG, "cmd down - channel %i", i + 1);
-      jaroCmdDown(i);
+      jaroCmd(CMD_DOWN, i);
     }
     if (strcmp(elementId, cmdShadeId) == 0) {
       MY_LOGI(TAG, "cmd shade - channel %i", i + 1);
-      jaroCmdShade(i);
+      jaroCmd(CMD_SHADE, i);
     }
   }
 

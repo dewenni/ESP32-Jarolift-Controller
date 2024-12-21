@@ -85,7 +85,7 @@ void JaroliftController::devcnt_handler(boolean do_increment) {
     devcnt++;
   EEPROM.put(cntadr, devcnt);
   EEPROM.commit();
-  sendMsg(ESP_LOG_INFO, "Device Counter: %i", devcnt);
+  sendMsg(ESP_LOG_DEBUG, "Device Counter: %i", devcnt);
 } // void devcnt_handler
 
 // ####################################################################
@@ -136,7 +136,7 @@ bool JaroliftController::getCC1101State(void) { return cc1101.connected(); }
 // ####################################################################
 uint32_t JaroliftController::cmd_get_serial(int channel) {
   uint32_t serial = (config.serial << 8) + channel;
-  sendMsg(ESP_LOG_DEBUG, "get serial: 0x%08x for channel: %i", serial, channel);
+  sendMsg(ESP_LOG_DEBUG, "get serial: 0x%08x for channel: %i", serial, channel + 1);
   return serial;
 }
 
@@ -428,7 +428,7 @@ void JaroliftController::cmdStop(uint8_t channel) {
   radio_tx(2);
   enterrx();
   rx_function = 0x4;
-  sendMsg(ESP_LOG_INFO, "command STOP for channel %i sent", channel);
+  sendMsg(ESP_LOG_INFO, "command STOP for channel %i sent", channel + 1);
   devcnt_handler(true);
 } // void jaroCmdStop
 
@@ -486,7 +486,7 @@ void JaroliftController::cmdSetShade(uint8_t channel) {
     delay(300);
   }
   rx_function = 0x6;
-  sendMsg(ESP_LOG_INFO, "command SET SHADE for channel %i sent", channel);
+  sendMsg(ESP_LOG_INFO, "command SET SHADE for channel %i sent", channel + 1);
   devcnt_handler(false);
   delay(2000); // Safety time to prevent accidentally erase of end-points.
 } // void cmd_set_shade_position
@@ -501,7 +501,7 @@ void JaroliftController::cmdLearn(uint8_t channel) {
     return;
   }
 
-  sendMsg(ESP_LOG_INFO, "putting channel %i into learn mode ...", channel);
+  sendMsg(ESP_LOG_INFO, "putting channel %i into learn mode ...", channel + 1);
   new_serial = cmd_get_serial(channel);
   EEPROM.get(cntadr, devcnt);
   sendMsg(ESP_LOG_DEBUG, "Device Counter from EEPROM: %i", devcnt);
@@ -553,7 +553,7 @@ void JaroliftController::cmdUpDown(uint8_t channel) {
   radio_tx(1);
   enterrx();
   devcnt_handler(true);
-  sendMsg(ESP_LOG_INFO, "command UPDOWN for channel %i sent", channel);
+  sendMsg(ESP_LOG_INFO, "command UPDOWN for channel %i sent", channel + 1);
 } // void cmd_updown
 
 void JaroliftController::begin() {

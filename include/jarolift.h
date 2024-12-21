@@ -1,11 +1,5 @@
 #pragma once
 
-void jaroCmdUp(uint8_t channel);
-void jaroCmdDown(uint8_t channel);
-void jaroCmdStop(uint8_t channel);
-void jaroCmdSetShade(uint8_t channel);
-void jaroCmdShade(uint8_t channel);
-void jaroCmdLearn(uint8_t channel);
 void jaroCmdSetDevCnt(uint16_t value);
 void jaroCmdReInit();
 bool getCC1101State();
@@ -14,3 +8,12 @@ uint16_t jaroGetDevCnt();
 
 void jaroliftSetup();
 void jaroliftCyclic();
+
+enum JaroCommandType { CMD_UP, CMD_DOWN, CMD_STOP, CMD_SET_SHADE, CMD_SHADE, CMD_LEARN };
+
+struct JaroCommand {
+  JaroCommandType type;
+  uint8_t channel;
+};
+
+void jaroCmd(JaroCommandType type, uint8_t channel);

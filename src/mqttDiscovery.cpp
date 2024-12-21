@@ -11,9 +11,6 @@ char statePrefix[128];
 char deviceId[32];
 char swVersion[32];
 
-static muTimer cyclicTimer = muTimer();
-static muTimer sendTimer = muTimer();
-
 static bool resetMqttConfig = false;
 
 enum DeviceType { DEV_TEXT, DEV_BTN, DEV_SHUTTER };

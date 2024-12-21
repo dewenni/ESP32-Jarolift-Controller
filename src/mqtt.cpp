@@ -5,6 +5,9 @@
 #include <message.h>
 #include <mqtt.h>
 #include <mqttDiscovery.h>
+#include <queue>
+
+#define MAX_MQTT_CMD 20
 
 /* D E C L A R A T I O N S ****************************************************/
 #define PAYLOAD_LEN 512
@@ -12,19 +15,40 @@ struct s_MqttMessage {
   char topic[512];
   char payload[PAYLOAD_LEN];
   int len;
-  long intVal = 0;
-  float floatVal = 0.0;
 };
 
+std::queue<s_MqttMessage> mqttCmdQueue;
 static void processMqttMessage();
 static AsyncMqttClient mqtt_client;
 static bool bootUpMsgDone, setupDone = false;
 static const char *TAG = "MQTT"; // LOG TAG
-static bool mqttMsgAvailable = false;
 static char lastError[64] = "---";
 static int mqtt_retry = 0;
 static muTimer mqttReconnectTimer;
-static s_MqttMessage msgCpy;
+
+/**
+ * *******************************************************************
+ * @brief   add message to mqtt command buffer
+ * @param   topic, payload, len
+ * @return  none
+ * *******************************************************************/
+void addMqttCmd(const char *topic, const char *payload, int len) {
+  if (mqttCmdQueue.size() < MAX_MQTT_CMD) {
+    s_MqttMessage message;
+    strncpy(message.topic, topic, sizeof(message.topic) - 1);
+    message.topic[sizeof(message.topic) - 1] = '\0';
+
+    strncpy(message.payload, payload, sizeof(message.payload) - 1);
+    message.payload[sizeof(message.payload) - 1] = '\0';
+
+    message.len = len;
+
+    mqttCmdQueue.push(message);
+    MY_LOGD(TAG, "add msg to buffer: %s, %s", topic, payload);
+  } else {
+    MY_LOGE(TAG, "too many commands within too short time");
+  }
+}
 
 /**
  * *******************************************************************
@@ -66,6 +90,8 @@ const char *addCfgCmdTopic(const char *suffix) {
  * *******************************************************************/
 void onMqttMessage(char *topic, char *payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) {
 
+  s_MqttMessage msgCpy;
+
   msgCpy.len = len;
 
   if (topic == NULL) {
@@ -81,15 +107,7 @@ void onMqttMessage(char *topic, char *payload, AsyncMqttClientMessageProperties 
     msgCpy.payload[len] = '\0';
   }
 
-  // payload as number
-  msgCpy.intVal = 0;
-  msgCpy.floatVal = 0.0;
-  if (len > 0) {
-    msgCpy.intVal = atoi(msgCpy.payload);
-    msgCpy.floatVal = atoff(msgCpy.payload);
-  }
-
-  mqttMsgAvailable = true;
+  addMqttCmd(msgCpy.topic, msgCpy.payload, msgCpy.len);
 
   MY_LOGI(TAG, "msg received | topic: %s | payload: %s", msgCpy.topic, msgCpy.payload);
 }
@@ -187,9 +205,8 @@ void mqttSetup() {
 void mqttCyclic() {
 
   // process incoming messages
-  if (mqttMsgAvailable) {
+  if (!mqttCmdQueue.empty()) {
     processMqttMessage();
-    mqttMsgAvailable = false;
   }
 
   // call setup when connection is established
@@ -234,6 +251,12 @@ void mqttCyclic() {
   }
 }
 
+/**
+ * *******************************************************************
+ * @brief   helper function to check shutter commands
+ * @param   topicCopy, cmpTopic
+ * @return  none
+ * *******************************************************************/
 int checkShutterCmd(const char *topicCopy, const char *cmpTopic) {
 
   size_t cmpTopicLen = strlen(cmpTopic);
@@ -257,6 +280,18 @@ int checkShutterCmd(const char *topicCopy, const char *cmpTopic) {
  * @return  none
  * *******************************************************************/
 void processMqttMessage() {
+
+  s_MqttMessage msgCpy = mqttCmdQueue.front();
+
+  MY_LOGD(TAG, "process msg from buffer: %s, %s", msgCpy.topic, msgCpy.payload);
+
+  // payload as number
+  // msgCpy.intVal = 0;
+  // msgCpy.floatVal = 0.0;
+  // if (len > 0) {
+  //   msgCpy.intVal = atoi(msgCpy.payload);
+  //   msgCpy.floatVal = atoff(msgCpy.payload);
+  // }
 
   const char *shutterTopic = addTopic("/cmd/shutter/");
   int channel = checkShutterCmd(msgCpy.topic, shutterTopic);
@@ -284,15 +319,15 @@ void processMqttMessage() {
   } else if (channel != -1) {
     if (channel >= 1 && channel <= 16) {
       if (strcasecmp(msgCpy.payload, "UP") == 0 || strcasecmp(msgCpy.payload, "OPEN") == 0 || strcmp(msgCpy.payload, "0") == 0) {
-        jaroCmdUp(channel - 1);
+        jaroCmd(CMD_UP, channel - 1);
       } else if (strcasecmp(msgCpy.payload, "DOWN") == 0 || strcasecmp(msgCpy.payload, "CLOSE") == 0 || strcmp(msgCpy.payload, "1") == 0) {
-        jaroCmdDown(channel - 1);
+        jaroCmd(CMD_DOWN, channel - 1);
       } else if (strcasecmp(msgCpy.payload, "STOP") == 0 || strcmp(msgCpy.payload, "2") == 0) {
-        jaroCmdStop(channel - 1);
+        jaroCmd(CMD_STOP, channel - 1);
       } else if (strcasecmp(msgCpy.payload, "SHADE") == 0 || strcmp(msgCpy.payload, "3") == 0) {
-        jaroCmdShade(channel - 1);
+        jaroCmd(CMD_SHADE, channel - 1);
       } else if (strcasecmp(msgCpy.payload, "SETSHADE") == 0 || strcmp(msgCpy.payload, "4") == 0) {
-        jaroCmdSetShade(channel - 1);
+        jaroCmd(CMD_SET_SHADE, channel - 1);
       } else {
         mqttPublish(addTopic("/message"), "invalid shutter cmd", false);
         MY_LOGW(TAG, "invalid shutter cmd");
@@ -305,4 +340,6 @@ void processMqttMessage() {
     mqttPublish(addTopic("/message"), "unknown topic", false);
     MY_LOGI(TAG, "unknown topic received");
   }
+
+  mqttCmdQueue.pop(); // next entry in Queue
 }
