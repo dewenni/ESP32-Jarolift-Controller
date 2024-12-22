@@ -6,6 +6,10 @@ const translations = {
     de: "System",
     en: "System",
   },
+  timer: {
+    de: "Timer",
+    en: "Timer",
+  },
   control: {
     de: "Bedienung",
     en: "Control",
@@ -361,5 +365,85 @@ const translations = {
   mqtt_info2: {
     de: "< ../ > ist der Platzhalter für das MQTT Topic welches in den Einstellungen vorgegeben wird.",
     en: "< ../ > is the placeholder for the MQTT topic which is specified in the settings.",
+  },
+  sunrise: {
+    de: "Sonnenaufgang",
+    en: "sunrise",
+  },
+  sundown: {
+    de: "Sonnenuntergang",
+    en: "sundown",
+  },
+  time_offset: {
+    de: "Zeitverschiebung",
+    en: "time offset",
+  },
+  shutter: {
+    de: "Rolläden",
+    en: "Shutters",
+  },
+  cmd_up: {
+    de: "Hochfahren",
+    en: "up",
+  },
+  cmd_down: {
+    de: "Runterfahren",
+    en: "down",
+  },
+  timer_type: {
+    de: "Zeitgeber",
+    en: "Time-Source",
+  },
+  time: {
+    de: "Uhrzeit",
+    en: "Time",
+  },
+  time_HH_MM: {
+    de: "Zeit (HH:MM)",
+    en: "Time (HH:MM)",
+  },
+  offset_desc: {
+    de: "Offset in Minuten (z. B. -15 oder +20)",
+    en: "Offset in Minutens (e.g. -15 oder +20)",
+  },
+  command: {
+    de: "Befehl",
+    en: "Command",
+  },
+  weekdays: {
+    de: "Wochentage",
+    en: "weekdays",
+  },
+  day_mo: {
+    de: "Mo",
+    en: "Mo",
+  },
+  day_tu: {
+    de: "Di",
+    en: "Tu",
+  },
+  day_we: {
+    de: "Mi",
+    en: "We",
+  },
+  day_th: {
+    de: "Do",
+    en: "Th",
+  },
+  day_fr: {
+    de: "Fr",
+    en: "Fr",
+  },
+  day_sa: {
+    de: "Sa",
+    en: "Sa",
+  },
+  day_su: {
+    de: "So",
+    en: "Su",
+  },
+  delete: {
+    de: "löschen",
+    en: "delete",
   },
 };

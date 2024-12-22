@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>ESP Async Web Server</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" type="text/css" href="../css/pico.css" />
+    <link rel="stylesheet" type="text/css" href="../css/custom.css" />
+    <link rel="stylesheet" type="text/css" href="../css/icons.css" />
+    <script src="../js/fun.js" defer></script>
+    <script src="../js/doc.js" defer></script>
+    <script src="../js/lang.js" defer></script>
+    <script src="../js/timer.js" defer></script>
+    <style></style>
+    <script>
+      function test() {
+        document.getElementById("tab2").classList.add("active");
+        localizePage("de");
+      }
+      setInterval(test, 1000);
+    </script>
+  </head>
+  <body>
+    <!-- Layout -->
+    <header
+      style="
+        height: 100px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      "></header>
+    <!-- Tab-Content -->
+    <main class="container">
+      <!--SECTION-START-->
+      <template id="timer-template">
+        <article class="timer">
+          <div class="dash-main">
+            <div class="dash-header">Timer ${i}</div>
+            <div class="section-header">
+              <label for="timer${i}_enable" data-i18n="activate"></label>
+              <div class="switch-container">
+                <input
+                  name="timer${i}_enable"
+                  type="checkbox"
+                  role="switch"
+                  hideOpt="OPT_TIMER${i}"
+                  id="cfg_timer${i}_enable" />
+              </div>
+            </div>
+            <br />
+            <form id="timerForm" class="OPT_TIMER${i}">
+              <fieldset">
+                <label for="timeType${i}" data-i18n="timer_type"></label>
+                <select
+                  id="p02_timer${i}_type"
+                  name="timeType${i}"
+                  onchange="toggleTimeInputs(this)">
+                  <option value="fixed" data-i18n="time"></option>
+                  <option value="sunrise" data-i18n="sunrise"></option>
+                  <option value="sunset" data-i18n="sundown"></option>
+                </select>
+
+                <div class="time-input" id="timeInput${i}">
+                  <label for="timeValue${i}" data-i18n="time_HH_MM"></label>
+                  <input
+                    type="time"
+                    id="p02_timer${i}_timeValue"
+                    name="timeValue${i}" />
+                </div>
+
+                <div
+                  class="time-input"
+                  id="offsetInput${i}"
+                  style="display: none">
+                  <label for="offsetValue${i}" data-i18n="offset_desc"></label>
+                  <input
+                    type="number"
+                    id="p02_timer${i}_offsetValue"
+                    name="offsetValue${i}"
+                    placeholder="0"
+                    step="1" />
+                </div>
+
+                <!-- Dropdown for shutter cmd -->
+                <label for="command${i}" data-i18n="command"></label>
+                <select id="p02_timer${i}_cmd" name="command${i}">
+                  <option value="up" data-i18n="cmd_up"></option>
+                  <option value="down" data-i18n="cmd_down"></option>
+                </select>
+
+                <!-- Checkboxe for wekdays -->
+                <label data-i18n="weekdays"></label>
+                <div class="grid">
+                  <div>
+                    <input
+                      type="checkbox"
+                      id="p02_timer${i}_monday"
+                      name="days${i}" />
+                    <label for="monday${i}" data-i18n="day_mo"></label>
+                  </div>
+                  <div>
+                    <input
+                      type="checkbox"
+                      id="p02_timer${i}_tuesday"
+                      name="days${i}" />
+                    <label for="tuesday${i}" data-i18n="day_tu"></label>
+                  </div>
+                  <div>
+                    <input
+                      type="checkbox"
+                      id="p02_timer${i}_wednesday"
+                      name="days${i}" />
+                    <label for="wednesday${i}" data-i18n="day_we"></label>
+                  </div>
+                  <div>
+                    <input
+                      type="checkbox"
+                      id="p02_timer${i}_thursday"
+                      name="days${i}" />
+                    <label for="thursday${i}" data-i18n="day_th"></label>
+                  </div>
+                  <div>
+                    <input
+                      type="checkbox"
+                      id="p02_timer${i}_friday"
+                      name="days${i}" />
+                    <label for="friday${i}" data-i18n="day_fr"></label>
+                  </div>
+                  <br />
+                  <div>
+                    <input
+                      type="checkbox"
+                      id="p02_timer${i}_saturday"
+                      name="days${i}" />
+                    <label for="saturday${i}" data-i18n="day_sa"></label>
+                  </div>
+                  <div>
+                    <input
+                      type="checkbox"
+                      id="p02_timer${i}_sunday"
+                      name="days${i}" />
+                    <label for="sunday${i}" data-i18n="day_su"></label>
+                  </div>
+                </div>
+                <!-- selection of shutter -->
+                <div class="roller-shutter-selection">
+                  <label for="rollos${i}" data-i18n="shutter"></label>
+                  <div class="grid-container">
+                    <div class="grid-item">
+                      <input
+                        type="checkbox"
+                        id="p02_timer${i}_shutter1"
+                        name="shutters"
+                        value="shutter1_${i}" />
+                      <label for="shutter1_${i}">CH 1</label>
+                    </div>
+                    <div class="grid-item">
+                      <input
+                        type="checkbox"
+                        id="p02_timer${i}_shutter2"
+                        name="shutters"
+                        value="shutter2_${i}" />
+                      <label for="shutter2_${i}">CH 2</label>
+                    </div>
+                    <div class="grid-item">
+                      <input
+                        type="checkbox"
+                        id="p02_timer${i}_shutter3"
+                        name="shutters"
+                        value="shutter3_${i}" />
+                      <label for="shutter3_${i}">CH 3</label>
+                    </div>
+                    <div class="grid-item">
+                      <input
+                        type="checkbox"
+                        id="p02_timer${i}_shutter4"
+                        name="shutters"
+                        value="shutter4_${i}" />
+                      <label for="shutter4_${i}">CH 4</label>
+                    </div>
+                    <div class="grid-item">
+                      <input
+                        type="checkbox"
+                        id="p02_timer${i}_shutter5"
+                        name="shutters"
+                        value="shutter5_${i}" />
+                      <label for="shutter5_${i}">CH 5</label>
+                    </div>
+                    <div class="grid-item">
+                      <input
+                        type="checkbox"
+                        id="p02_timer${i}_shutter6"
+                        name="shutters"
+                        value="shutter6_${i}" />
+                      <label for="shutter6_${i}">CH 6</label>
+                    </div>
+                    <div class="grid-item">
+                      <input
+                        type="checkbox"
+                        id="p02_timer${i}_shutter7"
+                        name="shutters"
+                        value="shutter7_${i}" />
+                      <label for="shutter7_${i}">CH 7</label>
+                    </div>
+                    <div class="grid-item">
+                      <input
+                        type="checkbox"
+                        id="p02_timer${i}_shutter8"
+                        name="shutters"
+                        value="shutter8_${i}" />
+                      <label for="shutter8_${i}">CH 8</label>
+                    </div>
+                    <div class="grid-item">
+                      <input
+                        type="checkbox"
+                        id="p02_timer${i}_shutter9"
+                        name="shutters"
+                        value="shutter9_${i}" />
+                      <label for="shutter9_${i}">CH 9</label>
+                    </div>
+                    <div class="grid-item">
+                      <input
+                        type="checkbox"
+                        id="p02_timer${i}_shutter10"
+                        name="shutters"
+                        value="shutter10_${i}" />
+                      <label for="shutter10_${i}">CH 10</label>
+                    </div>
+                    <div class="grid-item">
+                      <input
+                        type="checkbox"
+                        id="p02_timer${i}_shutter11"
+                        name="shutters"
+                        value="shutter11_${i}" />
+                      <label for="shutter11_${i}">CH 11</label>
+                    </div>
+                    <div class="grid-item">
+                      <input
+                        type="checkbox"
+                        id="p02_timer${i}_shutter12"
+                        name="shutters"
+                        value="shutter12_${i}" />
+                      <label for="shutter12_${i}">CH 12</label>
+                    </div>
+                    <div class="grid-item">
+                      <input
+                        type="checkbox"
+                        id="p02_timer${i}_shutter13"
+                        name="shutters"
+                        value="shutter13_${i}" />
+                      <label for="shutter13_${i}">CH 13</label>
+                    </div>
+                    <div class="grid-item">
+                      <input
+                        type="checkbox"
+                        id="p02_timer${i}_shutter14"
+                        name="shutters"
+                        value="shutter14_${i}" />
+                      <label for="shutter14_${i}">CH 14</label>
+                    </div>
+                    <div class="grid-item">
+                      <input
+                        type="checkbox"
+                        id="p02_timer${i}_shutter15"
+                        name="shutters"
+                        value="shutter15_${i}" />
+                      <label for="shutter15_${i}">CH 15</label>
+                    </div>
+                    <div class="grid-item">
+                      <input
+                        type="checkbox"
+                        id="p02_timer${i}_shutter16"
+                        name="shutters"
+                        value="shutter16_${i}" />
+                      <label for="shutter16_${i}">CH 16</label>
+                    </div>
+                  </div>
+                </div>
+                <br />
+              </fieldset>
+            </form>
+          </div>
+        </article>
+      </template>
+
+      <!-- Tab-2 -->
+      <div id="tab2" class="tab-content active">
+        <div class="grid" id="timers-container">
+          <!-- END Grid1 -->
+        </div>
+        <!-- END Tab-Content -->
+      </div>
+      <!--SECTION-END-->
+    </main>
+    <!-- Footer -->
+    <footer
+      style="
+        height: 100px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      ">
+      <div id="status">STATUS</div>
+    </footer>
+  </body>
+</html>
