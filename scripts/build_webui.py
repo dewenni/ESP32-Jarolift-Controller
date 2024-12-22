@@ -54,6 +54,7 @@ def convert_to_c_literal(input_file_path, output_file_path, var_name):
 source_files = [
     'web/html/00_header.html',
     'web/html/01_control.html',
+    'web/html/02_timer.html',
     'web/html/09_system.html',
     'web/html/10_logger.html',
     'web/html/11_ota.html',
@@ -137,7 +138,8 @@ compress_to_gzip_c_array(output_file_css, output_c_file, 'gzip_css')
 source_files = [
     'web/js/fun.js',
     'web/js/doc.js',
-    'web/js/lang.js'
+    'web/js/lang.js',
+    'web/js/timer.js',
 ]
 
 # Zielpfad der generierten Datei
