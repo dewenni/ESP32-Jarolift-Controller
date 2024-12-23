@@ -259,6 +259,26 @@ function updateDialog(data) {
   }
 }
 
+// open bitmask help dialog
+function openGrpMaskHelp(button) {
+  const dialog = document.getElementById("p12_bitmask_dialog");
+  if (dialog) {
+    dialog.showModal();
+  } else {
+    console.error("Dialog mit ID 'p12_bitmask_dialog' wurde nicht gefunden.");
+  }
+}
+
+// close bitmask help dialog
+function closeGrpMaskHelp() {
+  const dialog = document.getElementById("p12_bitmask_dialog");
+  if (dialog) {
+    dialog.close();
+  } else {
+    console.error("Dialog mit ID 'p12_bitmask_dialog' wurde nicht gefunden.");
+  }
+}
+
 // Function for switching the visibility of elements
 function toggleElementVisibility(className, isVisible) {
   const elements = document.querySelectorAll(`.${className}`);
@@ -357,6 +377,16 @@ function formatHex(input) {
   input.value = input.value.padStart(length, "0").toLowerCase();
 }
 
+function validateBin(input) {
+  // Entferne alles außer 0 und 1
+  input.value = input.value.replace(/[^0-1]/g, "");
+}
+
+function formatBin(input) {
+  const length = parseInt(input.getAttribute("data-length"), 10) || 16; // Standardlänge: 16
+  input.value = input.value.padStart(length, "0");
+}
+
 // update elements based on config.json file
 function updateUI(
   config,
@@ -394,11 +424,18 @@ function updateUI(
             // Setze das "checked"-Attribut für Radio-Buttons
             element.checked = element.value === value.toString();
           } else {
-            // Überprüfen, ob das Feld ein HEX-Wert benötigt
+            // Überprüfen, ob das Feld ein HEX- oder Binärwert benötigt
             if (element.dataset.type === "hex" && typeof value === "number") {
               // Konvertiere Zahl zu HEX und setze den Wert
               element.value = value.toString(16).toLowerCase();
               formatHex(element);
+            } else if (
+              element.dataset.type === "bin" &&
+              typeof value === "number"
+            ) {
+              // Konvertiere Zahl zu Binär und setze den Wert
+              element.value = value.toString(2);
+              formatBin(element);
             } else {
               // Setze den "value"-Attribut für andere Eingabetypen (z.B. text, number)
               element.value = value;

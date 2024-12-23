@@ -98,3 +98,6 @@
 .i_updown {
   background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="%23fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.68" viewBox="0 0 24 24"><path d="m7 15 5 5 5-5M7 9l5-5 5 5"/></svg>');
 }
+.i_updown2 {
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="%23fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.68" viewBox="0 0 24 24"><path d="m.891 14.882 4.871 4.87 4.871-4.87M.891 9.036l4.871-4.87 4.871 4.87M13.402 14.882l4.872 4.87 4.87-4.87m-9.742-5.846 4.872-4.87 4.87 4.87" style="stroke-width:1.63669"/></svg>');
+}

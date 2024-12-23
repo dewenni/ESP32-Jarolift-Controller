@@ -66,6 +66,14 @@ public:
 
   void cmdUp(uint8_t channel);
 
+  void cmdGroupUp(uint16_t group_mask);
+
+  void cmdGroupDown(uint16_t group_mask);
+
+  void cmdGroupStop(uint16_t group_mask);
+
+  void cmdGroupShade(uint16_t group_mask);
+
   void cmdDown(uint8_t channel);
 
   void cmdStop(uint8_t channel);

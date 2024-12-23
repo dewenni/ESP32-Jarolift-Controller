@@ -16,6 +16,9 @@ struct s_cfg_jaro {
   uint32_t serial;
   char ch_name[16][64]{"\0"};
   bool ch_enable[16];
+  char grp_name[6][64]{"\0"};
+  bool grp_enable[6];
+  uint16_t grp_mask[6];
 };
 
 struct s_cfg_wifi {

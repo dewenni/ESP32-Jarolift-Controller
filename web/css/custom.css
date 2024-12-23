@@ -9,29 +9,34 @@
   --pico-switch-checked-background-color: #687899;
 }
 
+@media (min-width: 100px) {
+  :root {
+    --pico-font-size: 80%;
+  }
+}
 @media (min-width: 576px) {
   :root {
-    --pico-font-size: 100%;
+    --pico-font-size: 90%;
   }
 }
 @media (min-width: 768px) {
   :root {
-    --pico-font-size: 105%;
+    --pico-font-size: 95%;
   }
 }
 @media (min-width: 1024px) {
   :root {
-    --pico-font-size: 110%;
+    --pico-font-size: 100%;
   }
 }
 @media (min-width: 1280px) {
   :root {
-    --pico-font-size: 115%;
+    --pico-font-size: 105%;
   }
 }
 @media (min-width: 1536px) {
   :root {
-    --pico-font-size: 120%;
+    --pico-font-size: 110%;
   }
 }
 
@@ -195,6 +200,30 @@ hr {
   .grid .dash {
     flex-basis: 32%;
   }
+}
+
+.details-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  align-items: center;
+}
+
+.details-container .input-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.details-container .label-with-button {
+  display: flex;
+
+  justify-content: flex-start;
+  gap: 0.5rem;
+}
+
+.details-container input {
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .leftright {
