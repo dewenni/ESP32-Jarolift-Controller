@@ -38,17 +38,20 @@ Controlling Jarolift(TM) TDEF 433MHz radio shutters via **ESP32** and **CC1101**
 
 ## Features
 
-- Web-based User Interface (WebUI):  
+- **Web-based User Interface (WebUI):**  
 A modern, mobile-friendly interface for easy configuration and control.
 
-- MQTT Support:  
+- **MQTT Support:**  
 Communication and control of devices are handled via MQTT, a lightweight and reliable messaging protocol.
 
-- HomeAssistant Integration:  
+- **HomeAssistant Integration:**  
 Automatic device discovery in HomeAssistant through MQTT Auto Discovery for seamless integration.
 
-- Support for up to 16 Roller Shutters:  
+- **Support for up to 16 Roller Shutters:**  
 Control up to 16 roller shutters with ease, all managed through the WebUI and MQTT.
+
+- **Support for up to 6 Roller Shutter Groups:**  
+define shutter groups to control several shutters at once
 
 Experimental version.
 Use at your own risk. For private/educational use only. (Keeloq algorithm licensed only to TI Microcontrollers)
@@ -237,6 +240,12 @@ Here you can configure the GPIO to connect the CC1101 to the ESP32
 - **Jarolift**  
 here you have to configure some Jarolift specific protocol settings
 
+- **Shutter**  
+here you can configure each shutter with individual name
+
+- **Group**  
+here you can define optional shutter-groups
+
 - **Language**  
 There are two languages available. Choose what you prefer.
 The language take effect on the webUI and also on the mqtt messages!
@@ -309,7 +318,9 @@ Topic: ESP32-Jarolift-Controller/wifi = {
 
 ## Commands
 
-To control the shutters yu can use the following mqtt commands.
+### Shutter
+
+To control the shutters you can use the following mqtt commands.
 {UP, OPEN, 0} means, that you can use one of the listed payload commands.
 
 ```text
@@ -334,6 +345,66 @@ topic:      ../cmd/shutter/1 ... cmd/shutter/16
 payload:    {SHADE, 3}
 
 ```
+
+### predefined Group
+
+To control shutters a group you can use the following mqtt commands.
+{UP, OPEN, 0} means, that you can use one of the listed payload commands.
+
+```text
+
+command:    group up
+topic:      ../cmd/group/1 ... cmd/group/6
+payload:    {UP, OPEN, 0}
+
+command:    group down
+topic:      ../cmd/group/1 ... cmd/group/6
+payload:    {DOWN, CLOSE, 1}
+
+command:    group stop
+topic:      ../cmd/group/1 ... cmd/group/6
+payload:    {STOP, 2}
+
+command:    group shade
+topic:      ../cmd/group/1 ... cmd/group/6
+payload:    {SHADE, 3}
+
+```
+
+### Group with bitmask
+
+You can also use a generic group command and provide the bitmask to select the shutters directly.  
+The bitmask is a 16-bit number, with the least significant bit (on the right) representing channel 1.  
+A set bit means that the channel belongs to this group.  
+
+**Example**: `0000000000010101` means that channels 1, 3, and 5 belong to this group.
+
+As payload, you can use three different formats to represent the same bitmask:
+
+- **Binary**: `0b0000000000010101`
+- **Hex**: `0x15`
+- **Decimal**: `21`
+
+```text
+
+command:    group up
+topic:      ../cmd/group/up
+payload:    {0b0000000000010101, 0x15, 21}
+
+command:    group down
+topic:      ../cmd/group/down
+payload:    {0b0000000000010101, 0x15, 21}
+
+command:    group stop
+topic:      ../cmd/group/stop
+payload:    {0b0000000000010101, 0x15, 21}
+
+command:    group shade
+topic:      ../cmd/group/shade
+payload:    {0b0000000000010101, 0x15, 21}
+
+```
+
 
 > [!NOTE]
 > < ../ > is the placeholder for the MQTT topic which is specified in the settings.

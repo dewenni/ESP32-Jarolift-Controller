@@ -34,7 +34,7 @@
         <div class="grid" style="max-width: 800px">
           <div>
             <h4 data-i18n="gpio"></h2>
-            <p data-i18n="gpio_info"></p>
+            <h6 data-i18n="gpio_info"></h6>
               <table>
               <tr>
                 <th>Signal</th>
@@ -73,43 +73,127 @@
             </div>
           </div>
         </div>
+        <hr />
         <!--GPIO-END-->
         <div class="grid" style="max-width: 800px">
-          <h4 data-i18n="mqtt"></h2>
-          <table>
-            <tr>
-              <th>Command</th>
-              <th>Topic</th>
-              <th>Payload</th>
-            </tr>
-            <tbody>
+          <div>
+            <h4 data-i18n="mqtt"></h4>
+            <h6 data-i18n="general"></h6>
+            <table>
               <tr>
-                <td>Restart ESP</td>
-                <td>../cmd/restart</td>
-                <td>none</td>
+                <th>Command</th>
+                <th>Topic</th>
+                <th>Payload</th>
               </tr>
+              <tbody>
+                <tr>
+                  <td>Restart ESP</td>
+                  <td>../cmd/restart</td>
+                  <td>none</td>
+                </tr>
+              </tbody>
+            </table>
+            <h6 data-i18n="shutter"></h6>
+            <table>
               <tr>
-                <td>Shutter up</td>
-                <td>../cmd/shutter/1 ... cmd/shutter/16</td>
-                <td>{UP, OPEN, 0}</td>
+                <th>Command</th>
+                <th>Topic</th>
+                <th>Payload</th>
               </tr>
+              <tbody>
+                <tr>
+                  <td>Restart ESP</td>
+                  <td>../cmd/restart</td>
+                  <td>none</td>
+                </tr>
+                <tr>
+                  <td>Shutter UP</td>
+                  <td>../cmd/shutter/1 ... cmd/shutter/16</td>
+                  <td>{UP, OPEN, 0}</td>
+                </tr>
+                <tr>
+                  <td>Shutter DOWN</td>
+                  <td>../cmd/shutter/1 ... cmd/shutter/16</td>
+                  <td>{DOWN, CLOSE, 1}</td>
+                </tr>
+                <tr>
+                  <td>Shutter STOP</td>
+                  <td>../cmd/shutter/1 ... cmd/shutter/16</td>
+                  <td>{STOP, 2}</td>
+                </tr>
+                <tr>
+                  <td>Shutter SHADE</td>
+                  <td>../cmd/shutter/1 ... cmd/shutter/16</td>
+                  <td>{SHADE, 3}</td>
+                </tr>
+              </tbody>
+            </table>
+            <h6 data-i18n="groups"></h6>
+            <table>
               <tr>
-                <td>Shutter down</td>
-                <td>../cmd/shutter/1 ... cmd/shutter/16</td>
-                <td>{DOWN, CLOSE, 1}</td>
+                <th>Command</th>
+                <th>Topic</th>
+                <th>Payload</th>
               </tr>
+              <tbody>
+                <tr>
+                  <td>Group UP</td>
+                  <td>../cmd/group/1 ... cmd/shutter/6</td>
+                  <td>{UP, OPEN, 0}</td>
+                </tr>
+                <tr>
+                  <td>Group DOWN</td>
+                  <td>../cmd/group/1 ... cmd/shutter/6</td>
+                  <td>{DOWN, CLOSE, 1}</td>
+                </tr>
+                <tr>
+                  <td>Group STOP</td>
+                  <td>../cmd/group/1 ... cmd/shutter/6</td>
+                  <td>{STOP, 2}</td>
+                </tr>
+                <tr>
+                  <td>Group SHADE</td>
+                  <td>../cmd/group/1 ... cmd/shutter/6</td>
+                  <td>{SHADE, 3}</td>
+                </tr>
+              </tbody>
+            </table>
+            <h6 data-i18n="group$ + $mask"></h6>
+            <div data-i18n="grp_mask_help"></div><br>
+            <code> Binary: 0b0000000000010101</code><br>
+            <code> Hex: 0x15</code><br>
+            <code> Decimal: 21</code><br><br>
+            
+            <table>
               <tr>
-                <td>Shutter stop</td>
-                <td>../cmd/shutter/1 ... cmd/shutter/16</td>
-                <td>{STOP, 2}</td>
+                <th>Command</th>
+                <th>Topic</th>
+                <th>Payload</th>
               </tr>
-              <tr>
-                <td>Shutter shade</td>
-                <td>../cmd/shutter/1 ... cmd/shutter/16</td>
-                <td>{SHADE, 3}</td>
-              </tr>
-            </tbody>
-          </table>
+              <tbody>
+                <tr>
+                  <td>Group UP</td>
+                  <td>../cmd/group/up</td>
+                  <td>{0b0000000000010101, 0x15, 21}</td>
+                </tr>
+                <tr>
+                  <td>Group DOWN</td>
+                  <td>../cmd/group/down</td>
+                  <td>{0b0000000000010101, 0x15, 21}</td>
+                </tr>
+                <tr>
+                  <td>Group STOP</td>
+                  <td>../cmd/group/stop</td>
+                  <td>{0b0000000000010101, 0x15, 21}</td>
+                </tr>
+                <tr>
+                  <td>Group SHADE</td>
+                  <td>../cmd/group/shade</td>
+                  <td>{0b0000000000010101, 0x15, 21}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
           <div class="info-box">
               <div class="info-icon">&#9432;</div>
               <div class="info-text" data-i18n="mqtt_info2"></div>

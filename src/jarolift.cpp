@@ -7,6 +7,9 @@
 
 #define MAX_CMD 20
 #define SEND_CYCLE 500
+#define POS_OPEN 0
+#define POS_CLOSE 100
+#define POS_SHADE 90
 
 static muTimer cmdTimer = muTimer();
 static const char *TAG = "JARO"; // LOG TAG
@@ -113,6 +116,23 @@ void mqttSendPosition(uint8_t channel, uint8_t position) {
   }
 }
 
+/**
+ * *******************************************************************
+ * @brief   send expected position via mqtt
+ * @param   channel, position
+ * @return  none
+ * *******************************************************************/
+void mqttSendPositionGroup(uint16_t group_mask, uint8_t position) {
+  
+  // check all 16 channels
+  for (uint8_t c = 0; c < 16; c++) {
+    // check if channel is in group
+    if (group_mask & (1 << c)) {
+      mqttSendPosition(c, position);
+    }
+  }
+}
+
 void jaroCmdReInit() { jaroliftSetup(); };
 void jaroCmdSetDevCnt(uint16_t value) { jarolift.setDeviceCounter(value); };
 uint16_t jaroGetDevCnt() { return jarolift.getDeviceCounter(); };
@@ -133,12 +153,12 @@ void processJaroCommands() {
       switch (cmd.single.type) {
       case CMD_UP:
         jarolift.cmdUp(cmd.single.channel);
-        mqttSendPosition(cmd.single.channel, 0);
+        mqttSendPosition(cmd.single.channel, POS_OPEN);
         MY_LOGI(TAG, "execute cmd: UP - channel: %i", cmd.single.channel + 1);
         break;
       case CMD_DOWN:
         jarolift.cmdDown(cmd.single.channel);
-        mqttSendPosition(cmd.single.channel, 100);
+        mqttSendPosition(cmd.single.channel, POS_CLOSE);
         MY_LOGI(TAG, "execute cmd: DOWN - channel: %i", cmd.single.channel + 1);
         break;
       case CMD_STOP:
@@ -147,7 +167,7 @@ void processJaroCommands() {
         break;
       case CMD_SET_SHADE:
         jarolift.cmdSetShade(cmd.single.channel);
-        mqttSendPosition(cmd.single.channel, 90);
+        mqttSendPosition(cmd.single.channel, POS_SHADE);
         MY_LOGI(TAG, "execute cmd: SETSHADE - channel: %i", cmd.single.channel + 1);
         break;
       case CMD_SHADE:
@@ -164,10 +184,12 @@ void processJaroCommands() {
       case CMD_GRP_UP:
         jarolift.cmdGroupUp(cmd.group.group_mask);
         MY_LOGI(TAG, "execute group cmd: UP - mask: %04X", cmd.group.group_mask);
+        mqttSendPositionGroup(cmd.group.group_mask, POS_OPEN);
         break;
       case CMD_GRP_DOWN:
         jarolift.cmdGroupDown(cmd.group.group_mask);
         MY_LOGI(TAG, "execute group cmd: DOWN - mask: %04X", cmd.group.group_mask);
+        mqttSendPositionGroup(cmd.group.group_mask, POS_CLOSE);
         break;
       case CMD_GRP_STOP:
         jarolift.cmdGroupStop(cmd.group.group_mask);
@@ -175,6 +197,7 @@ void processJaroCommands() {
         break;
       case CMD_GRP_SHADE:
         jarolift.cmdGroupShade(cmd.group.group_mask);
+        mqttSendPositionGroup(cmd.group.group_mask, POS_SHADE);
         MY_LOGI(TAG, "execute group cmd: SHADE - mask: %04X", cmd.group.group_mask);
         break;
       }

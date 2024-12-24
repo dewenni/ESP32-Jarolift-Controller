@@ -14,7 +14,7 @@ char swVersion[32];
 static bool resetMqttConfig = false;
 
 enum DeviceType { DEV_TEXT, DEV_BTN, DEV_SHUTTER };
-enum statType { TYP_STATUS, TYP_INFO, TYP_WIFI, TYP_ETH, TYP_SYSINFO, TYP_CMD_BTN, TYP_SHUTTER };
+enum statType { TYP_STATUS, TYP_INFO, TYP_WIFI, TYP_ETH, TYP_SYSINFO, TYP_CMD_BTN, TYP_SHUTTER, TYP_GROUP };
 enum ValTmpType { VAL_SPLIT };
 
 struct DeviceConfig {
@@ -127,14 +127,23 @@ void mqttHaConfig(statType statType, const char *name, const char *deviceClass, 
   }
 
   if (devType == DEV_SHUTTER) {
+
+    // Enable optimistic mode for a device with no state feedback
+    doc["optimistic"] = true;
+
     doc["pl_open"] = "OPEN";
     doc["pl_cls"] = "CLOSE";
     doc["pl_stop"] = "STOP";
-    doc["state_open"] = "0";
-    doc["state_closed"] = "100";
 
-    sprintf(cmdTopic, "%s/cmd/shutter/%i", statePrefix, devCfg.num1);
-    doc["cmd_t"] = cmdTopic;
+    if (statType == TYP_GROUP) {
+      sprintf(cmdTopic, "%s/cmd/group/%i", statePrefix, devCfg.num1);
+      doc["cmd_t"] = cmdTopic;
+    } else if (statType == TYP_SHUTTER) {
+      doc["state_open"] = "0";
+      doc["state_closed"] = "100";
+      sprintf(cmdTopic, "%s/cmd/shutter/%i", statePrefix, devCfg.num1);
+      doc["cmd_t"] = cmdTopic;
+    }
 
   } else if (devType == DEV_BTN) {
     sprintf(cmdTopic, "%s/cmd/%s", statePrefix, name);
@@ -197,6 +206,15 @@ void mqttDiscoverySetup(bool reset) {
       snprintf(shutter, sizeof(shutter), "shutter%d", i + 1);
       mqttHaConfig(TYP_SHUTTER, shutter, "shutter", "cover", NULL, "{{ value | int }}", "mdi:window-shutter", DEV_SHUTTER,
                    shutterPar(i + 1, config.jaro.ch_name[i]));
+    }
+  }
+  // Group Control 1..6
+  for (int i = 0; i < 6; i++) {
+    if (config.jaro.grp_enable[i]) {
+      char group[32];
+      snprintf(group, sizeof(group), "group%d", i + 1);
+      mqttHaConfig(TYP_GROUP, group, "shutter", "cover", NULL, NULL, "mdi:window-shutter-settings", DEV_SHUTTER,
+                   shutterPar(i + 1, config.jaro.grp_name[i]));
     }
   }
   // Service Buttons
