@@ -9,11 +9,22 @@ uint16_t jaroGetDevCnt();
 void jaroliftSetup();
 void jaroliftCyclic();
 
-enum JaroCommandType { CMD_UP, CMD_DOWN, CMD_STOP, CMD_SET_SHADE, CMD_SHADE, CMD_LEARN };
+enum JaroCmdType { CMD_UP, CMD_DOWN, CMD_STOP, CMD_SET_SHADE, CMD_SHADE, CMD_LEARN };
+enum JaroCmdGrpType { CMD_GRP_UP, CMD_GRP_DOWN, CMD_GRP_STOP, CMD_GRP_SHADE };
 
 struct JaroCommand {
-  JaroCommandType type;
-  uint8_t channel;
+  enum CommandType { SINGLE, GROUP } cmdType;
+  union {
+    struct {
+      JaroCmdType type;
+      uint8_t channel;
+    } single;
+    struct {
+      JaroCmdGrpType type;
+      uint16_t group_mask;
+    } group;
+  };
 };
 
-void jaroCmd(JaroCommandType type, uint8_t channel);
+void jaroCmd(JaroCmdType type, uint8_t channel);
+void jaroCmd(JaroCmdGrpType type, uint16_t group_mask);

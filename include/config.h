@@ -4,7 +4,7 @@
 /*-------------------------------------------------------------------------------
 General Configuration
 --------------------------------------------------------------------------------*/
-#define VERSION "v1.2.0" // internal program version
+#define VERSION "v1.3.0" // internal program version
 
 #define WIFI_RECONNECT 30000 // Delay between wifi reconnection tries
 #define MQTT_RECONNECT 10000 // Delay between mqtt reconnection tries
@@ -16,6 +16,9 @@ struct s_cfg_jaro {
   uint32_t serial;
   char ch_name[16][64]{"\0"};
   bool ch_enable[16];
+  char grp_name[6][64]{"\0"};
+  bool grp_enable[6];
+  uint16_t grp_mask[6];
 };
 
 struct s_cfg_wifi {

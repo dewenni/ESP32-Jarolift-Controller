@@ -54,6 +54,7 @@ def convert_to_c_literal(input_file_path, output_file_path, var_name):
 source_files = [
     'web/html/00_header.html',
     'web/html/01_control.html',
+    'web/html/02_group.html',
     'web/html/09_system.html',
     'web/html/10_logger.html',
     'web/html/11_ota.html',

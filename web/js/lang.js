@@ -6,10 +6,6 @@ const translations = {
     de: "System",
     en: "System",
   },
-  control: {
-    de: "Bedienung",
-    en: "Control",
-  },
   settings: {
     de: "Einstellungen",
     en: "Settings",
@@ -361,5 +357,37 @@ const translations = {
   mqtt_info2: {
     de: "< ../ > ist der Platzhalter für das MQTT Topic welches in den Einstellungen vorgegeben wird.",
     en: "< ../ > is the placeholder for the MQTT topic which is specified in the settings.",
+  },
+  groups: {
+    de: "Gruppen",
+    en: "Groups",
+  },
+  group: {
+    de: "Gruppe",
+    en: "Group",
+  },
+  channels: {
+    de: "Kanäle",
+    en: "Channels",
+  },
+  name: {
+    de: "Name",
+    en: "Name",
+  },
+  mask: {
+    de: "Bitmaske",
+    en: "Bitmask",
+  },
+  mask_help: {
+    de: "In diesem Feld wird über eine Bitmaske festgelegt, welche Kanäle zu dieser Gruppe gehören.\nDie Bitmaske ist eine 16-Bit-Zahl, wobei das niederwertigste Bit (rechts) den Kanal 1 repräsentiert. \nEin gesetztes Bit bedeutet, dass der Kanal zu dieser Gruppe gehört.\n\nBeispiel: 0000000000010101 bedeutet, dass die Kanäle 1, 3 und 5 zu dieser Gruppe gehören.",
+    en: "In this field, a bitmask is used to determine which channels belong to this group.\nThe bitmask is a 16-bit number, with the least significant bit (right) representing channel 1.\nA set bit means that the channel belongs to this group.\n\nExample: 0000000000010101 means that channels 1, 3 and 5 belong to this group.",
+  },
+  grp_mask_help: {
+    de: "Sie können auch ein generisches Gruppenkommando verwenden und die Bitmaske verwenden, um die Rolläden direkt auszuwählen. Die Bitmaske ist eine 16-Bit-Zahl, wobei das niederwertigste Bit (rechts) den Kanal 1 repräsentiert. Ein gesetztes Bit bedeutet, dass der Kanal zu dieser Gruppe gehört.\n\nBeispiel: 0000000000010101 bedeutet, dass die Kanäle 1, 3 und 5 zu dieser Gruppe gehören.\n\nAls Payload können Sie drei verschiedene Formate verwenden, um die gleiche Bitmaske darzustellen:",
+    en: "You can also use a generic group command and provide the bitmask to select the shutters directly. The bitmask is a 16-bit number, with the least significant bit (on the right) representing channel 1. A set bit means that the channel belongs to this group.\n\nExample: `0000000000010101` means that channels 1, 3, and 5 belong to this group.\n\nAs payload, you can use three different formats to represent the same bitmask:",
+  },
+  general: {
+    de: "Allgemein",
+    en: "General",
   },
 };

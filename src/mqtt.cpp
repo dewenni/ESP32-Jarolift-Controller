@@ -257,7 +257,7 @@ void mqttCyclic() {
  * @param   topicCopy, cmpTopic
  * @return  none
  * *******************************************************************/
-int checkShutterCmd(const char *topicCopy, const char *cmpTopic) {
+int checkJaroCmd(const char *topicCopy, const char *cmpTopic, int maxChannel) {
 
   size_t cmpTopicLen = strlen(cmpTopic);
 
@@ -266,11 +266,53 @@ int checkShutterCmd(const char *topicCopy, const char *cmpTopic) {
     char *endPtr;
     int channel = strtol(suffix, &endPtr, 10);
 
-    if (*endPtr == '\0' && channel >= 1 && channel <= 15) {
+    if (*endPtr == '\0' && channel >= 1 && channel <= maxChannel) {
       return channel;
     }
   }
   return -1;
+}
+
+/**
+ * *******************************************************************
+ * @brief  parseMask:
+ * @details - Removes any whitespace characters
+ *  - Converts everything to lowercase
+ *  - Determines the format based on prefix:
+ *      "0x" => hexadecimal
+ *      "0b" => binary
+ *      otherwise => decimal
+ * @param   topicCopy, cmpTopic
+ * @return  the interpreted number as a uint16_t
+ * *******************************************************************/
+
+uint16_t parseMask(const char *payload) {
+  char buffer[64];
+  int idx = 0;
+
+  // 1) Remove whitespaces and convert to lowercase
+  while (*payload != '\0' && idx < (int)(sizeof(buffer) - 1)) {
+    if (!isspace((unsigned char)*payload)) {
+      buffer[idx++] = (char)tolower((unsigned char)*payload);
+    }
+    payload++;
+  }
+  buffer[idx] = '\0'; // null termination for the new string
+
+  // 2) Detect prefix
+  // "0x" => hexadecimal
+  if (strncmp(buffer, "0x", 2) == 0) {
+    // strtol parses the substring after "0x" in base 16
+    return (uint16_t)strtol(buffer + 2, NULL, 16);
+  }
+  // "0b" => binary
+  else if (strncmp(buffer, "0b", 2) == 0) {
+    return (uint16_t)strtol(buffer + 2, NULL, 2);
+  }
+  // otherwise => decimal
+  else {
+    return (uint16_t)strtol(buffer, NULL, 10);
+  }
 }
 
 /**
@@ -294,7 +336,12 @@ void processMqttMessage() {
   // }
 
   const char *shutterTopic = addTopic("/cmd/shutter/");
-  int channel = checkShutterCmd(msgCpy.topic, shutterTopic);
+  int channel = checkJaroCmd(msgCpy.topic, shutterTopic, 16);
+  const char *groupTopic = addTopic("/cmd/group/");
+  int group = checkJaroCmd(msgCpy.topic, groupTopic, 6);
+
+  MY_LOGD(TAG, "channel: %i", channel);
+  MY_LOGD(TAG, "group: %i", group);
 
   // restart ESP command
   if (strcasecmp(msgCpy.topic, addTopic("/cmd/restart")) == 0) {
@@ -336,6 +383,34 @@ void processMqttMessage() {
       mqttPublish(addTopic("/message"), "invalid channel", false);
       MY_LOGW(TAG, "invalid channel for shutter cmd");
     }
+    // Group commands
+  } else if (group != -1) {
+    if (group >= 1 && group <= 6) {
+      if (strcasecmp(msgCpy.payload, "UP") == 0 || strcasecmp(msgCpy.payload, "OPEN") == 0 || strcmp(msgCpy.payload, "0") == 0) {
+        jaroCmd(CMD_GRP_UP, config.jaro.grp_mask[group - 1]);
+      } else if (strcasecmp(msgCpy.payload, "DOWN") == 0 || strcasecmp(msgCpy.payload, "CLOSE") == 0 || strcmp(msgCpy.payload, "1") == 0) {
+        jaroCmd(CMD_GRP_DOWN, config.jaro.grp_mask[group - 1]);
+      } else if (strcasecmp(msgCpy.payload, "STOP") == 0 || strcmp(msgCpy.payload, "2") == 0) {
+        jaroCmd(CMD_GRP_STOP, config.jaro.grp_mask[group - 1]);
+      } else if (strcasecmp(msgCpy.payload, "SHADE") == 0 || strcmp(msgCpy.payload, "3") == 0) {
+        jaroCmd(CMD_GRP_SHADE, config.jaro.grp_mask[group - 1]);
+      } else {
+        mqttPublish(addTopic("/message"), "invalid group cmd", false);
+        MY_LOGW(TAG, "invalid group cmd");
+      }
+    } else {
+      mqttPublish(addTopic("/message"), "invalid group", false);
+      MY_LOGW(TAG, "invalid channel for group cmd");
+    }
+    // Group commands with bitmask
+  } else if (strcasecmp(msgCpy.topic, addTopic("/cmd/group/up")) == 0) {
+    jaroCmd(CMD_GRP_UP, parseMask(msgCpy.payload));
+  } else if (strcasecmp(msgCpy.topic, addTopic("/cmd/group/down")) == 0) {
+    jaroCmd(CMD_GRP_DOWN, parseMask(msgCpy.payload));
+  } else if (strcasecmp(msgCpy.topic, addTopic("/cmd/group/stop")) == 0) {
+    jaroCmd(CMD_GRP_STOP, parseMask(msgCpy.payload));
+  } else if (strcasecmp(msgCpy.topic, addTopic("/cmd/group/shade")) == 0) {
+    jaroCmd(CMD_GRP_SHADE, parseMask(msgCpy.payload));
   } else {
     mqttPublish(addTopic("/message"), "unknown topic", false);
     MY_LOGI(TAG, "unknown topic received");

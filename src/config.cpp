@@ -341,6 +341,21 @@ void configSaveToFile() {
     ch_name.add(config.jaro.ch_name[i]);
   }
 
+  JsonArray grp_enable = doc["jaro"]["grp_enable"].to<JsonArray>();
+  for (int i = 0; i < 6; i++) {
+    grp_enable.add(config.jaro.grp_enable[i]);
+  }
+
+  JsonArray grp_name = doc["jaro"]["grp_name"].to<JsonArray>();
+  for (int i = 0; i < 6; i++) {
+    grp_name.add(config.jaro.grp_name[i]);
+  }
+
+  JsonArray grp_mask = doc["jaro"]["grp_mask"].to<JsonArray>();
+  for (int i = 0; i < 6; i++) {
+    grp_mask.add(config.jaro.grp_mask[i]);
+  }
+
   // Delete existing file, otherwise the configuration is appended to the file
   LittleFS.remove(filename);
 
@@ -452,6 +467,18 @@ void configLoadFromFile() {
     JsonArray ch_name = doc["jaro"]["ch_name"].as<JsonArray>();
     for (int i = 0; i < 16; i++) {
       readJSONstring(config.jaro.ch_name[i], sizeof(config.jaro.ch_name[0]), ch_name[i]);
+    }
+    JsonArray grp_enable = doc["jaro"]["grp_enable"].as<JsonArray>();
+    for (int i = 0; i < 6; i++) {
+      config.jaro.grp_enable[i] = grp_enable[i];
+    }
+    JsonArray grp_name = doc["jaro"]["grp_name"].as<JsonArray>();
+    for (int i = 0; i < 6; i++) {
+      readJSONstring(config.jaro.grp_name[i], sizeof(config.jaro.grp_name[0]), grp_name[i]);
+    }
+    JsonArray grp_mask = doc["jaro"]["grp_mask"].as<JsonArray>();
+    for (int i = 0; i < 6; i++) {
+      config.jaro.grp_mask[i] = grp_mask[i];
     }
   }
 

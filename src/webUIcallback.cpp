@@ -283,27 +283,73 @@ void webCallback(const char *elementId, const char *value) {
     }
     if (strcmp(elementId, setShadeId) == 0) {
       jaroCmd(CMD_SET_SHADE, i);
-      MY_LOGI(TAG, "cmd set shade - channel %i", i + 1);
+      MY_LOGI(TAG, "cmd SET-SHADE - channel %i", i + 1);
     }
     if (strcmp(elementId, learnId) == 0) {
       jaroCmd(CMD_LEARN, i);
-      MY_LOGI(TAG, "cmd learn - channel %i", i + 1);
+      MY_LOGI(TAG, "cmd LEARN - channel %i", i + 1);
     }
     if (strcmp(elementId, cmdUpId) == 0) {
-      MY_LOGI(TAG, "cmd up - channel %i", i + 1);
+      MY_LOGI(TAG, "cmd UP - channel %i", i + 1);
       jaroCmd(CMD_UP, i);
     }
     if (strcmp(elementId, cmdStopId) == 0) {
-      MY_LOGI(TAG, "cmd stop - channel %i", i + 1);
+      MY_LOGI(TAG, "cmd STOP - channel %i", i + 1);
       jaroCmd(CMD_STOP, i);
     }
     if (strcmp(elementId, cmdDownId) == 0) {
-      MY_LOGI(TAG, "cmd down - channel %i", i + 1);
+      MY_LOGI(TAG, "cmd DOWN - channel %i", i + 1);
       jaroCmd(CMD_DOWN, i);
     }
     if (strcmp(elementId, cmdShadeId) == 0) {
-      MY_LOGI(TAG, "cmd shade - channel %i", i + 1);
+      MY_LOGI(TAG, "cmd SHADE - channel %i", i + 1);
       jaroCmd(CMD_SHADE, i);
+    }
+  }
+
+  // group 1-6
+  for (int i = 0; i < 6; i++) {
+    char enableId[32];
+    char nameId[32];
+    char maskId[32];
+    char cmdUpId[32];
+    char cmdDownId[32];
+    char cmdStopId[32];
+    char cmdShadeId[32];
+
+    snprintf(enableId, sizeof(enableId), "cfg_jaro_grp_enable_%d", i);
+    snprintf(nameId, sizeof(nameId), "cfg_jaro_grp_name_%d", i);
+    snprintf(maskId, sizeof(maskId), "cfg_jaro_grp_mask_%d", i);
+
+    snprintf(cmdUpId, sizeof(cmdUpId), "p02_up_%d", i);
+    snprintf(cmdDownId, sizeof(cmdDownId), "p02_down_%d", i);
+    snprintf(cmdStopId, sizeof(cmdStopId), "p02_stop_%d", i);
+    snprintf(cmdShadeId, sizeof(cmdShadeId), "p02_shade_%d", i);
+
+    if (strcmp(elementId, enableId) == 0) {
+      config.jaro.grp_enable[i] = stringToBool(value);
+    }
+    if (strcmp(elementId, nameId) == 0) {
+      snprintf(config.jaro.grp_name[i], sizeof(config.jaro.grp_name[i]), "%s", value);
+    }
+    if (strcmp(elementId, maskId) == 0) {
+      config.jaro.grp_mask[i] = strtoul(value, NULL, 2);
+    }
+    if (strcmp(elementId, cmdUpId) == 0) {
+      MY_LOGI(TAG, "cmd UP - group %i", i + 1);
+      jaroCmd(CMD_GRP_UP, config.jaro.grp_mask[i]);
+    }
+    if (strcmp(elementId, cmdStopId) == 0) {
+      MY_LOGI(TAG, "cmd STOP - group %i", i + 1);
+      jaroCmd(CMD_GRP_STOP, config.jaro.grp_mask[i]);
+    }
+    if (strcmp(elementId, cmdDownId) == 0) {
+      MY_LOGI(TAG, "cmd DOWN - group %i", i + 1);
+      jaroCmd(CMD_GRP_DOWN, config.jaro.grp_mask[i]);
+    }
+    if (strcmp(elementId, cmdShadeId) == 0) {
+      MY_LOGI(TAG, "cmd SHADE - group %i", i + 1);
+      jaroCmd(CMD_GRP_SHADE, config.jaro.grp_mask[i]);
     }
   }
 

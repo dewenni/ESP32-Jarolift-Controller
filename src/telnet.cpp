@@ -41,7 +41,7 @@ Command commands[] = {
     {"restart", cmdRestart, "Restart the ESP", ""},
     {"serial", cmdSerial, "serial stream output", "<stream> <[start], [stop]>"},
     {"shutter", cmdShutter, "shutter commands", "channel, up/down/stop/shade"},
-    {"test", cmdTest, "test commands", ""},
+    {"test", cmdTest, "test commands", "group"},
 };
 const int commandsCount = sizeof(commands) / sizeof(commands[0]);
 
