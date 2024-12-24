@@ -6,10 +6,6 @@ const translations = {
     de: "System",
     en: "System",
   },
-  control: {
-    de: "Bedienung",
-    en: "Control",
-  },
   settings: {
     de: "Einstellungen",
     en: "Settings",
