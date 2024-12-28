@@ -195,7 +195,7 @@ Du findest die Update-Funktion im Tab „Tools“ der WebUI.
 
 Hier kannst du einfach die Datei `esp32_jarolift_controller_ota_update_vx.x.x.bin` aus dem Release-Bereich auswählen und das Update starten.
 
-![ota-1](Doc/tools.png)
+![ota-1](Doc/webUI_ota.gif)
 
 Aber es ist auch möglich, die Software drahtlos mit Platformio herunterzuladen.
 Du musst nur die `upload_port` Einstellungen in der `platformio.ini` ändern.
@@ -421,6 +421,7 @@ siehe auch die offizielle Dokumentation: <https://www.home-assistant.io/integrat
 <img src="Doc/webUI_ha2.png" alt="mqtt_ha1" width="75%">
 
 In den mqtt-Einstellungen können die Funktion zur Erkennung aktiviert sowie das mqtt-Topic und der Gerätename für den Home Assistant festgelegt werden.
+
 <img src="Doc/webUI_ha1.png" alt="mqtt_ha1" width="50%">
 
 -----
