@@ -6,6 +6,10 @@
 
 -----
 
+**[🇩🇪 Deutsche Version der Beschreibung](README_DE.md)**
+
+-----
+
 <div align="center">
 
 [![Current Release](https://img.shields.io/github/release/dewenni/ESP32-Jarolift-Controller.svg)](https://github.com/dewenni/ESP32-Jarolift-Controller/releases/latest)
@@ -86,7 +90,6 @@ The WebUI is responsive and also offers a mobile layout.
 
 # Table of Contents
 
-- [Overview](#overview)
 - [Hardware](#hardware)
   - [ESP32 + CC1101](#esp32-+-cc1101)
   - [Optional: Ethernet Module W5500](#optional-ethernet-module-w5500)
