@@ -4,7 +4,6 @@
 #include <basics.h>
 #include <config.h>
 #include <message.h>
-#include <stringHelper.h>
 
 /* D E C L A R A T I O N S ****************************************************/
 char filename[24] = {"/config.json"};
@@ -27,7 +26,6 @@ void checkGPIO();
  * @return  none
  * *******************************************************************/
 void configSetup() {
-
   // start Filesystem
   if (LittleFS.begin(true)) {
     MY_LOGI(TAG, "LittleFS successfully started");
@@ -178,7 +176,7 @@ void checkGPIO() {
  * @return  none
  * *******************************************************************/
 void configHashInit() {
-  hashOld = hash(&config, sizeof(s_config));
+  hashOld = EspStrUtil::hash(&config, sizeof(s_config));
   configInitDone = true;
 }
 
@@ -191,7 +189,7 @@ void configHashInit() {
 void configCyclic() {
 
   if (checkTimer.cycleTrigger(1000) && configInitDone) {
-    unsigned long hashNew = hash(&config, sizeof(s_config));
+    unsigned long hashNew = EspStrUtil::hash(&config, sizeof(s_config));
     if (hashNew != hashOld) {
       hashOld = hashNew;
       configSaveToFile();
@@ -401,23 +399,23 @@ void configLoadFromFile() {
 
     config.lang = doc["lang"];
 
-    readJSONstring(config.wifi.ssid, sizeof(config.wifi.ssid), doc["wifi"]["ssid"]);
-    readJSONstring(config.wifi.password, sizeof(config.wifi.password), doc["wifi"]["password"]);
-    readJSONstring(config.wifi.hostname, sizeof(config.wifi.hostname), doc["wifi"]["hostname"]);
+    EspStrUtil::readJSONstring(config.wifi.ssid, sizeof(config.wifi.ssid), doc["wifi"]["ssid"]);
+    EspStrUtil::readJSONstring(config.wifi.password, sizeof(config.wifi.password), doc["wifi"]["password"]);
+    EspStrUtil::readJSONstring(config.wifi.hostname, sizeof(config.wifi.hostname), doc["wifi"]["hostname"]);
     config.wifi.static_ip = doc["wifi"]["static_ip"];
-    readJSONstring(config.wifi.ipaddress, sizeof(config.wifi.ipaddress), doc["wifi"]["ipaddress"]);
-    readJSONstring(config.wifi.subnet, sizeof(config.wifi.subnet), doc["wifi"]["subnet"]);
-    readJSONstring(config.wifi.gateway, sizeof(config.wifi.gateway), doc["wifi"]["gateway"]);
-    readJSONstring(config.wifi.dns, sizeof(config.wifi.dns), doc["wifi"]["dns"]);
+    EspStrUtil::readJSONstring(config.wifi.ipaddress, sizeof(config.wifi.ipaddress), doc["wifi"]["ipaddress"]);
+    EspStrUtil::readJSONstring(config.wifi.subnet, sizeof(config.wifi.subnet), doc["wifi"]["subnet"]);
+    EspStrUtil::readJSONstring(config.wifi.gateway, sizeof(config.wifi.gateway), doc["wifi"]["gateway"]);
+    EspStrUtil::readJSONstring(config.wifi.dns, sizeof(config.wifi.dns), doc["wifi"]["dns"]);
 
     config.eth.enable = doc["eth"]["enable"];
-    readJSONstring(config.eth.hostname, sizeof(config.eth.hostname), doc["eth"]["hostname"]);
+    EspStrUtil::readJSONstring(config.eth.hostname, sizeof(config.eth.hostname), doc["eth"]["hostname"]);
     config.eth.static_ip = doc["eth"]["static_ip"];
-    readJSONstring(config.eth.ipaddress, sizeof(config.eth.ipaddress), doc["eth"]["ipaddress"]);
-    readJSONstring(config.eth.ipaddress, sizeof(config.eth.ipaddress), doc["eth"]["ipaddress"]);
-    readJSONstring(config.eth.subnet, sizeof(config.eth.subnet), doc["eth"]["subnet"]);
-    readJSONstring(config.eth.gateway, sizeof(config.eth.gateway), doc["eth"]["gateway"]);
-    readJSONstring(config.eth.dns, sizeof(config.eth.dns), doc["eth"]["dns"]);
+    EspStrUtil::readJSONstring(config.eth.ipaddress, sizeof(config.eth.ipaddress), doc["eth"]["ipaddress"]);
+    EspStrUtil::readJSONstring(config.eth.ipaddress, sizeof(config.eth.ipaddress), doc["eth"]["ipaddress"]);
+    EspStrUtil::readJSONstring(config.eth.subnet, sizeof(config.eth.subnet), doc["eth"]["subnet"]);
+    EspStrUtil::readJSONstring(config.eth.gateway, sizeof(config.eth.gateway), doc["eth"]["gateway"]);
+    EspStrUtil::readJSONstring(config.eth.dns, sizeof(config.eth.dns), doc["eth"]["dns"]);
     config.eth.gpio_sck = doc["eth"]["gpio_sck"];
     config.eth.gpio_mosi = doc["eth"]["gpio_mosi"];
     config.eth.gpio_miso = doc["eth"]["gpio_miso"];
@@ -426,18 +424,18 @@ void configLoadFromFile() {
     config.eth.gpio_rst = doc["eth"]["gpio_rst"];
 
     config.mqtt.enable = doc["mqtt"]["enable"];
-    readJSONstring(config.mqtt.server, sizeof(config.mqtt.server), doc["mqtt"]["server"]);
-    readJSONstring(config.mqtt.user, sizeof(config.mqtt.user), doc["mqtt"]["user"]);
-    readJSONstring(config.mqtt.password, sizeof(config.mqtt.password), doc["mqtt"]["password"]);
-    readJSONstring(config.mqtt.topic, sizeof(config.mqtt.topic), doc["mqtt"]["topic"]);
+    EspStrUtil::readJSONstring(config.mqtt.server, sizeof(config.mqtt.server), doc["mqtt"]["server"]);
+    EspStrUtil::readJSONstring(config.mqtt.user, sizeof(config.mqtt.user), doc["mqtt"]["user"]);
+    EspStrUtil::readJSONstring(config.mqtt.password, sizeof(config.mqtt.password), doc["mqtt"]["password"]);
+    EspStrUtil::readJSONstring(config.mqtt.topic, sizeof(config.mqtt.topic), doc["mqtt"]["topic"]);
     config.mqtt.port = doc["mqtt"]["port"];
     config.mqtt.ha_enable = doc["mqtt"]["ha_enable"];
-    readJSONstring(config.mqtt.ha_topic, sizeof(config.mqtt.ha_topic), doc["mqtt"]["ha_topic"]);
-    readJSONstring(config.mqtt.ha_device, sizeof(config.mqtt.ha_device), doc["mqtt"]["ha_device"]);
+    EspStrUtil::readJSONstring(config.mqtt.ha_topic, sizeof(config.mqtt.ha_topic), doc["mqtt"]["ha_topic"]);
+    EspStrUtil::readJSONstring(config.mqtt.ha_device, sizeof(config.mqtt.ha_device), doc["mqtt"]["ha_device"]);
 
     config.ntp.enable = doc["ntp"]["enable"];
-    readJSONstring(config.ntp.server, sizeof(config.ntp.server), doc["ntp"]["server"]);
-    readJSONstring(config.ntp.tz, sizeof(config.ntp.tz), doc["ntp"]["tz"]);
+    EspStrUtil::readJSONstring(config.ntp.server, sizeof(config.ntp.server), doc["ntp"]["server"]);
+    EspStrUtil::readJSONstring(config.ntp.tz, sizeof(config.ntp.tz), doc["ntp"]["tz"]);
 
     config.gpio.led_setup = doc["gpio"]["led_setup"];
     config.gpio.gdo0 = doc["gpio"]["gdo0"];
@@ -448,8 +446,8 @@ void configLoadFromFile() {
     config.gpio.cs = doc["gpio"]["cs"];
 
     config.auth.enable = doc["auth"]["enable"];
-    readJSONstring(config.auth.user, sizeof(config.auth.user), doc["auth"]["user"]);
-    readJSONstring(config.auth.password, sizeof(config.auth.password), doc["auth"]["password"]);
+    EspStrUtil::readJSONstring(config.auth.user, sizeof(config.auth.user), doc["auth"]["user"]);
+    EspStrUtil::readJSONstring(config.auth.password, sizeof(config.auth.password), doc["auth"]["password"]);
 
     config.log.enable = doc["logger"]["enable"];
     config.log.level = doc["logger"]["level"];
@@ -466,7 +464,7 @@ void configLoadFromFile() {
     }
     JsonArray ch_name = doc["jaro"]["ch_name"].as<JsonArray>();
     for (int i = 0; i < 16; i++) {
-      readJSONstring(config.jaro.ch_name[i], sizeof(config.jaro.ch_name[0]), ch_name[i]);
+      EspStrUtil::readJSONstring(config.jaro.ch_name[i], sizeof(config.jaro.ch_name[0]), ch_name[i]);
     }
     JsonArray grp_enable = doc["jaro"]["grp_enable"].as<JsonArray>();
     for (int i = 0; i < 6; i++) {
@@ -474,7 +472,7 @@ void configLoadFromFile() {
     }
     JsonArray grp_name = doc["jaro"]["grp_name"].as<JsonArray>();
     for (int i = 0; i < 6; i++) {
-      readJSONstring(config.jaro.grp_name[i], sizeof(config.jaro.grp_name[0]), grp_name[i]);
+      EspStrUtil::readJSONstring(config.jaro.grp_name[i], sizeof(config.jaro.grp_name[0]), grp_name[i]);
     }
     JsonArray grp_mask = doc["jaro"]["grp_mask"].as<JsonArray>();
     for (int i = 0; i < 6; i++) {
@@ -496,53 +494,4 @@ void configLoadFromFile() {
     config.jaro.learn_mode = 4; // ESP_LOG_DEBUG
   }
   setLogLevel(config.log.level);
-}
-
-/**
- * *******************************************************************
- * @brief   save restart reason to file
- * @param   reason
- * @return  none
- * *******************************************************************/
-void saveRestartReason(const char *reason) {
-  File file = LittleFS.open("/restart_reason.txt", "w");
-  if (!file) {
-    MY_LOGE(TAG, "Failed to open file for writing");
-    return;
-  }
-  file.println(reason);
-  file.close();
-}
-
-/**
- * *******************************************************************
- * @brief   read restart reason from file
- * @param   buffer
- * @param   bufferSize
- * @return  none
- * *******************************************************************/
-bool readRestartReason(char *buffer, size_t bufferSize) {
-  if (!LittleFS.exists("/restart_reason.txt")) {
-    return false; // no file
-  }
-
-  File file = LittleFS.open("/restart_reason.txt", "r");
-  if (!file) {
-    MY_LOGE(TAG, "Failed to open file for reading");
-    return false;
-  }
-
-  bool result = false;
-  if (file.available()) {
-    String line = file.readStringUntil('\n');
-    line.trim();
-    strncpy(buffer, line.c_str(), bufferSize - 1);
-    buffer[bufferSize - 1] = '\0';
-    result = true;
-  }
-  file.close();
-
-  LittleFS.remove("/restart_reason.txt");
-
-  return result;
 }

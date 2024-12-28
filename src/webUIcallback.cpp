@@ -52,7 +52,7 @@ void webCallback(const char *elementId, const char *value) {
     snprintf(config.wifi.password, sizeof(config.wifi.password), value);
   }
   if (strcmp(elementId, "cfg_wifi_static_ip") == 0) {
-    config.wifi.static_ip = stringToBool(value);
+    config.wifi.static_ip = EspStrUtil::stringToBool(value);
   }
   if (strcmp(elementId, "cfg_wifi_ipaddress") == 0) {
     snprintf(config.wifi.ipaddress, sizeof(config.wifi.ipaddress), value);
@@ -69,7 +69,7 @@ void webCallback(const char *elementId, const char *value) {
 
   // Ethernet
   if (strcmp(elementId, "cfg_eth_enable") == 0) {
-    config.eth.enable = stringToBool(value);
+    config.eth.enable = EspStrUtil::stringToBool(value);
   }
   if (strcmp(elementId, "cfg_eth_hostname") == 0) {
     snprintf(config.eth.hostname, sizeof(config.eth.hostname), value);
@@ -93,7 +93,7 @@ void webCallback(const char *elementId, const char *value) {
     config.eth.gpio_rst = strtoul(value, NULL, 10);
   }
   if (strcmp(elementId, "cfg_eth_static_ip") == 0) {
-    config.eth.static_ip = stringToBool(value);
+    config.eth.static_ip = EspStrUtil::stringToBool(value);
   }
   if (strcmp(elementId, "cfg_eth_ipaddress") == 0) {
     snprintf(config.eth.ipaddress, sizeof(config.eth.ipaddress), value);
@@ -110,7 +110,7 @@ void webCallback(const char *elementId, const char *value) {
 
   // Authentication
   if (strcmp(elementId, "cfg_auth_enable") == 0) {
-    config.auth.enable = stringToBool(value);
+    config.auth.enable = EspStrUtil::stringToBool(value);
   }
   if (strcmp(elementId, "cfg_auth_user") == 0) {
     snprintf(config.auth.user, sizeof(config.auth.user), "%s", value);
@@ -121,7 +121,7 @@ void webCallback(const char *elementId, const char *value) {
 
   // NTP-Server
   if (strcmp(elementId, "cfg_ntp_enable") == 0) {
-    config.ntp.enable = stringToBool(value);
+    config.ntp.enable = EspStrUtil::stringToBool(value);
   }
   if (strcmp(elementId, "cfg_ntp_server") == 0) {
     snprintf(config.ntp.server, sizeof(config.ntp.server), "%s", value);
@@ -182,7 +182,7 @@ void webCallback(const char *elementId, const char *value) {
 
   // MQTT
   if (strcmp(elementId, "cfg_mqtt_enable") == 0) {
-    config.mqtt.enable = stringToBool(value);
+    config.mqtt.enable = EspStrUtil::stringToBool(value);
   }
   if (strcmp(elementId, "cfg_mqtt_server") == 0) {
     snprintf(config.mqtt.server, sizeof(config.mqtt.server), "%s", value);
@@ -200,7 +200,7 @@ void webCallback(const char *elementId, const char *value) {
     snprintf(config.mqtt.password, sizeof(config.mqtt.password), "%s", value);
   }
   if (strcmp(elementId, "cfg_mqtt_ha_enable") == 0) {
-    config.mqtt.ha_enable = stringToBool(value);
+    config.mqtt.ha_enable = EspStrUtil::stringToBool(value);
   }
   if (strcmp(elementId, "cfg_mqtt_ha_topic") == 0) {
     snprintf(config.mqtt.ha_topic, sizeof(config.mqtt.ha_topic), "%s", value);
@@ -247,7 +247,7 @@ void webCallback(const char *elementId, const char *value) {
     jaroCmdReInit();
   }
   if (strcmp(elementId, "cfg_jaro_learn_mode") == 0) {
-    config.jaro.learn_mode = stringToBool(value);
+    config.jaro.learn_mode = EspStrUtil::stringToBool(value);
     jaroCmdReInit();
   }
   if (strcmp(elementId, "p12_jaro_devcnt") == 0) {
@@ -276,7 +276,7 @@ void webCallback(const char *elementId, const char *value) {
     snprintf(cmdShadeId, sizeof(cmdShadeId), "p01_shade_%d", i);
 
     if (strcmp(elementId, enableId) == 0) {
-      config.jaro.ch_enable[i] = stringToBool(value);
+      config.jaro.ch_enable[i] = EspStrUtil::stringToBool(value);
     }
     if (strcmp(elementId, nameId) == 0) {
       snprintf(config.jaro.ch_name[i], sizeof(config.jaro.ch_name[i]), "%s", value);
@@ -327,7 +327,7 @@ void webCallback(const char *elementId, const char *value) {
     snprintf(cmdShadeId, sizeof(cmdShadeId), "p02_shade_%d", i);
 
     if (strcmp(elementId, enableId) == 0) {
-      config.jaro.grp_enable[i] = stringToBool(value);
+      config.jaro.grp_enable[i] = EspStrUtil::stringToBool(value);
     }
     if (strcmp(elementId, nameId) == 0) {
       snprintf(config.jaro.grp_name[i], sizeof(config.jaro.grp_name[i]), "%s", value);
@@ -361,7 +361,7 @@ void webCallback(const char *elementId, const char *value) {
 
   // Buttons
   if (strcmp(elementId, "p12_btn_restart") == 0) {
-    saveRestartReason("webUI command");
+    EspSysUtil::RestartReason::saveLocal("webUI command");
     yield();
     delay(1000);
     yield();
@@ -370,7 +370,7 @@ void webCallback(const char *elementId, const char *value) {
 
   // Logger
   if (strcmp(elementId, "cfg_logger_enable") == 0) {
-    config.log.enable = stringToBool(value);
+    config.log.enable = EspStrUtil::stringToBool(value);
   }
   if (strcmp(elementId, "cfg_logger_level") == 0) {
     config.log.level = strtoul(value, NULL, 10);
@@ -394,7 +394,7 @@ void webCallback(const char *elementId, const char *value) {
   // OTA-Confirm
   if (strcmp(elementId, "p11_ota_confirm_btn") == 0) {
     updateWebDialog("ota_update_done_dialog", "close");
-    saveRestartReason("ota update");
+    EspSysUtil::RestartReason::saveLocal("ota update");
     yield();
     delay(1000);
     yield();

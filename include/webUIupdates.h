@@ -1,7 +1,6 @@
 #pragma once
 
 /* I N C L U D E S ****************************************************/
-#include <webUIhelper.h>
 
 // time structure for burner runtime
 struct timeComponents {

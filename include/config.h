@@ -107,6 +107,4 @@ void configCyclic();
 void configSaveToFile();
 void configLoadFromFile();
 void configInitValue();
-void saveRestartReason(const char *reason);
-bool readRestartReason(char *buffer, size_t bufferSize);
 void configGPIO();

@@ -30,6 +30,7 @@ void cmdSerial(char param[MAX_PAR][MAX_CHAR]);
 void cmdTest(char param[MAX_PAR][MAX_CHAR]);
 void cmdShutter(char param[MAX_PAR][MAX_CHAR]);
 void cmdDeviceCnt(char param[MAX_PAR][MAX_CHAR]);
+void cmdGroup(char param[MAX_PAR][MAX_CHAR]);
 
 Command commands[] = {
     {"cls", cmdCls, "Clear screen", ""},
@@ -41,6 +42,7 @@ Command commands[] = {
     {"restart", cmdRestart, "Restart the ESP", ""},
     {"serial", cmdSerial, "serial stream output", "<stream> <[start], [stop]>"},
     {"shutter", cmdShutter, "shutter commands", "channel, up/down/stop/shade"},
+    {"group", cmdGroup, "group commands", "group, up/down/stop/shade"},
     {"test", cmdTest, "test commands", "group"},
 };
 const int commandsCount = sizeof(commands) / sizeof(commands[0]);
@@ -184,7 +186,7 @@ void cmdLog(char param[MAX_PAR][MAX_CHAR]) {
 
 /**
  * *******************************************************************
- * @brief   telnet command: config structure
+ * @brief   telnet command: shutter commands
  * @param   params received parameters
  * @return  none
  * *******************************************************************/
@@ -206,6 +208,35 @@ void cmdShutter(char param[MAX_PAR][MAX_CHAR]) {
     jaroCmd(CMD_STOP, channel - 1);
   } else if (!strcmp(param[2], "shade")) {
     jaroCmd(CMD_SHADE, channel - 1);
+  } else {
+    telnet.println("unknown command");
+  }
+}
+
+/**
+ * *******************************************************************
+ * @brief   telnet command: group commands
+ * @param   params received parameters
+ * @return  none
+ * *******************************************************************/
+void cmdGroup(char param[MAX_PAR][MAX_CHAR]) {
+  int group = -1;
+
+  if (strlen(param[1]) > 0) {
+    group = atoi(param[1]);
+    if (group < 1 || group > 6) {
+      telnet.println("invalid channel");
+      return;
+    }
+  }
+  if (!strcmp(param[2], "up")) {
+    jaroCmd(CMD_GRP_UP, config.jaro.grp_mask[group - 1]);
+  } else if (!strcmp(param[2], "down")) {
+    jaroCmd(CMD_GRP_DOWN, config.jaro.grp_mask[group - 1]);
+  } else if (!strcmp(param[2], "stop")) {
+    jaroCmd(CMD_GRP_STOP, config.jaro.grp_mask[group - 1]);
+  } else if (!strcmp(param[2], "shade")) {
+    jaroCmd(CMD_GRP_SHADE, config.jaro.grp_mask[group - 1]);
   } else {
     telnet.println("unknown command");
   }
@@ -255,10 +286,10 @@ void cmdInfo(char param[MAX_PAR][MAX_CHAR]) {
   telnet.print(ansi.setFG(ANSI_BRIGHT_WHITE));
   telnet.println("ESP-INFO");
   telnet.print(ansi.reset());
-  telnet.printf("ESP Flash Usage: %s %%\n", floatToString((float)ESP.getSketchSize() * 100 / ESP.getFreeSketchSpace()));
-  telnet.printf("ESP Heap Usage: %s %%\n", floatToString((float)ESP.getFreeHeap() * 100 / ESP.getHeapSize()));
-  telnet.printf("ESP MAX Alloc Heap: %s KB\n", floatToString((float)ESP.getMaxAllocHeap() / 1000.0));
-  telnet.printf("ESP MAX Alloc Heap: %s KB\n", floatToString((float)ESP.getMinFreeHeap() / 1000.0));
+  telnet.printf("ESP Flash Usage: %s %%\n", EspStrUtil::floatToString((float)ESP.getSketchSize() * 100 / ESP.getFreeSketchSpace(), 1));
+  telnet.printf("ESP Heap Usage: %s %%\n", EspStrUtil::floatToString((float)ESP.getFreeHeap() * 100 / ESP.getHeapSize(), 1));
+  telnet.printf("ESP MAX Alloc Heap: %s KB\n", EspStrUtil::floatToString((float)ESP.getMaxAllocHeap() / 1000.0, 1));
+  telnet.printf("ESP MAX Alloc Heap: %s KB\n", EspStrUtil::floatToString((float)ESP.getMinFreeHeap() / 1000.0, 1));
 
   telnet.print(ansi.setFG(ANSI_BRIGHT_WHITE));
   telnet.println("\nRESTART - UPTIME");
@@ -266,15 +297,14 @@ void cmdInfo(char param[MAX_PAR][MAX_CHAR]) {
   char tmpMsg[64];
   getUptime(tmpMsg, sizeof(tmpMsg));
   telnet.printf("Uptime: %s\n", tmpMsg);
-  getRestartReason(tmpMsg, sizeof(tmpMsg));
-  telnet.printf("Restart Reason: %s\n", tmpMsg);
+  telnet.printf("Restart Reason: %s\n", EspSysUtil::RestartReason::get());
 
   telnet.print(ansi.setFG(ANSI_BRIGHT_WHITE));
   telnet.println("\nWiFi-INFO");
   telnet.print(ansi.reset());
   telnet.printf("IP-Address: %s\n", wifi.ipAddress);
-  telnet.printf("WiFi-Signal: %s %%\n", uint8ToString(wifi.signal));
-  telnet.printf("WiFi-Rssi: %s dbm\n", int8ToString(wifi.rssi));
+  telnet.printf("WiFi-Signal: %s %%\n", EspStrUtil::intToString(wifi.signal));
+  telnet.printf("WiFi-Rssi: %s dbm\n", EspStrUtil::intToString(wifi.rssi));
 
   telnet.println();
 }
@@ -309,7 +339,7 @@ void cmdDisconnect(char param[MAX_PAR][MAX_CHAR]) {
  * *******************************************************************/
 void cmdRestart(char param[MAX_PAR][MAX_CHAR]) {
   telnet.println("ESP will restart - you have to reconnect");
-  saveRestartReason("telnet command");
+  EspSysUtil::RestartReason::saveLocal("telnet command");
   yield();
   delay(1000);
   yield();

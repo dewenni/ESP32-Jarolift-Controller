@@ -105,7 +105,7 @@ void mqttHaConfig(statType statType, const char *name, const char *deviceClass, 
     doc["name"] = devCfg.char1;
   } else {
     char friendlyName[64];
-    replace_underscores(name, friendlyName, sizeof(friendlyName));
+    EspStrUtil::replace_underscores(name, friendlyName, sizeof(friendlyName));
     doc["name"] = friendlyName;
   }
 
