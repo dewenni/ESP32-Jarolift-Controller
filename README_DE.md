@@ -162,7 +162,7 @@ Beispiel für einen generischen ESP32-Mini (Standard SPI Port wird vom CC1101 ve
 
 ## Platform-IO
 
-Die Software wurde mit [Visual Studio Code] (https://code.visualstudio.com) und dem [PlatformIO-Plugin] (https://platformio.org) erstellt.  
+Die Software wurde mit [Visual Studio Code](https://code.visualstudio.com) und dem [PlatformIO-Plugin](https://platformio.org) erstellt.  
 Nach der Installation der Software kannst du das Projekt von GitHub klonen oder als zip herunterladen und in PlatformIO öffnen.
 Dann noch den `upload_port` und die entsprechenden Einstellungen in `platformio.ini` an deinen USB-zu-Seriell-Adapter anpassen den Code auf den ESP hochladen.
 
@@ -213,7 +213,7 @@ Der „Setup Mode“ wird auch aktiviert, wenn (zu Beginn) keine WLAN-Verbindung
 Wenn der ESP in den „Setup Mode“ geht, erstellt er automatisch einen eigenen Netzwerk Accesspoint mit der ssid
 📶 `"ESP32_Jarolift"`  
 Nachdem du mit diesem Netzwerk verbunden bist, kannst du die WebUI übernachfolgende Adresse öffnen  
-**"http://192.168.4.1"**
+**http://192.168.4.1**
 
 ## Konfiguration
 
@@ -416,7 +416,7 @@ payload:    {0b0000000000010101, 0x15, 21}
 MQTT Discovery für Home Assistant macht es einfach, alle Werte in Home Assistant zu erhalten.
 Die konfigurierten Rollläden werden automatisch als mqtt-Gerät in Home Assistant angezeigt, wenn HomeAssistant aktiviert ist.
 
-siehe auch die offizielle Dokumentation: <https://www.home-assistant.io/integrations/mqtt/#discovery-messages>
+siehe auch die: [offizielle Dokumentation](https://www.home-assistant.io/integrations/mqtt/#discovery-messages)
 
 <img src="Doc/webUI_ha2.png" alt="mqtt_ha1" width="75%">
 
