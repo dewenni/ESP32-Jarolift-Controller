@@ -27,7 +27,7 @@ static int logLine, logIdx = 0;
 static bool logReadActive = false;
 JsonDocument jsonLog;
 
-static auto &ota = EspSysUtil::Wdt::getInstance();
+static auto &ota = EspSysUtil::OTA::getInstance();
 
 
 /**
