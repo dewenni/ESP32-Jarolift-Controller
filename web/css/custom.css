@@ -470,3 +470,7 @@ table td {
   color: #fff; /* Weiße Textfarbe */
   border-radius: 10px;
 }
+
+a {
+  cursor: pointer;
+}

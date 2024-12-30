@@ -14,8 +14,6 @@
 static muTimer cmdTimer = muTimer();
 static const char *TAG = "JARO"; // LOG TAG
 
-
-
 std::queue<JaroCommand> jaroCmdQueue;
 
 JaroliftController jarolift;
@@ -123,7 +121,7 @@ void mqttSendPosition(uint8_t channel, uint8_t position) {
  * @return  none
  * *******************************************************************/
 void mqttSendPositionGroup(uint16_t group_mask, uint8_t position) {
-  
+
   // check all 16 channels
   for (uint8_t c = 0; c < 16; c++) {
     // check if channel is in group

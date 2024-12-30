@@ -191,12 +191,24 @@ for Mac it is hard to find a tool with a graphical UI, but you can simple use th
 
 ## OTA-Updates
 
-since software version 3.0, you can also update the software with the new Elegant OTA web upload.  
+### local Web OTA-Update
+
+The first option is, to download the ota Update File from the latest release at GitHub.
+After you have downloaded this to your computer, you can perform a update with the embedded WebUI OTA-Update.
 You can find the update function in the "Tools" Tab of the WebUI.
 
 here you can choose "Firmware" and select the `esp32_jarolift_controller_ota_update_vx.x.x.bin` file from the release section
 
 ![ota-1](Doc/webUI_ota.gif)
+
+### GitHub OTA-Update
+
+since Version 1.4.0 it is also possible to update the controller directly in the WebUI without downloading the .bin file before.
+If you click on the Version info on the bottom left, a dialog will open. If there is a new version available, you can directly initiate the update here. It will then automatically download and install the latest release from github!
+
+![ota-2](Doc/github_ota.gif)
+
+### PlatformIO OTA-Update
 
 But it is also possible to download the software wireless with platformio.
 You only have to change the `upload_port` settings in `platformio.ini`
@@ -272,14 +284,14 @@ The configuration is stored in the ```config.json``` file. To backup and restore
 
 It is possible to migrate from a latest version of [madmartin/Jarolift_MQTT](https://github.com/madmartin/Jarolift_MQTT) to this project.
 
-#### Get a working Setup of this Project
+### Get a working Setup of this Project
 
 - get a working version of this project up and running
 - set the right GPIO settings for CC1101
 - set the Master Keys
 - set the Log-Level in the Logger of the WebUI to "Debug"
 
-#### Get the right serial number
+### Get the right serial number
 
 - execute a shutter UP command of "old" Setup `(madmartin/Jarolift_MQTT)` for **channel 0!**.
 - now you should see a debug message of this command in the Logger of the WebUI.  
@@ -287,12 +299,12 @@ It contains a message with `D (APP-JARO): (INF1) serial: 0xaabbcc00,`
 The first 6 digits are the serial number that you have to use for this project (in this example: **aabbcc**). this should be the same as configured in the WebUI of the "old" setup, but now we are sure to have the right one.
 - set this serial in the WebUI of this project
 
-#### Get the right Device Counter
+### Get the right Device Counter
 
 - read the actual device counter of the "old" setup from the System Page of the WebUI.
 - set the same Device Counter value in the settings of this project.
 
-#### define the Shutter
+### define the Shutter
 
 - define the same shutter as in the "old" setup and activate them.
 
@@ -305,7 +317,7 @@ If everything done correct, all shutters should work like before. If not, some s
 
 # MQTT
 
-### additional information's (read only)
+## additional information's (read only)
 
 status information about WiFi:
 

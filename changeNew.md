@@ -1,8 +1,17 @@
-# v1.3.1
+# v1.4.0
 
 ## what's new
 
-minor changes and housekeeping
+### direct GitHub Update 🎉🎉🎉
+
+This update introduces an exciting new feature: You can now update to the latest version directly from the WebUI – no need to download the .bin file manually anymore!
+
+Simply click on the version info in the bottom left corner, and a dialog will open. If a new version is available, you can initiate the update right there. It will automatically download and install the latest release from GitHub.
+
+![ota-2](Doc/github_ota.gif)
+
+> [!TIP]
+> Maybe it is necessary to clean your browser cache after the update, to be sure that everything works well!
 
 > [!NOTE]
 > this project is still in an early phase.
@@ -12,7 +21,4 @@ minor changes and housekeeping
 
 ## changelog
 
-- add group commands for telnet interface
-- code cleanup (reorganize internal functions and libraries)
-- add german description
-- bugfix "Build fails on build_webui.py script with FileNotFoundError" #11
+- add new feature to update directly from GitHub

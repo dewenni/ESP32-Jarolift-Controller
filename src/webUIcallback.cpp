@@ -2,14 +2,10 @@
 #include <basics.h>
 #include <jarolift.h>
 #include <message.h>
-#include <version.h>
 #include <webUI.h>
 #include <webUIupdates.h>
 
 static tm dti;
-static char gitVersion[16];
-static char gitUrl[256];
-static char errorMsg[32];
 static const char *TAG = "WEB"; // LOG TAG
 
 /**
@@ -23,18 +19,26 @@ void webCallback(const char *elementId, const char *value) {
 
   MY_LOGD(TAG, "Received - Element ID: %s = %s", elementId, value);
 
-  // check for new version on github
+  // ------------------------------------------------------------------
+  // GitHub / Version
+  // ------------------------------------------------------------------
+
+  // Github Check Version
   if (strcmp(elementId, "check_git_version") == 0) {
-    int result = checkGithubUpdates("dewenni", "ESP32-Jarolift-Controller", gitVersion, sizeof(gitVersion), gitUrl, sizeof(gitUrl));
-    if (result == HTTP_CODE_OK) {
-      updateWebBusy("p00_dialog_git_version", false);
-      updateWebText("p00_dialog_git_version", gitVersion, false);
-      updateWebHref("p00_dialog_git_version", gitUrl);
-    } else {
-      sniprintf(errorMsg, sizeof(errorMsg), "error (%i)", result);
-      updateWebBusy("p00_dialog_git_version", false);
-      updateWebText("p00_dialog_git_version", errorMsg, false);
-    }
+    requestGitHubVersion();
+  }
+  // Github Update
+  if (strcmp(elementId, "p00_update_btn") == 0) {
+    requestGitHubUpdate();
+  }
+  // OTA-Confirm
+  if (strcmp(elementId, "p00_ota_confirm_btn") == 0) {
+    updateWebDialog("ota_update_done_dialog", "close");
+    EspSysUtil::RestartReason::saveLocal("ota update");
+    yield();
+    delay(1000);
+    yield();
+    ESP.restart();
   }
 
   // ------------------------------------------------------------------
@@ -389,15 +393,5 @@ void webCallback(const char *elementId, const char *value) {
   }
   if (strcmp(elementId, "p10_log_refresh_btn") == 0) {
     webReadLogBuffer();
-  }
-
-  // OTA-Confirm
-  if (strcmp(elementId, "p11_ota_confirm_btn") == 0) {
-    updateWebDialog("ota_update_done_dialog", "close");
-    EspSysUtil::RestartReason::saveLocal("ota update");
-    yield();
-    delay(1000);
-    yield();
-    ESP.restart();
   }
 }

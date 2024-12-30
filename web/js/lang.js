@@ -283,8 +283,8 @@ const translations = {
     en: "actual version",
   },
   github_version: {
-    de: "neustes Release",
-    en: "newest release",
+    de: "letztes Release",
+    en: "latest release",
   },
   mqtt_info: {
     de: "MQTT-Informationen",

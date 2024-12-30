@@ -1,5 +1,6 @@
 #include <EspStrUtil.h>
 #include <basics.h>
+#include <github.h>
 #include <jarolift.h>
 #include <language.h>
 #include <message.h>
@@ -15,8 +16,9 @@ void updateSystemInfoElements();
 
 /* D E C L A R A T I O N S ****************************************************/
 
-static muTimer refreshTimer1 = muTimer();    // timer to refresh other values
-static muTimer refreshTimer2 = muTimer();    // timer to refresh other values
+static muTimer refreshTimer1 = muTimer();   // timer to refresh other values
+static muTimer refreshTimer2 = muTimer();   // timer to refresh other values
+static muTimer otaProgessTimer = muTimer(); // timer to refresh other values
 
 static char tmpMessage[300] = {'\0'};
 static bool refreshRequest = false;
@@ -26,9 +28,11 @@ static bool jsonDataToSend = false;
 static int logLine, logIdx = 0;
 static bool logReadActive = false;
 JsonDocument jsonLog;
-
+static const char *TAG = "WEB"; // LOG TAG
 static auto &ota = EspSysUtil::OTA::getInstance();
-
+static auto &wdt = EspSysUtil::Wdt::getInstance();
+GithubRelease ghLatestRelease;
+GithubReleaseInfo ghReleaseInfo;
 
 /**
  * *******************************************************************
@@ -266,14 +270,118 @@ void webReadLogBufferCyclic() {
 
 /**
  * *******************************************************************
+ * @brief   callback function for OTA progress
+ * @param   none
+ * @return  none
+ * *******************************************************************/
+void otaProgressCallback(int progress) {
+  if (otaProgessTimer.cycleTrigger(1000)) {
+    sendHeartbeat();
+    char buttonTxt[32];
+    snprintf(buttonTxt, sizeof(buttonTxt), "updating: %i%%", progress);
+    updateWebText("p00_update_btn", buttonTxt, false);
+  }
+}
+
+/**
+ * *******************************************************************
+ * @brief   initiate GitHub version check
+ * @param   none
+ * @return  none
+ * *******************************************************************/
+bool startCheckGitHubVersion;
+void requestGitHubVersion() { startCheckGitHubVersion = true; }
+void processGitHubVersion() {
+  if (startCheckGitHubVersion) {
+    startCheckGitHubVersion = false;
+    if (ghGetLatestRelease(&ghLatestRelease, &ghReleaseInfo)) {
+      updateWebBusy("p00_dialog_git_version", false);
+      updateWebText("p00_dialog_git_version", ghReleaseInfo.tag, false);
+      updateWebHref("p00_dialog_git_version", ghReleaseInfo.url);
+      // if new version is available, show update button
+      if (strcmp(ghReleaseInfo.tag, VERSION) != 0) {
+        char buttonTxt[32];
+        snprintf(buttonTxt, sizeof(buttonTxt), "Update %s", ghReleaseInfo.tag);
+        updateWebText("p00_update_btn", buttonTxt, false);
+        updateWebHideElement("p00_update_btn_hide", false);
+      }
+    } else {
+      updateWebBusy("p00_dialog_git_version", false);
+      updateWebText("p00_dialog_git_version", "error", false);
+    }
+  }
+}
+
+/**
+ * *******************************************************************
+ * @brief   initiate GitHub version OTA update
+ * @param   none
+ * @return  none
+ * *******************************************************************/
+bool startGitHubUpdate;
+void requestGitHubUpdate() { startGitHubUpdate = true; }
+void processGitHubUpdate() {
+  if (startGitHubUpdate) {
+    startGitHubUpdate = false;
+    ghSetProgressCallback(otaProgressCallback);
+    updateWebText("p00_update_btn", "updating: 0%", false);
+    updateWebDisabled("p00_update_btn", true);
+    ota.setActive(true);
+    wdt.disable();
+    int result = ghStartOtaUpdate(ghLatestRelease, ghReleaseInfo.asset);
+    if (result == OTA_SUCCESS) {
+      updateWebText("p00_update_btn", "updating: 100%", false);
+      updateWebDialog("version_dialog", "close");
+      updateWebDialog("ota_update_done_dialog", "open");
+      MY_LOGI(TAG, "GitHub OTA-Update successful");
+    } else {
+      char errMsg[32];
+      switch (result) {
+      case OTA_NULL_URL:
+        strcpy(errMsg, "URL is NULL");
+        break;
+      case OTA_CONNECT_ERROR:
+        strcpy(errMsg, "Connection error");
+        break;
+      case OTA_BEGIN_ERROR:
+        strcpy(errMsg, "Begin error");
+        break;
+      case OTA_WRITE_ERROR:
+        strcpy(errMsg, "Write error");
+        break;
+      case OTA_END_ERROR:
+        strcpy(errMsg, "End error");
+        break;
+      default:
+        strcpy(errMsg, "Unknown error");
+        break;
+      }
+      updateWebText("p00_ota_upd_err", errMsg, false);
+      updateWebDialog("version_dialog", "close");
+      updateWebDialog("ota_update_failed_dialog", "open");
+      MY_LOGE(TAG, "GitHub OTA-Update failed: %s", errMsg);
+    }
+    ota.setActive(false);
+    wdt.enable();
+  }
+}
+
+/**
+ * *******************************************************************
  * @brief   cyclic update of webUI elements
  * @param   none
  * @return  none
  * *******************************************************************/
 void webUIupdates() {
 
+  // check if new version is available
+  processGitHubVersion();
+  // perform GitHub update
+  processGitHubUpdate();
+  
+  // update webUI Logger
   if (webLogRefreshActive()) {
-    webReadLogBufferCyclic(); // update webUI Logger
+    webReadLogBufferCyclic();
   }
 
   // ON-BROWSER-REFRESH: refresh ALL elements - do this step by step not to stress the connection

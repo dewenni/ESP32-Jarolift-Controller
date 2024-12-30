@@ -14,3 +14,5 @@ struct timeComponents {
 void updateAllElements();
 void webUIupdates();
 void updateGpioSettings();
+void requestGitHubVersion();
+void requestGitHubUpdate();
