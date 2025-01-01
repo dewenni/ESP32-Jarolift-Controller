@@ -15,9 +15,8 @@ muTimer checkTimer = muTimer(); // timer to refresh other values
 static const char *TAG = "CFG"; // LOG TAG
 
 /* P R O T O T Y P E S ********************************************************/
-void configGPIO();
-void configInitValue();
 void checkGPIO();
+void configInitValue();
 void configFinalCheck();
 
 /**
@@ -36,10 +35,8 @@ void configSetup() {
 
   // load config from file
   configLoadFromFile();
-  // check GPIO
+  //check gpio
   checkGPIO();
-  // gpio settings
-  configGPIO();
   // check final settings
   configFinalCheck();
 }
@@ -197,23 +194,6 @@ void configCyclic() {
       hashOld = hashNew;
       configSaveToFile();
       MY_LOGD(TAG, "config saved to file");
-    }
-  }
-}
-
-/**
- * *******************************************************************
- * @brief   Setup for GPIO
- * @param   none
- * @return  none
- * *******************************************************************/
-void configGPIO() {
-
-  if (setupMode) {
-    if (config.gpio.led_setup <= 0) {
-      pinMode(LED_BUILTIN, OUTPUT); // onboard LED
-    } else {
-      pinMode(config.gpio.led_setup, OUTPUT); // LED for Wifi-Status
     }
   }
 }
@@ -485,13 +465,11 @@ void configLoadFromFile() {
     }
   }
 
-  
   file.close();     // Close the file (Curiously, File's destructor doesn't close the file)
   configHashInit(); // init hash value
-
 }
 
-void configFinalCheck(){
+void configFinalCheck() {
 
   // check network settings
   if (strlen(config.wifi.ssid) == 0) {
@@ -510,5 +488,10 @@ void configFinalCheck(){
   }
   setLogLevel(config.log.level);
 
-
+  // check GIO for LED
+  if (config.gpio.led_setup <= 0) {
+    pinMode(LED_BUILTIN, OUTPUT); // onboard LED
+  } else {
+    pinMode(config.gpio.led_setup, OUTPUT); // LED for Wifi-Status
+  }
 }

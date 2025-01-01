@@ -237,7 +237,6 @@ void webCallback(const char *elementId, const char *value) {
   }
   if (strcmp(elementId, "cfg_gpio_led_setup") == 0) {
     config.gpio.led_setup = strtoul(value, NULL, 10);
-    configGPIO();
   }
 
   // Jarolift settings
