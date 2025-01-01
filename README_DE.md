@@ -316,20 +316,6 @@ Wenn alles richtig gemacht wurde, sollten alle Rollläden wie vorher funktionier
 
 # MQTT
 
-### zusätzliche Informationen (nur lesen)
-
-Statusinformationen über WiFi:
-
-```text
-Topic: ESP32-Jarolift-Controller/wifi = {  
-    "status":"online",  
-    "rssi":"-50",  
-    "signal":"90",  
-    "ip":"192.168.1.1",  
-    "date-time":"01.01.2022 - 10:20:30"  
-}
-```
-
 ## Kommandos
 
 ### Rolläden
@@ -419,8 +405,44 @@ payload:    {0b0000000000010101, 0x15, 21}
 
 ```
 
+## Status
+
+Der Controller sendet auch einen Status, **basierend auf den empfangenen Kommandos.**  
+
+> [!IMPORTANT]
+> Aber es ist wichtig zu beachten, dass dieser Status nicht dem tatsächlichen Zustand des Rollladens entspricht, denn leider sendet der Rolladen selbst keinen Status den man dazu auswerten könnte. Wenn also der Rolladen z.B. über die originale Fernbedienung bedient wird oder über eine vor Ort Bedienung, oder während der Bewegung gestoppt wird, dann stimmt dieser Status hier nicht mehr!
+
+```text
+
+Status:     Rolladen OFFEN
+topic:      ../status/shutter/1 ... status/shutter/16
+payload:    {0}
+
+Status:     Rolladen GESCHLOSSEN
+topic:      ../status/shutter/1 ... status/shutter/16
+payload:    {100}
+
+Status:     Rolladen SCHATTEN
+topic:      ../status/shutter/1 ... status/shutter/16
+payload:    {90}
+```
+
 > [!NOTE]
 > < ../ > ist der Platzhalter für das MQTT-Topic, das in den Einstellungen angegeben ist.
+
+## zusätzliche Informationen (nur lesen)
+
+Statusinformationen über WiFi:
+
+```text
+Topic: ESP32-Jarolift-Controller/wifi = {  
+    "status":"online",  
+    "rssi":"-50",  
+    "signal":"90",  
+    "ip":"192.168.1.1",  
+    "date-time":"01.01.2022 - 10:20:30"  
+}
+```
 
 ## Home Assistant
 
