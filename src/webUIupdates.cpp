@@ -96,28 +96,37 @@ void updateSystemInfoElements() {
 
   initJsonBuffer(jsonDoc);
 
-  // Network information
-  addJson(jsonDoc, "p09_wifi_ip", wifi.ipAddress);
-  snprintf(tmpMessage, sizeof(tmpMessage), "%i %%", wifi.signal);
-  addJson(jsonDoc, "p09_wifi_signal", tmpMessage);
-  snprintf(tmpMessage, sizeof(tmpMessage), "%ld dbm", wifi.rssi);
-  addJson(jsonDoc, "p09_wifi_rssi", tmpMessage);
+  // WiFi information
+  if (config.eth.enable) {
+    addJson(jsonDoc, "p09_wifi_ip", wifi.ipAddress);
+    snprintf(tmpMessage, sizeof(tmpMessage), "%i %%", wifi.signal);
+    addJson(jsonDoc, "p09_wifi_signal", tmpMessage);
+    snprintf(tmpMessage, sizeof(tmpMessage), "%ld dbm", wifi.rssi);
+    addJson(jsonDoc, "p09_wifi_rssi", tmpMessage);
 
-  if (!WiFi.isConnected()) {
-    addJson(jsonDoc, "p00_wifi_icon", "i_wifi_nok");
-  } else if (wifi.rssi < -80) {
-    addJson(jsonDoc, "p00_wifi_icon", "i_wifi_1");
-  } else if (wifi.rssi < -70) {
-    addJson(jsonDoc, "p00_wifi_icon", "i_wifi_2");
-  } else if (wifi.rssi < -60) {
-    addJson(jsonDoc, "p00_wifi_icon", "i_wifi_3");
+    if (!WiFi.isConnected()) {
+      addJson(jsonDoc, "p00_wifi_icon", "i_wifi_nok");
+    } else if (wifi.rssi < -80) {
+      addJson(jsonDoc, "p00_wifi_icon", "i_wifi_1");
+    } else if (wifi.rssi < -70) {
+      addJson(jsonDoc, "p00_wifi_icon", "i_wifi_2");
+    } else if (wifi.rssi < -60) {
+      addJson(jsonDoc, "p00_wifi_icon", "i_wifi_3");
+    } else {
+      addJson(jsonDoc, "p00_wifi_icon", "i_wifi_4");
+    }
+
   } else {
-    addJson(jsonDoc, "p00_wifi_icon", "i_wifi_4");
+    addJson(jsonDoc, "p00_wifi_icon", "");
+    addJson(jsonDoc, "p09_wifi_ip", "-.-.-.-");
+    addJson(jsonDoc, "p09_wifi_signal", "0");
+    addJson(jsonDoc, "p09_wifi_rssi", "0 dbm");
   }
 
   addJson(jsonDoc, "p09_eth_ip", strlen(eth.ipAddress) ? eth.ipAddress : "-.-.-.-");
   addJson(jsonDoc, "p09_eth_status", eth.connected ? WEB_TXT::CONNECTED[config.lang] : WEB_TXT::NOT_CONNECTED[config.lang]);
 
+  // ETH information
   if (config.eth.enable) {
     if (eth.connected) {
       addJson(jsonDoc, "p00_eth_icon", "i_eth_ok");
@@ -378,7 +387,7 @@ void webUIupdates() {
   processGitHubVersion();
   // perform GitHub update
   processGitHubUpdate();
-  
+
   // update webUI Logger
   if (webLogRefreshActive()) {
     webReadLogBufferCyclic();
