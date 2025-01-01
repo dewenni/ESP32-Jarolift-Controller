@@ -1,8 +1,5 @@
 ## OS specific ########
 .DS_Store
-.fuse_hidden*
-.*.swp
-.*.kate-swp
 
 ## Project files ######
 .pio

@@ -37,6 +37,17 @@
             <!-- WLAN -->
             <details>
               <summary data-i18n="wifi"></summary>
+              <div class="section-header">
+                <label for="wifi_enable" data-i18n="activate"></label>
+                <div class="switch-container">
+                  <input
+                    name="wifi_enable"
+                    type="checkbox"
+                    role="switch"
+                    id="cfg_wifi_enable" />
+                </div>
+              </div>
+              <br />
               <label for="wifi_hostname" data-i18n="hostname"></label>
               <input type="text" id="cfg_wifi_hostname" name="wifi_hostname" />
               <label for="wifi_ssid" data-i18n="ssid"></label>
@@ -172,7 +183,7 @@
                   id="p12_ntp_open_dialog_btn"
                   class="i_help"
                   style="
-                    height: 30px;
+                    height: 20px;
                     background-color: transparent;
                     border: none;
                   "></button>
@@ -755,6 +766,313 @@
                     id="cfg_jaro_ch_enable_15" />
                 </div>
               </div>
+            </details>
+            <hr />
+            <!-- Dialog OPEN-BITMASK-HELP -->
+            <dialog id="p12_bitmask_dialog">
+              <article>
+                <h3 data-i18n="help"></h3>
+                <div data-i18n="mask_help"></div>
+                <div class="dash-footer">
+                  <button
+                    onclick="closeGrpMaskHelp(this)"
+                    data-i18n="close"
+                    style="width: 75%"></button>
+                </div>
+              </article>
+            </dialog>
+            <!-- Group 1-6 -->
+            <details>
+              <summary data-i18n="groups"></summary>
+              <br />
+              <!-- Group 1 -->
+              <div class="section-header">
+                <label for="group0" data-i18n="group++ 1"></label>
+                <div class="switch-container">
+                  <input
+                    name="grp0_enable"
+                    type="checkbox"
+                    role="switch"
+                    hideOpt="GRP0"
+                    id="cfg_jaro_grp_enable_0" />
+                </div>
+              </div>
+              <br />
+              <div class="details-container">
+                <div>
+                  <label for="name_grp_0" data-i18n="name"></label>
+                  <input
+                    name="name_grp_0"
+                    type="text"
+                    id="cfg_jaro_grp_name_0"
+                    data-sync="p02_jaro_grp_name_0"
+                    placeholder="name" />
+                </div>
+                <div>
+                  <div class="label-with-button">
+                    <label for="mask_grp_0" data-i18n="mask"></label>
+                    <button
+                      onclick="openGrpMaskHelp(this)"
+                      class="i_help"
+                      style="
+                        height: 20px;
+                        background-color: transparent;
+                        border: none;
+                      "></button>
+                  </div>
+                  <input
+                    name="mask_grp_0"
+                    type="text"
+                    data-type="bin"
+                    id="cfg_jaro_grp_mask_0"
+                    oninput="validateBin(this)"
+                    onblur="formatBin(this)"
+                    pattern="[01]{1,16}"
+                    placeholder="Enter Bit-Mask (0 and 1 only, 16 chars)"
+                    maxlength="16" />
+                </div>
+              </div>
+              <hr />
+              <!-- Group 2 -->
+              <div class="section-header">
+                <label for="group1" data-i18n="group++ 2"></label>
+                <div class="switch-container">
+                  <input
+                    name="grp1_enable"
+                    type="checkbox"
+                    role="switch"
+                    hideOpt="GRP1"
+                    id="cfg_jaro_grp_enable_1" />
+                </div>
+              </div>
+              <br />
+              <div class="details-container">
+                <div>
+                  <label for="name_grp_1" data-i18n="name"></label>
+                  <input
+                    name="name_grp_1"
+                    type="text"
+                    id="cfg_jaro_grp_name_1"
+                    data-sync="p02_jaro_grp_name_1"
+                    placeholder="name" />
+                </div>
+                <div>
+                  <div class="label-with-button">
+                    <label for="mask_grp_1" data-i18n="mask"></label>
+                    <button
+                      onclick="openGrpMaskHelp(this)"
+                      class="i_help"
+                      style="
+                        height: 20px;
+                        background-color: transparent;
+                        border: none;
+                      "></button>
+                  </div>
+                  <input
+                    name="mask_grp_1"
+                    type="text"
+                    data-type="bin"
+                    id="cfg_jaro_grp_mask_1"
+                    oninput="validateBin(this)"
+                    onblur="formatBin(this)"
+                    pattern="[01]{1,16}"
+                    placeholder="Enter Bit-Mask (0 and 1 only, 16 chars)"
+                    maxlength="16" />
+                </div>
+              </div>
+              <hr />
+              <!-- Group 3 -->
+              <div class="section-header">
+                <label for="group2" data-i18n="group++ 3"></label>
+                <div class="switch-container">
+                  <input
+                    name="grp2_enable"
+                    type="checkbox"
+                    role="switch"
+                    hideOpt="GRP2"
+                    id="cfg_jaro_grp_enable_2" />
+                </div>
+              </div>
+              <br />
+              <div class="details-container">
+                <div>
+                  <label for="name_grp_2" data-i18n="name"></label>
+                  <input
+                    name="name_grp_2"
+                    type="text"
+                    id="cfg_jaro_grp_name_2"
+                    data-sync="p02_jaro_grp_name_2"
+                    placeholder="name" />
+                </div>
+                <div>
+                  <div class="label-with-button">
+                    <label for="mask_grp_2" data-i18n="mask"></label>
+                    <button
+                      onclick="openGrpMaskHelp(this)"
+                      class="i_help"
+                      style="
+                        height: 20px;
+                        background-color: transparent;
+                        border: none;
+                      "></button>
+                  </div>
+                  <input
+                    name="mask_grp_2"
+                    type="text"
+                    data-type="bin"
+                    id="cfg_jaro_grp_mask_2"
+                    oninput="validateBin(this)"
+                    onblur="formatBin(this)"
+                    pattern="[01]{1,16}"
+                    placeholder="Enter Bit-Mask (0 and 1 only, 16 chars)"
+                    maxlength="16" />
+                </div>
+              </div>
+              <hr />
+              <!-- Group 4 -->
+              <div class="section-header">
+                <label for="group3" data-i18n="group++ 4"></label>
+                <div class="switch-container">
+                  <input
+                    name="grp3_enable"
+                    type="checkbox"
+                    role="switch"
+                    hideOpt="GRP3"
+                    id="cfg_jaro_grp_enable_3" />
+                </div>
+              </div>
+              <br />
+              <div class="details-container">
+                <div>
+                  <label for="name_grp_3" data-i18n="name"></label>
+                  <input
+                    name="name_grp_3"
+                    type="text"
+                    id="cfg_jaro_grp_name_3"
+                    data-sync="p02_jaro_grp_name_3"
+                    placeholder="name" />
+                </div>
+                <div>
+                  <div class="label-with-button">
+                    <label for="mask_grp_3" data-i18n="mask"></label>
+                    <button
+                      onclick="openGrpMaskHelp(this)"
+                      class="i_help"
+                      style="
+                        height: 20px;
+                        background-color: transparent;
+                        border: none;
+                      "></button>
+                  </div>
+                  <input
+                    name="mask_grp_3"
+                    type="text"
+                    data-type="bin"
+                    id="cfg_jaro_grp_mask_3"
+                    oninput="validateBin(this)"
+                    onblur="formatBin(this)"
+                    pattern="[01]{1,16}"
+                    placeholder="Enter Bit-Mask (0 and 1 only, 16 chars)"
+                    maxlength="16" />
+                </div>
+              </div>
+              <hr />
+              <!-- Group 5 -->
+              <div class="section-header">
+                <label for="group4" data-i18n="group++ 5"></label>
+                <div class="switch-container">
+                  <input
+                    name="grp4_enable"
+                    type="checkbox"
+                    role="switch"
+                    hideOpt="GRP4"
+                    id="cfg_jaro_grp_enable_4" />
+                </div>
+              </div>
+              <br />
+              <div class="details-container">
+                <div>
+                  <label for="name_grp_4" data-i18n="name"></label>
+                  <input
+                    name="name_grp_4"
+                    type="text"
+                    id="cfg_jaro_grp_name_4"
+                    data-sync="p02_jaro_grp_name_4"
+                    placeholder="name" />
+                </div>
+                <div>
+                  <div class="label-with-button">
+                    <label for="mask_grp_4" data-i18n="mask"></label>
+                    <button
+                      onclick="openGrpMaskHelp(this)"
+                      class="i_help"
+                      style="
+                        height: 20px;
+                        background-color: transparent;
+                        border: none;
+                      "></button>
+                  </div>
+                  <input
+                    name="mask_grp_4"
+                    type="text"
+                    data-type="bin"
+                    id="cfg_jaro_grp_mask_4"
+                    oninput="validateBin(this)"
+                    onblur="formatBin(this)"
+                    pattern="[01]{1,16}"
+                    placeholder="Enter Bit-Mask (0 and 1 only, 16 chars)"
+                    maxlength="16" />
+                </div>
+              </div>
+              <hr />
+              <!-- Group 6 -->
+              <div class="section-header">
+                <label for="group5" data-i18n="group++ 6"></label>
+                <div class="switch-container">
+                  <input
+                    name="grp5_enable"
+                    type="checkbox"
+                    role="switch"
+                    hideOpt="GRP5"
+                    id="cfg_jaro_grp_enable_5" />
+                </div>
+              </div>
+              <br />
+              <div class="details-container">
+                <div>
+                  <label for="name_grp_5" data-i18n="name"></label>
+                  <input
+                    name="name_grp_5"
+                    type="text"
+                    id="cfg_jaro_grp_name_5"
+                    data-sync="p02_jaro_grp_name_5"
+                    placeholder="name" />
+                </div>
+                <div>
+                  <div class="label-with-button">
+                    <label for="mask_grp_5" data-i18n="mask"></label>
+                    <button
+                      onclick="openGrpMaskHelp(this)"
+                      class="i_help"
+                      style="
+                        height: 20px;
+                        background-color: transparent;
+                        border: none;
+                      "></button>
+                  </div>
+                  <input
+                    name="mask_grp_5"
+                    type="text"
+                    data-type="bin"
+                    id="cfg_jaro_grp_mask_5"
+                    oninput="validateBin(this)"
+                    onblur="formatBin(this)"
+                    pattern="[01]{1,16}"
+                    placeholder="Enter Bit-Mask (0 and 1 only, 16 chars)"
+                    maxlength="16" />
+                </div>
+              </div>
+              <br />
             </details>
             <hr />
             <!-- Language -->

@@ -1,10 +1,9 @@
+#include <EspStrUtil.h>
 #include <basics.h>
+#include <github.h>
 #include <jarolift.h>
 #include <language.h>
 #include <message.h>
-#include <ota.h>
-#include <stringHelper.h>
-#include <wdt.h>
 #include <webUI.h>
 #include <webUIupdates.h>
 
@@ -13,46 +12,27 @@
 #define WEBUI_FAST_REFRESH_TIME_MS 100
 
 /* P R O T O T Y P E S ********************************************************/
-void updateOilmeterElements(bool forceUpdate);
-void updateSensorElements(bool forceUpdate);
 void updateSystemInfoElements();
 
 /* D E C L A R A T I O N S ****************************************************/
-static muTimer refreshTimer1 = muTimer();    // timer to refresh other values
-static muTimer refreshTimer2 = muTimer();    // timer to refresh other values
-static muTimer refreshTimer3 = muTimer();    // timer to refresh other values
-static muTimer gitVersionTimer1 = muTimer(); // timer to refresh other values
-static muTimer gitVersionTimer2 = muTimer(); // timer to refresh other values
+
+static muTimer refreshTimer1 = muTimer();   // timer to refresh other values
+static muTimer refreshTimer2 = muTimer();   // timer to refresh other values
+static muTimer otaProgessTimer = muTimer(); // timer to refresh other values
 
 static char tmpMessage[300] = {'\0'};
 static bool refreshRequest = false;
 static uint16_t devCntNew, devCntOld = 0;
 static JsonDocument jsonDoc;
 static bool jsonDataToSend = false;
-
-static auto &ota = OTAState::getInstance();
-
-// convert minutes to human readable structure
-timeComponents convertMinutes(int totalMinutes) {
-  int minutesPerYear = 525600; // 365 days * 24 hours * 60 minutes
-  int minutesPerDay = 1440;    // 24 hours * 60 minutes
-  int minutesPerHour = 60;
-
-  timeComponents result;
-
-  result.years = totalMinutes / minutesPerYear;
-  int remainingMinutes = totalMinutes % minutesPerYear;
-
-  result.days = remainingMinutes / minutesPerDay;
-  remainingMinutes %= minutesPerDay;
-
-  result.hours = remainingMinutes / minutesPerHour;
-  remainingMinutes %= minutesPerHour;
-
-  result.minutes = remainingMinutes;
-
-  return result;
-}
+static int logLine, logIdx = 0;
+static bool logReadActive = false;
+JsonDocument jsonLog;
+static const char *TAG = "WEB"; // LOG TAG
+static auto &ota = EspSysUtil::OTA::getInstance();
+static auto &wdt = EspSysUtil::Wdt::getInstance();
+GithubRelease ghLatestRelease;
+GithubReleaseInfo ghReleaseInfo;
 
 /**
  * *******************************************************************
@@ -78,10 +58,12 @@ void addJsonElement(JsonDocument &jsonBuf, const char *elementID, const char *va
 // add webElement - numeric Type
 template <typename NumericType, typename std::enable_if<std::is_integral<NumericType>::value, NumericType>::type * = nullptr>
 inline void addJson(JsonDocument &jsonBuf, const char *elementID, NumericType value) {
-  addJsonElement(jsonBuf, elementID, int32ToString(static_cast<intmax_t>(value)));
+  addJsonElement(jsonBuf, elementID, EspStrUtil::intToString(static_cast<intmax_t>(value)));
 };
 // add webElement - float Type
-inline void addJson(JsonDocument &jsonBuf, const char *elementID, float value) { addJsonElement(jsonBuf, elementID, floatToString(value)); };
+inline void addJson(JsonDocument &jsonBuf, const char *elementID, float value) {
+  addJsonElement(jsonBuf, elementID, EspStrUtil::floatToString(value, 1));
+};
 // add webElement - char Type
 inline void addJson(JsonDocument &jsonBuf, const char *elementID, const char *value) { addJsonElement(jsonBuf, elementID, value); };
 // add webElement - bool Type
@@ -114,28 +96,37 @@ void updateSystemInfoElements() {
 
   initJsonBuffer(jsonDoc);
 
-  // Network information
-  addJson(jsonDoc, "p09_wifi_ip", wifi.ipAddress);
-  snprintf(tmpMessage, sizeof(tmpMessage), "%i %%", wifi.signal);
-  addJson(jsonDoc, "p09_wifi_signal", tmpMessage);
-  snprintf(tmpMessage, sizeof(tmpMessage), "%ld dbm", wifi.rssi);
-  addJson(jsonDoc, "p09_wifi_rssi", tmpMessage);
+  // WiFi information
+  if (config.eth.enable) {
+    addJson(jsonDoc, "p09_wifi_ip", wifi.ipAddress);
+    snprintf(tmpMessage, sizeof(tmpMessage), "%i %%", wifi.signal);
+    addJson(jsonDoc, "p09_wifi_signal", tmpMessage);
+    snprintf(tmpMessage, sizeof(tmpMessage), "%ld dbm", wifi.rssi);
+    addJson(jsonDoc, "p09_wifi_rssi", tmpMessage);
 
-  if (!WiFi.isConnected()) {
-    addJson(jsonDoc, "p00_wifi_icon", "i_wifi_nok");
-  } else if (wifi.rssi < -80) {
-    addJson(jsonDoc, "p00_wifi_icon", "i_wifi_1");
-  } else if (wifi.rssi < -70) {
-    addJson(jsonDoc, "p00_wifi_icon", "i_wifi_2");
-  } else if (wifi.rssi < -60) {
-    addJson(jsonDoc, "p00_wifi_icon", "i_wifi_3");
+    if (!WiFi.isConnected()) {
+      addJson(jsonDoc, "p00_wifi_icon", "i_wifi_nok");
+    } else if (wifi.rssi < -80) {
+      addJson(jsonDoc, "p00_wifi_icon", "i_wifi_1");
+    } else if (wifi.rssi < -70) {
+      addJson(jsonDoc, "p00_wifi_icon", "i_wifi_2");
+    } else if (wifi.rssi < -60) {
+      addJson(jsonDoc, "p00_wifi_icon", "i_wifi_3");
+    } else {
+      addJson(jsonDoc, "p00_wifi_icon", "i_wifi_4");
+    }
+
   } else {
-    addJson(jsonDoc, "p00_wifi_icon", "i_wifi_4");
+    addJson(jsonDoc, "p00_wifi_icon", "");
+    addJson(jsonDoc, "p09_wifi_ip", "-.-.-.-");
+    addJson(jsonDoc, "p09_wifi_signal", "0");
+    addJson(jsonDoc, "p09_wifi_rssi", "0 dbm");
   }
 
   addJson(jsonDoc, "p09_eth_ip", strlen(eth.ipAddress) ? eth.ipAddress : "-.-.-.-");
   addJson(jsonDoc, "p09_eth_status", eth.connected ? WEB_TXT::CONNECTED[config.lang] : WEB_TXT::NOT_CONNECTED[config.lang]);
 
+  // ETH information
   if (config.eth.enable) {
     if (eth.connected) {
       addJson(jsonDoc, "p00_eth_icon", "i_eth_ok");
@@ -200,27 +191,210 @@ void updateSystemInfoElementsStatic() {
   addJson(jsonDoc, "p09_sw_version", VERSION);
   addJson(jsonDoc, "p00_dialog_version", VERSION);
 
-  getBuildDateTime(tmpMessage);
-  addJson(jsonDoc, "p09_sw_date", tmpMessage);
+  addJson(jsonDoc, "p09_sw_date", EspStrUtil::getBuildDateTime());
 
   // restart reason
-  char restartReason[64];
-  getRestartReason(restartReason, sizeof(restartReason));
-  addJson(jsonDoc, "p09_restart_reason", restartReason);
+  addJson(jsonDoc, "p09_restart_reason", EspSysUtil::RestartReason::get());
 
   addJson(jsonDoc, "p12_jaro_devcnt", jaroGetDevCnt());
 
   updateWebJSON(jsonDoc);
 }
 
+/**
+ * *******************************************************************
+ * @brief   check id read log buffer is active
+ * @param   none
+ * @return  none
+ * *******************************************************************/
+bool webLogRefreshActive() { return logReadActive; }
+
+/**
+ * *******************************************************************
+ * @brief   start reading log buffer
+ * @param   none
+ * @return  none
+ * *******************************************************************/
+void webReadLogBuffer() {
+  logReadActive = true;
+  logLine = 0;
+  logIdx = 0;
+}
+
+/**
+ * *******************************************************************
+ * @brief   update Logger output
+ * @param   none
+ * @return  none
+ * *******************************************************************/
+void webReadLogBufferCyclic() {
+
+  jsonLog.clear();
+  jsonLog["type"] = "logger";
+  jsonLog["cmd"] = "add_log";
+  JsonArray entryArray = jsonLog["entry"].to<JsonArray>();
+
+  while (logReadActive) {
+
+    if (logLine == 0 && logData.lastLine == 0) {
+      // log empty
+      logReadActive = false;
+      return;
+    }
+    if (config.log.order == 1) {
+      logIdx = (logData.lastLine - logLine - 1) % MAX_LOG_LINES;
+    } else {
+      if (logData.buffer[logData.lastLine][0] == '\0') {
+        // buffer is not full - start reading at element index 0
+        logIdx = logLine % MAX_LOG_LINES;
+      } else {
+        // buffer is full - start reading at element index "logData.lastLine"
+        logIdx = (logData.lastLine + logLine) % MAX_LOG_LINES;
+      }
+    }
+    if (logIdx < 0) {
+      logIdx += MAX_LOG_LINES;
+    }
+    if (logIdx >= MAX_LOG_LINES) {
+      logIdx = 0;
+    }
+    if (logLine == MAX_LOG_LINES - 1) {
+      // end
+      updateWebJSON(jsonLog);
+      logReadActive = false;
+      return;
+    } else {
+      if (logData.buffer[logIdx][0] != '\0') {
+        entryArray.add(logData.buffer[logIdx]);
+        logLine++;
+      } else {
+        // no more entries
+        logReadActive = false;
+        updateWebJSON(jsonLog);
+        return;
+      }
+    }
+  }
+}
+
+/**
+ * *******************************************************************
+ * @brief   callback function for OTA progress
+ * @param   none
+ * @return  none
+ * *******************************************************************/
+void otaProgressCallback(int progress) {
+  if (otaProgessTimer.cycleTrigger(1000)) {
+    sendHeartbeat();
+    char buttonTxt[32];
+    snprintf(buttonTxt, sizeof(buttonTxt), "updating: %i%%", progress);
+    updateWebText("p00_update_btn", buttonTxt, false);
+  }
+}
+
+/**
+ * *******************************************************************
+ * @brief   initiate GitHub version check
+ * @param   none
+ * @return  none
+ * *******************************************************************/
+bool startCheckGitHubVersion;
+void requestGitHubVersion() { startCheckGitHubVersion = true; }
+void processGitHubVersion() {
+  if (startCheckGitHubVersion) {
+    startCheckGitHubVersion = false;
+    if (ghGetLatestRelease(&ghLatestRelease, &ghReleaseInfo)) {
+      updateWebBusy("p00_dialog_git_version", false);
+      updateWebText("p00_dialog_git_version", ghReleaseInfo.tag, false);
+      updateWebHref("p00_dialog_git_version", ghReleaseInfo.url);
+      // if new version is available, show update button
+      if (strcmp(ghReleaseInfo.tag, VERSION) != 0) {
+        char buttonTxt[32];
+        snprintf(buttonTxt, sizeof(buttonTxt), "Update %s", ghReleaseInfo.tag);
+        updateWebText("p00_update_btn", buttonTxt, false);
+        updateWebHideElement("p00_update_btn_hide", false);
+      }
+    } else {
+      updateWebBusy("p00_dialog_git_version", false);
+      updateWebText("p00_dialog_git_version", "error", false);
+    }
+  }
+}
+
+/**
+ * *******************************************************************
+ * @brief   initiate GitHub version OTA update
+ * @param   none
+ * @return  none
+ * *******************************************************************/
+bool startGitHubUpdate;
+void requestGitHubUpdate() { startGitHubUpdate = true; }
+void processGitHubUpdate() {
+  if (startGitHubUpdate) {
+    startGitHubUpdate = false;
+    ghSetProgressCallback(otaProgressCallback);
+    updateWebText("p00_update_btn", "updating: 0%", false);
+    updateWebDisabled("p00_update_btn", true);
+    ota.setActive(true);
+    wdt.disable();
+    int result = ghStartOtaUpdate(ghLatestRelease, ghReleaseInfo.asset);
+    if (result == OTA_SUCCESS) {
+      updateWebText("p00_update_btn", "updating: 100%", false);
+      updateWebDialog("version_dialog", "close");
+      updateWebDialog("ota_update_done_dialog", "open");
+      MY_LOGI(TAG, "GitHub OTA-Update successful");
+    } else {
+      char errMsg[32];
+      switch (result) {
+      case OTA_NULL_URL:
+        strcpy(errMsg, "URL is NULL");
+        break;
+      case OTA_CONNECT_ERROR:
+        strcpy(errMsg, "Connection error");
+        break;
+      case OTA_BEGIN_ERROR:
+        strcpy(errMsg, "Begin error");
+        break;
+      case OTA_WRITE_ERROR:
+        strcpy(errMsg, "Write error");
+        break;
+      case OTA_END_ERROR:
+        strcpy(errMsg, "End error");
+        break;
+      default:
+        strcpy(errMsg, "Unknown error");
+        break;
+      }
+      updateWebText("p00_ota_upd_err", errMsg, false);
+      updateWebDialog("version_dialog", "close");
+      updateWebDialog("ota_update_failed_dialog", "open");
+      MY_LOGE(TAG, "GitHub OTA-Update failed: %s", errMsg);
+    }
+    ota.setActive(false);
+    wdt.enable();
+  }
+}
+
+/**
+ * *******************************************************************
+ * @brief   cyclic update of webUI elements
+ * @param   none
+ * @return  none
+ * *******************************************************************/
 void webUIupdates() {
 
+  // check if new version is available
+  processGitHubVersion();
+  // perform GitHub update
+  processGitHubUpdate();
+
+  // update webUI Logger
   if (webLogRefreshActive()) {
-    webReadLogBufferCyclic(); // update webUI Logger
+    webReadLogBufferCyclic();
   }
 
   // ON-BROWSER-REFRESH: refresh ALL elements - do this step by step not to stress the connection
-  if (refreshTimer3.cycleTrigger(WEBUI_FAST_REFRESH_TIME_MS) && refreshRequest && !ota.isActive()) {
+  if (refreshTimer1.cycleTrigger(WEBUI_FAST_REFRESH_TIME_MS) && refreshRequest && !ota.isActive()) {
 
     updateSystemInfoElementsStatic(); // update static informations (≈ 200 Bytes)
     refreshRequest = false;

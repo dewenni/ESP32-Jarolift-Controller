@@ -19,8 +19,6 @@ SPIClass *SPI_2;
 
 static muTimer wifiReconnectTimer = muTimer(); // timer for reconnect delay
 static int wifi_retry = 0;
-static esp_reset_reason_t reset_reason;
-static char intRestartReason[64];
 static const char *TAG = "SETUP"; // LOG TAG
 
 /**
@@ -96,7 +94,7 @@ void checkWiFi() {
       MY_LOGI(TAG, "\n! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! !\n");
       MY_LOGI(TAG, "Wifi connection not possible, esp rebooting...");
       MY_LOGI(TAG, "\n! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! !\n");
-      saveRestartReason("no wifi connection");
+      EspSysUtil::RestartReason::saveLocal("no wifi connection");
       yield();
       delay(1000);
       yield();
@@ -115,32 +113,23 @@ void setupWiFi() {
 
   if (setupMode) {
     // start Accesspoint for initial setup
-    IPAddress ip(192, 168, 4, 1);
-    IPAddress gateway(192, 168, 4, 1);
-    IPAddress subnet(255, 255, 255, 0);
-    WiFi.softAPConfig(ip, gateway, subnet);
+    WiFi.softAPConfig(IPAddress(192, 168, 4, 1), IPAddress(192, 168, 4, 1), IPAddress(255, 255, 255, 0));
     WiFi.softAP("ESP32-Jarolift");
     MY_LOGI(TAG, "\n! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! !\n");
     MY_LOGI(TAG, "> WiFi Mode: AccessPoint <");
     MY_LOGI(TAG, "1. connect your device to SSID: ESP32-Jarolift");
     MY_LOGI(TAG, "2. open Browser and go to Address: http://192.168.4.1");
     MY_LOGI(TAG, "\n! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! !\n");
-  } else {
+
+  } else if (config.wifi.enable) {
+
     // setup callback function
     WiFi.onEvent(onWiFiStationConnected, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_CONNECTED);
     WiFi.onEvent(onWiFiGotIP, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_GOT_IP);
 
+    // manual IP-Settings
     if (config.wifi.static_ip) {
-      // manual IP-Settings
-      IPAddress manIp;
-      manIp.fromString(config.wifi.ipaddress);
-      IPAddress manSubnet;
-      manSubnet.fromString(config.wifi.subnet);
-      IPAddress manGateway;
-      manGateway.fromString(config.wifi.gateway);
-      IPAddress manDns;
-      manDns.fromString(config.wifi.dns);
-      WiFi.config(manIp, manGateway, manSubnet, manDns);
+      WiFi.config(IPAddress(config.wifi.ipaddress), IPAddress(config.wifi.gateway), IPAddress(config.wifi.subnet), IPAddress(config.wifi.dns));
     }
 
     // connect to configured wifi AP
@@ -218,7 +207,7 @@ void setupETH() {
 void basicSetup() {
 
   // check internal restart reason
-  readRestartReason(intRestartReason, sizeof(intRestartReason));
+  EspSysUtil::RestartReason::readLocal();
 
   // WiFi
   setupWiFi();
@@ -230,9 +219,6 @@ void basicSetup() {
 
   // NTP
   ntpSetup();
-
-  // Bestimme den Grund für den letzten Neustart
-  reset_reason = esp_reset_reason();
 }
 
 /**
@@ -261,13 +247,13 @@ void sendWiFiInfo() {
     wifiJSON["rssi"] = wifi.rssi;
     wifiJSON["signal"] = wifi.signal;
     wifiJSON["ip"] = wifi.ipAddress;
-    wifiJSON["date_time"] = getDateTimeString();
+    wifiJSON["date_time"] = EspStrUtil::getDateTimeString();
   } else {
     wifiJSON["status"] = "disconnected";
     wifiJSON["rssi"] = "--";
     wifiJSON["signal"] = "--";
     wifiJSON["ip"] = "--";
-    wifiJSON["date_time"] = getDateTimeString();
+    wifiJSON["date_time"] = EspStrUtil::getDateTimeString();
   }
 
   char sendWififJSON[255];
@@ -297,7 +283,7 @@ void sendETHInfo() {
   ethJSON["link_up"] = eth.linkUp ? "active" : "inactive";
   ethJSON["link_speed"] = eth.linkSpeed;
   ethJSON["full_duplex"] = eth.linkUp ? "full-duplex" : "---";
-  ethJSON["date_time"] = getDateTimeString();
+  ethJSON["date_time"] = EspStrUtil::getDateTimeString();
 
   char sendEthJSON[255];
   serializeJson(ethJSON, sendEthJSON);
@@ -317,8 +303,6 @@ void sendSysInfo() {
   // Uptime and restart reason
   char uptimeStr[64];
   getUptime(uptimeStr, sizeof(uptimeStr));
-  char restartReason[64];
-  getRestartReason(restartReason, sizeof(restartReason));
   // ESP Heap and Flash usage
   char heap[10];
   snprintf(heap, sizeof(heap), "%.1f %%", (float)(ESP.getHeapSize() - ESP.getFreeHeap()) * 100 / ESP.getHeapSize());
@@ -327,7 +311,7 @@ void sendSysInfo() {
 
   JsonDocument sysInfoJSON;
   sysInfoJSON["uptime"] = uptimeStr;
-  sysInfoJSON["restart_reason"] = restartReason;
+  sysInfoJSON["restart_reason"].set((char *)EspSysUtil::RestartReason::get());
   sysInfoJSON["heap"] = heap;
   sysInfoJSON["flash"] = flash;
   sysInfoJSON["sw_version"] = VERSION;
@@ -346,17 +330,16 @@ void sendSysInfo() {
 void getUptime(char *buffer, size_t bufferSize) {
   static unsigned long previousMillis = 0;
   static unsigned long overflowCounter = 0;
-  const unsigned long overflowThreshold = 4294967295; // Maximalwert von millis() bevor es zum Überlauf kommt
+  const unsigned long overflowThreshold = 4294967295;
 
   unsigned long currentMillis = millis();
   if (currentMillis < previousMillis) {
-    // Ein Überlauf wurde detektiert
+    // overflow detected
     overflowCounter++;
   }
   previousMillis = currentMillis;
 
-  // Berechne die gesamte Uptime in Sekunden unter Berücksichtigung des
-  // Überlaufs
+  // calculate total uptime in seconds considering overflow
   unsigned long long totalSeconds = overflowCounter * (overflowThreshold / 1000ULL) + (currentMillis / 1000ULL);
 
   unsigned long days = totalSeconds / 86400;
@@ -364,62 +347,12 @@ void getUptime(char *buffer, size_t bufferSize) {
   unsigned long minutes = (totalSeconds % 3600) / 60;
   unsigned long seconds = totalSeconds % 60;
 
-  // Verwende snprintf zum Formatieren der Ausgabe
+  // use snprintf to format the output
   if (days > 0) {
     snprintf(buffer, bufferSize, "%lud %02luh %02lum %02lus", days, hours, minutes, seconds);
   } else if (hours > 0) {
     snprintf(buffer, bufferSize, "%02luh %02lum %02lus", hours, minutes, seconds);
   } else {
     snprintf(buffer, bufferSize, "%lum %lus", minutes, seconds);
-  }
-}
-
-/**
- * *******************************************************************
- * @brief   get last restart reason as string
- * @param   buffer
- * @param   bufferSize
- * @return  none
- * *******************************************************************/
-void getRestartReason(char *reason, size_t reason_size) {
-
-  if (strlen(intRestartReason) != 0) {
-    snprintf(reason, reason_size, "%s", intRestartReason);
-  } else {
-    switch (reset_reason) {
-    case ESP_RST_POWERON:
-      strncpy(reason, "Power-on reset", reason_size);
-      break;
-    case ESP_RST_EXT:
-      strncpy(reason, "External reset", reason_size);
-      break;
-    case ESP_RST_SW:
-      strncpy(reason, "Software reset via esp_restart", reason_size);
-      break;
-    case ESP_RST_PANIC:
-      strncpy(reason, "Software panic reset", reason_size);
-      break;
-    case ESP_RST_INT_WDT:
-      strncpy(reason, "Interrupt watchdog reset", reason_size);
-      break;
-    case ESP_RST_TASK_WDT:
-      strncpy(reason, "Task watchdog reset", reason_size);
-      break;
-    case ESP_RST_WDT:
-      strncpy(reason, "Other watchdog reset", reason_size);
-      break;
-    case ESP_RST_DEEPSLEEP:
-      strncpy(reason, "Woke up from deep-sleep", reason_size);
-      break;
-    case ESP_RST_BROWNOUT:
-      strncpy(reason, "Brownout reset (voltage dip)", reason_size);
-      break;
-    case ESP_RST_SDIO:
-      strncpy(reason, "Reset over SDIO", reason_size);
-      break;
-    default:
-      strncpy(reason, "unknown Reset", reason_size);
-      break;
-    }
   }
 }

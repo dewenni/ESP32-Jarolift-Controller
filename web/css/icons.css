@@ -7,6 +7,15 @@
   background-position: center;
 }
 
+.svgbtn {
+  width: 20%;
+  height: 40px;
+  display: inline-block;
+  background-size: 35%;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
 .i_dashboard {
   background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="%23ffffff" viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>');
 }
@@ -100,4 +109,7 @@
 }
 .i_clock {
   background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><path stroke="%23fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 7v5h3m6 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>');
+}
+.i_updown2 {
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="%23fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.68" viewBox="0 0 24 24"><path d="m.891 14.882 4.871 4.87 4.871-4.87M.891 9.036l4.871-4.87 4.871 4.87M13.402 14.882l4.872 4.87 4.87-4.87m-9.742-5.846 4.872-4.87 4.87 4.87" style="stroke-width:1.63669"/></svg>');
 }

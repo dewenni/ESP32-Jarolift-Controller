@@ -2,6 +2,14 @@ import os
 import re
 import gzip
 
+def ensure_directory_exists(path):
+    if not os.path.exists(path):
+        os.makedirs(path)
+        print(f"folder '{path}' was created.")
+
+# check if temp folder exists, otherwise create it
+ensure_directory_exists("web/temp") 
+
 def compress_to_gzip_c_array(input_file_path, output_file_path, var_name):
     # HTML-Datei einlesen
     with open(input_file_path, 'rb') as file:
@@ -55,6 +63,7 @@ source_files = [
     'web/html/00_header.html',
     'web/html/01_control.html',
     'web/html/02_timer.html',
+    'web/html/02_group.html',
     'web/html/09_system.html',
     'web/html/10_logger.html',
     'web/html/11_ota.html',

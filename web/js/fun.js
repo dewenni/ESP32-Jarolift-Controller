@@ -53,6 +53,8 @@ function setupWS() {
       updateHref(message);
     } else if (message.type === "updateBusy") {
       updateBusy(message);
+    } else if (message.type === "updateDisabled") {
+      updateDisabled(message);
     } else if (message.type === "showElementClass") {
       showElementClass(message);
     } else if (message.type === "logger") {
@@ -218,6 +220,14 @@ function updateBusy(data) {
   }
 }
 
+// disable/enable element
+function updateDisabled(data) {
+  var element = document.getElementById(data.id);
+  if (element) {
+    element.disabled = data.disabled;
+  }
+}
+
 // hide/show elements based on className
 function showElementClass(data) {
   const elements = document.querySelectorAll(`.${data.className}`);
@@ -256,6 +266,26 @@ function updateDialog(data) {
     dialog.showModal();
   } else if (data.state == "close") {
     dialog.close();
+  }
+}
+
+// open bitmask help dialog
+function openGrpMaskHelp(button) {
+  const dialog = document.getElementById("p12_bitmask_dialog");
+  if (dialog) {
+    dialog.showModal();
+  } else {
+    console.error("Dialog mit ID 'p12_bitmask_dialog' wurde nicht gefunden.");
+  }
+}
+
+// close bitmask help dialog
+function closeGrpMaskHelp() {
+  const dialog = document.getElementById("p12_bitmask_dialog");
+  if (dialog) {
+    dialog.close();
+  } else {
+    console.error("Dialog mit ID 'p12_bitmask_dialog' wurde nicht gefunden.");
   }
 }
 
@@ -357,6 +387,16 @@ function formatHex(input) {
   input.value = input.value.padStart(length, "0").toLowerCase();
 }
 
+function validateBin(input) {
+  // Entferne alles außer 0 und 1
+  input.value = input.value.replace(/[^0-1]/g, "");
+}
+
+function formatBin(input) {
+  const length = parseInt(input.getAttribute("data-length"), 10) || 16; // Standardlänge: 16
+  input.value = input.value.padStart(length, "0");
+}
+
 // update elements based on config.json file
 function updateUI(
   config,
@@ -394,11 +434,18 @@ function updateUI(
             // Setze das "checked"-Attribut für Radio-Buttons
             element.checked = element.value === value.toString();
           } else {
-            // Überprüfen, ob das Feld ein HEX-Wert benötigt
+            // Überprüfen, ob das Feld ein HEX- oder Binärwert benötigt
             if (element.dataset.type === "hex" && typeof value === "number") {
               // Konvertiere Zahl zu HEX und setze den Wert
               element.value = value.toString(16).toLowerCase();
               formatHex(element);
+            } else if (
+              element.dataset.type === "bin" &&
+              typeof value === "number"
+            ) {
+              // Konvertiere Zahl zu Binär und setze den Wert
+              element.value = value.toString(2);
+              formatBin(element);
             } else {
               // Setze den "value"-Attribut für andere Eingabetypen (z.B. text, number)
               element.value = value;

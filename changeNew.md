@@ -1,18 +1,28 @@
-# v1.2.0
+# v1.4.0
 
 ## what's new
 
-Implemented a command queue for incomming mqtt messages and also for the CC1101 commands.
-Commands are now buffered and processed sequentially to prevent timing issues during transmission.
+### 1. direct GitHub Update 🎉🎉🎉
 
-this project is still in an early phase.
-If you like this project, feel free to push the **[Star ⭐️]** button and click **[Watch 👁]** to stay updated.
-If there is any bug, please use the Issue function and let me know.
-If you have any further questions, suggestions or requests, please use the discussion function.
+This update introduces an exciting new feature: You can now update to the latest version directly from the WebUI – no need to download the .bin file manually anymore!
+
+Simply click on the version info in the bottom left corner, and a dialog will open. If a new version is available, you can initiate the update right there. It will automatically download and install the latest release from GitHub.
+
+![ota-2](Doc/github_ota.gif)
+
+### 2. new option to enable/disable WIFI
+
+there is a new option to enable/disable WiFi. This could be useful if you use the Ethernet connection and you do not want to use the WiFi in parallel.
+The depending switch to enable/disable is also in Settings > WiFi
+
+> [!CAUTION]
+> Unfortunately after the update the "enable" will be false and therefore the Controller will be activate the "Setup-Mode" after restart, because WiFi and in most cases Ethernet is now disabled. Then you have to connect to the Accesspoint, go to Settings and activate WiFi. After Reboot everything should be fine again. Sorry, but that's something I can't avoid in this case.
+
+> [!TIP]
+> Maybe it is necessary to clean your browser cache after the update, to be sure that everything works well!
 
 ## changelog
 
-- fix missing SW-Version in MQTT-SysInfo and Home Assistant
-- Implemented a command queue for incoming mqtt messages. #5
-- Implemented a command queue for CC1101 to handle rapid consecutive commands to prevent timing issues during transmission. #5
-- update to Arduino core 3.1.0 based on IDF 5.3.2.241210
+- add new feature to update directly from GitHub
+- add option to enable/disable WIFI in case ETH is used (WiFi will be activated automatically in Setup-Mode) #17
+- improve the size of controls at mobile layout

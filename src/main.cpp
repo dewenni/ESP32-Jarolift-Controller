@@ -1,18 +1,13 @@
 // includes
 #include <ArduinoOTA.h>
-#include <ESP32_DRD.h>
 #include <basics.h>
 #include <config.h>
-#include <esp_task_wdt.h>
 #include <jarolift.h>
 #include <message.h>
 #include <mqtt.h>
-#include <ota.h>
 #include <telnet.h>
-#include <wdt.h>
 #include <webUI.h>
 #include <webUIupdates.h>
-
 
 #define CORE_DEBUG_LEVEL ESP_LOG_DEBUG
 
@@ -21,13 +16,13 @@ static muTimer heartbeat = muTimer();      // timer for heartbeat signal
 static muTimer setupModeTimer = muTimer(); // timer for heartbeat signal
 static muTimer wdtTimer = muTimer();       // timer to reset wdt
 
-static DRD32 *drd;              // Double-Reset-Detector
+static EspSysUtil::DRD32 *drd;  // Double-Reset-Detector
 static bool main_reboot = true; // reboot flag
 
 static const char *TAG = "MAIN"; // LOG TAG
 
-static auto &wdt = Watchdog::getInstance();
-static auto &ota = OTAState::getInstance();
+static auto &wdt = EspSysUtil::Wdt::getInstance();
+static auto &ota = EspSysUtil::OTA::getInstance();
 
 /**
  * *******************************************************************
@@ -41,7 +36,7 @@ void setup() {
   messageSetup();
 
   // check for double reset
-  drd = new DRD32(DRD_TIMEOUT);
+  drd = new EspSysUtil::DRD32(DRD_TIMEOUT);
   if (drd->detectDoubleReset()) {
     MY_LOGI(TAG, "DRD detected - enter SetupMode");
     setupMode = true;
@@ -81,7 +76,7 @@ void setup() {
   ArduinoOTA.setHostname(config.wifi.hostname);
   ArduinoOTA.begin();
 
-  // jarolift setup#
+  // jarolift setup
   if (!setupMode) {
     jaroliftSetup();
   }
@@ -90,7 +85,6 @@ void setup() {
 
   // telnet Setup
   setupTelnet();
-
 }
 
 /**

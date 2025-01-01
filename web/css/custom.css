@@ -11,32 +11,32 @@
 
 @media (min-width: 100px) {
   :root {
-    --pico-font-size: 75%;
+    --pico-font-size: 90%;
   }
 }
 @media (min-width: 576px) {
   :root {
-    --pico-font-size: 80%;
+    --pico-font-size: 90%;
   }
 }
 @media (min-width: 768px) {
   :root {
-    --pico-font-size: 85%;
+    --pico-font-size: 95%;
   }
 }
 @media (min-width: 1024px) {
   :root {
-    --pico-font-size: 90%;
+    --pico-font-size: 100%;
   }
 }
 @media (min-width: 1280px) {
   :root {
-    --pico-font-size: 95%;
+    --pico-font-size: 105%;
   }
 }
 @media (min-width: 1536px) {
   :root {
-    --pico-font-size: 100%;
+    --pico-font-size: 110%;
   }
 }
 
@@ -185,7 +185,7 @@ hr {
 .grid .dash {
   flex-basis: 99%;
   padding: 10px;
-  min-width: 450px;
+  min-width: 300px;
 }
 
 /* Container für Checkboxen */
@@ -212,6 +212,30 @@ hr {
   .grid .dash {
     flex-basis: 32%;
   }
+}
+
+.details-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  align-items: center;
+}
+
+.details-container .input-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.details-container .label-with-button {
+  display: flex;
+
+  justify-content: flex-start;
+  gap: 0.5rem;
+}
+
+.details-container input {
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .leftright {
@@ -294,6 +318,17 @@ hr {
   transition: transform 0.3s ease;
   margin-top: 6px;
   margin-bottom: 6px;
+}
+
+.sidebar li a.active {
+  background: #fff;
+}
+
+.sidebar li a.active .links_name,
+.sidebar li a.active i {
+  pointer-events: auto;
+  transition: all 0.3s ease;
+  filter: invert(1);
 }
 
 .home-section {
@@ -446,4 +481,8 @@ table td {
   background-color: var(--pico-card-sectioning-background-color);
   color: #fff; /* Weiße Textfarbe */
   border-radius: 10px;
+}
+
+a {
+  cursor: pointer;
 }

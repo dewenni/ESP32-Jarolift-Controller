@@ -4,12 +4,7 @@
 #include <favicon.h>
 #include <language.h>
 #include <message.h>
-#include <ota.h>
-#include <sensor.h>
-#include <stringHelper.h>
-#include <wdt.h>
 #include <webUI.h>
-#include <webUIhelper.h>
 #include <webUIupdates.h>
 
 const int MAX_WS_CLIENT = 3;
@@ -19,11 +14,8 @@ const int CHUNK_SIZE = 1024;
 void webCallback(const char *elementId, const char *value);
 
 /* D E C L A R A T I O N S ****************************************************/
-static muTimer heartbeatTimer = muTimer();  // timer to refresh other values
-static muTimer simulationTimer = muTimer(); // timer to refresh other values
-static muTimer logReadTimer = muTimer();    // timer to refresh other values
-static muTimer otaUpdateTimer = muTimer();  // timer to refresh other values
-static muTimer onLoadTimer = muTimer();     // timer to refresh other values
+static muTimer heartbeatTimer = muTimer(); // timer to refresh other values
+static muTimer onLoadTimer = muTimer();    // timer to refresh other values
 
 static AsyncWebServer server(80);
 static AsyncWebSocket ws("/ws");
@@ -37,8 +29,8 @@ static char webCallbackValue[256];
 static bool webCallbackAvailable = false;
 static bool onLoadRequest = false;
 
-static auto &wdt = Watchdog::getInstance();
-static auto &ota = OTAState::getInstance();
+static auto &wdt = EspSysUtil::Wdt::getInstance();
+static auto &ota = EspSysUtil::OTA::getInstance();
 
 void sendWs(JsonDocument &jsonDoc) {
   if (ws.count()) {
@@ -198,6 +190,14 @@ void updateWebBusy(const char *id, bool busy) {
   sendWs(jsonDoc);
 }
 
+void updateWebDisabled(const char *id, bool disabled) {
+  JsonDocument jsonDoc;
+  jsonDoc["type"] = "updateDisabled";
+  jsonDoc["id"] = id;
+  jsonDoc["disabled"] = disabled;
+  sendWs(jsonDoc);
+}
+
 /**
  * *******************************************************************
  * @brief   function to process the firmware update
@@ -215,7 +215,7 @@ void handleDoUpdate(AsyncWebServerRequest *request, const String &filename, size
     if (!Update.begin(UPDATE_SIZE_UNKNOWN, U_FLASH)) {
       ota.setActive(false);
       wdt.enable();
-      updateWebText("p11_ota_upd_err", Update.errorString(), false);
+      updateWebText("p00_ota_upd_err", Update.errorString(), false);
       updateWebDialog("ota_update_failed_dialog", "open");
       return request->send(400, "text/plain", "OTA could not begin");
     }
@@ -224,7 +224,7 @@ void handleDoUpdate(AsyncWebServerRequest *request, const String &filename, size
   if (Update.write(data, len) != len) {
     ota.setActive(false);
     wdt.enable();
-    updateWebText("p11_ota_upd_err", Update.errorString(), false);
+    updateWebText("p00_ota_upd_err", Update.errorString(), false);
     updateWebDialog("ota_update_failed_dialog", "open");
     return request->send(400, "text/plain", "OTA could not begin");
   } else {
@@ -243,7 +243,7 @@ void handleDoUpdate(AsyncWebServerRequest *request, const String &filename, size
   if (final) {
     if (!Update.end(true)) {
       MY_LOGI(TAG, "OTA Update failed: %s", Update.errorString());
-      updateWebText("p11_ota_upd_err", Update.errorString(), false);
+      updateWebText("p000_ota_upd_err", Update.errorString(), false);
       updateWebDialog("ota_update_failed_dialog", "open");
       ota.setActive(false);
       wdt.enable();
@@ -265,7 +265,7 @@ bool isAuthenticated(AsyncWebServerRequest *request) {
   }
   String cookieHeader = request->header("Cookie");
   if (cookieHeader.length() > 0) {
-    String cookieName = "esp_XXX_auth=";
+    String cookieName = "esp_jarolift_auth=";
     int cookiePos = cookieHeader.indexOf(cookieName);
     if (cookiePos != -1) {
       int valueStart = cookiePos + cookieName.length();
@@ -339,13 +339,11 @@ void sendGzipChunkedResponse(AsyncWebServerRequest *request, const uint8_t *cont
       request->beginChunkedResponse(contentType, [content, contentLength, chunkSize](uint8_t *buffer, size_t maxLen, size_t index) -> size_t {
         // Check if we have reached the end of the file
         if (index >= contentLength) {
-          // MY_LOGD(TAG, "finished");
           return 0; // End transmission
         }
         // Determine the actual chunk size to send, ensuring we don't exceed maxLen or remaining content length
         size_t actualChunkSize = min(chunkSize, min(maxLen, contentLength - index));
         memcpy(buffer, content + index, actualChunkSize);
-        // MY_LOGD(TAG, "sending: %u", actualChunkSize);
         return actualChunkSize; // Return the number of bytes sent
       });
 

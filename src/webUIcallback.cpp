@@ -2,14 +2,10 @@
 #include <basics.h>
 #include <jarolift.h>
 #include <message.h>
-#include <version.h>
 #include <webUI.h>
 #include <webUIupdates.h>
 
 static tm dti;
-static char gitVersion[16];
-static char gitUrl[256];
-static char errorMsg[32];
 static const char *TAG = "WEB"; // LOG TAG
 
 /**
@@ -23,18 +19,26 @@ void webCallback(const char *elementId, const char *value) {
 
   MY_LOGD(TAG, "Received - Element ID: %s = %s", elementId, value);
 
-  // check for new version on github
+  // ------------------------------------------------------------------
+  // GitHub / Version
+  // ------------------------------------------------------------------
+
+  // Github Check Version
   if (strcmp(elementId, "check_git_version") == 0) {
-    int result = checkGithubUpdates("dewenni", "ESP32-Jarolift-Controller", gitVersion, sizeof(gitVersion), gitUrl, sizeof(gitUrl));
-    if (result == HTTP_CODE_OK) {
-      updateWebBusy("p00_dialog_git_version", false);
-      updateWebText("p00_dialog_git_version", gitVersion, false);
-      updateWebHref("p00_dialog_git_version", gitUrl);
-    } else {
-      sniprintf(errorMsg, sizeof(errorMsg), "error (%i)", result);
-      updateWebBusy("p00_dialog_git_version", false);
-      updateWebText("p00_dialog_git_version", errorMsg, false);
-    }
+    requestGitHubVersion();
+  }
+  // Github Update
+  if (strcmp(elementId, "p00_update_btn") == 0) {
+    requestGitHubUpdate();
+  }
+  // OTA-Confirm
+  if (strcmp(elementId, "p00_ota_confirm_btn") == 0) {
+    updateWebDialog("ota_update_done_dialog", "close");
+    EspSysUtil::RestartReason::saveLocal("ota update");
+    yield();
+    delay(1000);
+    yield();
+    ESP.restart();
   }
 
   // ------------------------------------------------------------------
@@ -42,6 +46,9 @@ void webCallback(const char *elementId, const char *value) {
   // ------------------------------------------------------------------
 
   // WiFi
+  if (strcmp(elementId, "cfg_wifi_enable") == 0) {
+    config.wifi.enable = EspStrUtil::stringToBool(value);
+  }
   if (strcmp(elementId, "cfg_wifi_hostname") == 0) {
     snprintf(config.wifi.hostname, sizeof(config.wifi.hostname), value);
   }
@@ -52,7 +59,7 @@ void webCallback(const char *elementId, const char *value) {
     snprintf(config.wifi.password, sizeof(config.wifi.password), value);
   }
   if (strcmp(elementId, "cfg_wifi_static_ip") == 0) {
-    config.wifi.static_ip = stringToBool(value);
+    config.wifi.static_ip = EspStrUtil::stringToBool(value);
   }
   if (strcmp(elementId, "cfg_wifi_ipaddress") == 0) {
     snprintf(config.wifi.ipaddress, sizeof(config.wifi.ipaddress), value);
@@ -69,7 +76,7 @@ void webCallback(const char *elementId, const char *value) {
 
   // Ethernet
   if (strcmp(elementId, "cfg_eth_enable") == 0) {
-    config.eth.enable = stringToBool(value);
+    config.eth.enable = EspStrUtil::stringToBool(value);
   }
   if (strcmp(elementId, "cfg_eth_hostname") == 0) {
     snprintf(config.eth.hostname, sizeof(config.eth.hostname), value);
@@ -93,7 +100,7 @@ void webCallback(const char *elementId, const char *value) {
     config.eth.gpio_rst = strtoul(value, NULL, 10);
   }
   if (strcmp(elementId, "cfg_eth_static_ip") == 0) {
-    config.eth.static_ip = stringToBool(value);
+    config.eth.static_ip = EspStrUtil::stringToBool(value);
   }
   if (strcmp(elementId, "cfg_eth_ipaddress") == 0) {
     snprintf(config.eth.ipaddress, sizeof(config.eth.ipaddress), value);
@@ -110,7 +117,7 @@ void webCallback(const char *elementId, const char *value) {
 
   // Authentication
   if (strcmp(elementId, "cfg_auth_enable") == 0) {
-    config.auth.enable = stringToBool(value);
+    config.auth.enable = EspStrUtil::stringToBool(value);
   }
   if (strcmp(elementId, "cfg_auth_user") == 0) {
     snprintf(config.auth.user, sizeof(config.auth.user), "%s", value);
@@ -121,7 +128,7 @@ void webCallback(const char *elementId, const char *value) {
 
   // NTP-Server
   if (strcmp(elementId, "cfg_ntp_enable") == 0) {
-    config.ntp.enable = stringToBool(value);
+    config.ntp.enable = EspStrUtil::stringToBool(value);
   }
   if (strcmp(elementId, "cfg_ntp_server") == 0) {
     snprintf(config.ntp.server, sizeof(config.ntp.server), "%s", value);
@@ -182,7 +189,7 @@ void webCallback(const char *elementId, const char *value) {
 
   // MQTT
   if (strcmp(elementId, "cfg_mqtt_enable") == 0) {
-    config.mqtt.enable = stringToBool(value);
+    config.mqtt.enable = EspStrUtil::stringToBool(value);
   }
   if (strcmp(elementId, "cfg_mqtt_server") == 0) {
     snprintf(config.mqtt.server, sizeof(config.mqtt.server), "%s", value);
@@ -200,7 +207,7 @@ void webCallback(const char *elementId, const char *value) {
     snprintf(config.mqtt.password, sizeof(config.mqtt.password), "%s", value);
   }
   if (strcmp(elementId, "cfg_mqtt_ha_enable") == 0) {
-    config.mqtt.ha_enable = stringToBool(value);
+    config.mqtt.ha_enable = EspStrUtil::stringToBool(value);
   }
   if (strcmp(elementId, "cfg_mqtt_ha_topic") == 0) {
     snprintf(config.mqtt.ha_topic, sizeof(config.mqtt.ha_topic), "%s", value);
@@ -230,7 +237,6 @@ void webCallback(const char *elementId, const char *value) {
   }
   if (strcmp(elementId, "cfg_gpio_led_setup") == 0) {
     config.gpio.led_setup = strtoul(value, NULL, 10);
-    configGPIO();
   }
 
   // Jarolift settings
@@ -247,7 +253,7 @@ void webCallback(const char *elementId, const char *value) {
     jaroCmdReInit();
   }
   if (strcmp(elementId, "cfg_jaro_learn_mode") == 0) {
-    config.jaro.learn_mode = stringToBool(value);
+    config.jaro.learn_mode = EspStrUtil::stringToBool(value);
     jaroCmdReInit();
   }
   if (strcmp(elementId, "p12_jaro_devcnt") == 0) {
@@ -276,34 +282,80 @@ void webCallback(const char *elementId, const char *value) {
     snprintf(cmdShadeId, sizeof(cmdShadeId), "p01_shade_%d", i);
 
     if (strcmp(elementId, enableId) == 0) {
-      config.jaro.ch_enable[i] = stringToBool(value);
+      config.jaro.ch_enable[i] = EspStrUtil::stringToBool(value);
     }
     if (strcmp(elementId, nameId) == 0) {
       snprintf(config.jaro.ch_name[i], sizeof(config.jaro.ch_name[i]), "%s", value);
     }
     if (strcmp(elementId, setShadeId) == 0) {
       jaroCmd(CMD_SET_SHADE, i);
-      MY_LOGI(TAG, "cmd set shade - channel %i", i + 1);
+      MY_LOGI(TAG, "cmd SET-SHADE - channel %i", i + 1);
     }
     if (strcmp(elementId, learnId) == 0) {
       jaroCmd(CMD_LEARN, i);
-      MY_LOGI(TAG, "cmd learn - channel %i", i + 1);
+      MY_LOGI(TAG, "cmd LEARN - channel %i", i + 1);
     }
     if (strcmp(elementId, cmdUpId) == 0) {
-      MY_LOGI(TAG, "cmd up - channel %i", i + 1);
+      MY_LOGI(TAG, "cmd UP - channel %i", i + 1);
       jaroCmd(CMD_UP, i);
     }
     if (strcmp(elementId, cmdStopId) == 0) {
-      MY_LOGI(TAG, "cmd stop - channel %i", i + 1);
+      MY_LOGI(TAG, "cmd STOP - channel %i", i + 1);
       jaroCmd(CMD_STOP, i);
     }
     if (strcmp(elementId, cmdDownId) == 0) {
-      MY_LOGI(TAG, "cmd down - channel %i", i + 1);
+      MY_LOGI(TAG, "cmd DOWN - channel %i", i + 1);
       jaroCmd(CMD_DOWN, i);
     }
     if (strcmp(elementId, cmdShadeId) == 0) {
-      MY_LOGI(TAG, "cmd shade - channel %i", i + 1);
+      MY_LOGI(TAG, "cmd SHADE - channel %i", i + 1);
       jaroCmd(CMD_SHADE, i);
+    }
+  }
+
+  // group 1-6
+  for (int i = 0; i < 6; i++) {
+    char enableId[32];
+    char nameId[32];
+    char maskId[32];
+    char cmdUpId[32];
+    char cmdDownId[32];
+    char cmdStopId[32];
+    char cmdShadeId[32];
+
+    snprintf(enableId, sizeof(enableId), "cfg_jaro_grp_enable_%d", i);
+    snprintf(nameId, sizeof(nameId), "cfg_jaro_grp_name_%d", i);
+    snprintf(maskId, sizeof(maskId), "cfg_jaro_grp_mask_%d", i);
+
+    snprintf(cmdUpId, sizeof(cmdUpId), "p02_up_%d", i);
+    snprintf(cmdDownId, sizeof(cmdDownId), "p02_down_%d", i);
+    snprintf(cmdStopId, sizeof(cmdStopId), "p02_stop_%d", i);
+    snprintf(cmdShadeId, sizeof(cmdShadeId), "p02_shade_%d", i);
+
+    if (strcmp(elementId, enableId) == 0) {
+      config.jaro.grp_enable[i] = EspStrUtil::stringToBool(value);
+    }
+    if (strcmp(elementId, nameId) == 0) {
+      snprintf(config.jaro.grp_name[i], sizeof(config.jaro.grp_name[i]), "%s", value);
+    }
+    if (strcmp(elementId, maskId) == 0) {
+      config.jaro.grp_mask[i] = strtoul(value, NULL, 2);
+    }
+    if (strcmp(elementId, cmdUpId) == 0) {
+      MY_LOGI(TAG, "cmd UP - group %i", i + 1);
+      jaroCmd(CMD_GRP_UP, config.jaro.grp_mask[i]);
+    }
+    if (strcmp(elementId, cmdStopId) == 0) {
+      MY_LOGI(TAG, "cmd STOP - group %i", i + 1);
+      jaroCmd(CMD_GRP_STOP, config.jaro.grp_mask[i]);
+    }
+    if (strcmp(elementId, cmdDownId) == 0) {
+      MY_LOGI(TAG, "cmd DOWN - group %i", i + 1);
+      jaroCmd(CMD_GRP_DOWN, config.jaro.grp_mask[i]);
+    }
+    if (strcmp(elementId, cmdShadeId) == 0) {
+      MY_LOGI(TAG, "cmd SHADE - group %i", i + 1);
+      jaroCmd(CMD_GRP_SHADE, config.jaro.grp_mask[i]);
     }
   }
 
@@ -315,7 +367,7 @@ void webCallback(const char *elementId, const char *value) {
 
   // Buttons
   if (strcmp(elementId, "p12_btn_restart") == 0) {
-    saveRestartReason("webUI command");
+    EspSysUtil::RestartReason::saveLocal("webUI command");
     yield();
     delay(1000);
     yield();
@@ -324,7 +376,7 @@ void webCallback(const char *elementId, const char *value) {
 
   // Logger
   if (strcmp(elementId, "cfg_logger_enable") == 0) {
-    config.log.enable = stringToBool(value);
+    config.log.enable = EspStrUtil::stringToBool(value);
   }
   if (strcmp(elementId, "cfg_logger_level") == 0) {
     config.log.level = strtoul(value, NULL, 10);
@@ -343,15 +395,5 @@ void webCallback(const char *elementId, const char *value) {
   }
   if (strcmp(elementId, "p10_log_refresh_btn") == 0) {
     webReadLogBuffer();
-  }
-
-  // OTA-Confirm
-  if (strcmp(elementId, "p11_ota_confirm_btn") == 0) {
-    updateWebDialog("ota_update_done_dialog", "close");
-    saveRestartReason("ota update");
-    yield();
-    delay(1000);
-    yield();
-    ESP.restart();
   }
 }

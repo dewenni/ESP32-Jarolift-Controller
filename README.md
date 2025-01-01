@@ -6,6 +6,10 @@
 
 -----
 
+**[🇩🇪 Deutsche Version der Beschreibung](README_DE.md)**
+
+-----
+
 <div align="center">
 
 [![Current Release](https://img.shields.io/github/release/dewenni/ESP32-Jarolift-Controller.svg)](https://github.com/dewenni/ESP32-Jarolift-Controller/releases/latest)
@@ -38,17 +42,20 @@ Controlling Jarolift(TM) TDEF 433MHz radio shutters via **ESP32** and **CC1101**
 
 ## Features
 
-- Web-based User Interface (WebUI):  
+- **Web-based User Interface (WebUI):**  
 A modern, mobile-friendly interface for easy configuration and control.
 
-- MQTT Support:  
+- **MQTT Support:**  
 Communication and control of devices are handled via MQTT, a lightweight and reliable messaging protocol.
 
-- HomeAssistant Integration:  
+- **HomeAssistant Integration:**  
 Automatic device discovery in HomeAssistant through MQTT Auto Discovery for seamless integration.
 
-- Support for up to 16 Roller Shutters:  
+- **Support for up to 16 Roller Shutters:**  
 Control up to 16 roller shutters with ease, all managed through the WebUI and MQTT.
+
+- **Support for up to 6 Roller Shutter Groups:**  
+define shutter groups to control several shutters at once
 
 Experimental version.
 Use at your own risk. For private/educational use only. (Keeloq algorithm licensed only to TI Microcontrollers)
@@ -83,7 +90,6 @@ The WebUI is responsive and also offers a mobile layout.
 
 # Table of Contents
 
-- [Overview](#overview)
 - [Hardware](#hardware)
   - [ESP32 + CC1101](#esp32-+-cc1101)
   - [Optional: Ethernet Module W5500](#optional-ethernet-module-w5500)
@@ -185,12 +191,24 @@ for Mac it is hard to find a tool with a graphical UI, but you can simple use th
 
 ## OTA-Updates
 
-since software version 3.0, you can also update the software with the new Elegant OTA web upload.  
+### local Web OTA-Update
+
+The first option is, to download the ota Update File from the latest release at GitHub.
+After you have downloaded this to your computer, you can perform a update with the embedded WebUI OTA-Update.
 You can find the update function in the "Tools" Tab of the WebUI.
 
 here you can choose "Firmware" and select the `esp32_jarolift_controller_ota_update_vx.x.x.bin` file from the release section
 
 ![ota-1](Doc/webUI_ota.gif)
+
+### GitHub OTA-Update
+
+since Version 1.4.0 it is also possible to update the controller directly in the WebUI without downloading the .bin file before.
+If you click on the Version info on the bottom left, a dialog will open. If there is a new version available, you can directly initiate the update here. It will then automatically download and install the latest release from github!
+
+![ota-2](Doc/github_ota.gif)
+
+### PlatformIO OTA-Update
 
 But it is also possible to download the software wireless with platformio.
 You only have to change the `upload_port` settings in `platformio.ini`
@@ -237,6 +255,12 @@ Here you can configure the GPIO to connect the CC1101 to the ESP32
 - **Jarolift**  
 here you have to configure some Jarolift specific protocol settings
 
+- **Shutter**  
+here you can configure each shutter with individual name
+
+- **Group**  
+here you can define optional shutter-groups
+
 - **Language**  
 There are two languages available. Choose what you prefer.
 The language take effect on the webUI and also on the mqtt messages!
@@ -260,14 +284,14 @@ The configuration is stored in the ```config.json``` file. To backup and restore
 
 It is possible to migrate from a latest version of [madmartin/Jarolift_MQTT](https://github.com/madmartin/Jarolift_MQTT) to this project.
 
-#### Get a working Setup of this Project
+### Get a working Setup of this Project
 
 - get a working version of this project up and running
 - set the right GPIO settings for CC1101
 - set the Master Keys
 - set the Log-Level in the Logger of the WebUI to "Debug"
 
-#### Get the right serial number
+### Get the right serial number
 
 - execute a shutter UP command of "old" Setup `(madmartin/Jarolift_MQTT)` for **channel 0!**.
 - now you should see a debug message of this command in the Logger of the WebUI.  
@@ -275,12 +299,12 @@ It contains a message with `D (APP-JARO): (INF1) serial: 0xaabbcc00,`
 The first 6 digits are the serial number that you have to use for this project (in this example: **aabbcc**). this should be the same as configured in the WebUI of the "old" setup, but now we are sure to have the right one.
 - set this serial in the WebUI of this project
 
-#### Get the right Device Counter
+### Get the right Device Counter
 
 - read the actual device counter of the "old" setup from the System Page of the WebUI.
 - set the same Device Counter value in the settings of this project.
 
-#### define the Shutter
+### define the Shutter
 
 - define the same shutter as in the "old" setup and activate them.
 
@@ -293,23 +317,11 @@ If everything done correct, all shutters should work like before. If not, some s
 
 # MQTT
 
-### additional information's (read only)
-
-status information about WiFi:
-
-```text
-Topic: ESP32-Jarolift-Controller/wifi = {  
-    "status":"online",  
-    "rssi":"-50",  
-    "signal":"90",  
-    "ip":"192.168.1.1",  
-    "date-time":"01.01.2022 - 10:20:30"  
-}
-```
-
 ## Commands
 
-To control the shutters yu can use the following mqtt commands.
+### Shutter
+
+To control the shutters you can use the following mqtt commands.
 {UP, OPEN, 0} means, that you can use one of the listed payload commands.
 
 ```text
@@ -335,8 +347,104 @@ payload:    {SHADE, 3}
 
 ```
 
+### predefined Group
+
+To control shutters a group you can use the following mqtt commands.
+{UP, OPEN, 0} means, that you can use one of the listed payload commands.
+
+```text
+
+command:    group up
+topic:      ../cmd/group/1 ... cmd/group/6
+payload:    {UP, OPEN, 0}
+
+command:    group down
+topic:      ../cmd/group/1 ... cmd/group/6
+payload:    {DOWN, CLOSE, 1}
+
+command:    group stop
+topic:      ../cmd/group/1 ... cmd/group/6
+payload:    {STOP, 2}
+
+command:    group shade
+topic:      ../cmd/group/1 ... cmd/group/6
+payload:    {SHADE, 3}
+
+```
+
+### Group with bitmask
+
+You can also use a generic group command and provide the bitmask to select the shutters directly.  
+The bitmask is a 16-bit number, with the least significant bit (on the right) representing channel 1.  
+A set bit means that the channel belongs to this group.  
+
+**Example**: `0000000000010101` means that channels 1, 3, and 5 belong to this group.
+
+As payload, you can use three different formats to represent the same bitmask:
+
+- **Binary**: `0b0000000000010101`
+- **Hex**: `0x15`
+- **Decimal**: `21`
+
+```text
+
+command:    group up
+topic:      ../cmd/group/up
+payload:    {0b0000000000010101, 0x15, 21}
+
+command:    group down
+topic:      ../cmd/group/down
+payload:    {0b0000000000010101, 0x15, 21}
+
+command:    group stop
+topic:      ../cmd/group/stop
+payload:    {0b0000000000010101, 0x15, 21}
+
+command:    group shade
+topic:      ../cmd/group/shade
+payload:    {0b0000000000010101, 0x15, 21}
+
+```
+
+## Status
+
+The controller will also send a status **based on the commands**.  
+
+> [!IMPORTANT]
+> But it is important to know, that this status is only a "copy of the received command".  
+> It does not correspond to the real status of the roller shutter, because unfortunately the roller shutter itself does not have a status that could be analyzed. So if the roller shutter is operated via the original remote control, for example, or via local operation, or is stopped during movement, then this status is no longer correct!
+
+```text
+
+Status:     Shutter OPEN
+topic:      ../status/shutter/1 ... status/shutter/16
+payload:    {0}
+
+Status:     Shutter CLOSED
+topic:      ../status/shutter/1 ... status/shutter/16
+payload:    {100}
+
+Status:     Shutter SHADE
+topic:      ../status/shutter/1 ... status/shutter/16
+payload:    {90}
+```
+
 > [!NOTE]
 > < ../ > is the placeholder for the MQTT topic which is specified in the settings.
+
+## additional information's (read only)
+
+status information about WiFi:
+
+```text
+Topic: ESP32-Jarolift-Controller/wifi = {  
+    "status":"online",  
+    "rssi":"-50",  
+    "signal":"90",  
+    "ip":"192.168.1.1",  
+    "date-time":"01.01.2022 - 10:20:30"  
+}
+```
 
 ## Home Assistant
 

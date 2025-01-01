@@ -361,7 +361,6 @@ void JaroliftController::cmdUp(uint8_t channel) {
   if (!initOK) {
     return;
   }
-
   new_serial = cmd_get_serial(channel);
   EEPROM.get(cntadr, devcnt);
   button = 0x8;
@@ -379,6 +378,28 @@ void JaroliftController::cmdUp(uint8_t channel) {
   devcnt_handler(true);
 } // void jaroCmdUp
 
+void JaroliftController::cmdGroupUp(uint16_t group_mask) {
+
+  if (!initOK) {
+    return;
+  }
+  EEPROM.get(cntadr, devcnt);
+  new_serial = cmd_get_serial(0);
+  button = 0x8;
+  disc_l = group_mask & 0x00FF;
+  disc_h = (group_mask >> 8) & 0x00FF;
+  disc = (disc_l << 8) | (new_serial & 0xFF);
+  rx_disc_low[0] = disc_l;
+  rx_disc_high[0] = disc_h;
+  keygen();
+  keeloq();
+  entertx();
+  radio_tx(2);
+  enterrx();
+  rx_function = 0x8;
+  devcnt_handler(true);
+} // void cmdGroupUp
+
 // ####################################################################
 //  function to move the shutter down
 // ####################################################################
@@ -387,7 +408,6 @@ void JaroliftController::cmdDown(uint8_t channel) {
   if (!initOK) {
     return;
   }
-
   new_serial = cmd_get_serial(channel);
   EEPROM.get(cntadr, devcnt);
   button = 0x2;
@@ -405,6 +425,28 @@ void JaroliftController::cmdDown(uint8_t channel) {
   devcnt_handler(true);
 } // void jaroCmdDown
 
+void JaroliftController::cmdGroupDown(uint16_t group_mask) {
+
+  if (!initOK) {
+    return;
+  }
+  EEPROM.get(cntadr, devcnt);
+  new_serial = cmd_get_serial(0);
+  button = 0x2;
+  disc_l = group_mask & 0x00FF;
+  disc_h = (group_mask >> 8) & 0x00FF;
+  disc = (disc_l << 8) | (new_serial & 0xFF);
+  rx_disc_low[0] = disc_l;
+  rx_disc_high[0] = disc_h;
+  keygen();
+  keeloq();
+  entertx();
+  radio_tx(2);
+  enterrx();
+  rx_function = 0x2;
+  devcnt_handler(true);
+} // void cmdGroupDown
+
 // ####################################################################
 //  function to stop the shutter
 // ####################################################################
@@ -413,7 +455,6 @@ void JaroliftController::cmdStop(uint8_t channel) {
   if (!initOK) {
     return;
   }
-
   new_serial = cmd_get_serial(channel);
   EEPROM.get(cntadr, devcnt);
   button = 0x4;
@@ -428,9 +469,30 @@ void JaroliftController::cmdStop(uint8_t channel) {
   radio_tx(2);
   enterrx();
   rx_function = 0x4;
-  sendMsg(ESP_LOG_INFO, "command STOP for channel %i sent", channel + 1);
   devcnt_handler(true);
 } // void jaroCmdStop
+
+void JaroliftController::cmdGroupStop(uint16_t group_mask) {
+
+  if (!initOK) {
+    return;
+  }
+  EEPROM.get(cntadr, devcnt);
+  new_serial = cmd_get_serial(0);
+  button = 0x4;
+  disc_l = group_mask & 0x00FF;
+  disc_h = (group_mask >> 8) & 0x00FF;
+  disc = (disc_l << 8) | (new_serial & 0xFF);
+  rx_disc_low[0] = disc_l;
+  rx_disc_high[0] = disc_h;
+  keygen();
+  keeloq();
+  entertx();
+  radio_tx(2);
+  enterrx();
+  rx_function = 0x4;
+  devcnt_handler(true);
+} // void cmdGroupStop
 
 // ####################################################################
 //  function to move shutter to shade position
@@ -440,7 +502,6 @@ void JaroliftController::cmdShade(uint8_t channel) {
   if (!initOK) {
     return;
   }
-
   new_serial = cmd_get_serial(channel);
   EEPROM.get(cntadr, devcnt);
   button = 0x4;
@@ -457,6 +518,28 @@ void JaroliftController::cmdShade(uint8_t channel) {
   rx_function = 0x3;
   devcnt_handler(true);
 } // void jaroCmdShade
+
+void JaroliftController::cmdGroupShade(uint16_t group_mask) {
+
+  if (!initOK) {
+    return;
+  }
+  EEPROM.get(cntadr, devcnt);
+  new_serial = cmd_get_serial(0);
+  button = 0x4;
+  disc_l = group_mask & 0x00FF;
+  disc_h = (group_mask >> 8) & 0x00FF;
+  disc = (disc_l << 8) | (new_serial & 0xFF);
+  rx_disc_low[0] = disc_l;
+  rx_disc_high[0] = disc_h;
+  keygen();
+  keeloq();
+  entertx();
+  radio_tx(20);
+  enterrx();
+  rx_function = 0x3;
+  devcnt_handler(true);
+} // void cmdGroupShade
 
 // ####################################################################
 //  function to set the learn/set the shade position
