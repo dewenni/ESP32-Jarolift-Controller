@@ -11,7 +11,7 @@
 
 @media (min-width: 100px) {
   :root {
-    --pico-font-size: 80%;
+    --pico-font-size: 90%;
   }
 }
 @media (min-width: 576px) {
@@ -185,7 +185,7 @@ hr {
 .grid .dash {
   flex-basis: 99%;
   padding: 10px;
-  min-width: 450px;
+  min-width: 300px;
 }
 
 /* Breitere Bildschirme: 2 Elemente pro Zeile */
