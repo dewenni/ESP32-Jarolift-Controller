@@ -46,6 +46,9 @@ void webCallback(const char *elementId, const char *value) {
   // ------------------------------------------------------------------
 
   // WiFi
+  if (strcmp(elementId, "cfg_wifi_enable") == 0) {
+    config.wifi.enable = EspStrUtil::stringToBool(value);
+  }
   if (strcmp(elementId, "cfg_wifi_hostname") == 0) {
     snprintf(config.wifi.hostname, sizeof(config.wifi.hostname), value);
   }

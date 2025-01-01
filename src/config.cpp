@@ -229,6 +229,7 @@ void configInitValue() {
   config.log.level = 4;
 
   // WiFi
+  config.wifi.enable = true;
   snprintf(config.wifi.hostname, sizeof(config.wifi.hostname), "ESP32-Jarolift");
 
   // MQTT
@@ -267,6 +268,7 @@ void configSaveToFile() {
 
   doc["lang"] = (config.lang);
 
+  doc["wifi"]["enable"] = config.wifi.enable;
   doc["wifi"]["ssid"] = config.wifi.ssid;
   doc["wifi"]["password"] = config.wifi.password;
   doc["wifi"]["hostname"] = config.wifi.hostname;
@@ -398,7 +400,7 @@ void configLoadFromFile() {
   } else {
 
     config.lang = doc["lang"];
-
+    config.wifi.enable = doc["wifi"]["enable"];
     EspStrUtil::readJSONstring(config.wifi.ssid, sizeof(config.wifi.ssid), doc["wifi"]["ssid"]);
     EspStrUtil::readJSONstring(config.wifi.password, sizeof(config.wifi.password), doc["wifi"]["password"]);
     EspStrUtil::readJSONstring(config.wifi.hostname, sizeof(config.wifi.hostname), doc["wifi"]["hostname"]);

@@ -22,6 +22,7 @@ struct s_cfg_jaro {
 };
 
 struct s_cfg_wifi {
+  bool enable = false;
   char ssid[128];
   char password[128];
   char hostname[128];
