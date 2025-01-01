@@ -194,8 +194,13 @@ void messageCyclic() {
 
   // send cyclic infos
   if (mainTimer.cycleTrigger(10000) && !setupMode && mqttIsConnected()) {
-    sendWiFiInfo();
+
     sendSysInfo();
+
+    if (config.wifi.enable) {
+      sendWiFiInfo();
+    }
+
     if (config.eth.enable) {
       sendETHInfo();
     }

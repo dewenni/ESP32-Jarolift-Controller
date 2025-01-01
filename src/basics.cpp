@@ -113,32 +113,23 @@ void setupWiFi() {
 
   if (setupMode) {
     // start Accesspoint for initial setup
-    IPAddress ip(192, 168, 4, 1);
-    IPAddress gateway(192, 168, 4, 1);
-    IPAddress subnet(255, 255, 255, 0);
-    WiFi.softAPConfig(ip, gateway, subnet);
+    WiFi.softAPConfig(IPAddress(192, 168, 4, 1), IPAddress(192, 168, 4, 1), IPAddress(255, 255, 255, 0));
     WiFi.softAP("ESP32-Jarolift");
     MY_LOGI(TAG, "\n! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! !\n");
     MY_LOGI(TAG, "> WiFi Mode: AccessPoint <");
     MY_LOGI(TAG, "1. connect your device to SSID: ESP32-Jarolift");
     MY_LOGI(TAG, "2. open Browser and go to Address: http://192.168.4.1");
     MY_LOGI(TAG, "\n! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! !\n");
-  } else {
+
+  } else if (config.wifi.enable) {
+
     // setup callback function
     WiFi.onEvent(onWiFiStationConnected, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_CONNECTED);
     WiFi.onEvent(onWiFiGotIP, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_GOT_IP);
 
+    // manual IP-Settings
     if (config.wifi.static_ip) {
-      // manual IP-Settings
-      IPAddress manIp;
-      manIp.fromString(config.wifi.ipaddress);
-      IPAddress manSubnet;
-      manSubnet.fromString(config.wifi.subnet);
-      IPAddress manGateway;
-      manGateway.fromString(config.wifi.gateway);
-      IPAddress manDns;
-      manDns.fromString(config.wifi.dns);
-      WiFi.config(manIp, manGateway, manSubnet, manDns);
+      WiFi.config(IPAddress(config.wifi.ipaddress), IPAddress(config.wifi.gateway), IPAddress(config.wifi.subnet), IPAddress(config.wifi.dns));
     }
 
     // connect to configured wifi AP
@@ -228,7 +219,6 @@ void basicSetup() {
 
   // NTP
   ntpSetup();
-
 }
 
 /**

@@ -37,6 +37,17 @@
             <!-- WLAN -->
             <details>
               <summary data-i18n="wifi"></summary>
+              <div class="section-header">
+                <label for="wifi_enable" data-i18n="activate"></label>
+                <div class="switch-container">
+                  <input
+                    name="wifi_enable"
+                    type="checkbox"
+                    role="switch"
+                    id="cfg_wifi_enable" />
+                </div>
+              </div>
+              <br />
               <label for="wifi_hostname" data-i18n="hostname"></label>
               <input type="text" id="cfg_wifi_hostname" name="wifi_hostname" />
               <label for="wifi_ssid" data-i18n="ssid"></label>

@@ -317,20 +317,6 @@ If everything done correct, all shutters should work like before. If not, some s
 
 # MQTT
 
-## additional information's (read only)
-
-status information about WiFi:
-
-```text
-Topic: ESP32-Jarolift-Controller/wifi = {  
-    "status":"online",  
-    "rssi":"-50",  
-    "signal":"90",  
-    "ip":"192.168.1.1",  
-    "date-time":"01.01.2022 - 10:20:30"  
-}
-```
-
 ## Commands
 
 ### Shutter
@@ -420,9 +406,45 @@ payload:    {0b0000000000010101, 0x15, 21}
 
 ```
 
+## Status
+
+The controller will also send a status **based on the commands**.  
+
+> [!IMPORTANT]
+> But it is important to know, that this status is only a "copy of the received command".  
+> It does not correspond to the real status of the roller shutter, because unfortunately the roller shutter itself does not have a status that could be analyzed. So if the roller shutter is operated via the original remote control, for example, or via local operation, or is stopped during movement, then this status is no longer correct!
+
+```text
+
+Status:     Shutter OPEN
+topic:      ../status/shutter/1 ... status/shutter/16
+payload:    {0}
+
+Status:     Shutter CLOSED
+topic:      ../status/shutter/1 ... status/shutter/16
+payload:    {100}
+
+Status:     Shutter SHADE
+topic:      ../status/shutter/1 ... status/shutter/16
+payload:    {90}
+```
 
 > [!NOTE]
 > < ../ > is the placeholder for the MQTT topic which is specified in the settings.
+
+## additional information's (read only)
+
+status information about WiFi:
+
+```text
+Topic: ESP32-Jarolift-Controller/wifi = {  
+    "status":"online",  
+    "rssi":"-50",  
+    "signal":"90",  
+    "ip":"192.168.1.1",  
+    "date-time":"01.01.2022 - 10:20:30"  
+}
+```
 
 ## Home Assistant
 

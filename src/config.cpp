@@ -18,6 +18,7 @@ static const char *TAG = "CFG"; // LOG TAG
 void configGPIO();
 void configInitValue();
 void checkGPIO();
+void configFinalCheck();
 
 /**
  * *******************************************************************
@@ -39,6 +40,8 @@ void configSetup() {
   checkGPIO();
   // gpio settings
   configGPIO();
+  // check final settings
+  configFinalCheck();
 }
 
 /**
@@ -229,6 +232,7 @@ void configInitValue() {
   config.log.level = 4;
 
   // WiFi
+  config.wifi.enable = true;
   snprintf(config.wifi.hostname, sizeof(config.wifi.hostname), "ESP32-Jarolift");
 
   // MQTT
@@ -267,6 +271,7 @@ void configSaveToFile() {
 
   doc["lang"] = (config.lang);
 
+  doc["wifi"]["enable"] = config.wifi.enable;
   doc["wifi"]["ssid"] = config.wifi.ssid;
   doc["wifi"]["password"] = config.wifi.password;
   doc["wifi"]["hostname"] = config.wifi.hostname;
@@ -398,7 +403,7 @@ void configLoadFromFile() {
   } else {
 
     config.lang = doc["lang"];
-
+    config.wifi.enable = doc["wifi"]["enable"];
     EspStrUtil::readJSONstring(config.wifi.ssid, sizeof(config.wifi.ssid), doc["wifi"]["ssid"]);
     EspStrUtil::readJSONstring(config.wifi.password, sizeof(config.wifi.password), doc["wifi"]["password"]);
     EspStrUtil::readJSONstring(config.wifi.hostname, sizeof(config.wifi.hostname), doc["wifi"]["hostname"]);
@@ -480,18 +485,30 @@ void configLoadFromFile() {
     }
   }
 
+  
+  file.close();     // Close the file (Curiously, File's destructor doesn't close the file)
+  configHashInit(); // init hash value
+
+}
+
+void configFinalCheck(){
+
+  // check network settings
   if (strlen(config.wifi.ssid) == 0) {
     // no valid wifi setting => start AP-Mode
     MY_LOGW(TAG, "no valid wifi SSID set => enter SetupMode and start AP-Mode");
     setupMode = true;
+  } else if (config.wifi.enable == false && config.eth.enable == false) {
+    // no network enabled => start AP-Mode
+    MY_LOGW(TAG, "WiFi and ETH disabled => enter SetupMode and start AP-Mode");
+    setupMode = true;
   }
-
-  file.close();     // Close the file (Curiously, File's destructor doesn't close the file)
-  configHashInit(); // init hash value
 
   // check log level
   if (config.jaro.learn_mode == 0) {
     config.jaro.learn_mode = 4; // ESP_LOG_DEBUG
   }
   setLogLevel(config.log.level);
+
+
 }
