@@ -4,6 +4,7 @@
 #include <jarolift.h>
 #include <mqtt.h>
 #include <queue>
+#include <timer.h>
 
 #define MAX_CMD 20
 #define SEND_CYCLE 500
@@ -12,6 +13,7 @@
 #define POS_SHADE 90
 
 static muTimer cmdTimer = muTimer();
+static muTimer timerTimer = muTimer();
 static const char *TAG = "JARO"; // LOG TAG
 
 std::queue<JaroCommand> jaroCmdQueue;
@@ -215,6 +217,10 @@ void jaroliftCyclic() {
 
   if (cmdTimer.cycleTrigger(SEND_CYCLE)) {
     processJaroCommands();
+  }
+
+  if (timerTimer.cycleTrigger(30000)) {
+    timerCyclic();
   }
 
   jarolift.loop();

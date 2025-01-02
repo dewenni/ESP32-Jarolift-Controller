@@ -10,10 +10,6 @@ const translations = {
     de: "Timer",
     en: "Timer",
   },
-  control: {
-    de: "Bedienung",
-    en: "Control",
-  },
   settings: {
     de: "Einstellungen",
     en: "Settings",
@@ -406,14 +402,6 @@ const translations = {
     de: "Sonnenuntergang",
     en: "sundown",
   },
-  time_offset: {
-    de: "Zeitverschiebung",
-    en: "time offset",
-  },
-  shutter: {
-    de: "Rolläden",
-    en: "Shutters",
-  },
   cmd_up: {
     de: "Hochfahren",
     en: "up",
@@ -421,6 +409,10 @@ const translations = {
   cmd_down: {
     de: "Runterfahren",
     en: "down",
+  },
+  cmd_shade: {
+    de: "Schatten",
+    en: "shade",
   },
   timer_type: {
     de: "Zeitgeber",
@@ -474,8 +466,24 @@ const translations = {
     de: "So",
     en: "Su",
   },
-  delete: {
-    de: "löschen",
-    en: "delete",
+  geo_location: {
+    de: "Geografische Lage",
+    en: "Geographical location",
+  },
+  geo_info: {
+    de: "Wird benötigt für die Timer Funktion mit Sonnenaufgang und Sonnenuntergang",
+    en: "Required for the timer function with sunrise and sunset",
+  },
+  latitude: {
+    de: "Breitengrad",
+    en: "Latitude",
+  },
+  longitude: {
+    de: "Längengrad",
+    en: "Longitude",
+  },
+  time_info: {
+    de: "Zeitinformationen",
+    en: "Time information",
   },
 };

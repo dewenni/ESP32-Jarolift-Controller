@@ -1,9 +1,11 @@
+#include <Dusk2Dawn.h>
 #include <EspStrUtil.h>
 #include <basics.h>
 #include <github.h>
 #include <jarolift.h>
 #include <language.h>
 #include <message.h>
+#include <timer.h>
 #include <webUI.h>
 #include <webUIupdates.h>
 
@@ -173,6 +175,10 @@ void updateSystemInfoElements() {
     addJson(jsonDoc, "p12_jaro_devcnt", devCntNew);
   }
 
+  // Date, Time
+  addJson(jsonDoc, "p09_act_date", EspStrUtil::getDateString());
+  addJson(jsonDoc, "p09_act_time", EspStrUtil::getTimeString());
+
   updateWebJSON(jsonDoc);
 }
 
@@ -197,6 +203,17 @@ void updateSystemInfoElementsStatic() {
   addJson(jsonDoc, "p09_restart_reason", EspSysUtil::RestartReason::get());
 
   addJson(jsonDoc, "p12_jaro_devcnt", jaroGetDevCnt());
+
+  // Sunrise, Sunset
+  uint8_t sunriseHour, sunriseMinute;
+  getSunriseOrSunset(TYPE_SUNRISE, 0, config.geo.latitude, config.geo.longitude, sunriseHour, sunriseMinute);
+  snprintf(tmpMessage, sizeof(tmpMessage), "%02d:%02d", sunriseHour, sunriseMinute);
+  addJson(jsonDoc, "p09_sunrise", tmpMessage);
+
+  uint8_t sundownHour, sundownMinute;
+  getSunriseOrSunset(TYPE_SUNDOWN, 0, config.geo.latitude, config.geo.longitude, sundownHour, sundownMinute);
+  snprintf(tmpMessage, sizeof(tmpMessage), "%02d:%02d", sundownHour, sundownMinute);
+  addJson(jsonDoc, "p09_sundown", tmpMessage);
 
   updateWebJSON(jsonDoc);
 }

@@ -195,6 +195,15 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     });
 
+  // Event-Listener for Checkbox
+  document
+    .querySelectorAll('input[type="checkbox"]')
+    .forEach(function (switchElement) {
+      switchElement.addEventListener("change", function () {
+        sendData(switchElement.id, switchElement.checked);
+      });
+    });
+  
   // Event-Listener for Select Elements
   document.querySelectorAll("select").forEach(function (selectElement) {
     selectElement.addEventListener("change", function () {

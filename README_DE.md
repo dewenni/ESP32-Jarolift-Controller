@@ -102,6 +102,7 @@ Die WebUI ist responsiv und bietet auch ein mobiles Layout.
   - [Migration](#migration)
 - [MQTT](#mqtt)
   - [Kommandos](#kommandos)
+  - [Status](#status)
   - [Home Assistant](#home-assistant)
 - [Optionale Kommunikation](#optionale-kommunikation)
   - [WebUI-Logger](#webui-logger)

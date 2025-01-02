@@ -21,6 +21,27 @@ struct s_cfg_jaro {
   uint16_t grp_mask[6];
 };
 
+struct s_cfg_timer {
+  bool enable;         // Timer enable
+  uint8_t type;        // 0 = fixed time, 2 = sunrise, 3 = sunset
+  char time_value[6];  // fixed Time value (hh:mm)
+  int8_t offset_value; // offset value in minutes for sunrise/sunset
+  uint8_t cmd;         // 0 = up, 1 = down, 2=shade
+  bool monday;
+  bool tuesday;
+  bool wednesday;
+  bool thursday;
+  bool friday;
+  bool saturday;
+  bool sunday;
+  uint16_t grp_mask; // Group mask for included channels
+};
+
+struct s_cfg_geo {
+  float latitude;
+  float longitude;
+};
+
 struct s_cfg_wifi {
   bool enable = false;
   char ssid[128];
@@ -99,6 +120,8 @@ struct s_config {
   s_cfg_auth auth;
   s_cfg_log log;
   s_cfg_jaro jaro;
+  s_cfg_timer timer[6];
+  s_cfg_geo geo;
 };
 
 extern s_config config;

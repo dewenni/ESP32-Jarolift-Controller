@@ -433,6 +433,14 @@ function updateUI(
           } else if (element.type === "radio") {
             // Setze das "checked"-Attribut für Radio-Buttons
             element.checked = element.value === value.toString();
+          } else if (element.tagName === "SELECT") {
+            // Setze den "value"-Attribut für <select>-Elemente
+            element.value = value;
+
+            // Rufe toggleTimeInputs nur auf, wenn data-toggle="timeInputs" gesetzt ist
+            if (element.dataset.toggle === "timeInputs") {
+              toggleTimeInputs(element);
+            }
           } else {
             // Überprüfen, ob das Feld ein HEX- oder Binärwert benötigt
             if (element.dataset.type === "hex" && typeof value === "number") {
@@ -519,5 +527,25 @@ function toggleEdit(button, inputId) {
     input.disabled = true;
     button.innerText = "Edit";
     console.log("button save");
+  }
+}
+
+function toggleTimeInputs(selectElement) {
+  const matches = selectElement.id.match(/\d+/g);
+  const timerId = matches[matches.length - 1];
+  const timeInput = document.getElementById(`timeInput${timerId}`);
+  const offsetInput = document.getElementById(`offsetInput${timerId}`);
+
+  if (!timeInput || !offsetInput) {
+    console.error("Eines der Elemente nicht gefunden!");
+    return;
+  }
+  //  value:0 == fixex Time
+  if (selectElement.value === "0") {
+    timeInput.style.display = "block";
+    offsetInput.style.display = "none";
+  } else {
+    timeInput.style.display = "none";
+    offsetInput.style.display = "block";
   }
 }

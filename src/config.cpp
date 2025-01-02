@@ -289,6 +289,9 @@ void configSaveToFile() {
   doc["ntp"]["server"] = config.ntp.server;
   doc["ntp"]["tz"] = config.ntp.tz;
 
+  doc["geo"]["latitude"] = config.geo.latitude;
+  doc["geo"]["longitude"] = config.geo.longitude;
+
   doc["gpio"]["gdo0"] = config.gpio.gdo0;
   doc["gpio"]["gdo2"] = config.gpio.gdo2;
   doc["gpio"]["sck"] = config.gpio.sck;
@@ -337,6 +340,24 @@ void configSaveToFile() {
   JsonArray grp_mask = doc["jaro"]["grp_mask"].to<JsonArray>();
   for (int i = 0; i < 6; i++) {
     grp_mask.add(config.jaro.grp_mask[i]);
+  }
+
+  JsonArray timers = doc["timer"].to<JsonArray>();
+  for (int i = 0; i < 6; i++) {
+    JsonObject timer = timers.add<JsonObject>();
+    timer["enable"] = config.timer[i].enable;
+    timer["type"] = config.timer[i].type;
+    timer["time_value"] = config.timer[i].time_value;
+    timer["offset_value"] = config.timer[i].offset_value;
+    timer["cmd"] = config.timer[i].cmd;
+    timer["monday"] = config.timer[i].monday;
+    timer["tuesday"] = config.timer[i].tuesday;
+    timer["wednesday"] = config.timer[i].wednesday;
+    timer["thursday"] = config.timer[i].thursday;
+    timer["friday"] = config.timer[i].friday;
+    timer["saturday"] = config.timer[i].saturday;
+    timer["sunday"] = config.timer[i].sunday;
+    timer["grp_mask"] = config.timer[i].grp_mask;
   }
 
   // Delete existing file, otherwise the configuration is appended to the file
@@ -422,6 +443,9 @@ void configLoadFromFile() {
     EspStrUtil::readJSONstring(config.ntp.server, sizeof(config.ntp.server), doc["ntp"]["server"]);
     EspStrUtil::readJSONstring(config.ntp.tz, sizeof(config.ntp.tz), doc["ntp"]["tz"]);
 
+    config.geo.latitude = doc["geo"]["latitude"];
+    config.geo.longitude = doc["geo"]["longitude"];
+
     config.gpio.led_setup = doc["gpio"]["led_setup"];
     config.gpio.gdo0 = doc["gpio"]["gdo0"];
     config.gpio.gdo2 = doc["gpio"]["gdo2"];
@@ -462,6 +486,23 @@ void configLoadFromFile() {
     JsonArray grp_mask = doc["jaro"]["grp_mask"].as<JsonArray>();
     for (int i = 0; i < 6; i++) {
       config.jaro.grp_mask[i] = grp_mask[i];
+    }
+    JsonArray timers = doc["timer"].as<JsonArray>();
+    for (size_t i = 0; i < timers.size() && i < 6; i++) { // Schleife über die Timer
+      JsonObject timer = timers[i];
+      config.timer[i].enable = timer["enable"];
+      config.timer[i].type = timer["type"];
+      EspStrUtil::readJSONstring(config.timer[i].time_value, sizeof(config.timer[i].time_value), timer["time_value"]);
+      config.timer[i].offset_value = timer["offset_value"];
+      config.timer[i].cmd = timer["cmd"];
+      config.timer[i].monday = timer["monday"];
+      config.timer[i].tuesday = timer["tuesday"];
+      config.timer[i].wednesday = timer["wednesday"];
+      config.timer[i].thursday = timer["thursday"];
+      config.timer[i].friday = timer["friday"];
+      config.timer[i].saturday = timer["saturday"];
+      config.timer[i].sunday = timer["sunday"];
+      config.timer[i].grp_mask = timer["grp_mask"];
     }
   }
 
