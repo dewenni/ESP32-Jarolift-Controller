@@ -219,7 +219,7 @@ void jaroliftCyclic() {
     processJaroCommands();
   }
 
-  if (timerTimer.cycleTrigger(30000)) {
+  if (timerTimer.cycleTrigger(10000)) {
     timerCyclic();
   }
 

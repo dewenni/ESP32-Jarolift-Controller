@@ -25,7 +25,7 @@ struct s_cfg_timer {
   bool enable;         // Timer enable
   uint8_t type;        // 0 = fixed time, 2 = sunrise, 3 = sunset
   char time_value[6];  // fixed Time value (hh:mm)
-  int8_t offset_value; // offset value in minutes for sunrise/sunset
+  int16_t offset_value; // offset value in minutes for sunrise/sunset
   uint8_t cmd;         // 0 = up, 1 = down, 2=shade
   bool monday;
   bool tuesday;

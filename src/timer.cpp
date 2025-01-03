@@ -10,11 +10,8 @@
 #define CMD_DOWN 1
 #define CMD_SHADE 2
 
-
-
 int lastProcessedTime = -1;       // last processed time
 static const char *TAG = "TIMER"; // LOG TAG
-
 
 bool isDayEnabled(const s_cfg_timer &timer, int day) {
   switch (day) {
@@ -58,9 +55,9 @@ void executeCommand(const s_cfg_timer &timer, uint8_t number) {
   }
 }
 
-void getSunriseOrSunset(uint8_t type, int8_t offset, float latitude, float longitude, uint8_t &hour, uint8_t &minute) {
+void getSunriseOrSunset(uint8_t type, int16_t offset, float latitude, float longitude, uint8_t &hour, uint8_t &minute) {
 
-  int timeInMinutes;
+  int16_t timeInMinutes;
   time_t now;
   tm dti, utcTime;
   time(&now);
@@ -114,7 +111,7 @@ void timerCyclic() {
 
   // check if year is valid
   if (dti.tm_year < 125) { // 2025 = 1900 + 125
-    return;                
+    return;
   }
 
   // check if minute has changed

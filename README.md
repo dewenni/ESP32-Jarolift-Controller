@@ -101,6 +101,10 @@ The WebUI is responsive and also offers a mobile layout.
   - [Configuration](#configuration)
   - [Filemanager](#filemanager)
   - [Migration](#migration)
+- [WebUI](#webui)
+  - [Channels](#channels)
+  - [Groups](#groups)
+  - [Timer](#timer)
 - [MQTT](#mqtt)
   - [Commands](#commands)
   - [Status](#status)
@@ -313,6 +317,18 @@ finished!
 now restart the ESP and test it.  
 After restarting, first check whether the device counter has been read correctly from the EEPROM. Only continue testing if this is the case.
 If everything done correct, all shutters should work like before. If not, some setting is wrong or you haven´t used the latest version of `(madmartin/Jarolift_MQTT)`. In that case I would prefer to set a new Serial number, reset the Device Counter und learn the shutter again.
+
+-----
+
+# WebUI
+
+## Channels
+
+## Groups
+
+## Timer
+
+
 
 -----
 
