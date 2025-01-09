@@ -390,6 +390,10 @@ const translations = {
     de: "Sie können auch ein generisches Gruppenkommando verwenden und die Bitmaske verwenden, um die Rolläden direkt auszuwählen. Die Bitmaske ist eine 16-Bit-Zahl, wobei das niederwertigste Bit (rechts) den Kanal 1 repräsentiert. Ein gesetztes Bit bedeutet, dass der Kanal zu dieser Gruppe gehört.\n\nBeispiel: 0000000000010101 bedeutet, dass die Kanäle 1, 3 und 5 zu dieser Gruppe gehören.\n\nAls Payload können Sie drei verschiedene Formate verwenden, um die gleiche Bitmaske darzustellen:",
     en: "You can also use a generic group command and provide the bitmask to select the shutters directly. The bitmask is a 16-bit number, with the least significant bit (on the right) representing channel 1. A set bit means that the channel belongs to this group.\n\nExample: `0000000000010101` means that channels 1, 3, and 5 belong to this group.\n\nAs payload, you can use three different formats to represent the same bitmask:",
   },
+  bitmask_wizard: {
+    de: "Auswahl Assistent",
+    en: "Selection Wizard",
+  },
   general: {
     de: "Allgemein",
     en: "General",
@@ -485,5 +489,13 @@ const translations = {
   time_info: {
     de: "Zeitinformationen",
     en: "Time information",
+  },
+  apply: {
+    de: "Übernehmen",
+    en: "apply",
+  },
+  cancel: {
+    de: "abbrechen",
+    en: "cancel",
   },
 };

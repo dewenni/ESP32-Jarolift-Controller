@@ -4,7 +4,7 @@
 /*-------------------------------------------------------------------------------
 General Configuration
 --------------------------------------------------------------------------------*/
-#define VERSION "v1.4.0" // internal program version
+#define VERSION "v1.5.0" // internal program version
 
 #define WIFI_RECONNECT 30000 // Delay between wifi reconnection tries
 #define MQTT_RECONNECT 10000 // Delay between mqtt reconnection tries
@@ -22,11 +22,11 @@ struct s_cfg_jaro {
 };
 
 struct s_cfg_timer {
-  bool enable;         // Timer enable
-  uint8_t type;        // 0 = fixed time, 2 = sunrise, 3 = sunset
-  char time_value[6];  // fixed Time value (hh:mm)
+  bool enable;          // Timer enable
+  uint8_t type;         // 0 = fixed time, 2 = sunrise, 3 = sunset
+  char time_value[6];   // fixed Time value (hh:mm)
   int16_t offset_value; // offset value in minutes for sunrise/sunset
-  uint8_t cmd;         // 0 = up, 1 = down, 2=shade
+  uint8_t cmd;          // 0 = up, 1 = down, 2=shade
   bool monday;
   bool tuesday;
   bool wednesday;

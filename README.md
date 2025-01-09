@@ -72,22 +72,6 @@ The project home is here: [Project Home](http://www.bastelbudenbuben.de/2017/04/
 
 -----
 
-![weubui_dash](Doc/webUI_1.png)
-(Desktop Version)
-
-The WebUI is responsive and also offers a mobile layout.
-
-<img style="display: inline;
-  margin-right: 50px;
-  width: 200px;" src="./Doc/webUI_mobile_1.png">
-<img style="display: inline;
-  margin-right: 50px;
-  width: 200px;" src="./Doc/webUI_mobile_2.png">
-
-(Mobile Version)
-
------
-
 # Table of Contents
 
 - [Hardware](#hardware)
@@ -132,15 +116,15 @@ a standard SPI GPIO configuration is:
 |7          | MISO         | 19      |
 |4          | CS(N)        | 5       |
 
-![fritzing1](/Doc/ESP32_CC1101_Steckplatine.png)  
+<img style="width: 500px;" src="./Doc/ESP32_CC1101_Steckplatine.png">
 
-![fritzing2](/Doc/ESP32_CC1101_Schaltplan.png)  
+<img style="width: 500px;" src="./Doc/ESP32_CC1101_Schaltplan.png"> 
 
-![hardware_1](/Doc/hw_1.png)  
+<img style="width: 500px;" src="./Doc/hw_1.png">
 
 example with ESP32-Mini and CC1101
 
-![hardware_2](/Doc/hw_2.png)  
+<img style="width: 500px;" src="./Doc/hw_2.png">
 
 example for direct replacement with ESP32-Mini and the custom board from M. Maywald
 
@@ -322,13 +306,42 @@ If everything done correct, all shutters should work like before. If not, some s
 
 # WebUI
 
+The WebUI is responsive and also offers a mobile layout.
+
+![weubui_dash](Doc/webUI_1.png)
+(Desktop Version)
+
+<img style="display: inline;
+  margin-right: 50px;
+  width: 200px;" src="./Doc/webUI_mobile_1.png">
+<img style="display: inline;
+  margin-right: 50px;
+  width: 200px;" src="./Doc/webUI_mobile_2.png">
+
+(Mobile Version)
+
 ## Channels
+
+Once the roller shutters have been configured and activated, they can also be controlled directly in the WebUI.
+
+![webUI_shutter](/Doc/webUI_shutter.png)
 
 ## Groups
 
+The groups that are configured in the settings can also be operated directly in the WebUI in the same way as the individual roller shutters.
+
+![webUI_groups](/Doc/webUI_groups.png)
+
 ## Timer
 
+The timer function enables the automatic control of individual roller shutters or a selection of several roller shutters as a group.
+A fixed time can be specified as a trigger, or sunrise or sunset with an optional time offset.
 
+![webUI_timer](/Doc/webUI_timer.png)
+
+The selection of roller shutters is supported by an additional dialogue. All configured and activated roller shutters are displayed there. These can be selected there and the bitmask is then automatically created from them.
+
+<img style="width: 444px;" src="./Doc/webUI_bitmask_wiz.png">
 
 -----
 

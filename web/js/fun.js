@@ -484,34 +484,37 @@ async function loadConfig() {
   }
 }
 
-// Funktion zur Synchronisierung basierend auf data-sync-Attributen
 function synchronizeDataSyncFields() {
   // Alle Eingabefelder mit data-sync-Attribut finden
   const inputs = document.querySelectorAll("input[data-sync]");
 
   inputs.forEach((inputElement) => {
-    const syncId = inputElement.dataset.sync;
-    const syncElement = document.getElementById(syncId);
+    // Splitte die data-sync IDs bei Kommas
+    const syncIds = inputElement.dataset.sync.split(",");
 
-    if (syncElement) {
-      // **Initiale Synchronisierung**
-      syncElement.textContent = inputElement.value;
+    syncIds.forEach((syncId) => {
+      const syncElement = document.getElementById(syncId.trim()); // Trimmt Leerzeichen um die IDs
 
-      // Synchronisiere bei Benutzereingaben
-      inputElement.addEventListener("input", (event) => {
-        syncElement.textContent = event.target.value;
-      });
-
-      // Überwache programmatische Änderungen
-      const observer = new MutationObserver(() => {
+      if (syncElement) {
+        // **Initiale Synchronisierung**
         syncElement.textContent = inputElement.value;
-      });
 
-      observer.observe(inputElement, {
-        attributes: true,
-        attributeFilter: ["value"],
-      });
-    }
+        // Synchronisiere bei Benutzereingaben
+        inputElement.addEventListener("input", (event) => {
+          syncElement.textContent = event.target.value;
+        });
+
+        // Überwache programmatische Änderungen
+        const observer = new MutationObserver(() => {
+          syncElement.textContent = inputElement.value;
+        });
+
+        observer.observe(inputElement, {
+          attributes: true,
+          attributeFilter: ["value"],
+        });
+      }
+    });
   });
 }
 
@@ -548,4 +551,52 @@ function toggleTimeInputs(selectElement) {
     timeInput.style.display = "none";
     offsetInput.style.display = "block";
   }
+}
+
+function setupBitmaskDialog() {
+  const bitmaskDialog = document.getElementById("bitmask_dialog");
+  const applyButton = document.getElementById("apply_bitmask");
+  const closeButton = document.getElementById("close_bitmask_dialog");
+
+  let currentInput = null; // reference to existing input
+
+  // open the dialog for the source input field
+  document.querySelectorAll(".bitmask-input").forEach((input) => {
+    input.addEventListener("click", () => {
+      currentInput = input;
+
+      // set checkboxes based on acutal bitmask
+      const bitmask = parseInt(input.value || "0", 2);
+      for (let i = 0; i < 16; i++) {
+        const checkbox = document.getElementById(`channel-${i}`);
+        if (checkbox) {
+          checkbox.checked = (bitmask & (1 << i)) !== 0;
+        }
+      }
+
+      bitmaskDialog.showModal();
+    });
+  });
+
+  // apply checkboxes and close the dialog
+  applyButton.addEventListener("click", () => {
+    let bitmask = 0;
+    for (let i = 0; i < 16; i++) {
+      const checkbox = document.getElementById(`channel-${i}`);
+      if (checkbox && checkbox.checked) {
+        bitmask |= 1 << i;
+      }
+    }
+
+    if (currentInput) {
+      currentInput.value = bitmask.toString(2).padStart(16, "0");
+    }
+
+    bitmaskDialog.close();
+  });
+
+  // close the dialog without changes
+  closeButton.addEventListener("click", () => {
+    bitmaskDialog.close();
+  });
 }

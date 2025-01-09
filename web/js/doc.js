@@ -7,6 +7,7 @@ document.addEventListener("DOMContentLoaded", function () {
   initializeVisibilityBasedOnSwitches();
   localizePage("de");
   loadConfig();
+  setupBitmaskDialog();
 
   // Event Listener for Reload-Button
   document
@@ -203,7 +204,7 @@ document.addEventListener("DOMContentLoaded", function () {
         sendData(switchElement.id, switchElement.checked);
       });
     });
-  
+
   // Event-Listener for Select Elements
   document.querySelectorAll("select").forEach(function (selectElement) {
     selectElement.addEventListener("change", function () {

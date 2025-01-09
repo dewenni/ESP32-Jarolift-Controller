@@ -71,26 +71,10 @@ Die Homepage des Projekts ist hier: [Project Home](http://www.bastelbudenbuben.d
 
 -----
 
-![weubui_dash](Doc/webUI_1.png)
-(Desktop Version)
-
-Die WebUI ist responsiv und bietet auch ein mobiles Layout.
-
-<img style="display: inline;
-  margin-right: 50px;
-  width: 200px;" src="./Doc/webUI_mobile_1.png">
-<img style="display: inline;
-  margin-right: 50px;
-  width: 200px;" src="./Doc/webUI_mobile_2.png">
-
-(Mobile Version)
-
------
-
 # Inhaltsverzeichnis
 
 - [Hardware](#hardware)
-  - [ESP32+CC1101](#esp32-+-cc1101)
+  - [ESP32+CC1101](#esp32+cc1101)
   - [Optional: Ethernet Modul W5500](#optional-ethernet-modul-w5500)
 - [Erste Schritte](#erste-schritte)
   - [Platform-IO](#platform-io)
@@ -100,6 +84,10 @@ Die WebUI ist responsiv und bietet auch ein mobiles Layout.
   - [Konfiguration](#konfiguration)
   - [Filemanager](#filemanager)
   - [Migration](#migration)
+- [WebUI](#webui)
+  - [Kanäle](#kanäle)
+  - [Gruppen](#gruppen)
+  - [Timer](#timer)
 - [MQTT](#mqtt)
   - [Kommandos](#kommandos)
   - [Status](#status)
@@ -112,7 +100,7 @@ Die WebUI ist responsiv und bietet auch ein mobiles Layout.
 
 # Hardware
 
-## ESP32 + CC1101
+## ESP32+CC1101
 
 eine Standard-SPI-GPIO-Konfiguration für den CC1101 und den ESP32 ist folgende:
 
@@ -127,15 +115,15 @@ eine Standard-SPI-GPIO-Konfiguration für den CC1101 und den ESP32 ist folgende:
 |7          | MISO         | 19      |
 |4          | CS(N)        | 5       |
 
-![fritzing1](/Doc/ESP32_CC1101_Steckplatine.png)  
+<img style="width: 500px;" src="./Doc/ESP32_CC1101_Steckplatine.png">
 
-![fritzing2](/Doc/ESP32_CC1101_Schaltplan.png)  
+<img style="width: 500px;" src="./Doc/ESP32_CC1101_Schaltplan.png"> 
 
-![hardware_1](/Doc/hw_1.png)  
+<img style="width: 500px;" src="./Doc/hw_1.png">
 
 Beispiel mit ESP32-Mini und CC1101
 
-![hardware_2](/Doc/hw_2.png)  
+<img style="width: 500px;" src="./Doc/hw_2.png">
 
 Beispiel für direkten Austausch mit ESP32-Mini und dem Custom Board von M. Maywald (vermutlich nicht mehr verfügbar)
 
@@ -312,6 +300,47 @@ fertig!
 Starte nun den ESP neu und teste.  
 Prüfe nach dem Neustart zunächst, ob der Gerätezähler korrekt aus dem EEPROM gelesen wurde. Nur wenn dies der Fall ist, fahre mit dem Test fort.
 Wenn alles richtig gemacht wurde, sollten alle Rollläden wie vorher funktionieren. Wenn nicht, ist eine Einstellung falsch oder du hast zuletzt nicht die neueste Version von `(madmartin/Jarolift_MQTT)` verwendet. In diesem Fall würde ich es vorziehen, eine neue Seriennummer zu setzen, den Gerätezähler zurückzusetzen und die Rolläden neu einzulernen.
+
+-----
+
+# WebUI
+
+Das WebUI ist responsive und bietet auch eine Layout für Mobile Geräte
+
+![weubui_dash](Doc/webUI_1.png)
+(Desktop Version)
+
+<img style="display: inline;
+  margin-right: 50px;
+  width: 200px;" src="./Doc/webUI_mobile_1.png">
+<img style="display: inline;
+  margin-right: 50px;
+  width: 200px;" src="./Doc/webUI_mobile_2.png">
+
+(Mobile Version)
+
+## Channels
+
+Nachdem die Rolläden in den Einstellungen konfiguriert und aktiviert wurden, können diese auch direkt im WebUI bedient werden.
+
+![webUI_shutter](/Doc/webUI_shutter.png)
+
+## Groups
+
+Die in den Einstellungen konfigurierten Gruppen können wie die einzelnen Rollläden auch direkt im WebUI bedient werden.
+
+![webUI_groups](/Doc/webUI_groups.png)
+
+## Timer
+
+Die Timer ermöglicht die automatische Steuerung einzelner Rollläden oder eine Auswahl mehrerer Rollläden als Gruppe.
+Als Auslöser kann ein fester Zeitpunkt oder Sonnenaufgang bzw. Sonnenuntergang mit optionalem Zeitversatz vorgegeben werden.
+
+![webUI_timer](/Doc/webUI_timer.png)
+
+Die Auswahl von Rollläden wird durch einen zusätzlichen Dialog unterstützt. Dort werden alle konfigurierten und aktivierten Rollläden angezeigt. Diese können dort ausgewählt werden und die benötigte Bitmaske wird dann automatisch berechnet.
+
+<img style="width: 444px;" src="./Doc/webUI_bitmask_wiz.png">
 
 -----
 

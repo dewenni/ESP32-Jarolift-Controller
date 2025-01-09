@@ -163,7 +163,7 @@ void updateSystemInfoElements() {
   addJson(jsonDoc, "p09_esp_maxallocheap", ESP.getMaxAllocHeap() / 1000.0f);
   addJson(jsonDoc, "p09_esp_minfreeheap", ESP.getMinFreeHeap() / 1000.0f);
 
-  // Uptime and restart reason
+  // Uptime
   char uptimeStr[64];
   getUptime(uptimeStr, sizeof(uptimeStr));
   addJson(jsonDoc, "p09_uptime", uptimeStr);
@@ -175,8 +175,7 @@ void updateSystemInfoElements() {
     addJson(jsonDoc, "p12_jaro_devcnt", devCntNew);
   }
 
-  // Date, Time
-  addJson(jsonDoc, "p09_act_date", EspStrUtil::getDateString());
+  // act Time
   addJson(jsonDoc, "p09_act_time", EspStrUtil::getTimeString());
 
   updateWebJSON(jsonDoc);
@@ -214,6 +213,9 @@ void updateSystemInfoElementsStatic() {
   getSunriseOrSunset(TYPE_SUNDOWN, 0, config.geo.latitude, config.geo.longitude, sundownHour, sundownMinute);
   snprintf(tmpMessage, sizeof(tmpMessage), "%02d:%02d", sundownHour, sundownMinute);
   addJson(jsonDoc, "p09_sundown", tmpMessage);
+
+  // Date
+  addJson(jsonDoc, "p09_act_date", EspStrUtil::getDateString());
 
   updateWebJSON(jsonDoc);
 }
