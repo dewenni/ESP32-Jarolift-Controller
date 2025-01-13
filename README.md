@@ -57,6 +57,9 @@ Control up to 16 roller shutters with ease, all managed through the WebUI and MQ
 - **Support for up to 6 Roller Shutter Groups:**  
 define shutter groups to control several shutters at once
 
+- **Timer function***  
+stand alone timer function with fixed time, sunrise or sunset as trigger.
+
 Experimental version.
 Use at your own risk. For private/educational use only. (Keeloq algorithm licensed only to TI Microcontrollers)
 This project is not affiliated in any way with the vendor of the Jarolift components.
@@ -152,7 +155,7 @@ Example for generic ESP32-Mini (Standard SPI port is used by CC1101)
 
 ## Platform-IO
 
-The software is created with [Visual Studio Code](https://code.visualstudio.com) and the [PlatformIO-Plugin](https://platformio.org).  
+The software is created with [Visual Studio Code](https://code.visualstudio.com) and the [pioarduino-Plugin](https://github.com/pioarduino/pioarduino-vscode-ide).  
 After installing the software you can clone the project from GitHub or you can download it as zip and open it in PlatformIO.
 Then adapt the `upload_port` and corresponding settings in `platformio.ini` to your USB-to-serial Adapter and upload the code to the ESP.
 

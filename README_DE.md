@@ -57,6 +57,9 @@ Steuern von bis zu 16 Rollläden, die alle über die WebUI und MQTT verwaltet we
 - **Unterstützung für bis zu 6 Rollladengruppen:**  
 Definiere bis zu 6 Rollladengruppen, um mehrere Rollläden auf einmal zu steuern
 
+- **Timer Funktion**  
+für Stand-Alone Anwendung auch mit integrierter Timer Funktion mit fester Uhrzeit, Sonnenaufgang oder Sonnenuntergang als Auslöser.
+
 Die Verwendung erfolgt auf eigene Gefahr. Nur für den privaten/schulischen Gebrauch. (Keeloq-Algorithmus ist nur für TI-Mikrocontroller lizenziert)
 Dieses Projekt ist in keiner Weise mit dem Hersteller der Jarolift-Komponenten verbunden.
 Jarolift ist ein Warenzeichen der Schöneberger Rolladenfabrik GmbH & Co. KG
@@ -151,7 +154,7 @@ Beispiel für einen generischen ESP32-Mini (Standard SPI Port wird vom CC1101 ve
 
 ## Platform-IO
 
-Die Software wurde mit [Visual Studio Code](https://code.visualstudio.com) und dem [PlatformIO-Plugin](https://platformio.org) erstellt.  
+Die Software wurde mit [Visual Studio Code](https://code.visualstudio.com) und dem [pioarduino-Plugin](https://github.com/pioarduino/pioarduino-vscode-ide) erstellt.  
 Nach der Installation der Software kannst du das Projekt von GitHub klonen oder als zip herunterladen und in PlatformIO öffnen.
 Dann noch den `upload_port` und die entsprechenden Einstellungen in `platformio.ini` an deinen USB-zu-Seriell-Adapter anpassen den Code auf den ESP hochladen.
 
