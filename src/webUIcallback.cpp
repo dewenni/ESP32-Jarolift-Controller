@@ -396,12 +396,11 @@ void webCallback(const char *elementId, const char *value) {
     updateAllElements();
   }
 
-  // Buttons
-  if (strcmp(elementId, "p12_btn_restart") == 0) {
+  // Restart (and save)
+  if (strcmp(elementId, "restartAction") == 0) {
     EspSysUtil::RestartReason::saveLocal("webUI command");
-    yield();
+    configSaveToFile();
     delay(1000);
-    yield();
     ESP.restart();
   }
 

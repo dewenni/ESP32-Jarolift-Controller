@@ -111,6 +111,7 @@ struct s_cfg_log {
 };
 
 struct s_config {
+  int version;
   int lang;
   s_cfg_wifi wifi;
   s_cfg_eth eth;

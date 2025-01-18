@@ -6,6 +6,9 @@
 #include <message.h>
 
 /* D E C L A R A T I O N S ****************************************************/
+
+const int CFG_VERSION = 1;
+
 char filename[24] = {"/config.json"};
 bool setupMode;
 bool configInitDone = false;
@@ -13,6 +16,9 @@ unsigned long hashOld;
 s_config config;
 muTimer checkTimer = muTimer(); // timer to refresh other values
 static const char *TAG = "CFG"; // LOG TAG
+char encrypted[256] = {0};
+char decrypted[128] = {0};
+const unsigned char key[16] = {0x6d, 0x79, 0x5f, 0x73, 0x65, 0x63, 0x75, 0x72, 0x65, 0x5f, 0x6b, 0x65, 0x79, 0x31, 0x32, 0x33};
 
 /* P R O T O T Y P E S ********************************************************/
 void checkGPIO();
@@ -35,7 +41,7 @@ void configSetup() {
 
   // load config from file
   configLoadFromFile();
-  //check gpio
+  // check gpio
   checkGPIO();
   // check final settings
   configFinalCheck();
@@ -193,7 +199,6 @@ void configCyclic() {
     if (hashNew != hashOld) {
       hashOld = hashNew;
       configSaveToFile();
-      MY_LOGD(TAG, "config saved to file");
     }
   }
 }
@@ -249,11 +254,19 @@ void configSaveToFile() {
 
   JsonDocument doc; // reserviert 2048 Bytes für das JSON-Objekt
 
+  doc["version"] = CFG_VERSION;
+
   doc["lang"] = (config.lang);
 
   doc["wifi"]["enable"] = config.wifi.enable;
   doc["wifi"]["ssid"] = config.wifi.ssid;
-  doc["wifi"]["password"] = config.wifi.password;
+
+  if (EspStrUtil::encryptPassword(config.wifi.password, key, encrypted, sizeof(encrypted))) {
+    doc["wifi"]["password"] = encrypted;
+  } else {
+    MY_LOGE(TAG, "error encrypting WiFi Password");
+  }
+
   doc["wifi"]["hostname"] = config.wifi.hostname;
   doc["wifi"]["static_ip"] = config.wifi.static_ip;
   doc["wifi"]["ipaddress"] = config.wifi.ipaddress;
@@ -278,7 +291,13 @@ void configSaveToFile() {
   doc["mqtt"]["enable"] = config.mqtt.enable;
   doc["mqtt"]["server"] = config.mqtt.server;
   doc["mqtt"]["user"] = config.mqtt.user;
-  doc["mqtt"]["password"] = config.mqtt.password;
+
+  if (EspStrUtil::encryptPassword(config.mqtt.password, key, encrypted, sizeof(encrypted))) {
+    doc["mqtt"]["password"] = encrypted;
+  } else {
+    MY_LOGE(TAG, "error encrypting mqtt Password");
+  }
+
   doc["mqtt"]["topic"] = config.mqtt.topic;
   doc["mqtt"]["port"] = config.mqtt.port;
   doc["mqtt"]["ha_enable"] = config.mqtt.ha_enable;
@@ -374,7 +393,7 @@ void configSaveToFile() {
   if (serializeJson(doc, file) == 0) {
     MY_LOGE(TAG, "Failed to write to file");
   } else {
-    MY_LOGI(TAG, "config successfully saved to file: %s", filename);
+    MY_LOGI(TAG, "config successfully saved to file: %s - Version: %i", filename, CFG_VERSION);
   }
 
   // Close the file
@@ -403,10 +422,24 @@ void configLoadFromFile() {
 
   } else {
 
+    config.version = doc["version"];
+
     config.lang = doc["lang"];
+
     config.wifi.enable = doc["wifi"]["enable"];
     EspStrUtil::readJSONstring(config.wifi.ssid, sizeof(config.wifi.ssid), doc["wifi"]["ssid"]);
-    EspStrUtil::readJSONstring(config.wifi.password, sizeof(config.wifi.password), doc["wifi"]["password"]);
+
+    if (config.version == 0) {
+      EspStrUtil::readJSONstring(config.wifi.password, sizeof(config.wifi.password), doc["wifi"]["password"]);
+    } else {
+      EspStrUtil::readJSONstring(encrypted, sizeof(encrypted), doc["wifi"]["password"]);
+      if (EspStrUtil::decryptPassword(encrypted, key, config.wifi.password, sizeof(config.wifi.password))) {
+        // MY_LOGD(TAG, "decrypted WiFi password: %s", config.wifi.password);
+      } else {
+        MY_LOGE(TAG, "error decrypting WiFi password");
+      }
+    }
+
     EspStrUtil::readJSONstring(config.wifi.hostname, sizeof(config.wifi.hostname), doc["wifi"]["hostname"]);
     config.wifi.static_ip = doc["wifi"]["static_ip"];
     EspStrUtil::readJSONstring(config.wifi.ipaddress, sizeof(config.wifi.ipaddress), doc["wifi"]["ipaddress"]);
@@ -432,7 +465,20 @@ void configLoadFromFile() {
     config.mqtt.enable = doc["mqtt"]["enable"];
     EspStrUtil::readJSONstring(config.mqtt.server, sizeof(config.mqtt.server), doc["mqtt"]["server"]);
     EspStrUtil::readJSONstring(config.mqtt.user, sizeof(config.mqtt.user), doc["mqtt"]["user"]);
+
     EspStrUtil::readJSONstring(config.mqtt.password, sizeof(config.mqtt.password), doc["mqtt"]["password"]);
+
+    if (config.version == 0) {
+      EspStrUtil::readJSONstring(config.mqtt.password, sizeof(config.mqtt.password), doc["mqtt"]["password"]);
+    } else {
+      EspStrUtil::readJSONstring(encrypted, sizeof(encrypted), doc["mqtt"]["password"]);
+      if (EspStrUtil::decryptPassword(encrypted, key, config.mqtt.password, sizeof(config.mqtt.password))) {
+        // MY_LOGD(TAG, "decrypted mqtt password: %s", config.mqtt.password);
+      } else {
+        MY_LOGE(TAG, "error decrypting mqtt password");
+      }
+    }
+
     EspStrUtil::readJSONstring(config.mqtt.topic, sizeof(config.mqtt.topic), doc["mqtt"]["topic"]);
     config.mqtt.port = doc["mqtt"]["port"];
     config.mqtt.ha_enable = doc["mqtt"]["ha_enable"];
@@ -508,12 +554,20 @@ void configLoadFromFile() {
 
   file.close();     // Close the file (Curiously, File's destructor doesn't close the file)
   configHashInit(); // init hash value
+
+  // save config if version is different
+  if (config.version != CFG_VERSION) {
+    configSaveToFile();
+    MY_LOGI(TAG, "config file was updated from version %i to version: %i", config.version, CFG_VERSION);
+  } else {
+    MY_LOGI(TAG, "config file version %i was successfully loaded", config.version);
+  }
 }
 
 void configFinalCheck() {
 
   // check network settings
-  if (strlen(config.wifi.ssid) == 0) {
+  if (strlen(config.wifi.ssid) == 0 && config.wifi.enable) {
     // no valid wifi setting => start AP-Mode
     MY_LOGW(TAG, "no valid wifi SSID set => enter SetupMode and start AP-Mode");
     setupMode = true;

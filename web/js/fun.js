@@ -87,7 +87,31 @@ function attemptReconnect() {
   }, reconnectDelay);
 }
 
+function restartFunction() {
+  const activeElement = document.activeElement;
+  if (activeElement && ["INPUT", "TEXTAREA"].includes(activeElement.tagName)) {
+    activeElement.blur(); // save last active input
+  }
+
+  // add a delay to be sure the last input is complete
+  setTimeout(function () {
+    sendData("restartAction", "true");
+  }, 1000);
+}
+
 function sendData(elementId, value) {
+  // Find the element by its ID
+  const element = document.getElementById(elementId);
+
+  // Check if the element exists and is a password field
+  if (element && element.type === "password") {
+    // Only send the data if the value is not "XxXxXxXxXxX"
+    if (value === "XxXxXxXxXxX") {
+      console.log(`Password field (${elementId}) not updated, skipping send.`);
+      return;
+    }
+  }
+
   if (ws.readyState === WebSocket.OPEN) {
     const message = {
       type: "sendData",
@@ -398,11 +422,8 @@ function formatBin(input) {
 }
 
 // update elements based on config.json file
-function updateUI(
-  config,
-  prefix = "cfg",
-  ignoreKeys = ["debug", "webUI_enable"]
-) {
+function updateUI(config, prefix = "cfg", ignoreKeys = ["version"]) {
+  console.log("updating config");
   for (const key in config) {
     if (config.hasOwnProperty(key)) {
       // Prüfen, ob der aktuelle Schlüssel ignoriert werden soll
@@ -441,6 +462,9 @@ function updateUI(
             if (element.dataset.toggle === "timeInputs") {
               toggleTimeInputs(element);
             }
+          } else if (element.type === "password") {
+            // Always set password fields to "XxXxXxXxXxX" as a placeholder
+            element.value = "XxXxXxXxXxX";
           } else {
             // Überprüfen, ob das Feld ein HEX- oder Binärwert benötigt
             if (element.dataset.type === "hex" && typeof value === "number") {
@@ -465,11 +489,12 @@ function updateUI(
       }
     }
   }
-  synchronizeDataSyncFields(); // Synchronisierung basierend auf data-sync-Attributen
+  synchronizeDataSyncFields();
 }
 
-// Config bei Seitenaufruf laden und UI aktualisieren
+// load and update config
 async function loadConfig() {
+  console.log("loading config");
   try {
     const response = await fetch("/config.json");
     if (!response.ok)
@@ -477,7 +502,7 @@ async function loadConfig() {
 
     const config = await response.json();
 
-    // UI-Elemente basierend auf der geladenen config.json aktualisieren
+    // update UI-Elementes based on config.json
     updateUI(config);
   } catch (error) {
     console.error("Error loading config:", error);
@@ -485,26 +510,26 @@ async function loadConfig() {
 }
 
 function synchronizeDataSyncFields() {
-  // Alle Eingabefelder mit data-sync-Attribut finden
+  // find all input fields with data-sync
   const inputs = document.querySelectorAll("input[data-sync]");
 
   inputs.forEach((inputElement) => {
-    // Splitte die data-sync IDs bei Kommas
+    // split data-sync IDs by comma
     const syncIds = inputElement.dataset.sync.split(",");
 
     syncIds.forEach((syncId) => {
-      const syncElement = document.getElementById(syncId.trim()); // Trimmt Leerzeichen um die IDs
+      const syncElement = document.getElementById(syncId.trim());
 
       if (syncElement) {
-        // **Initiale Synchronisierung**
+        // initial synchronization
         syncElement.textContent = inputElement.value;
 
-        // Synchronisiere bei Benutzereingaben
+        // synchronize user inputs
         inputElement.addEventListener("input", (event) => {
           syncElement.textContent = event.target.value;
         });
 
-        // Überwache programmatische Änderungen
+        // check for programmed changes
         const observer = new MutationObserver(() => {
           syncElement.textContent = inputElement.value;
         });
@@ -565,13 +590,29 @@ function setupBitmaskDialog() {
     input.addEventListener("click", () => {
       currentInput = input;
 
-      // set checkboxes based on acutal bitmask
-      const bitmask = parseInt(input.value || "0", 2);
+      // Parse the bitmask as a mutable variable
+      let bitmask = parseInt(input.value || "0", 2);
+
+      // Set checkboxes based on actual bitmask
       for (let i = 0; i < 16; i++) {
         const checkbox = document.getElementById(`channel-${i}`);
         if (checkbox) {
-          checkbox.checked = (bitmask & (1 << i)) !== 0;
+          // Check the visibility of the checkbox
+          const isVisible = checkbox.parentElement.style.display !== "none";
+
+          // Set checkbox state only if visible
+          checkbox.checked = isVisible && (bitmask & (1 << i)) !== 0;
+
+          // Clear bit if the checkbox is not visible
+          if (!isVisible) {
+            bitmask &= ~(1 << i);
+          }
         }
+      }
+
+      // Safely update the input value with the sanitized bitmask
+      if (currentInput && !Object.isFrozen(currentInput)) {
+        currentInput.value = bitmask.toString(2).padStart(16, "0");
       }
 
       bitmaskDialog.showModal();
