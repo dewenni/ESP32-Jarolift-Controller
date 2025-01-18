@@ -429,11 +429,12 @@ void webUISetup() {
       "/config-upload", HTTP_POST, [](AsyncWebServerRequest *request) { request->send(200, "text/plain", "upload done!"); },
       [](AsyncWebServerRequest *request, const String &filename, size_t index, uint8_t *data, size_t len, bool final) {
         static File uploadFile;
+        const String targetFilename = "/config.json"; // fix to config.json
 
         if (!index) { // firs call for upload
           updateWebText("upload_status_txt", "uploading...", false);
           MY_LOGI(TAG, "Upload Start: %s\n", filename.c_str());
-          uploadFile = LittleFS.open("/" + filename, "w");
+          uploadFile = LittleFS.open(targetFilename, "w"); // fix to config.json
 
           if (!uploadFile) {
             MY_LOGE(TAG, "Error: file could not be opened");
