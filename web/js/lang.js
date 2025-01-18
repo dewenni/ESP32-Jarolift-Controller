@@ -6,6 +6,10 @@ const translations = {
     de: "System",
     en: "System",
   },
+  timer: {
+    de: "Timer",
+    en: "Timer",
+  },
   settings: {
     de: "Einstellungen",
     en: "Settings",
@@ -386,8 +390,112 @@ const translations = {
     de: "Sie können auch ein generisches Gruppenkommando verwenden und die Bitmaske verwenden, um die Rolläden direkt auszuwählen. Die Bitmaske ist eine 16-Bit-Zahl, wobei das niederwertigste Bit (rechts) den Kanal 1 repräsentiert. Ein gesetztes Bit bedeutet, dass der Kanal zu dieser Gruppe gehört.\n\nBeispiel: 0000000000010101 bedeutet, dass die Kanäle 1, 3 und 5 zu dieser Gruppe gehören.\n\nAls Payload können Sie drei verschiedene Formate verwenden, um die gleiche Bitmaske darzustellen:",
     en: "You can also use a generic group command and provide the bitmask to select the shutters directly. The bitmask is a 16-bit number, with the least significant bit (on the right) representing channel 1. A set bit means that the channel belongs to this group.\n\nExample: `0000000000010101` means that channels 1, 3, and 5 belong to this group.\n\nAs payload, you can use three different formats to represent the same bitmask:",
   },
+  bitmask_wizard: {
+    de: "Auswahl Assistent",
+    en: "Selection Wizard",
+  },
   general: {
     de: "Allgemein",
     en: "General",
+  },
+  sunrise: {
+    de: "Sonnenaufgang",
+    en: "sunrise",
+  },
+  sundown: {
+    de: "Sonnenuntergang",
+    en: "sundown",
+  },
+  cmd_up: {
+    de: "Hochfahren",
+    en: "up",
+  },
+  cmd_down: {
+    de: "Runterfahren",
+    en: "down",
+  },
+  cmd_shade: {
+    de: "Schatten",
+    en: "shade",
+  },
+  timer_type: {
+    de: "Zeitgeber",
+    en: "Time-Source",
+  },
+  time: {
+    de: "Uhrzeit",
+    en: "Time",
+  },
+  time_HH_MM: {
+    de: "Zeit (HH:MM)",
+    en: "Time (HH:MM)",
+  },
+  offset_desc: {
+    de: "Offset in Minuten (z. B. -15 oder +20)",
+    en: "Offset in Minutens (e.g. -15 oder +20)",
+  },
+  command: {
+    de: "Befehl",
+    en: "Command",
+  },
+  weekdays: {
+    de: "Wochentage",
+    en: "weekdays",
+  },
+  day_mo: {
+    de: "Mo",
+    en: "Mo",
+  },
+  day_tu: {
+    de: "Di",
+    en: "Tu",
+  },
+  day_we: {
+    de: "Mi",
+    en: "We",
+  },
+  day_th: {
+    de: "Do",
+    en: "Th",
+  },
+  day_fr: {
+    de: "Fr",
+    en: "Fr",
+  },
+  day_sa: {
+    de: "Sa",
+    en: "Sa",
+  },
+  day_su: {
+    de: "So",
+    en: "Su",
+  },
+  geo_location: {
+    de: "Geografische Lage",
+    en: "Geographical location",
+  },
+  geo_info: {
+    de: "Wird benötigt für die Timer Funktion mit Sonnenaufgang und Sonnenuntergang",
+    en: "Required for the timer function with sunrise and sunset",
+  },
+  latitude: {
+    de: "Breitengrad",
+    en: "Latitude",
+  },
+  longitude: {
+    de: "Längengrad",
+    en: "Longitude",
+  },
+  time_info: {
+    de: "Zeitinformationen",
+    en: "Time information",
+  },
+  apply: {
+    de: "Übernehmen",
+    en: "apply",
+  },
+  cancel: {
+    de: "abbrechen",
+    en: "cancel",
   },
 };

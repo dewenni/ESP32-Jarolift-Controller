@@ -7,6 +7,7 @@ document.addEventListener("DOMContentLoaded", function () {
   initializeVisibilityBasedOnSwitches();
   localizePage("de");
   loadConfig();
+  setupBitmaskDialog();
 
   // Event Listener for Reload-Button
   document
@@ -189,6 +190,15 @@ document.addEventListener("DOMContentLoaded", function () {
   // Event-Listener for Radio
   document
     .querySelectorAll('input[type="radio"]')
+    .forEach(function (switchElement) {
+      switchElement.addEventListener("change", function () {
+        sendData(switchElement.id, switchElement.checked);
+      });
+    });
+
+  // Event-Listener for Checkbox
+  document
+    .querySelectorAll('input[type="checkbox"]')
     .forEach(function (switchElement) {
       switchElement.addEventListener("change", function () {
         sendData(switchElement.id, switchElement.checked);

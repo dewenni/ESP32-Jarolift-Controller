@@ -1,28 +1,40 @@
-# v1.4.0
+# v1.5.0
 
 ## what's new
 
-### 1. direct GitHub Update 🎉🎉🎉
+This update brings a cool new feature 🎉🎉🎉
 
-This update introduces an exciting new feature: You can now update to the latest version directly from the WebUI – no need to download the .bin file manually anymore!
+### 1. Timer Control
 
-Simply click on the version info in the bottom left corner, and a dialog will open. If a new version is available, you can initiate the update right there. It will automatically download and install the latest release from GitHub.
+The timer function enables the automatic control of individual roller shutters or a selection of several roller shutters as a group.
+A fixed time can be specified as a trigger, or sunrise or sunset with an optional time offset.
+This controller can therefore also work well as a stand-alone solution without the need for further automation
 
-![ota-2](Doc/github_ota.gif)
+![webUI_timer](/Doc/webUI_timer.png)
 
-### 2. new option to enable/disable WIFI
+The selection of roller shutters is supported by an additional dialogue. All configured and activated roller shutters are displayed there. These can be selected there and the bitmask is then automatically created from them.
 
-there is a new option to enable/disable WiFi. This could be useful if you use the Ethernet connection and you do not want to use the WiFi in parallel.
-The depending switch to enable/disable is also in Settings > WiFi
-
-> [!CAUTION]
-> Unfortunately after the update the "enable" will be false and therefore the Controller will be activate the "Setup-Mode" after restart, because WiFi and in most cases Ethernet is now disabled. Then you have to connect to the Accesspoint, go to Settings and activate WiFi. After Reboot everything should be fine again. Sorry, but that's something I can't avoid in this case.
+<img style="width: 400px;" src="./Doc/webUI_bitmask_wiz.png">
 
 > [!TIP]
 > Maybe it is necessary to clean your browser cache after the update, to be sure that everything works well!
 
+### encrypted Passwords
+
+Passwords are now better protected and stored in encrypted form in the config.json
+When updating, the existing passwords are automatically encrypted and saved again.
+
+> [!CAUTION]
+> As the passwords are stored in encrypted form after this update, it is no longer possible to switch to an older version without re-entering the passwords after the downgrade
+
 ## changelog
 
-- add new feature to update directly from GitHub
-- add option to enable/disable WIFI in case ETH is used (WiFi will be activated automatically in Setup-Mode) #17
-- improve the size of controls at mobile layout
+- [UPDATE] Arduino core 3.1.1 based on IDF 5.3.2.241224
+- [UPDATE] mathieucarbou/AsyncTCP @ 3.3.2
+- [UPDATE] mathieucarbou/ESPAsyncWebServer @ 3.6.0
+- [FEATURE] new feature to define 6 individual timer to automatically move the shutters #4
+- [FEATURE] new wizard for defining bit masks for timers and groups
+- [IMPROVE] uploaded config files via "config-upload" are now automatically renamed to config.json, regardless of the original filename.
+- [IMPROVE] Improved behavior when the restart button is pressed immediately after a change in the settings.
+- [IMPROVE] Passwords are better protected and are stored in encrypted form
+

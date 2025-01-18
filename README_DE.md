@@ -57,6 +57,9 @@ Steuern von bis zu 16 Rollläden, die alle über die WebUI und MQTT verwaltet we
 - **Unterstützung für bis zu 6 Rollladengruppen:**  
 Definiere bis zu 6 Rollladengruppen, um mehrere Rollläden auf einmal zu steuern
 
+- **Timer Funktion**  
+für Stand-Alone Anwendung auch mit integrierter Timer Funktion mit fester Uhrzeit, Sonnenaufgang oder Sonnenuntergang als Auslöser.
+
 Die Verwendung erfolgt auf eigene Gefahr. Nur für den privaten/schulischen Gebrauch. (Keeloq-Algorithmus ist nur für TI-Mikrocontroller lizenziert)
 Dieses Projekt ist in keiner Weise mit dem Hersteller der Jarolift-Komponenten verbunden.
 Jarolift ist ein Warenzeichen der Schöneberger Rolladenfabrik GmbH & Co. KG
@@ -71,26 +74,10 @@ Die Homepage des Projekts ist hier: [Project Home](http://www.bastelbudenbuben.d
 
 -----
 
-![weubui_dash](Doc/webUI_1.png)
-(Desktop Version)
-
-Die WebUI ist responsiv und bietet auch ein mobiles Layout.
-
-<img style="display: inline;
-  margin-right: 50px;
-  width: 200px;" src="./Doc/webUI_mobile_1.png">
-<img style="display: inline;
-  margin-right: 50px;
-  width: 200px;" src="./Doc/webUI_mobile_2.png">
-
-(Mobile Version)
-
------
-
 # Inhaltsverzeichnis
 
 - [Hardware](#hardware)
-  - [ESP32+CC1101](#esp32-+-cc1101)
+  - [ESP32+CC1101](#esp32+cc1101)
   - [Optional: Ethernet Modul W5500](#optional-ethernet-modul-w5500)
 - [Erste Schritte](#erste-schritte)
   - [Platform-IO](#platform-io)
@@ -100,8 +87,13 @@ Die WebUI ist responsiv und bietet auch ein mobiles Layout.
   - [Konfiguration](#konfiguration)
   - [Filemanager](#filemanager)
   - [Migration](#migration)
+- [WebUI](#webui)
+  - [Kanäle](#kanäle)
+  - [Gruppen](#gruppen)
+  - [Timer](#timer)
 - [MQTT](#mqtt)
   - [Kommandos](#kommandos)
+  - [Status](#status)
   - [Home Assistant](#home-assistant)
 - [Optionale Kommunikation](#optionale-kommunikation)
   - [WebUI-Logger](#webui-logger)
@@ -111,30 +103,30 @@ Die WebUI ist responsiv und bietet auch ein mobiles Layout.
 
 # Hardware
 
-## ESP32 + CC1101
+## ESP32+CC1101
 
 eine Standard-SPI-GPIO-Konfiguration für den CC1101 und den ESP32 ist folgende:
 
-|CC1101-PIN | CC1101-Signal| ESP-GPIO|
-|-----------|--------------|---------|
-|2          | VCC          | --      |
-|1          | GND          | --      |
-|3          | GD0          | 21      |
-|8          | GD2          | 22      |
-|5          | SCK/CLK      | 18      |
-|6          | MOSI         | 23      |
-|7          | MISO         | 19      |
-|4          | CS(N)        | 5       |
+| CC1101-Signal| ESP-GPIO|
+|--------------|---------|
+| VCC          | --      |
+| GND          | --      |
+| GD0          | 21      |
+| GD2          | 22      |
+| SCK/CLK      | 18      |
+| MOSI         | 23      |
+| MISO         | 19      |
+| CS(N)        | 5       |
 
-![fritzing1](/Doc/ESP32_CC1101_Steckplatine.png)  
+<img style="width: 500px;" src="./Doc/ESP32_CC1101_Steckplatine.png">
 
-![fritzing2](/Doc/ESP32_CC1101_Schaltplan.png)  
+<img style="width: 500px;" src="./Doc/ESP32_CC1101_Schaltplan.png"> 
 
-![hardware_1](/Doc/hw_1.png)  
+<img style="width: 500px;" src="./Doc/hw_1.png">
 
 Beispiel mit ESP32-Mini und CC1101
 
-![hardware_2](/Doc/hw_2.png)  
+<img style="width: 500px;" src="./Doc/hw_2.png">
 
 Beispiel für direkten Austausch mit ESP32-Mini und dem Custom Board von M. Maywald (vermutlich nicht mehr verfügbar)
 
@@ -162,7 +154,7 @@ Beispiel für einen generischen ESP32-Mini (Standard SPI Port wird vom CC1101 ve
 
 ## Platform-IO
 
-Die Software wurde mit [Visual Studio Code](https://code.visualstudio.com) und dem [PlatformIO-Plugin](https://platformio.org) erstellt.  
+Die Software wurde mit [Visual Studio Code](https://code.visualstudio.com) und dem [pioarduino-Plugin](https://github.com/pioarduino/pioarduino-vscode-ide) erstellt.  
 Nach der Installation der Software kannst du das Projekt von GitHub klonen oder als zip herunterladen und in PlatformIO öffnen.
 Dann noch den `upload_port` und die entsprechenden Einstellungen in `platformio.ini` an deinen USB-zu-Seriell-Adapter anpassen den Code auf den ESP hochladen.
 
@@ -311,6 +303,47 @@ fertig!
 Starte nun den ESP neu und teste.  
 Prüfe nach dem Neustart zunächst, ob der Gerätezähler korrekt aus dem EEPROM gelesen wurde. Nur wenn dies der Fall ist, fahre mit dem Test fort.
 Wenn alles richtig gemacht wurde, sollten alle Rollläden wie vorher funktionieren. Wenn nicht, ist eine Einstellung falsch oder du hast zuletzt nicht die neueste Version von `(madmartin/Jarolift_MQTT)` verwendet. In diesem Fall würde ich es vorziehen, eine neue Seriennummer zu setzen, den Gerätezähler zurückzusetzen und die Rolläden neu einzulernen.
+
+-----
+
+# WebUI
+
+Das WebUI ist responsive und bietet auch eine Layout für Mobile Geräte
+
+![weubui_dash](Doc/webUI_1.png)
+(Desktop Version)
+
+<img style="display: inline;
+  margin-right: 50px;
+  width: 200px;" src="./Doc/webUI_mobile_1.png">
+<img style="display: inline;
+  margin-right: 50px;
+  width: 200px;" src="./Doc/webUI_mobile_2.png">
+
+(Mobile Version)
+
+## Channels
+
+Nachdem die Rolläden in den Einstellungen konfiguriert und aktiviert wurden, können diese auch direkt im WebUI bedient werden.
+
+![webUI_shutter](/Doc/webUI_shutter.png)
+
+## Groups
+
+Die in den Einstellungen konfigurierten Gruppen können wie die einzelnen Rollläden auch direkt im WebUI bedient werden.
+
+![webUI_groups](/Doc/webUI_groups.png)
+
+## Timer
+
+Die Timer ermöglicht die automatische Steuerung einzelner Rollläden oder eine Auswahl mehrerer Rollläden als Gruppe.
+Als Auslöser kann ein fester Zeitpunkt oder Sonnenaufgang bzw. Sonnenuntergang mit optionalem Zeitversatz vorgegeben werden.
+
+![webUI_timer](/Doc/webUI_timer.png)
+
+Die Auswahl von Rollläden wird durch einen zusätzlichen Dialog unterstützt. Dort werden alle konfigurierten und aktivierten Rollläden angezeigt. Diese können dort ausgewählt werden und die benötigte Bitmaske wird dann automatisch berechnet.
+
+<img style="width: 444px;" src="./Doc/webUI_bitmask_wiz.png">
 
 -----
 

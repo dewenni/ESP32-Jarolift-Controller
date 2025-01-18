@@ -11,6 +11,97 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   </head>
   <body>
+    <dialog id="bitmask_dialog">
+      <article class="dash">
+        <div class="dash-main">
+          <div class="dash-header" data-i18n="bitmask_wizard"></div>
+          <br />
+          <div>
+            <!-- Checkbox channel- 1..16 -->
+            <div class="leftright CH1">
+              <label for="channel-0" id="bitmask_dialog_ch_0"> </label>
+              <input type="checkbox" id="channel-0" data-bit="0" />
+            </div>
+            <div class="leftright CH2">
+              <label for="channel-1" id="bitmask_dialog_ch_1"> </label>
+              <input type="checkbox" id="channel-1" data-bit="1" />
+            </div>
+            <div class="leftright CH3">
+              <label for="channel-2" id="bitmask_dialog_ch_2"> </label>
+              <input type="checkbox" id="channel-2" data-bit="2" />
+            </div>
+            <div class="leftright CH4">
+              <label for="channel-3" id="bitmask_dialog_ch_3"> </label>
+              <input type="checkbox" id="channel-3" data-bit="3" />
+            </div>
+            <div class="leftright CH5">
+              <label for="channel-4" id="bitmask_dialog_ch_4"> </label>
+              <input type="checkbox" id="channel-4" data-bit="4" />
+            </div>
+            <div class="leftright CH6">
+              <label for="channel-5" id="bitmask_dialog_ch_5"> </label>
+              <input type="checkbox" id="channel-5" data-bit="5" />
+            </div>
+            <div class="leftright CH7">
+              <label for="channel-6" id="bitmask_dialog_ch_6"> </label>
+              <input type="checkbox" id="channel-6" data-bit="6" />
+            </div>
+            <div class="leftright CH8">
+              <label for="channel-7" id="bitmask_dialog_ch_7"> </label>
+              <input type="checkbox" id="channel-7" data-bit="7" />
+            </div>
+            <div class="leftright CH9">
+              <label for="channel-8" id="bitmask_dialog_ch_8"> </label>
+              <input type="checkbox" id="channel-8" data-bit="8" />
+            </div>
+            <div class="leftright CH10">
+              <label for="channel-9" id="bitmask_dialog_ch_9"> </label>
+              <input type="checkbox" id="channel-9" data-bit="9" />
+            </div>
+            <div class="leftright CH11">
+              <label for="channel-10" id="bitmask_dialog_ch_10"> </label>
+              <input type="checkbox" id="channel-10" data-bit="10" />
+            </div>
+            <div class="leftright CH12">
+              <label for="channel-11" id="bitmask_dialog_ch_11"> </label>
+              <input type="checkbox" id="channel-11" data-bit="11" />
+            </div>
+            <div class="leftright CH13">
+              <label for="channel-12" id="bitmask_dialog_ch_12"> </label>
+              <input type="checkbox" id="channel-12" data-bit="12" />
+            </div>
+            <div class="leftright CH14">
+              <label for="channel-13" id="bitmask_dialog_ch_13"> </label>
+              <input type="checkbox" id="channel-13" data-bit="13" />
+            </div>
+            <div class="leftright CH15">
+              <label for="channel-14" id="bitmask_dialog_ch_14"> </label>
+              <input type="checkbox" id="channel-14" data-bit="14" />
+            </div>
+            <div class="leftright CH16">
+              <label for="channel-15" id="bitmask_dialog_ch_15"> </label>
+              <input type="checkbox" id="channel-15" data-bit="15" />
+            </div>
+          </div>
+          <br />
+          <div class="dash-footer">
+            <button
+              id="apply_bitmask"
+              data-i18n="apply"
+              style="width: 75%"></button>
+          </div>
+          <div class="dash-footer">
+            <button
+              id="close_bitmask_dialog"
+              data-i18n="cancel"
+              style="width: 75%"></button>
+          </div>
+        </div>
+        <div class="dash-icon">
+          <div class="svg i_binary"></div>
+        </div>
+      </article>
+    </dialog>
     <!-- Dialog Version -->
     <dialog id="version_dialog">
       <article class="dash">
@@ -26,7 +117,10 @@
             <a id="p00_dialog_git_version" aria-busy="true"></a>
           </div>
           <br />
-          <div id="p00_update_btn_hide" class="dash-footer" style="display: none">
+          <div
+            id="p00_update_btn_hide"
+            class="dash-footer"
+            style="display: none">
             <button
               id="p00_update_btn"
               style="width: 75%"
@@ -105,6 +199,7 @@
               <ul class="nav-list" dir="rtl">
                 <li><a data-tab="tab1" href="#" data-i18n="channels"></a></li>
                 <li><a data-tab="tab2" href="#" data-i18n="groups"></a></li>
+                <li><a data-tab="tab3" href="#" data-i18n="timer"></a></li>
                 <li>
                   <a data-tab="tab9" href="#" data-i18n="system"></a>
                 </li>
@@ -145,6 +240,12 @@
           <a href="#" data-tab="tab2">
             <i class="svg i_updown2"></i>
             <span class="links_name" data-i18n="groups"></span>
+          </a>
+        </li>
+        <li>
+          <a href="#" data-tab="tab3">
+            <i class="svg i_clock"></i>
+            <span class="links_name" data-i18n="timer"></span>
           </a>
         </li>
         <li>

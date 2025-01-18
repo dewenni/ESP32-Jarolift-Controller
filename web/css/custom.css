@@ -188,6 +188,18 @@ hr {
   min-width: 300px;
 }
 
+/* Container für Checkboxen */
+.roller-shutter-selection {
+  margin-top: 1rem;
+}
+
+/* Grid-Container */
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 4 Spalten */
+  gap: 1rem; /* Abstand zwischen den Elementen */
+}
+
 /* Breitere Bildschirme: 2 Elemente pro Zeile */
 @media (min-width: 768) {
   .grid .dash {
@@ -229,8 +241,8 @@ hr {
 .leftright {
   display: flex;
   justify-content: space-between;
-  margin-left: 10px;
-  margin-right: 10px;
+  margin-left: 0px;
+  margin-right: 0px;
   margin-top: 5px;
 }
 

@@ -57,6 +57,9 @@ Control up to 16 roller shutters with ease, all managed through the WebUI and MQ
 - **Support for up to 6 Roller Shutter Groups:**  
 define shutter groups to control several shutters at once
 
+- **Timer function***  
+stand alone timer function with fixed time, sunrise or sunset as trigger.
+
 Experimental version.
 Use at your own risk. For private/educational use only. (Keeloq algorithm licensed only to TI Microcontrollers)
 This project is not affiliated in any way with the vendor of the Jarolift components.
@@ -69,22 +72,6 @@ This version is for an ESP32 and is based on ideas and code from [madmartin/Jaro
 The original control code was written from Steffen Hille in Nov, 2017
 
 The project home is here: [Project Home](http://www.bastelbudenbuben.de/2017/04/25/protokollanalyse-von-jarolift-tdef-motoren/)
-
------
-
-![weubui_dash](Doc/webUI_1.png)
-(Desktop Version)
-
-The WebUI is responsive and also offers a mobile layout.
-
-<img style="display: inline;
-  margin-right: 50px;
-  width: 200px;" src="./Doc/webUI_mobile_1.png">
-<img style="display: inline;
-  margin-right: 50px;
-  width: 200px;" src="./Doc/webUI_mobile_2.png">
-
-(Mobile Version)
 
 -----
 
@@ -101,8 +88,13 @@ The WebUI is responsive and also offers a mobile layout.
   - [Configuration](#configuration)
   - [Filemanager](#filemanager)
   - [Migration](#migration)
+- [WebUI](#webui)
+  - [Channels](#channels)
+  - [Groups](#groups)
+  - [Timer](#timer)
 - [MQTT](#mqtt)
   - [Commands](#commands)
+  - [Status](#status)
   - [Home Assistant](#home-assistant)
 - [Optional Communication](#optional-communication)
   - [WebUI-Logger](#webui-logger)
@@ -116,26 +108,26 @@ The WebUI is responsive and also offers a mobile layout.
 
 a standard SPI GPIO configuration is:
 
-|CC1101-PIN | CC1101-Signal| ESP-GPIO|
-|-----------|--------------|---------|
-|2          | VCC          | --      |
-|1          | GND          | --      |
-|3          | GD0          | 21      |
-|8          | GD2          | 22      |
-|5          | SCK/CLK      | 18      |
-|6          | MOSI         | 23      |
-|7          | MISO         | 19      |
-|4          | CS(N)        | 5       |
+| CC1101-Signal| ESP-GPIO|
+|--------------|---------|
+| VCC          | --      |
+| GND          | --      |
+| GD0          | 21      |
+| GD2          | 22      |
+| SCK/CLK      | 18      |
+| MOSI         | 23      |
+| MISO         | 19      |
+| CS(N)        | 5       |
 
-![fritzing1](/Doc/ESP32_CC1101_Steckplatine.png)  
+<img style="width: 500px;" src="./Doc/ESP32_CC1101_Steckplatine.png">
 
-![fritzing2](/Doc/ESP32_CC1101_Schaltplan.png)  
+<img style="width: 500px;" src="./Doc/ESP32_CC1101_Schaltplan.png"> 
 
-![hardware_1](/Doc/hw_1.png)  
+<img style="width: 500px;" src="./Doc/hw_1.png">
 
 example with ESP32-Mini and CC1101
 
-![hardware_2](/Doc/hw_2.png)  
+<img style="width: 500px;" src="./Doc/hw_2.png">
 
 example for direct replacement with ESP32-Mini and the custom board from M. Maywald
 
@@ -163,7 +155,7 @@ Example for generic ESP32-Mini (Standard SPI port is used by CC1101)
 
 ## Platform-IO
 
-The software is created with [Visual Studio Code](https://code.visualstudio.com) and the [PlatformIO-Plugin](https://platformio.org).  
+The software is created with [Visual Studio Code](https://code.visualstudio.com) and the [pioarduino-Plugin](https://github.com/pioarduino/pioarduino-vscode-ide).  
 After installing the software you can clone the project from GitHub or you can download it as zip and open it in PlatformIO.
 Then adapt the `upload_port` and corresponding settings in `platformio.ini` to your USB-to-serial Adapter and upload the code to the ESP.
 
@@ -312,6 +304,47 @@ finished!
 now restart the ESP and test it.  
 After restarting, first check whether the device counter has been read correctly from the EEPROM. Only continue testing if this is the case.
 If everything done correct, all shutters should work like before. If not, some setting is wrong or you haven´t used the latest version of `(madmartin/Jarolift_MQTT)`. In that case I would prefer to set a new Serial number, reset the Device Counter und learn the shutter again.
+
+-----
+
+# WebUI
+
+The WebUI is responsive and also offers a mobile layout.
+
+![weubui_dash](Doc/webUI_1.png)
+(Desktop Version)
+
+<img style="display: inline;
+  margin-right: 50px;
+  width: 200px;" src="./Doc/webUI_mobile_1.png">
+<img style="display: inline;
+  margin-right: 50px;
+  width: 200px;" src="./Doc/webUI_mobile_2.png">
+
+(Mobile Version)
+
+## Channels
+
+Once the roller shutters have been configured and activated, they can also be controlled directly in the WebUI.
+
+![webUI_shutter](/Doc/webUI_shutter.png)
+
+## Groups
+
+The groups that are configured in the settings can also be operated directly in the WebUI in the same way as the individual roller shutters.
+
+![webUI_groups](/Doc/webUI_groups.png)
+
+## Timer
+
+The timer function enables the automatic control of individual roller shutters or a selection of several roller shutters as a group.
+A fixed time can be specified as a trigger, or sunrise or sunset with an optional time offset.
+
+![webUI_timer](/Doc/webUI_timer.png)
+
+The selection of roller shutters is supported by an additional dialogue. All configured and activated roller shutters are displayed there. These can be selected there and the bitmask is then automatically created from them.
+
+<img style="width: 444px;" src="./Doc/webUI_bitmask_wiz.png">
 
 -----
 

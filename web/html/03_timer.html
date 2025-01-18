@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>ESP Async Web Server</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" type="text/css" href="../css/pico.css" />
+    <link rel="stylesheet" type="text/css" href="../css/custom.css" />
+    <link rel="stylesheet" type="text/css" href="../css/icons.css" />
+    <script src="../js/fun.js" defer></script>
+    <script src="../js/doc.js" defer></script>
+    <script src="../js/lang.js" defer></script>
+    <style></style>
+    <script>
+      function test() {
+        document.getElementById("tab3").classList.add("active");
+        localizePage("de");
+      }
+      setInterval(test, 1000);
+    </script>
+  </head>
+  <body>
+    <!-- Layout -->
+    <header
+      style="
+        height: 100px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      "></header>
+    <!-- Tab-Content -->
+    <main class="container">
+      <!--SECTION-START-->
+      <!-- Tab-3 -->
+      <div id="tab3" class="tab-content">
+        <div class="grid" id="timers-container">
+          <article>
+            <div class="dash-main">
+              <div class="dash-header">Timer 1</div>
+              <div class="section-header">
+                <label for="timer0_enable" data-i18n="activate"></label>
+                <div class="switch-container">
+                  <input
+                    name="timer0_enable"
+                    type="checkbox"
+                    role="switch"
+                    hideOpt="OPT_TIMER0"
+                    id="cfg_timer_0_enable" />
+                </div>
+              </div>
+              <br />
+              <form id="timerForm" class="OPT_TIMER0">
+                <fieldset>
+                  <label for="timeType0" data-i18n="timer_type"></label>
+                  <select
+                    id="cfg_timer_0_type"
+                    name="timeType0"
+                    data-toggle="timeInputs"
+                    onchange="toggleTimeInputs(this)">
+                    <option value="0" data-i18n="time"></option>
+                    <option value="1" data-i18n="sunrise"></option>
+                    <option value="2" data-i18n="sundown"></option>
+                  </select>
+
+                  <div class="time-input" id="timeInput0">
+                    <label for="timeValue0" data-i18n="time_HH_MM"></label>
+                    <input
+                      type="time"
+                      id="cfg_timer_0_time_value"
+                      name="timeValue0" />
+                  </div>
+
+                  <div
+                    class="time-input"
+                    id="offsetInput0"
+                    style="display: none">
+                    <label for="offsetValue0" data-i18n="offset_desc"></label>
+                    <input
+                      type="number"
+                      id="cfg_timer_0_offset_value"
+                      name="offsetValue0"
+                      placeholder="0"
+                      step="1" />
+                  </div>
+
+                  <!-- Dropdown for shutter cmd -->
+                  <label for="command0" data-i18n="command"></label>
+                  <select id="cfg_timer_0_cmd" name="command0">
+                    <option value="0" data-i18n="cmd_up"></option>
+                    <option value="1" data-i18n="cmd_down"></option>
+                    <option value="2" data-i18n="cmd_shade"></option>
+                  </select>
+
+                  <!-- Checkbox for wekdays -->
+                  <label data-i18n="weekdays"></label>
+                  <div class="grid">
+                    <div>
+                      <input
+                        type="checkbox"
+                        id="cfg_timer_0_monday"
+                        name="days0" />
+                      <label for="monday0" data-i18n="day_mo"></label>
+                    </div>
+                    <div>
+                      <input
+                        type="checkbox"
+                        id="cfg_timer_0_tuesday"
+                        name="days0" />
+                      <label for="tuesday0" data-i18n="day_tu"></label>
+                    </div>
+                    <div>
+                      <input
+                        type="checkbox"
+                        id="cfg_timer_0_wednesday"
+                        name="days0" />
+                      <label for="wednesday0" data-i18n="day_we"></label>
+                    </div>
+                    <div>
+                      <input
+                        type="checkbox"
+                        id="cfg_timer_0_thursday"
+                        name="days0" />
+                      <label for="thursday0" data-i18n="day_th"></label>
+                    </div>
+                    <div>
+                      <input
+                        type="checkbox"
+                        id="cfg_timer_0_friday"
+                        name="days0" />
+                      <label for="friday0" data-i18n="day_fr"></label>
+                    </div>
+                    <br />
+                    <div>
+                      <input
+                        type="checkbox"
+                        id="cfg_timer_0_saturday"
+                        name="days0" />
+                      <label for="saturday0" data-i18n="day_sa"></label>
+                    </div>
+                    <div>
+                      <input
+                        type="checkbox"
+                        id="cfg_timer_0_sunday"
+                        name="days0" />
+                      <label for="sunday0" data-i18n="day_su"></label>
+                    </div>
+                  </div>
+                  <!-- selection of shutter -->
+                  <div>
+                    <div class="leftright">
+                      <label for="mask_timer0" data-i18n="mask"></label>
+                      <button
+                        onclick="openGrpMaskHelp(this)"
+                        class="i_help"
+                        style="
+                          height: 20px;
+                          background-color: transparent;
+                          border: none;
+                        "></button>
+                    </div>
+                    <input
+                      class="bitmask-input"
+                      name="mask_timer0"
+                      type="text"
+                      data-type="bin"
+                      id="cfg_timer_0_grp_mask"
+                      oninput="validateBin(this)"
+                      onblur="formatBin(this)"
+                      pattern="[01]{1,16}"
+                      placeholder="Enter Bit-Mask (0 and 1 only, 16 chars)"
+                      maxlength="16" />
+                  </div>
+                  <br />
+                </fieldset>
+              </form>
+            </div>
+          </article>
+          <article>
+            <div class="dash-main">
+              <div class="dash-header">Timer 2</div>
+              <div class="section-header">
+                <label for="timer1_enable" data-i18n="activate"></label>
+                <div class="switch-container">
+                  <input
+                    name="timer1_enable"
+                    type="checkbox"
+                    role="switch"
+                    hideOpt="OPT_TIMER1"
+                    id="cfg_timer_1_enable" />
+                </div>
+              </div>
+              <br />
+              <form id="timerForm" class="OPT_TIMER1">
+                <fieldset>
+                  <label for="timeType1" data-i18n="timer_type"></label>
+                  <select
+                    id="cfg_timer_1_type"
+                    name="timeType1"
+                    data-toggle="timeInputs"
+                    onchange="toggleTimeInputs(this)">
+                    <option value="0" data-i18n="time"></option>
+                    <option value="1" data-i18n="sunrise"></option>
+                    <option value="2" data-i18n="sundown"></option>
+                  </select>
+
+                  <div class="time-input" id="timeInput1">
+                    <label for="timeValue1" data-i18n="time_HH_MM"></label>
+                    <input
+                      type="time"
+                      id="cfg_timer_1_time_value"
+                      name="timeValue1" />
+                  </div>
+
+                  <div
+                    class="time-input"
+                    id="offsetInput1"
+                    style="display: none">
+                    <label for="offsetValue1" data-i18n="offset_desc"></label>
+                    <input
+                      type="number"
+                      id="cfg_timer_1_offset_value"
+                      name="offsetValue1"
+                      placeholder="0"
+                      step="1" />
+                  </div>
+
+                  <!-- Dropdown for shutter cmd -->
+                  <label for="command1" data-i18n="command"></label>
+                  <select id="cfg_timer_1_cmd" name="command1">
+                    <option value="0" data-i18n="cmd_up"></option>
+                    <option value="1" data-i18n="cmd_down"></option>
+                    <option value="2" data-i18n="cmd_shade"></option>
+                  </select>
+
+                  <!-- Checkbox for wekdays -->
+                  <label data-i18n="weekdays"></label>
+                  <div class="grid">
+                    <div>
+                      <input
+                        type="checkbox"
+                        id="cfg_timer_1_monday"
+                        name="days1" />
+                      <label for="monday1" data-i18n="day_mo"></label>
+                    </div>
+                    <div>
+                      <input
+                        type="checkbox"
+                        id="cfg_timer_1_tuesday"
+                        name="days1" />
+                      <label for="tuesday1" data-i18n="day_tu"></label>
+                    </div>
+                    <div>
+                      <input
+                        type="checkbox"
+                        id="cfg_timer_1_wednesday"
+                        name="days1" />
+                      <label for="wednesday1" data-i18n="day_we"></label>
+                    </div>
+                    <div>
+                      <input
+                        type="checkbox"
+                        id="cfg_timer_1_thursday"
+                        name="days1" />
+                      <label for="thursday1" data-i18n="day_th"></label>
+                    </div>
+                    <div>
+                      <input
+                        type="checkbox"
+                        id="cfg_timer_1_friday"
+                        name="days1" />
+                      <label for="friday1" data-i18n="day_fr"></label>
+                    </div>
+                    <br />
+                    <div>
+                      <input
+                        type="checkbox"
+                        id="cfg_timer_1_saturday"
+                        name="days1" />
+                      <label for="saturday1" data-i18n="day_sa"></label>
+                    </div>
+                    <div>
+                      <input
+                        type="checkbox"
+                        id="cfg_timer_1_sunday"
+                        name="days1" />
+                      <label for="sunday1" data-i18n="day_su"></label>
+                    </div>
+                  </div>
+                  <!-- selection of shutter -->
+                  <div>
+                    <div class="leftright">
+                      <label for="mask_timer0" data-i18n="mask"></label>
+                      <button
+                        onclick="openGrpMaskHelp(this)"
+                        class="i_help"
+                        style="
+                          height: 20px;
+                          background-color: transparent;
+                          border: none;
+                        "></button>
+                    </div>
+                    <input
+                      class="bitmask-input"
+                      name="mask_timer0"
+                      type="text"
+                      data-type="bin"
+                      id="cfg_timer_1_grp_mask"
+                      oninput="validateBin(this)"
+                      onblur="formatBin(this)"
+                      pattern="[01]{1,16}"
+                      placeholder="Enter Bit-Mask (0 and 1 only, 16 chars)"
+                      maxlength="16" />
+                  </div>
+                  <br />
+                </fieldset>
+              </form>
+            </div>
+          </article>
+          <article>
+            <div class="dash-main">
+              <div class="dash-header">Timer 3</div>
+              <div class="section-header">
+                <label for="timer2_enable" data-i18n="activate"></label>
+                <div class="switch-container">
+                  <input
+                    name="timer2_enable"
+                    type="checkbox"
+                    role="switch"
+                    hideOpt="OPT_TIMER2"
+                    id="cfg_timer_2_enable" />
+                </div>
+              </div>
+              <br />
+              <form id="timerForm" class="OPT_TIMER2">
+                <fieldset>
+                  <label for="timeType2" data-i18n="timer_type"></label>
+                  <select
+                    id="cfg_timer_2_type"
+                    name="timeType2"
+                    data-toggle="timeInputs"
+                    onchange="toggleTimeInputs(this)">
+                    <option value="0" data-i18n="time"></option>
+                    <option value="1" data-i18n="sunrise"></option>
+                    <option value="2" data-i18n="sundown"></option>
+                  </select>
+
+                  <div class="time-input" id="timeInput2">
+                    <label for="timeValue2" data-i18n="time_HH_MM"></label>
+                    <input
+                      type="time"
+                      id="cfg_timer_2_time_value"
+                      name="timeValue2" />
+                  </div>
+
+                  <div
+                    class="time-input"
+                    id="offsetInput2"
+                    style="display: none">
+                    <label for="offsetValue2" data-i18n="offset_desc"></label>
+                    <input
+                      type="number"
+                      id="cfg_timer_2_offset_value"
+                      name="offsetValue2"
+                      placeholder="0"
+                      step="1" />
+                  </div>
+
+                  <!-- Dropdown for shutter cmd -->
+                  <label for="command2" data-i18n="command"></label>
+                  <select id="cfg_timer_2_cmd" name="command2">
+                    <option value="0" data-i18n="cmd_up"></option>
+                    <option value="1" data-i18n="cmd_down"></option>
+                    <option value="2" data-i18n="cmd_shade"></option>
+                  </select>
+
+                  <!-- Checkbox for wekdays -->
+                  <label data-i18n="weekdays"></label>
+                  <div class="grid">
+                    <div>
+                      <input
+                        type="checkbox"
+                        id="cfg_timer_2_monday"
+                        name="days2" />
+                      <label for="monday2" data-i18n="day_mo"></label>
+                    </div>
+                    <div>
+                      <input
+                        type="checkbox"
+                        id="cfg_timer_2_tuesday"
+                        name="days2" />
+                      <label for="tuesday2" data-i18n="day_tu"></label>
+                    </div>
+                    <div>
+                      <input
+                        type="checkbox"
+                        id="cfg_timer_2_wednesday"
+                        name="days2" />
+                      <label for="wednesday2" data-i18n="day_we"></label>
+                    </div>
+                    <div>
+                      <input
+                        type="checkbox"
+                        id="cfg_timer_2_thursday"
+                        name="days2" />
+                      <label for="thursday2" data-i18n="day_th"></label>
+                    </div>
+                    <div>
+                      <input
+                        type="checkbox"
+                        id="cfg_timer_2_friday"
+                        name="days2" />
+                      <label for="friday2" data-i18n="day_fr"></label>
+                    </div>
+                    <br />
+                    <div>
+                      <input
+                        type="checkbox"
+                        id="cfg_timer_2_saturday"
+                        name="days2" />
+                      <label for="saturday2" data-i18n="day_sa"></label>
+                    </div>
+                    <div>
+                      <input
+                        type="checkbox"
+                        id="cfg_timer_2_sunday"
+                        name="days2" />
+                      <label for="sunday2" data-i18n="day_su"></label>
+                    </div>
+                  </div>
+                  <!-- selection of shutter -->
+                  <div>
+                    <div class="leftright">
+                      <label for="mask_timer2" data-i18n="mask"></label>
+                      <button
+                        onclick="openGrpMaskHelp(this)"
+                        class="i_help"
+                        style="
+                          height: 20px;
+                          background-color: transparent;
+                          border: none;
+                        "></button>
+                    </div>
+                    <input
+                      class="bitmask-input"
+                      name="mask_timer2"
+                      type="text"
+                      data-type="bin"
+                      id="cfg_timer_2_grp_mask"
+                      oninput="validateBin(this)"
+                      onblur="formatBin(this)"
+                      pattern="[01]{1,16}"
+                      placeholder="Enter Bit-Mask (0 and 1 only, 16 chars)"
+                      maxlength="16" />
+                  </div>
+                  <br />
+                </fieldset>
+              </form>
+            </div>
+          </article>
+          <article>
+            <div class="dash-main">
+              <div class="dash-header">Timer 4</div>
+              <div class="section-header">
+                <label for="timer3_enable" data-i18n="activate"></label>
+                <div class="switch-container">
+                  <input
+                    name="timer3_enable"
+                    type="checkbox"
+                    role="switch"
+                    hideOpt="OPT_TIMER3"
+                    id="cfg_timer_3_enable" />
+                </div>
+              </div>
+              <br />
+              <form id="timerForm" class="OPT_TIMER3">
+                <fieldset>
+                  <label for="timeType3" data-i18n="timer_type"></label>
+                  <select
+                    id="cfg_timer_3_type"
+                    name="timeType3"
+                    data-toggle="timeInputs"
+                    onchange="toggleTimeInputs(this)">
+                    <option value="0" data-i18n="time"></option>
+                    <option value="1" data-i18n="sunrise"></option>
+                    <option value="2" data-i18n="sundown"></option>
+                  </select>
+
+                  <div class="time-input" id="timeInput3">
+                    <label for="timeValue3" data-i18n="time_HH_MM"></label>
+                    <input
+                      type="time"
+                      id="cfg_timer_3_time_value"
+                      name="timeValue3" />
+                  </div>
+
+                  <div
+                    class="time-input"
+                    id="offsetInput3"
+                    style="display: none">
+                    <label for="offsetValue3" data-i18n="offset_desc"></label>
+                    <input
+                      type="number"
+                      id="cfg_timer_3_offset_value"
+                      name="offsetValue3"
+                      placeholder="0"
+                      step="1" />
+                  </div>
+
+                  <!-- Dropdown for shutter cmd -->
+                  <label for="command3" data-i18n="command"></label>
+                  <select id="cfg_timer_3_cmd" name="command3">
+                    <option value="0" data-i18n="cmd_up"></option>
+                    <option value="1" data-i18n="cmd_down"></option>
+                    <option value="2" data-i18n="cmd_shade"></option>
+                  </select>
+
+                  <!-- Checkbox for wekdays -->
+                  <label data-i18n="weekdays"></label>
+                  <div class="grid">
+                    <div>
+                      <input
+                        type="checkbox"
+                        id="cfg_timer_3_monday"
+                        name="days3" />
+                      <label for="monday3" data-i18n="day_mo"></label>
+                    </div>
+                    <div>
+                      <input
+                        type="checkbox"
+                        id="cfg_timer_3_tuesday"
+                        name="days3" />
+                      <label for="tuesday3" data-i18n="day_tu"></label>
+                    </div>
+                    <div>
+                      <input
+                        type="checkbox"
+                        id="cfg_timer_3_wednesday"
+                        name="days3" />
+                      <label for="wednesday3" data-i18n="day_we"></label>
+                    </div>
+                    <div>
+                      <input
+                        type="checkbox"
+                        id="cfg_timer_3_thursday"
+                        name="days3" />
+                      <label for="thursday3" data-i18n="day_th"></label>
+                    </div>
+                    <div>
+                      <input
+                        type="checkbox"
+                        id="cfg_timer_3_friday"
+                        name="days3" />
+                      <label for="friday3" data-i18n="day_fr"></label>
+                    </div>
+                    <br />
+                    <div>
+                      <input
+                        type="checkbox"
+                        id="cfg_timer_3_saturday"
+                        name="days3" />
+                      <label for="saturday3" data-i18n="day_sa"></label>
+                    </div>
+                    <div>
+                      <input
+                        type="checkbox"
+                        id="cfg_timer_3_sunday"
+                        name="days3" />
+                      <label for="sunday3" data-i18n="day_su"></label>
+                    </div>
+                  </div>
+                  <!-- selection of shutter -->
+                  <div>
+                    <div class="leftright">
+                      <label for="mask_timer3" data-i18n="mask"></label>
+                      <button
+                        onclick="openGrpMaskHelp(this)"
+                        class="i_help"
+                        style="
+                          height: 20px;
+                          background-color: transparent;
+                          border: none;
+                        "></button>
+                    </div>
+                    <input
+                      class="bitmask-input"
+                      name="mask_timer3"
+                      type="text"
+                      data-type="bin"
+                      id="cfg_timer_3_grp_mask"
+                      oninput="validateBin(this)"
+                      onblur="formatBin(this)"
+                      pattern="[01]{1,16}"
+                      placeholder="Enter Bit-Mask (0 and 1 only, 16 chars)"
+                      maxlength="16" />
+                  </div>
+                  <br />
+                </fieldset>
+              </form>
+            </div>
+          </article>
+          <article>
+            <div class="dash-main">
+              <div class="dash-header">Timer 5</div>
+              <div class="section-header">
+                <label for="timer4_enable" data-i18n="activate"></label>
+                <div class="switch-container">
+                  <input
+                    name="timer4_enable"
+                    type="checkbox"
+                    role="switch"
+                    hideOpt="OPT_TIMER4"
+                    id="cfg_timer_4_enable" />
+                </div>
+              </div>
+              <br />
+              <form id="timerForm" class="OPT_TIMER4">
+                <fieldset>
+                  <label for="timeType4" data-i18n="timer_type"></label>
+                  <select
+                    id="cfg_timer_4_type"
+                    name="timeType4"
+                    data-toggle="timeInputs"
+                    onchange="toggleTimeInputs(this)">
+                    <option value="0" data-i18n="time"></option>
+                    <option value="1" data-i18n="sunrise"></option>
+                    <option value="2" data-i18n="sundown"></option>
+                  </select>
+
+                  <div class="time-input" id="timeInput4">
+                    <label for="timeValue4" data-i18n="time_HH_MM"></label>
+                    <input
+                      type="time"
+                      id="cfg_timer_4_time_value"
+                      name="timeValue4" />
+                  </div>
+
+                  <div
+                    class="time-input"
+                    id="offsetInput4"
+                    style="display: none">
+                    <label for="offsetValue4" data-i18n="offset_desc"></label>
+                    <input
+                      type="number"
+                      id="cfg_timer_4_offset_value"
+                      name="offsetValue4"
+                      placeholder="0"
+                      step="1" />
+                  </div>
+
+                  <!-- Dropdown for shutter cmd -->
+                  <label for="command4" data-i18n="command"></label>
+                  <select id="cfg_timer_4_cmd" name="command4">
+                    <option value="0" data-i18n="cmd_up"></option>
+                    <option value="1" data-i18n="cmd_down"></option>
+                    <option value="2" data-i18n="cmd_shade"></option>
+                  </select>
+
+                  <!-- Checkbox for wekdays -->
+                  <label data-i18n="weekdays"></label>
+                  <div class="grid">
+                    <div>
+                      <input
+                        type="checkbox"
+                        id="cfg_timer_4_monday"
+                        name="days4" />
+                      <label for="monday4" data-i18n="day_mo"></label>
+                    </div>
+                    <div>
+                      <input
+                        type="checkbox"
+                        id="cfg_timer_4_tuesday"
+                        name="days4" />
+                      <label for="tuesday4" data-i18n="day_tu"></label>
+                    </div>
+                    <div>
+                      <input
+                        type="checkbox"
+                        id="cfg_timer_4_wednesday"
+                        name="days4" />
+                      <label for="wednesday4" data-i18n="day_we"></label>
+                    </div>
+                    <div>
+                      <input
+                        type="checkbox"
+                        id="cfg_timer_4_thursday"
+                        name="days4" />
+                      <label for="thursday4" data-i18n="day_th"></label>
+                    </div>
+                    <div>
+                      <input
+                        type="checkbox"
+                        id="cfg_timer_4_friday"
+                        name="days4" />
+                      <label for="friday4" data-i18n="day_fr"></label>
+                    </div>
+                    <br />
+                    <div>
+                      <input
+                        type="checkbox"
+                        id="cfg_timer_4_saturday"
+                        name="days4" />
+                      <label for="saturday4" data-i18n="day_sa"></label>
+                    </div>
+                    <div>
+                      <input
+                        type="checkbox"
+                        id="cfg_timer_4_sunday"
+                        name="days4" />
+                      <label for="sunday4" data-i18n="day_su"></label>
+                    </div>
+                  </div>
+                  <!-- selection of shutter -->
+                  <div>
+                    <div class="leftright">
+                      <label for="mask_timer4" data-i18n="mask"></label>
+                      <button
+                        onclick="openGrpMaskHelp(this)"
+                        class="i_help"
+                        style="
+                          height: 20px;
+                          background-color: transparent;
+                          border: none;
+                        "></button>
+                    </div>
+                    <input
+                      class="bitmask-input"
+                      name="mask_timer4"
+                      type="text"
+                      data-type="bin"
+                      id="cfg_timer_4_grp_mask"
+                      oninput="validateBin(this)"
+                      onblur="formatBin(this)"
+                      pattern="[01]{1,16}"
+                      placeholder="Enter Bit-Mask (0 and 1 only, 16 chars)"
+                      maxlength="16" />
+                  </div>
+                  <br />
+                </fieldset>
+              </form>
+            </div>
+          </article>
+          <article>
+            <div class="dash-main">
+              <div class="dash-header">Timer 6</div>
+              <div class="section-header">
+                <label for="timer5_enable" data-i18n="activate"></label>
+                <div class="switch-container">
+                  <input
+                    name="timer5_enable"
+                    type="checkbox"
+                    role="switch"
+                    hideOpt="OPT_TIMER5"
+                    id="cfg_timer_5_enable" />
+                </div>
+              </div>
+              <br />
+              <form id="timerForm" class="OPT_TIMER5">
+                <fieldset>
+                  <label for="timeType5" data-i18n="timer_type"></label>
+                  <select
+                    id="cfg_timer_5_type"
+                    name="timeType5"
+                    data-toggle="timeInputs"
+                    onchange="toggleTimeInputs(this)">
+                    <option value="0" data-i18n="time"></option>
+                    <option value="1" data-i18n="sunrise"></option>
+                    <option value="2" data-i18n="sundown"></option>
+                  </select>
+
+                  <div class="time-input" id="timeInput5">
+                    <label for="timeValue5" data-i18n="time_HH_MM"></label>
+                    <input
+                      type="time"
+                      id="cfg_timer_5_time_value"
+                      name="timeValue5" />
+                  </div>
+
+                  <div
+                    class="time-input"
+                    id="offsetInput5"
+                    style="display: none">
+                    <label for="offsetValue5" data-i18n="offset_desc"></label>
+                    <input
+                      type="number"
+                      id="cfg_timer_5_offset_value"
+                      name="offsetValue5"
+                      placeholder="0"
+                      step="1" />
+                  </div>
+
+                  <!-- Dropdown for shutter cmd -->
+                  <label for="command5" data-i18n="command"></label>
+                  <select id="cfg_timer_5_cmd" name="command5">
+                    <option value="0" data-i18n="cmd_up"></option>
+                    <option value="1" data-i18n="cmd_down"></option>
+                    <option value="2" data-i18n="cmd_shade"></option>
+                  </select>
+
+                  <!-- Checkbox for wekdays -->
+                  <label data-i18n="weekdays"></label>
+                  <div class="grid">
+                    <div>
+                      <input
+                        type="checkbox"
+                        id="cfg_timer_5_monday"
+                        name="days5" />
+                      <label for="monday5" data-i18n="day_mo"></label>
+                    </div>
+                    <div>
+                      <input
+                        type="checkbox"
+                        id="cfg_timer_5_tuesday"
+                        name="days5" />
+                      <label for="tuesday5" data-i18n="day_tu"></label>
+                    </div>
+                    <div>
+                      <input
+                        type="checkbox"
+                        id="cfg_timer_5_wednesday"
+                        name="days5" />
+                      <label for="wednesday5" data-i18n="day_we"></label>
+                    </div>
+                    <div>
+                      <input
+                        type="checkbox"
+                        id="cfg_timer_5_thursday"
+                        name="days5" />
+                      <label for="thursday5" data-i18n="day_th"></label>
+                    </div>
+                    <div>
+                      <input
+                        type="checkbox"
+                        id="cfg_timer_5_friday"
+                        name="days5" />
+                      <label for="friday5" data-i18n="day_fr"></label>
+                    </div>
+                    <br />
+                    <div>
+                      <input
+                        type="checkbox"
+                        id="cfg_timer_5_saturday"
+                        name="days5" />
+                      <label for="saturday5" data-i18n="day_sa"></label>
+                    </div>
+                    <div>
+                      <input
+                        type="checkbox"
+                        id="cfg_timer_5_sunday"
+                        name="days5" />
+                      <label for="sunday5" data-i18n="day_su"></label>
+                    </div>
+                  </div>
+                  <!-- selection of shutter -->
+                  <div>
+                    <div class="leftright">
+                      <label for="mask_timer5" data-i18n="mask"></label>
+                      <button
+                        onclick="openGrpMaskHelp(this)"
+                        class="i_help"
+                        style="
+                          height: 20px;
+                          background-color: transparent;
+                          border: none;
+                        "></button>
+                    </div>
+                    <input
+                      class="bitmask-input"
+                      name="mask_timer5"
+                      type="text"
+                      data-type="bin"
+                      id="cfg_timer_5_grp_mask"
+                      oninput="validateBin(this)"
+                      onblur="formatBin(this)"
+                      pattern="[01]{1,16}"
+                      placeholder="Enter Bit-Mask (0 and 1 only, 16 chars)"
+                      maxlength="16" />
+                  </div>
+                  <br />
+                </fieldset>
+              </form>
+            </div>
+          </article>
+          <!-- END Grid1 -->
+        </div>
+        <!-- END Tab-Content -->
+      </div>
+      <!--SECTION-END-->
+    </main>
+    <!-- Footer -->
+    <footer
+      style="
+        height: 100px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      ">
+      <div id="status">STATUS</div>
+    </footer>
+  </body>
+</html>

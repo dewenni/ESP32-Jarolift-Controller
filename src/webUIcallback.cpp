@@ -5,7 +5,6 @@
 #include <webUI.h>
 #include <webUIupdates.h>
 
-static tm dti;
 static const char *TAG = "WEB"; // LOG TAG
 
 /**
@@ -137,54 +136,12 @@ void webCallback(const char *elementId, const char *value) {
     snprintf(config.ntp.tz, sizeof(config.ntp.tz), "%s", value);
   }
 
-  // set manual date for Logamatic
-  if (strcmp(elementId, "p12_dti_date") == 0) {
-    char tmp1[12] = {'\0'};
-    char tmp2[12] = {'\0'};
-    /* ---------------- INFO ---------------------------------
-    dti.tm_year + 1900  // years since 1900
-    dti.tm_mon + 1      // January = 0 (!)
-    dti.tm_mday         // day of month
-    dti.tm_hour         // hours since midnight  0-23
-    dti.tm_min          // minutes after the hour  0-59
-    dti.tm_sec          // seconds after the minute  0-61*
-    dti.tm_wday         // days since Sunday 0-6
-    dti.tm_isdst        // Daylight Saving Time flag
-    --------------------------------------------------------- */
-    // get date
-    strncpy(tmp1, value, sizeof(tmp1));
-    // extract year
-    memset(tmp2, 0, sizeof(tmp2));
-    strncpy(tmp2, tmp1, 4);
-    dti.tm_year = atoi(tmp2) - 1900;
-    // extract month
-    memset(tmp2, 0, sizeof(tmp2));
-    strncpy(tmp2, tmp1 + 5, 2);
-    dti.tm_mon = atoi(tmp2) - 1;
-    // extract day
-    memset(tmp2, 0, sizeof(tmp2));
-    strncpy(tmp2, tmp1 + 8, 2);
-    dti.tm_mday = atoi(tmp2);
-    // calculate day of week
-    int d = dti.tm_mday;        // Day     1-31
-    int m = dti.tm_mon + 1;     // Month   1-12
-    int y = dti.tm_year + 1900; // Year    2022
-    dti.tm_wday = (d += m < 3 ? y-- : y - 2,
-                   23 * m / 9 + d + 4 + y / 4 - y / 100 + y / 400) % 7; // calculate day of week
+  // GEO-Location
+  if (strcmp(elementId, "cfg_geo_latitude") == 0) {
+    config.geo.latitude = atof(value);
   }
-  // get time
-  if (strcmp(elementId, "p12_dti_time") == 0) {
-    char tmp1[12] = {'\0'};
-    char tmp2[12] = {'\0'};
-    strncpy(tmp1, value, sizeof(tmp1));
-    // extract hour
-    memset(tmp2, 0, sizeof(tmp2));
-    strncpy(tmp2, tmp1, 2);
-    dti.tm_hour = atoi(tmp2);
-    // extract minutes
-    memset(tmp2, 0, sizeof(tmp2));
-    strncpy(tmp2, tmp1 + 3, 2);
-    dti.tm_min = atoi(tmp2);
+  if (strcmp(elementId, "cfg_geo_longitude") == 0) {
+    config.geo.longitude = atof(value);
   }
 
   // MQTT
@@ -359,18 +316,91 @@ void webCallback(const char *elementId, const char *value) {
     }
   }
 
+  // Timer 1-6
+  for (int i = 0; i < 6; i++) {
+    char enableId[32];
+    char typeId[32];
+    char timeValueId[32];
+    char offsetValueId[32];
+    char cmdId[32];
+    char maskId[32];
+
+    char mondayId[32];
+    char tuesdayId[32];
+    char wednesdayId[32];
+    char thursdayId[32];
+    char fridayId[32];
+    char saturdayId[32];
+    char sundayId[32];
+
+    snprintf(enableId, sizeof(enableId), "cfg_timer_%d_enable", i);
+    snprintf(typeId, sizeof(typeId), "cfg_timer_%d_type", i);
+    snprintf(timeValueId, sizeof(timeValueId), "cfg_timer_%d_time_value", i);
+    snprintf(offsetValueId, sizeof(offsetValueId), "cfg_timer_%d_offset_value", i);
+    snprintf(cmdId, sizeof(cmdId), "cfg_timer_%d_cmd", i);
+    snprintf(maskId, sizeof(maskId), "cfg_timer_%d_grp_mask", i);
+
+    snprintf(mondayId, sizeof(mondayId), "cfg_timer_%d_monday", i);
+    snprintf(tuesdayId, sizeof(tuesdayId), "cfg_timer_%d_tuesday", i);
+    snprintf(wednesdayId, sizeof(wednesdayId), "cfg_timer_%d_wednesday", i);
+    snprintf(thursdayId, sizeof(thursdayId), "cfg_timer_%d_thursday", i);
+    snprintf(fridayId, sizeof(fridayId), "cfg_timer_%d_friday", i);
+    snprintf(saturdayId, sizeof(saturdayId), "cfg_timer_%d_saturday", i);
+    snprintf(sundayId, sizeof(sundayId), "cfg_timer_%d_sunday", i);
+
+    if (strcmp(elementId, enableId) == 0) {
+      config.timer[i].enable = EspStrUtil::stringToBool(value);
+    }
+    if (strcmp(elementId, typeId) == 0) {
+      config.timer[i].type = atoi(value);
+    }
+    if (strcmp(elementId, timeValueId) == 0) {
+      snprintf(config.timer[i].time_value, sizeof(config.timer[i].time_value), "%s", value);
+    }
+    if (strcmp(elementId, offsetValueId) == 0) {
+      config.timer[i].offset_value = atoi(value);
+    }
+    if (strcmp(elementId, cmdId) == 0) {
+      config.timer[i].cmd = atoi(value);
+    }
+    if (strcmp(elementId, maskId) == 0) {
+      config.timer[i].grp_mask = strtoul(value, NULL, 2);
+    }
+
+    if (strcmp(elementId, mondayId) == 0) {
+      config.timer[i].monday = EspStrUtil::stringToBool(value);
+    }
+    if (strcmp(elementId, tuesdayId) == 0) {
+      config.timer[i].tuesday = EspStrUtil::stringToBool(value);
+    }
+    if (strcmp(elementId, wednesdayId) == 0) {
+      config.timer[i].wednesday = EspStrUtil::stringToBool(value);
+    }
+    if (strcmp(elementId, thursdayId) == 0) {
+      config.timer[i].thursday = EspStrUtil::stringToBool(value);
+    }
+    if (strcmp(elementId, fridayId) == 0) {
+      config.timer[i].friday = EspStrUtil::stringToBool(value);
+    }
+    if (strcmp(elementId, saturdayId) == 0) {
+      config.timer[i].saturday = EspStrUtil::stringToBool(value);
+    }
+    if (strcmp(elementId, sundayId) == 0) {
+      config.timer[i].sunday = EspStrUtil::stringToBool(value);
+    }
+  }
+
   // Language
   if (strcmp(elementId, "cfg_lang") == 0) {
     config.lang = strtoul(value, NULL, 10);
     updateAllElements();
   }
 
-  // Buttons
-  if (strcmp(elementId, "p12_btn_restart") == 0) {
+  // Restart (and save)
+  if (strcmp(elementId, "restartAction") == 0) {
     EspSysUtil::RestartReason::saveLocal("webUI command");
-    yield();
+    configSaveToFile();
     delay(1000);
-    yield();
     ESP.restart();
   }
 
