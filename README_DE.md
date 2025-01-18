@@ -107,16 +107,16 @@ Die Homepage des Projekts ist hier: [Project Home](http://www.bastelbudenbuben.d
 
 eine Standard-SPI-GPIO-Konfiguration für den CC1101 und den ESP32 ist folgende:
 
-|CC1101-PIN | CC1101-Signal| ESP-GPIO|
-|-----------|--------------|---------|
-|2          | VCC          | --      |
-|1          | GND          | --      |
-|3          | GD0          | 21      |
-|8          | GD2          | 22      |
-|5          | SCK/CLK      | 18      |
-|6          | MOSI         | 23      |
-|7          | MISO         | 19      |
-|4          | CS(N)        | 5       |
+| CC1101-Signal| ESP-GPIO|
+|--------------|---------|
+| VCC          | --      |
+| GND          | --      |
+| GD0          | 21      |
+| GD2          | 22      |
+| SCK/CLK      | 18      |
+| MOSI         | 23      |
+| MISO         | 19      |
+| CS(N)        | 5       |
 
 <img style="width: 500px;" src="./Doc/ESP32_CC1101_Steckplatine.png">
 

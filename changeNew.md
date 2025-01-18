@@ -19,6 +19,22 @@ The selection of roller shutters is supported by an additional dialogue. All con
 > [!TIP]
 > Maybe it is necessary to clean your browser cache after the update, to be sure that everything works well!
 
+### encrypted Passwords
+
+Passwords are now better protected and stored in encrypted form in the config.json
+When updating, the existing passwords are automatically encrypted and saved again.
+
+> [!CAUTION]
+> As the passwords are stored in encrypted form after this update, it is no longer possible to switch to an older version without re-entering the passwords after the downgrade
+
 ## changelog
 
-- added new feature to define 6 individual timer to automatically move the shutters #4
+- [UPDATE] Arduino core 3.1.1 based on IDF 5.3.2.241224
+- [UPDATE] mathieucarbou/AsyncTCP @ 3.3.2
+- [UPDATE] mathieucarbou/ESPAsyncWebServer @ 3.6.0
+- [FEATURE] new feature to define 6 individual timer to automatically move the shutters #4
+- [FEATURE] new wizard for defining bit masks for timers and groups
+- [IMPROVE] uploaded config files via "config-upload" are now automatically renamed to config.json, regardless of the original filename.
+- [IMPROVE] Improved behavior when the restart button is pressed immediately after a change in the settings.
+- [IMPROVE] Passwords are better protected and are stored in encrypted form
+
