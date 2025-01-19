@@ -57,7 +57,7 @@ Control up to 16 roller shutters with ease, all managed through the WebUI and MQ
 - **Support for up to 6 Roller Shutter Groups:**  
 define shutter groups to control several shutters at once
 
-- **Timer function***  
+- **Timer function**  
 stand alone timer function with fixed time, sunrise or sunset as trigger.
 
 Experimental version.
