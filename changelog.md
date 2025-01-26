@@ -9,7 +9,7 @@ this is a minor update and bugfix version
 ## changelog
 
 - [UPDATE]  ESP32Async/AsyncTCP @ 3.3.2
-- [UPDATE]  ESP32Async/ESPAsyncWebServer @ 3.6.0
+- [UPDATE]  ESP32Async/ESPAsyncWebServer @ 3.6.2
 - [UPDATE]  bblanchon/ArduinoJson @ 7.3.0
 - [UPDATE]  dewenni/EspSysUtil @ 1.0.1
 - [IMPROVE] add button for GitHub-OTA in Tools section #34
