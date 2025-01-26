@@ -55,7 +55,7 @@ void telnetShell() {
 }
 
 void onTelnetConnect(String ip) {
-  MY_LOGI(TAG, "Telnet: %s connected", ip.c_str());
+  ESP_LOGI(TAG, "Telnet: %s connected", ip.c_str());
   telnet.println(ansi.setFG(ANSI_BRIGHT_GREEN));
   telnet.println("\n----------------------------------------------------------------------");
   telnet.println("\nESP32-Jarolift-MQTT");
@@ -66,11 +66,11 @@ void onTelnetConnect(String ip) {
   telnetShell();
 }
 
-void onTelnetDisconnect(String ip) { MY_LOGI(TAG, "Telnet: %s disconnected", ip.c_str()); }
+void onTelnetDisconnect(String ip) { ESP_LOGI(TAG, "Telnet: %s disconnected", ip.c_str()); }
 
-void onTelnetReconnect(String ip) { MY_LOGI(TAG, "Telnet: %s reconnected", ip.c_str()); }
+void onTelnetReconnect(String ip) { ESP_LOGI(TAG, "Telnet: %s reconnected", ip.c_str()); }
 
-void onTelnetConnectionAttempt(String ip) { MY_LOGI(TAG, "Telnet: %s tried to connect", ip.c_str()); }
+void onTelnetConnectionAttempt(String ip) { ESP_LOGI(TAG, "Telnet: %s tried to connect", ip.c_str()); }
 
 void onTelnetInput(String str) {
   if (!extractMessage(str, param)) {
@@ -96,9 +96,9 @@ void setupTelnet() {
   telnet.onInputReceived(onTelnetInput);
 
   if (telnet.begin(23, false)) {
-    MY_LOGI(TAG, "Telnet Server running!");
+    ESP_LOGI(TAG, "Telnet Server running!");
   } else {
-    MY_LOGI(TAG, "Telnet Server error!");
+    ESP_LOGI(TAG, "Telnet Server error!");
   }
 }
 

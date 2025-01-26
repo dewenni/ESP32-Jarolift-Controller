@@ -9,8 +9,6 @@
 #include <webUI.h>
 #include <webUIupdates.h>
 
-#define CORE_DEBUG_LEVEL ESP_LOG_DEBUG
-
 /* D E C L A R A T I O N S ****************************************************/
 static muTimer heartbeat = muTimer();      // timer for heartbeat signal
 static muTimer setupModeTimer = muTimer(); // timer for heartbeat signal
@@ -38,7 +36,7 @@ void setup() {
   // check for double reset
   drd = new EspSysUtil::DRD32(DRD_TIMEOUT);
   if (drd->detectDoubleReset()) {
-    MY_LOGI(TAG, "DRD detected - enter SetupMode");
+    ESP_LOGI(TAG, "SETUP-MODE-REASON: DRD detected");
     setupMode = true;
   }
 
@@ -55,19 +53,19 @@ void setup() {
 
   // Setup OTA
   ArduinoOTA.onStart([]() {
-    MY_LOGI(TAG, "OTA-started");
+    ESP_LOGI(TAG, "OTA-started");
     wdt.disable(); // disable watchdog timer
     ota.setActive(true);
   });
   ArduinoOTA.onEnd([]() {
-    MY_LOGI(TAG, "OTA-finished");
+    ESP_LOGI(TAG, "OTA-finished");
     if (!setupMode) {
       wdt.enable();
     }
     ota.setActive(false);
   });
   ArduinoOTA.onError([](ota_error_t error) {
-    MY_LOGI(TAG, "OTA-error");
+    ESP_LOGI(TAG, "OTA-error");
     if (!setupMode) {
       wdt.enable();
     }

@@ -43,7 +43,7 @@ void ntpSetup() {
  * *******************************************************************/
 void onWiFiStationConnected(WiFiEvent_t event, WiFiEventInfo_t info) {
   wifi_retry = 0;
-  MY_LOGI(TAG, "Connected to AP successfully!");
+  ESP_LOGI(TAG, "Connected to AP successfully!");
 }
 
 /**
@@ -54,7 +54,7 @@ void onWiFiStationConnected(WiFiEvent_t event, WiFiEventInfo_t info) {
  * *******************************************************************/
 void onWiFiStationDisconnected(WiFiEvent_t event, WiFiEventInfo_t info) {
   wifi.connected = false;
-  MY_LOGI(TAG, "WiFi-Disconnected");
+  ESP_LOGI(TAG, "WiFi-Disconnected");
 }
 
 /**
@@ -64,9 +64,9 @@ void onWiFiStationDisconnected(WiFiEvent_t event, WiFiEventInfo_t info) {
  * @return  none
  * *******************************************************************/
 void onWiFiGotIP(WiFiEvent_t event, WiFiEventInfo_t info) {
-  MY_LOGI(TAG, "WiFi connected");
+  ESP_LOGI(TAG, "WiFi connected");
   snprintf(wifi.ipAddress, sizeof(wifi.ipAddress), "%s", WiFi.localIP().toString().c_str());
-  MY_LOGI(TAG, "IP address: %s", wifi.ipAddress);
+  ESP_LOGI(TAG, "IP address: %s", wifi.ipAddress);
   wifi.connected = true;
 }
 
@@ -88,12 +88,10 @@ void checkWiFi() {
       WiFi.begin(config.wifi.ssid, config.wifi.password);
       WiFi.hostname(config.wifi.hostname);
       MDNS.begin(config.wifi.hostname);
-      MY_LOGI(TAG, "WiFi Mode STA - Trying connect to: %s", config.wifi.ssid);
-      MY_LOGI(TAG, "WiFi connection - attempt: %i/5", wifi_retry);
+      ESP_LOGI(TAG, "WiFi Mode STA - Trying connect to: %s", config.wifi.ssid);
+      ESP_LOGI(TAG, "WiFi connection - attempt: %i/5", wifi_retry);
     } else {
-      MY_LOGI(TAG, "\n! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! !\n");
-      MY_LOGI(TAG, "Wifi connection not possible, esp rebooting...");
-      MY_LOGI(TAG, "\n! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! !\n");
+      ESP_LOGW(TAG, "Wifi connection not possible, esp rebooting...");
       EspSysUtil::RestartReason::saveLocal("no wifi connection");
       yield();
       delay(1000);
@@ -115,12 +113,7 @@ void setupWiFi() {
     // start Accesspoint for initial setup
     WiFi.softAPConfig(IPAddress(192, 168, 4, 1), IPAddress(192, 168, 4, 1), IPAddress(255, 255, 255, 0));
     WiFi.softAP("ESP32-Jarolift");
-    MY_LOGI(TAG, "\n! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! !\n");
-    MY_LOGI(TAG, "> WiFi Mode: AccessPoint <");
-    MY_LOGI(TAG, "1. connect your device to SSID: ESP32-Jarolift");
-    MY_LOGI(TAG, "2. open Browser and go to Address: http://192.168.4.1");
-    MY_LOGI(TAG, "\n! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! !\n");
-
+    ESP_LOGI(TAG, "WiFi Mode: AccessPoint SSID: ESP32-Jarolift / IP: http://192.168.4.1");
   } else if (config.wifi.enable) {
 
     // setup callback function
@@ -138,35 +131,35 @@ void setupWiFi() {
     WiFi.begin(config.wifi.ssid, config.wifi.password);
     WiFi.hostname(config.wifi.hostname);
     MDNS.begin(config.wifi.hostname);
-    MY_LOGI(TAG, "WiFi Mode STA - Trying connect to: %s", config.wifi.ssid);
+    ESP_LOGI(TAG, "WiFi Mode STA - Trying connect to: %s", config.wifi.ssid);
   }
 }
 
 void onEthEvent(arduino_event_id_t event, arduino_event_info_t info) {
   switch (event) {
   case ARDUINO_EVENT_ETH_START:
-    MY_LOGI(TAG, "ETH Started");
+    ESP_LOGI(TAG, "ETH Started");
     // set eth hostname here
     ETH.setHostname(config.eth.hostname);
     break;
   case ARDUINO_EVENT_ETH_CONNECTED:
-    MY_LOGI(TAG, "ETH Connected");
+    ESP_LOGI(TAG, "ETH Connected");
     break;
   case ARDUINO_EVENT_ETH_GOT_IP:
     eth.connected = true;
     snprintf(eth.ipAddress, sizeof(eth.ipAddress), "%s", ETH.localIP().toString().c_str());
-    MY_LOGI(TAG, "ETH Got IP: '%s'\n", eth.ipAddress);
+    ESP_LOGI(TAG, "ETH Got IP: '%s'\n", eth.ipAddress);
     break;
   case ARDUINO_EVENT_ETH_LOST_IP:
-    MY_LOGI(TAG, "ETH Lost IP");
+    ESP_LOGI(TAG, "ETH Lost IP");
     eth.connected = false;
     break;
   case ARDUINO_EVENT_ETH_DISCONNECTED:
-    MY_LOGI(TAG, "ETH Disconnected");
+    ESP_LOGI(TAG, "ETH Disconnected");
     eth.connected = false;
     break;
   case ARDUINO_EVENT_ETH_STOP:
-    MY_LOGI(TAG, "ETH Stopped");
+    ESP_LOGI(TAG, "ETH Stopped");
     eth.connected = false;
     break;
   default:

@@ -29,19 +29,19 @@ JaroliftController jarolift;
 void msgCallback(esp_log_level_t level, const char *msg) {
   switch (level) {
   case ESP_LOG_ERROR:
-    MY_LOGE(TAG, "%s", msg);
+    ESP_LOGE(TAG, "%s", msg);
     break;
   case ESP_LOG_WARN:
-    MY_LOGW(TAG, "%s", msg);
+    ESP_LOGW(TAG, "%s", msg);
     break;
   case ESP_LOG_INFO:
-    MY_LOGI(TAG, "%s", msg);
+    ESP_LOGI(TAG, "%s", msg);
     break;
   case ESP_LOG_DEBUG:
-    MY_LOGD(TAG, "%s", msg);
+    ESP_LOGD(TAG, "%s", msg);
     break;
   default:
-    MY_LOGI(TAG, "[UNKNOWN]: %s", msg);
+    ESP_LOGI(TAG, "[UNKNOWN]: %s", msg);
     break;
   }
 }
@@ -55,18 +55,18 @@ void msgCallback(esp_log_level_t level, const char *msg) {
 void jaroCmd(JaroCmdType type, uint8_t channel) {
   if (jaroCmdQueue.size() < MAX_CMD) {
     jaroCmdQueue.push({JaroCommand::SINGLE, {.single = {type, channel}}});
-    MY_LOGD(TAG, "add single cmd to buffer: %i, %i", type, channel + 1);
+    ESP_LOGD(TAG, "add single cmd to buffer: %i, %i", type, channel + 1);
   } else {
-    MY_LOGE(TAG, "too many commands within too short time");
+    ESP_LOGE(TAG, "too many commands within too short time");
   }
 }
 
 void jaroCmd(JaroCmdGrpType type, uint16_t group_mask) {
   if (jaroCmdQueue.size() < MAX_CMD) {
     jaroCmdQueue.push({JaroCommand::GROUP, {.group = {type, group_mask}}});
-    MY_LOGD(TAG, "add group cmd to buffer: %i, %04X", type, group_mask);
+    ESP_LOGD(TAG, "add group cmd to buffer: %i, %04X", type, group_mask);
   } else {
-    MY_LOGE(TAG, "too many commands within too short time");
+    ESP_LOGE(TAG, "too many commands within too short time");
   }
 }
 
@@ -79,7 +79,7 @@ void jaroCmd(JaroCmdGrpType type, uint16_t group_mask) {
 void jaroliftSetup() {
 
   // initialize
-  MY_LOGI(TAG, "initializing the CC1101 Transceiver");
+  ESP_LOGI(TAG, "initializing the CC1101 Transceiver");
   jarolift.setMessageCallback(msgCallback);
   jarolift.setGPIO(config.gpio.sck, config.gpio.miso, config.gpio.mosi, config.gpio.cs, config.gpio.gdo0, config.gpio.gdo2);
   jarolift.setKeys(config.jaro.masterMSB, config.jaro.masterLSB);
@@ -87,12 +87,12 @@ void jaroliftSetup() {
   jarolift.begin();
 
   if (jarolift.getCC1101State()) {
-    MY_LOGI(TAG, "CC1101 Transceiver connected!");
+    ESP_LOGI(TAG, "CC1101 Transceiver connected!");
   } else {
-    MY_LOGE(TAG, "CC1101 Transceiver NOT connected!");
+    ESP_LOGE(TAG, "CC1101 Transceiver NOT connected!");
   }
 
-  MY_LOGI(TAG, "read Device Counter from EEPROM: %i", jarolift.getDeviceCounter());
+  ESP_LOGI(TAG, "read Device Counter from EEPROM: %i", jarolift.getDeviceCounter());
 }
 
 /**
@@ -154,51 +154,51 @@ void processJaroCommands() {
       case CMD_UP:
         jarolift.cmdUp(cmd.single.channel);
         mqttSendPosition(cmd.single.channel, POS_OPEN);
-        MY_LOGI(TAG, "execute cmd: UP - channel: %i", cmd.single.channel + 1);
+        ESP_LOGI(TAG, "execute cmd: UP - channel: %i", cmd.single.channel + 1);
         break;
       case CMD_DOWN:
         jarolift.cmdDown(cmd.single.channel);
         mqttSendPosition(cmd.single.channel, POS_CLOSE);
-        MY_LOGI(TAG, "execute cmd: DOWN - channel: %i", cmd.single.channel + 1);
+        ESP_LOGI(TAG, "execute cmd: DOWN - channel: %i", cmd.single.channel + 1);
         break;
       case CMD_STOP:
         jarolift.cmdStop(cmd.single.channel);
-        MY_LOGI(TAG, "execute cmd: STOP - channel: %i", cmd.single.channel + 1);
+        ESP_LOGI(TAG, "execute cmd: STOP - channel: %i", cmd.single.channel + 1);
         break;
       case CMD_SET_SHADE:
         jarolift.cmdSetShade(cmd.single.channel);
         mqttSendPosition(cmd.single.channel, POS_SHADE);
-        MY_LOGI(TAG, "execute cmd: SETSHADE - channel: %i", cmd.single.channel + 1);
+        ESP_LOGI(TAG, "execute cmd: SETSHADE - channel: %i", cmd.single.channel + 1);
         break;
       case CMD_SHADE:
         jarolift.cmdShade(cmd.single.channel);
-        MY_LOGI(TAG, "execute cmd: SHADE - channel: %i", cmd.single.channel + 1);
+        ESP_LOGI(TAG, "execute cmd: SHADE - channel: %i", cmd.single.channel + 1);
         break;
       case CMD_LEARN:
         jarolift.cmdLearn(cmd.single.channel);
-        MY_LOGI(TAG, "execute cmd: LEARN - channel: %i", cmd.single.channel + 1);
+        ESP_LOGI(TAG, "execute cmd: LEARN - channel: %i", cmd.single.channel + 1);
         break;
       }
     } else if (cmd.cmdType == JaroCommand::GROUP) {
       switch (cmd.group.type) {
       case CMD_GRP_UP:
         jarolift.cmdGroupUp(cmd.group.group_mask);
-        MY_LOGI(TAG, "execute group cmd: UP - mask: %04X", cmd.group.group_mask);
+        ESP_LOGI(TAG, "execute group cmd: UP - mask: %04X", cmd.group.group_mask);
         mqttSendPositionGroup(cmd.group.group_mask, POS_OPEN);
         break;
       case CMD_GRP_DOWN:
         jarolift.cmdGroupDown(cmd.group.group_mask);
-        MY_LOGI(TAG, "execute group cmd: DOWN - mask: %04X", cmd.group.group_mask);
+        ESP_LOGI(TAG, "execute group cmd: DOWN - mask: %04X", cmd.group.group_mask);
         mqttSendPositionGroup(cmd.group.group_mask, POS_CLOSE);
         break;
       case CMD_GRP_STOP:
         jarolift.cmdGroupStop(cmd.group.group_mask);
-        MY_LOGI(TAG, "execute group cmd: STOP - mask: %04X", cmd.group.group_mask);
+        ESP_LOGI(TAG, "execute group cmd: STOP - mask: %04X", cmd.group.group_mask);
         break;
       case CMD_GRP_SHADE:
         jarolift.cmdGroupShade(cmd.group.group_mask);
         mqttSendPositionGroup(cmd.group.group_mask, POS_SHADE);
-        MY_LOGI(TAG, "execute group cmd: SHADE - mask: %04X", cmd.group.group_mask);
+        ESP_LOGI(TAG, "execute group cmd: SHADE - mask: %04X", cmd.group.group_mask);
         break;
       }
     }

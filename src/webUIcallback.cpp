@@ -16,7 +16,7 @@ static const char *TAG = "WEB"; // LOG TAG
  * *******************************************************************/
 void webCallback(const char *elementId, const char *value) {
 
-  MY_LOGD(TAG, "Received - Element ID: %s = %s", elementId, value);
+  ESP_LOGD(TAG, "Received - Element ID: %s = %s", elementId, value);
 
   // ------------------------------------------------------------------
   // GitHub / Version
@@ -246,26 +246,26 @@ void webCallback(const char *elementId, const char *value) {
     }
     if (strcmp(elementId, setShadeId) == 0) {
       jaroCmd(CMD_SET_SHADE, i);
-      MY_LOGI(TAG, "cmd SET-SHADE - channel %i", i + 1);
+      ESP_LOGI(TAG, "cmd SET-SHADE - channel %i", i + 1);
     }
     if (strcmp(elementId, learnId) == 0) {
       jaroCmd(CMD_LEARN, i);
-      MY_LOGI(TAG, "cmd LEARN - channel %i", i + 1);
+      ESP_LOGI(TAG, "cmd LEARN - channel %i", i + 1);
     }
     if (strcmp(elementId, cmdUpId) == 0) {
-      MY_LOGI(TAG, "cmd UP - channel %i", i + 1);
+      ESP_LOGI(TAG, "cmd UP - channel %i", i + 1);
       jaroCmd(CMD_UP, i);
     }
     if (strcmp(elementId, cmdStopId) == 0) {
-      MY_LOGI(TAG, "cmd STOP - channel %i", i + 1);
+      ESP_LOGI(TAG, "cmd STOP - channel %i", i + 1);
       jaroCmd(CMD_STOP, i);
     }
     if (strcmp(elementId, cmdDownId) == 0) {
-      MY_LOGI(TAG, "cmd DOWN - channel %i", i + 1);
+      ESP_LOGI(TAG, "cmd DOWN - channel %i", i + 1);
       jaroCmd(CMD_DOWN, i);
     }
     if (strcmp(elementId, cmdShadeId) == 0) {
-      MY_LOGI(TAG, "cmd SHADE - channel %i", i + 1);
+      ESP_LOGI(TAG, "cmd SHADE - channel %i", i + 1);
       jaroCmd(CMD_SHADE, i);
     }
   }
@@ -299,19 +299,19 @@ void webCallback(const char *elementId, const char *value) {
       config.jaro.grp_mask[i] = strtoul(value, NULL, 2);
     }
     if (strcmp(elementId, cmdUpId) == 0) {
-      MY_LOGI(TAG, "cmd UP - group %i", i + 1);
+      ESP_LOGI(TAG, "cmd UP - group %i", i + 1);
       jaroCmd(CMD_GRP_UP, config.jaro.grp_mask[i]);
     }
     if (strcmp(elementId, cmdStopId) == 0) {
-      MY_LOGI(TAG, "cmd STOP - group %i", i + 1);
+      ESP_LOGI(TAG, "cmd STOP - group %i", i + 1);
       jaroCmd(CMD_GRP_STOP, config.jaro.grp_mask[i]);
     }
     if (strcmp(elementId, cmdDownId) == 0) {
-      MY_LOGI(TAG, "cmd DOWN - group %i", i + 1);
+      ESP_LOGI(TAG, "cmd DOWN - group %i", i + 1);
       jaroCmd(CMD_GRP_DOWN, config.jaro.grp_mask[i]);
     }
     if (strcmp(elementId, cmdShadeId) == 0) {
-      MY_LOGI(TAG, "cmd SHADE - group %i", i + 1);
+      ESP_LOGI(TAG, "cmd SHADE - group %i", i + 1);
       jaroCmd(CMD_GRP_SHADE, config.jaro.grp_mask[i]);
     }
   }

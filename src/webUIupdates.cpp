@@ -53,7 +53,7 @@ bool dataInJsonBuffer() { return jsonDataToSend; }
 
 // add JSON Element to JSON-Buffer
 void addJsonElement(JsonDocument &jsonBuf, const char *elementID, const char *value) {
-  jsonBuf[elementID].set((char *)value); // make sure value is handled as a copy not as pointer
+  jsonBuf[elementID] = value; // make sure value is handled as a copy not as pointer
   jsonDataToSend = true;
 };
 
@@ -99,7 +99,7 @@ void updateSystemInfoElements() {
   initJsonBuffer(jsonDoc);
 
   // WiFi information
-  if (config.eth.enable) {
+  if (config.wifi.enable) {
     addJson(jsonDoc, "p09_wifi_ip", wifi.ipAddress);
     snprintf(tmpMessage, sizeof(tmpMessage), "%i %%", wifi.signal);
     addJson(jsonDoc, "p09_wifi_signal", tmpMessage);
@@ -361,7 +361,7 @@ void processGitHubUpdate() {
       updateWebText("p00_update_btn", "updating: 100%", false);
       updateWebDialog("version_dialog", "close");
       updateWebDialog("ota_update_done_dialog", "open");
-      MY_LOGI(TAG, "GitHub OTA-Update successful");
+      ESP_LOGI(TAG, "GitHub OTA-Update successful");
     } else {
       char errMsg[32];
       switch (result) {
@@ -387,7 +387,7 @@ void processGitHubUpdate() {
       updateWebText("p00_ota_upd_err", errMsg, false);
       updateWebDialog("version_dialog", "close");
       updateWebDialog("ota_update_failed_dialog", "open");
-      MY_LOGE(TAG, "GitHub OTA-Update failed: %s", errMsg);
+      ESP_LOGE(TAG, "GitHub OTA-Update failed: %s", errMsg);
     }
     ota.setActive(false);
     wdt.enable();

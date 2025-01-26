@@ -44,9 +44,9 @@ void addMqttCmd(const char *topic, const char *payload, int len) {
     message.len = len;
 
     mqttCmdQueue.push(message);
-    MY_LOGD(TAG, "add msg to buffer: %s, %s", topic, payload);
+    ESP_LOGD(TAG, "add msg to buffer: %s, %s", topic, payload);
   } else {
-    MY_LOGE(TAG, "too many commands within too short time");
+    ESP_LOGE(TAG, "too many commands within too short time");
   }
 }
 
@@ -109,7 +109,7 @@ void onMqttMessage(char *topic, char *payload, AsyncMqttClientMessageProperties 
 
   addMqttCmd(msgCpy.topic, msgCpy.payload, msgCpy.len);
 
-  MY_LOGI(TAG, "msg received | topic: %s | payload: %s", msgCpy.topic, msgCpy.payload);
+  ESP_LOGI(TAG, "msg received | topic: %s | payload: %s", msgCpy.topic, msgCpy.payload);
 }
 
 /**
@@ -120,7 +120,7 @@ void onMqttMessage(char *topic, char *payload, AsyncMqttClientMessageProperties 
  * *******************************************************************/
 void onMqttConnect(bool sessionPresent) {
   mqtt_retry = 0;
-  MY_LOGI(TAG, "MQTT connected");
+  ESP_LOGI(TAG, "MQTT connected");
   // Once connected, publish an announcement...
   sendWiFiInfo();
   // ... and resubscribe
@@ -193,7 +193,7 @@ void mqttSetup() {
   mqtt_client.setKeepAlive(10);
   mqtt_client.connected();
 
-  MY_LOGI(TAG, "MQTT setup done!");
+  ESP_LOGI(TAG, "MQTT setup done!");
 }
 
 /**
@@ -220,15 +220,15 @@ void mqttCyclic() {
     if (mqtt_retry == 0) {
       mqtt_retry++;
       mqtt_client.connect();
-      MY_LOGI(TAG, "MQTT - connection attempt: 1/5");
+      ESP_LOGI(TAG, "MQTT - connection attempt: 1/5");
     } else if (mqttReconnectTimer.delayOnTrigger(true, MQTT_RECONNECT)) {
       mqttReconnectTimer.delayReset();
       if (mqtt_retry < 5) {
         mqtt_retry++;
         mqtt_client.connect();
-        MY_LOGI(TAG, "MQTT - connection attempt: %i/5", mqtt_retry);
+        ESP_LOGI(TAG, "MQTT - connection attempt: %i/5", mqtt_retry);
       } else {
-        MY_LOGI(TAG, "MQTT connection not possible, esp rebooting...");
+        ESP_LOGI(TAG, "MQTT connection not possible, esp rebooting...");
         EspSysUtil::RestartReason::saveLocal("no mqtt connection");
         yield();
         delay(1000);
@@ -241,7 +241,7 @@ void mqttCyclic() {
   // send bootup messages after restart and established mqtt connection
   if (!bootUpMsgDone && mqtt_client.connected()) {
     bootUpMsgDone = true;
-    MY_LOGI(TAG, "ESP restarted (%s)", EspSysUtil::RestartReason::get());
+    ESP_LOGI(TAG, "ESP restarted (%s)", EspSysUtil::RestartReason::get());
 
     if (config.mqtt.ha_enable) {
       mqttDiscoverySetup(false);
@@ -323,7 +323,7 @@ void processMqttMessage() {
 
   s_MqttMessage msgCpy = mqttCmdQueue.front();
 
-  MY_LOGD(TAG, "process msg from buffer: %s, %s", msgCpy.topic, msgCpy.payload);
+  ESP_LOGD(TAG, "process msg from buffer: %s, %s", msgCpy.topic, msgCpy.payload);
 
   // payload as number
   // msgCpy.intVal = 0;
@@ -338,8 +338,8 @@ void processMqttMessage() {
   const char *groupTopic = addTopic("/cmd/group/");
   int group = checkJaroCmd(msgCpy.topic, groupTopic, 6);
 
-  MY_LOGD(TAG, "channel: %i", channel);
-  MY_LOGD(TAG, "group: %i", group);
+  ESP_LOGD(TAG, "channel: %i", channel);
+  ESP_LOGD(TAG, "group: %i", group);
 
   // restart ESP command
   if (strcasecmp(msgCpy.topic, addTopic("/cmd/restart")) == 0) {
@@ -375,11 +375,11 @@ void processMqttMessage() {
         jaroCmd(CMD_SET_SHADE, channel - 1);
       } else {
         mqttPublish(addTopic("/message"), "invalid shutter cmd", false);
-        MY_LOGW(TAG, "invalid shutter cmd");
+        ESP_LOGW(TAG, "invalid shutter cmd");
       }
     } else {
       mqttPublish(addTopic("/message"), "invalid channel", false);
-      MY_LOGW(TAG, "invalid channel for shutter cmd");
+      ESP_LOGW(TAG, "invalid channel for shutter cmd");
     }
     // Group commands
   } else if (group != -1) {
@@ -394,11 +394,11 @@ void processMqttMessage() {
         jaroCmd(CMD_GRP_SHADE, config.jaro.grp_mask[group - 1]);
       } else {
         mqttPublish(addTopic("/message"), "invalid group cmd", false);
-        MY_LOGW(TAG, "invalid group cmd");
+        ESP_LOGW(TAG, "invalid group cmd");
       }
     } else {
       mqttPublish(addTopic("/message"), "invalid group", false);
-      MY_LOGW(TAG, "invalid channel for group cmd");
+      ESP_LOGW(TAG, "invalid channel for group cmd");
     }
     // Group commands with bitmask
   } else if (strcasecmp(msgCpy.topic, addTopic("/cmd/group/up")) == 0) {
@@ -411,7 +411,7 @@ void processMqttMessage() {
     jaroCmd(CMD_GRP_SHADE, parseMask(msgCpy.payload));
   } else {
     mqttPublish(addTopic("/message"), "unknown topic", false);
-    MY_LOGI(TAG, "unknown topic received");
+    ESP_LOGI(TAG, "unknown topic received");
   }
 
   mqttCmdQueue.pop(); // next entry in Queue

@@ -38,15 +38,15 @@ void executeCommand(const s_cfg_timer &timer, uint8_t number) {
 
   switch (timer.cmd) {
   case CMD_UP:
-    MY_LOGI(TAG, "Timer: %i | Cmd: UP | Mask: %04X", number + 1, timer.grp_mask);
+    ESP_LOGI(TAG, "Timer: %i | Cmd: UP | Mask: %04X", number + 1, timer.grp_mask);
     jaroCmd(CMD_GRP_UP, timer.grp_mask);
     break;
   case CMD_DOWN:
-    MY_LOGI(TAG, "Timer: %i | Cmd: DOWN | Mask: %04X", number + 1, timer.grp_mask);
+    ESP_LOGI(TAG, "Timer: %i | Cmd: DOWN | Mask: %04X", number + 1, timer.grp_mask);
     jaroCmd(CMD_GRP_DOWN, timer.grp_mask);
     break;
   case CMD_SHADE:
-    MY_LOGI(TAG, "Timer: %i | Cmd: SHADE | Mask: %04X", number + 1, timer.grp_mask);
+    ESP_LOGI(TAG, "Timer: %i | Cmd: SHADE | Mask: %04X", number + 1, timer.grp_mask);
     jaroCmd(CMD_GRP_SHADE, timer.grp_mask);
     break;
 

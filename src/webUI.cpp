@@ -208,7 +208,7 @@ void handleDoUpdate(AsyncWebServerRequest *request, const String &filename, size
   static unsigned long lastUpdateTime = 0;
   static int lastProgress = -1;
   if (!index) {
-    MY_LOGI(TAG, "webOTA started: %s", filename.c_str());
+    ESP_LOGI(TAG, "webOTA started: %s", filename.c_str());
     ota.setActive(true);
     wdt.disable();
     content_len = request->contentLength();
@@ -242,14 +242,14 @@ void handleDoUpdate(AsyncWebServerRequest *request, const String &filename, size
   // update done
   if (final) {
     if (!Update.end(true)) {
-      MY_LOGI(TAG, "OTA Update failed: %s", Update.errorString());
+      ESP_LOGI(TAG, "OTA Update failed: %s", Update.errorString());
       updateWebText("p000_ota_upd_err", Update.errorString(), false);
       updateWebDialog("ota_update_failed_dialog", "open");
       ota.setActive(false);
       wdt.enable();
       return request->send(400, "text/plain", "Could not end OTA");
     } else {
-      MY_LOGI(TAG, "OTA Update complete");
+      ESP_LOGI(TAG, "OTA Update complete");
       updateOTAprogress(100);
       updateWebDialog("ota_update_done_dialog", "open");
       ota.setActive(false);
@@ -323,7 +323,7 @@ void sendGzipChunkedResponse(AsyncWebServerRequest *request, const uint8_t *cont
   // Check if the client already has the current version in cache
   if (request->header("If-None-Match") == etag) {
     request->send(304); // 304 Not Modified
-    MY_LOGD(TAG, "contend not changed: %s", request->url().c_str());
+    ESP_LOGD(TAG, "contend not changed: %s", request->url().c_str());
     return;
   }
 
@@ -333,7 +333,7 @@ void sendGzipChunkedResponse(AsyncWebServerRequest *request, const uint8_t *cont
     return;
   }
 
-  MY_LOGD(TAG, "sending: %s", request->url().c_str());
+  ESP_LOGD(TAG, "sending: %s", request->url().c_str());
   // Create a chunked response with the specified chunk size
   AsyncWebServerResponse *response =
       request->beginChunkedResponse(contentType, [content, contentLength, chunkSize](uint8_t *buffer, size_t maxLen, size_t index) -> size_t {
@@ -433,11 +433,11 @@ void webUISetup() {
 
         if (!index) { // firs call for upload
           updateWebText("upload_status_txt", "uploading...", false);
-          MY_LOGI(TAG, "Upload Start: %s\n", filename.c_str());
+          ESP_LOGI(TAG, "Upload Start: %s\n", filename.c_str());
           uploadFile = LittleFS.open(targetFilename, "w"); // fix to config.json
 
           if (!uploadFile) {
-            MY_LOGE(TAG, "Error: file could not be opened");
+            ESP_LOGE(TAG, "Error: file could not be opened");
             updateWebText("upload_status_txt", "error on file close!", false);
             return;
           }
@@ -450,7 +450,7 @@ void webUISetup() {
         if (final) {
           if (uploadFile) {
             uploadFile.close();
-            MY_LOGI(TAG, "UploadEnd: %s, %u B\n", filename.c_str(), index + len);
+            ESP_LOGI(TAG, "UploadEnd: %s, %u B\n", filename.c_str(), index + len);
             updateWebText("upload_status_txt", "upload done!", false);
             configLoadFromFile(); // load configuration
             updateWebLanguage(LANG::CODE[config.lang]);
@@ -468,13 +468,13 @@ void webUISetup() {
   ws.onEvent([](AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len) {
     (void)len;
     if (type == WS_EVT_CONNECT) {
-      MY_LOGI(TAG, "web-client connected - IP:%s", client->remoteIP().toString().c_str());
+      ESP_LOGI(TAG, "web-client connected - IP:%s", client->remoteIP().toString().c_str());
       client->setCloseClientOnQueueFull(false);
       onLoadRequest = true; // update all webUI elements
     } else if (type == WS_EVT_DISCONNECT) {
-      MY_LOGI(TAG, "web-client disconnected");
+      ESP_LOGI(TAG, "web-client disconnected");
     } else if (type == WS_EVT_ERROR) {
-      MY_LOGI(TAG, "web-client error");
+      ESP_LOGI(TAG, "web-client error");
     } else if (type == WS_EVT_PONG) {
       // Serial.println("ws pong");
     } else if (type == WS_EVT_DATA) {
@@ -485,7 +485,7 @@ void webUISetup() {
           JsonDocument jsonDoc;
           DeserializationError error = deserializeJson(jsonDoc, data);
           if (error) {
-            MY_LOGW(TAG, "Failed to parse WebSocket message as JSON");
+            ESP_LOGW(TAG, "Failed to parse WebSocket message as JSON");
             return;
           }
           const char *elementId = jsonDoc["elementId"];
@@ -529,7 +529,7 @@ void webUICyclic() {
   if (onLoadRequest && onLoadTimer.cycleTrigger(1000)) {
     updateAllElements();
     onLoadRequest = false;
-    MY_LOGD(TAG, "updateAllElements()");
+    ESP_LOGD(TAG, "updateAllElements()");
   }
 
   // handling of update webUI elements
