@@ -16,6 +16,15 @@
   background-position: center;
 }
 
+.svgbtn2 {
+  display: flex;
+  width: 100%;
+  padding: 10px;
+  background-position: right;
+  background-position: calc(100% - 10px) center;
+  background-size: auto 70%;
+}
+
 .i_dashboard {
   background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="%23ffffff" viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>');
 }

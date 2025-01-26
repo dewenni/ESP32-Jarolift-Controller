@@ -498,4 +498,8 @@ const translations = {
     de: "abbrechen",
     en: "cancel",
   },
+  check_github: {
+    de: "Prüfe GitHub OTA Update",
+    en: "Check for GitHub OTA Update",
+  },
 };
