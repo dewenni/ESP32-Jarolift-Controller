@@ -13,5 +13,4 @@
 .travis.yml
 
 connect.txt
-web/temp
 zTest/
