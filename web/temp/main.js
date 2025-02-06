@@ -496,7 +496,7 @@ function updateUI(config, prefix = "cfg", ignoreKeys = ["version"]) {
 async function loadConfig() {
   console.log("loading config");
   try {
-    const response = await fetch("/config.json");
+    const response = await fetch("config.json");
     if (!response.ok)
       throw new Error("Fehler beim Abrufen der Konfigurationsdaten");
 
@@ -1369,4 +1369,3 @@ const translations = {
     en: "Check for GitHub OTA Update",
   },
 };
-
