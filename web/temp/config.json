@@ -74,8 +74,8 @@
         "order":1
     },
     "jaro":{
-        "masterMSB":000004827,
-        "masterLSB":000001237,
+        "masterMSB":4827,
+        "masterLSB":1237,
         "serial":255,
         "learn_mode":true,
         "ch_enable":[true,true,true,true,true,true,false,false,false,false,false,false,false,false,false,false],
