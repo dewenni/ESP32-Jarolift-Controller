@@ -642,11 +642,35 @@ function setupBitmaskDialog() {
   });
 }
 
+function isGitHubPages() {
+  return window.location.hostname.includes("github.io");
+}
+
+async function loadSimulatedData() {
+  if (!isGitHubPages()) {
+    return; // Kein Simulationsmodus, wenn nicht auf GitHub Pages
+  }
+
+  console.log("GitHub Pages erkannt – Simulationsdaten werden geladen.");
+
+  try {
+    const response = await fetch("sim.json");
+    if (!response.ok)
+      throw new Error("Fehler beim Abrufen der Simulationsdaten");
+
+    const simData = await response.json();
+    updateJSON(simData); // Aktualisiert die UI mit den Simulationsdaten
+  } catch (error) {
+    console.error("Fehler beim Laden von sim.json:", error);
+  }
+}
+
 // --------------------------------------
 // --------------------------------------
 document.addEventListener("DOMContentLoaded", function () {
   // call functions on refresh
   setupWS();
+  loadSimulatedData();
   synchronizeDataSyncFields();
   initializeVisibilityBasedOnSwitches();
   localizePage("de");
@@ -1369,3 +1393,4 @@ const translations = {
     en: "Check for GitHub OTA Update",
   },
 };
+
