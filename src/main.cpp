@@ -14,7 +14,7 @@ static muTimer heartbeat = muTimer();      // timer for heartbeat signal
 static muTimer setupModeTimer = muTimer(); // timer for heartbeat signal
 static muTimer wdtTimer = muTimer();       // timer to reset wdt
 
-static EspSysUtil::DRD32 *drd;  // Double-Reset-Detector
+static EspSysUtil::MRD32 *mrd;  // Multi-Reset-Detector
 static bool main_reboot = true; // reboot flag
 
 static const char *TAG = "MAIN"; // LOG TAG
@@ -34,9 +34,9 @@ void setup() {
   messageSetup();
 
   // check for double reset
-  drd = new EspSysUtil::DRD32(DRD_TIMEOUT);
-  if (drd->detectDoubleReset()) {
-    ESP_LOGI(TAG, "SETUP-MODE-REASON: DRD detected");
+  mrd = new EspSysUtil::MRD32(MRD_TIMEOUT, MRD_RETRIES);
+  if (mrd->detectMultipleResets()) {
+    ESP_LOGI(TAG, "SETUP-MODE-REASON: MRD detected");
     setupMode = true;
   }
 
@@ -102,7 +102,7 @@ void loop() {
   ArduinoOTA.handle();
 
   // double reset detector
-  drd->loop();
+  mrd->loop();
 
   // webUI Cyclic
   webUICyclic();
