@@ -3,6 +3,7 @@
 document.addEventListener("DOMContentLoaded", function () {
   // call functions on refresh
   setupWS();
+  loadSimulatedData();
   synchronizeDataSyncFields();
   initializeVisibilityBasedOnSwitches();
   localizePage("de");

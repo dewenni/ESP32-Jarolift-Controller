@@ -60,6 +60,11 @@ define shutter groups to control several shutters at once
 - **Timer function**  
 stand alone timer function with fixed time, sunrise or sunset as trigger.
 
+### WebUI-Demo
+
+For a first impression of the functions and the WebUI, a limited demo is also available.  
+This can be accessed via the following link: [WebUI-DEMO](https://dewenni.github.io/ESP32-Jarolift-Controller/)
+
 Experimental version.
 Use at your own risk. For private/educational use only. (Keeloq algorithm licensed only to TI Microcontrollers)
 This project is not affiliated in any way with the vendor of the Jarolift components.

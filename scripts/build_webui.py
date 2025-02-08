@@ -8,7 +8,7 @@ def ensure_directory_exists(path):
         print(f"folder '{path}' was created.")
 
 # check if temp folder exists, otherwise create it
-ensure_directory_exists("web/temp") 
+ensure_directory_exists("web/ghpages") 
 
 def compress_to_gzip_c_array(input_file_path, output_file_path, var_name):
     # HTML-Datei einlesen

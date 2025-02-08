@@ -1,15 +1,17 @@
-# v1.5.1
+# v1.5.3
 
 ## what's new
 
 this is a minor update and bugfix version
 
+### WebUI-Demo
+
+For a first impression of the functions and the WebUI, a limited demo is also available.  
+This can be accessed via the following link: [WebUI-DEMO](https://dewenni.github.io/ESP32-Jarolift-Controller/)
+
+
 ## changelog
 
-- [UPDATE]  ESP32Async/AsyncTCP @ 3.3.2
-- [UPDATE]  ESP32Async/ESPAsyncWebServer @ 3.6.2
-- [UPDATE]  bblanchon/ArduinoJson @ 7.3.0
-- [UPDATE]  dewenni/EspSysUtil @ 1.0.1
-- [IMPROVE] add button for GitHub-OTA in Tools section #34
-- [BUGFIX]  some log messages got lost at startup
-- [BUGFIX]  WiFi Status information was not updated in webUI
+- [UPDATE]  ESP32Async/AsyncTCP @ 3.3.5
+- [UPDATE]  ESP32Async/ESPAsyncWebServer @ 3.7.0
+- [ADD] add a [WebUI-DEMO](https://dewenni.github.io/ESP32-Jarolift-Controller/) under github-pages

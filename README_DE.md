@@ -60,6 +60,11 @@ Definiere bis zu 6 Rollladengruppen, um mehrere Rollläden auf einmal zu steuern
 - **Timer Funktion**  
 für Stand-Alone Anwendung auch mit integrierter Timer Funktion mit fester Uhrzeit, Sonnenaufgang oder Sonnenuntergang als Auslöser.
 
+### WebUI-Demo
+
+Um sich einen ersten Eindruck von den Funktionen und der WebUI zu verschaffen, steht auch eine eingeschränkte Demo zur Verfügung.  
+Diese kann über den folgenden Link aufgerufen werden: [WebUI-DEMO](https://dewenni.github.io/ESP32-Jarolift-Controller/)
+
 Die Verwendung erfolgt auf eigene Gefahr. Nur für den privaten/schulischen Gebrauch. (Keeloq-Algorithmus ist nur für TI-Mikrocontroller lizenziert)
 Dieses Projekt ist in keiner Weise mit dem Hersteller der Jarolift-Komponenten verbunden.
 Jarolift ist ein Warenzeichen der Schöneberger Rolladenfabrik GmbH & Co. KG

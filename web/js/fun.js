@@ -496,7 +496,7 @@ function updateUI(config, prefix = "cfg", ignoreKeys = ["version"]) {
 async function loadConfig() {
   console.log("loading config");
   try {
-    const response = await fetch("/config.json");
+    const response = await fetch("config.json");
     if (!response.ok)
       throw new Error("Fehler beim Abrufen der Konfigurationsdaten");
 
@@ -640,4 +640,27 @@ function setupBitmaskDialog() {
   closeButton.addEventListener("click", () => {
     bitmaskDialog.close();
   });
+}
+
+function isGitHubPages() {
+  return window.location.hostname.includes("github.io");
+}
+
+async function loadSimulatedData() {
+  if (!isGitHubPages()) {
+    return; // Kein Simulationsmodus, wenn nicht auf GitHub Pages
+  }
+
+  console.log("GitHub Pages erkannt – Simulationsdaten werden geladen.");
+
+  try {
+    const response = await fetch("sim.json");
+    if (!response.ok)
+      throw new Error("Fehler beim Abrufen der Simulationsdaten");
+
+    const simData = await response.json();
+    updateJSON(simData); // Aktualisiert die UI mit den Simulationsdaten
+  } catch (error) {
+    console.error("Fehler beim Laden von sim.json:", error);
+  }
 }
