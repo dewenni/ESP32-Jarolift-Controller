@@ -8,7 +8,7 @@ logging.basicConfig(level=logging.DEBUG, format='%(levelname)s: %(message)s')
 
 # Pfade zur JS- und HTML-Datei
 js_file_path = 'web/js/lang.js'
-html_file_path = 'web/temp/index.html'
+html_file_path = 'web/ghpages/index.html'
 
 # 1. Lang.js auslesen
 with open(js_file_path, 'r', encoding='utf-8') as js_file:

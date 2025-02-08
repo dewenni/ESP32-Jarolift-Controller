@@ -73,7 +73,7 @@ source_files = [
 ]
 
 # Zielpfad der generierten Datei
-output_file_html = 'web/temp/index.html'
+output_file_html = 'web/ghpages/index.html'
 output_file_br = 'include/gzip_m_html.h'
 
 combined_html = ''
@@ -124,7 +124,7 @@ source_files = [
 ]
 
 # Zielpfad der generierten Datei
-output_file_css = 'web/temp/main.css'
+output_file_css = 'web/ghpages/main.css'
 output_c_file = 'include/gzip_css.h'
 
 combined_content = ''
@@ -151,7 +151,7 @@ source_files = [
 ]
 
 # Zielpfad der generierten Datei
-output_file_js = 'web/temp/main.js'
+output_file_js = 'web/ghpages/main.js'
 output_file_br_js = 'include/gzip_js.h'
 
 combined_content = ''
