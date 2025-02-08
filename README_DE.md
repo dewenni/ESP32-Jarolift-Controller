@@ -91,6 +91,7 @@ Die Homepage des Projekts ist hier: [Project Home](http://www.bastelbudenbuben.d
   - [Setup-Mode](#setup-mode)
   - [Konfiguration](#konfiguration)
   - [Filemanager](#filemanager)
+  - [Anlernen von Rolläden](#anlernen-von-rolläden)
   - [Migration](#migration)
 - [WebUI](#webui)
   - [Kanäle](#kanäle)
@@ -216,8 +217,12 @@ Es gibt zwei vordefinierte Optionen:
 
 ## Setup Mode
 
-Es gibt einen „Setup Mode“. Der „Setup Mode“ wird aktiviert, wenn der „Reset-Knopf“ des ESP zweimal innerhalb von 3 Sekunden gedrückt wird.
-Der „Setup Mode“ wird auch aktiviert, wenn (zu Beginn) keine WLAN-Verbindung konfiguriert ist.
+Es ist ein `Setup Mode` verfügbar. Der „Setup Mode“ wird aktiviert, wenn der ESP **5** mal neu gestartet wird.
+Nach jdem Neustart dürfen maximal bis zu 5 Sekunden vergehen.
+
+Beispiel: restart 1/5 - 2s warten - restart 2/5 - 2s warten - restart 3/5 - 2s warten - restart 4/5 - 2s warten - restart /5/5 => Setup-Mode
+
+Der `Setup-Mode` wird auch aktiviert, wenn kein gültiges WLAN und keine gültige ETH-Verbindung konfiguriert ist.
 
 Wenn der ESP in den „Setup Mode“ geht, erstellt er automatisch einen eigenen Netzwerk Accesspoint mit der ssid
 📶 `"ESP32_Jarolift"`  
@@ -274,7 +279,32 @@ Die Konfiguration wird in der Datei ``config.json`` gespeichert. Zur Sicherung u
 
 ![filemanager](/Doc/webUI_tools.png)
 
-## Migration
+## Anlernen von Rolläden
+
+Es gibt grundsätzlich mehrere Möglichkeiten um einen Rolladen anzulernen.
+Es existieren die gleichen Möglichkeiten wie bei der Nutzung der original Fernbedienungen.
+
+### Anlernen durch drücken der Anlerntaste am Motor
+
+Jeder TDEF Motor hat eine Taste zum anlernen von neuen Fernbedienungen.
+Drückt man diese Taste, bestätgt der Motor den Anlernvorgang mit einem vibrieren.
+
+> [!TIP]
+> Wenn man an die Taste nicht ran kommt, kann man den Motor auch für ein paar Sekunden Stromlos schalten. Z.B. in dem man die Sicherung kurz raus macht.
+
+Jetzt innerhalb von 5 Sekunden den entsprechenden "Lern-Button" im WebUI in den Settings bei dem jeweiligen Rolladen drücken.
+Wenn der Rolladen erfolgreich eingelernt wurde, vibriert der Motor erneut.
+
+### Anlernen durch Kopieren eines bestehenden Funkcodes
+
+Alternativ kann man auch eine bereits eingelernte Fernbedienung nutzen und diese "Kopieren".
+Dazu auf dem bereits eingelernten Sender die AUF- und AB-Taste gleichzeitig. Danach, auf diesem Sender, die STOP-Taste
+acht mal drücken. Der Motor wird zur Bestätigung kurz vibrieren.
+
+Jetzt innerhalb von 5 Sekunden den entsprechenden "Lern-Button" im WebUI in den Settings bei dem jeweiligen Rolladen drücken.
+Wenn der Rolladen erfolgreich eingelernt wurde, vibriert der Motor erneut.
+
+## Migration von madmartin/Jarolift_MQTT
 
 Es ist möglich, von einer vorherigen Version von [madmartin/Jarolift_MQTT](https://github.com/madmartin/Jarolift_MQTT) zu diesem Projekt zu migrieren.
 

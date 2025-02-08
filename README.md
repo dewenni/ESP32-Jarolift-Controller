@@ -92,6 +92,7 @@ The project home is here: [Project Home](http://www.bastelbudenbuben.de/2017/04/
   - [Setup-Mode](#setup-mode)
   - [Configuration](#configuration)
   - [Filemanager](#filemanager)
+  - [Teach-in of roller shutters](#teach-in-of-roller-shutters)
   - [Migration](#migration)
 - [WebUI](#webui)
   - [Channels](#channels)
@@ -217,8 +218,12 @@ There are two predefined Options:
 
 ## Setup Mode
 
-There is a "Setup Mode" available. The "Setup Mode" is activated, when you press the "reset-button" of the ESP two times within 3 Seconds.
-The "Setup Mode" will also activated if there is no wifi connection configured.
+A `Setup Mode` is available. Setup mode is activated when the ESP is restarted **5** times.
+A maximum of 5 seconds may elapse after each restart.
+
+Example: restart 1/5 - wait 2s - restart 2/5 - wait 2s - restart 3/5 - wait 2s - restart 4/5 - wait 2s - restart /5/5 => Setup-Mode
+
+The "Setup Mode" will also activated if there is no valid wifi and no valid ETH connection configured.
 
 If the ESP goes into "Setup Mode", it will automatically create a own network access point with ssid  
 📶 `"ESP32_Jarolift"`  
@@ -276,6 +281,31 @@ there is also a builtin file manager to open (show), download (export) and uploa
 The configuration is stored in the ```config.json``` file. To backup and restore the configuration you can download and upload this file.
 
 ![filemanager](/Doc/webUI_tools.png)
+
+## Teach-in of roller shutters
+
+There are basically several ways to teach-in a roller shutter.
+There are the same options as when using the original remote controls.
+
+### Teach-in by pressing the teach-in button on the motor
+
+Every TDEF motor has a button for programming new remote controls.
+If you press this button, the motor confirms the learning process with a vibration.
+
+> [!TIP]
+> If you cannot reach the button, you can also switch the motor off for a few seconds. For example, by briefly switching off the fuse.
+
+Now press the corresponding ‘Learn button’ in the WebUI in the settings for the respective roller shutter within 5 seconds.
+If the roller shutter has been successfully programmed, the motor will vibrate again.
+
+### Programming by copying an existing radio code
+
+Alternatively, you can also use an already programmed remote control and ‘copy’ it.
+To do this, press the UP and DOWN buttons simultaneously on the already programmed transmitter. Then, on this transmitter, press the STOP button
+eight times on this transmitter. The motor will vibrate briefly to confirm.
+
+Now press the corresponding ‘Learn button’ in the WebUI in the settings for the respective roller shutter within 5 seconds.
+If the roller shutter has been successfully learnt, the motor will vibrate again.
 
 ## Migration
 
