@@ -20,31 +20,6 @@ std::queue<JaroCommand> jaroCmdQueue;
 
 JaroliftController jarolift;
 
-/**
- * *******************************************************************
- * @brief   message callback for JaroliftController
- * @param   level,msg
- * @return  none
- * *******************************************************************/
-void msgCallback(esp_log_level_t level, const char *msg) {
-  switch (level) {
-  case ESP_LOG_ERROR:
-    ESP_LOGE(TAG, "%s", msg);
-    break;
-  case ESP_LOG_WARN:
-    ESP_LOGW(TAG, "%s", msg);
-    break;
-  case ESP_LOG_INFO:
-    ESP_LOGI(TAG, "%s", msg);
-    break;
-  case ESP_LOG_DEBUG:
-    ESP_LOGD(TAG, "%s", msg);
-    break;
-  default:
-    ESP_LOGI(TAG, "[UNKNOWN]: %s", msg);
-    break;
-  }
-}
 
 /**
  * *******************************************************************
@@ -80,7 +55,6 @@ void jaroliftSetup() {
 
   // initialize
   ESP_LOGI(TAG, "initializing the CC1101 Transceiver");
-  jarolift.setMessageCallback(msgCallback);
   jarolift.setGPIO(config.gpio.sck, config.gpio.miso, config.gpio.mosi, config.gpio.cs, config.gpio.gdo0, config.gpio.gdo2);
   jarolift.setKeys(config.jaro.masterMSB, config.jaro.masterLSB);
   jarolift.setBaseSerial(config.jaro.serial);
@@ -92,7 +66,7 @@ void jaroliftSetup() {
     ESP_LOGE(TAG, "CC1101 Transceiver NOT connected!");
   }
 
-  ESP_LOGI(TAG, "read Device Counter from EEPROM: %i", jarolift.getDeviceCounter());
+  ESP_LOGI(TAG, "read Device Counter from FLASH: %i", jarolift.getDeviceCounter());
 }
 
 /**

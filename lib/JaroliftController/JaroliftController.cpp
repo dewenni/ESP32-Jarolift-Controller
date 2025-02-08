@@ -1,10 +1,16 @@
 #include "esp_log.h"
 #include <JaroliftController.h>
+#include <nvs.h>
+#include <nvs_flash.h>
+
+#define NVS_NAMESPACE "device_data"
 
 #define Lowpulse 400 // Defines pulse-width in microseconds. Adapt for your use...
 #define Highpulse 800
 
 #define BITS_SIZE 8
+
+static const char *TAG = "JARO-CTRL"; // LOG TAG
 
 // RX variables and defines
 #define debounce 200 // Ignoring short pulses in reception... no clue if required and if it makes sense ;)
@@ -31,7 +37,6 @@ static s_cfg config;
 static bool initOK = false;
 
 unsigned short devcnt = 0x0; // Initial 16Bit countervalue, stored in EEPROM and incremented once every time a command is send
-int cntadr = 0;              // EEPROM address where the 16Bit counter is stored.
 
 static int device_key_msb = 0x0; // stores cryptkey MSB
 static int device_key_lsb = 0x0; // stores cryptkey LSB
@@ -80,13 +85,31 @@ void JaroliftController::setGPIO(int8_t sck, int8_t miso, int8_t mosi, int8_t ss
 // ####################################################################
 //  increment and store devcnt, send devcnt as mqtt state topic
 // ####################################################################
-void JaroliftController::devcnt_handler(boolean do_increment) {
-  if (do_increment)
+void JaroliftController::devcnt_handler(bool do_increment) {
+  nvs_handle_t nvs_handle;
+  esp_err_t err = nvs_open(NVS_NAMESPACE, NVS_READWRITE, &nvs_handle);
+  if (err != ESP_OK) {
+    ESP_LOGE(TAG, "Failed to open NVS");
+    return;
+  }
+
+  // Wert aus NVS laden
+  err = nvs_get_u16(nvs_handle, "devcnt", &devcnt);
+  if (err == ESP_ERR_NVS_NOT_FOUND) {
+    devcnt = 0; // Falls Key noch nicht existiert, mit 0 starten
+  }
+
+  // Falls gewünscht, erhöhen und speichern
+  if (do_increment) {
     devcnt++;
-  EEPROM.put(cntadr, devcnt);
-  EEPROM.commit();
-  sendMsg(ESP_LOG_DEBUG, "Device Counter: %i", devcnt);
-} // void devcnt_handler
+    nvs_set_u16(nvs_handle, "devcnt", devcnt);
+    nvs_commit(nvs_handle);
+  }
+
+  ESP_LOGD(TAG, "Device Counter: %i", devcnt);
+
+  nvs_close(nvs_handle);
+}
 
 // ####################################################################
 //  set Device Counter
@@ -101,7 +124,27 @@ void JaroliftController::setDeviceCounter(uint16_t newDevCnt) {
 //  get Device Counter
 // ####################################################################
 uint16_t JaroliftController::getDeviceCounter() {
-  EEPROM.get(cntadr, devcnt);
+  nvs_handle_t nvs_handle;
+  esp_err_t err = nvs_open(NVS_NAMESPACE, NVS_READWRITE, &nvs_handle);
+  if (err != ESP_OK) {
+    ESP_LOGE(TAG, "Failed to open NVS");
+    return 0;
+  }
+
+  uint16_t devcnt = 0;
+  err = nvs_get_u16(nvs_handle, "devcnt", &devcnt);
+
+  if (err == ESP_ERR_NVS_NOT_FOUND) {
+    // try to read from EEPROM if not found in NVS (migration)
+    EEPROM.get(0, devcnt);
+
+    // save to NVS for future use
+    nvs_set_u16(nvs_handle, "devcnt", devcnt);
+    nvs_commit(nvs_handle);
+    ESP_LOGI(TAG, "Migrated devcnt=%d from EEPROM to NVS", devcnt);
+  }
+
+  nvs_close(nvs_handle);
   return devcnt;
 }
 
@@ -110,7 +153,7 @@ uint16_t JaroliftController::getDeviceCounter() {
 // ####################################################################
 void JaroliftController::setBaseSerial(uint32_t serial) {
   config.serial = serial;
-  sendMsg(ESP_LOG_DEBUG, "set base serial: 0x%06x", config.serial);
+  ESP_LOGD(TAG, "set base serial: 0x%08lx", config.serial);
 }
 
 // ####################################################################
@@ -136,7 +179,7 @@ bool JaroliftController::getCC1101State(void) { return cc1101.connected(); }
 // ####################################################################
 uint32_t JaroliftController::cmd_get_serial(int channel) {
   uint32_t serial = (config.serial << 8) + channel;
-  sendMsg(ESP_LOG_DEBUG, "get serial: 0x%08x for channel: %i", serial, channel + 1);
+  ESP_LOGD(TAG, "get serial: 0x%08lx for channel: %i", serial, channel + 1);
   return serial;
 }
 
@@ -238,7 +281,7 @@ void JaroliftController::keygen() {
   keylow = new_serial | 0x60000000;
   enc = k.decrypt(keylow);
   device_key_msb = enc; // Stores MSB devicekey 16Bit
-  sendMsg(ESP_LOG_DEBUG, "created devicekey low: 0x%08x // high: 0x%08x", device_key_lsb, device_key_msb);
+  ESP_LOGD(TAG, "created devicekey low: 0x%08x // high: 0x%08x", device_key_lsb, device_key_msb);
 } // void keygen
 
 // ####################################################################
@@ -286,7 +329,7 @@ void JaroliftController::rx_keygen() {
   enc = k.decrypt(keylow);
   rx_device_key_msb = enc; // Stores MSB devicekey 16Bit
 
-  sendMsg(ESP_LOG_DEBUG, "received devicekey low: 0x%08x // high: 0x%08x", rx_device_key_lsb, rx_device_key_msb);
+  ESP_LOGD(TAG, "received devicekey low: 0x%08x // high: 0x%08x", rx_device_key_lsb, rx_device_key_msb);
 } // void rx_keygen
 
 // ####################################################################
@@ -301,7 +344,7 @@ void JaroliftController::rx_decoder() {
   rx_disc_low[2] = (decoded >> 8) & 0xFF;
   rx_disc_low[3] = decoded & 0xFF;
 
-  sendMsg(ESP_LOG_DEBUG, "decoded devicekey: 0x%08lx", decoded);
+  ESP_LOGD(TAG, "decoded devicekey: 0x%08lx", decoded);
 } // void rx_decoder
 
 // ####################################################################
@@ -318,7 +361,7 @@ uint8_t JaroliftController::getRssi() {
     value = rssi / 2;
     value = value + 74;
   }
-  sendMsg(ESP_LOG_DEBUG, " CC1101_RSSI: %i", value);
+  ESP_LOGD(TAG, " CC1101_RSSI: %i", value);
   return value;
 } // void ReadRSSI
 
@@ -362,7 +405,7 @@ void JaroliftController::cmdUp(uint8_t channel) {
     return;
   }
   new_serial = cmd_get_serial(channel);
-  EEPROM.get(cntadr, devcnt);
+  devcnt = getDeviceCounter();
   button = 0x8;
   disc_l = disc_low[channel];
   disc_h = disc_high[channel];
@@ -383,7 +426,7 @@ void JaroliftController::cmdGroupUp(uint16_t group_mask) {
   if (!initOK) {
     return;
   }
-  EEPROM.get(cntadr, devcnt);
+  devcnt = getDeviceCounter();
   new_serial = cmd_get_serial(0);
   button = 0x8;
   disc_l = group_mask & 0x00FF;
@@ -409,7 +452,7 @@ void JaroliftController::cmdDown(uint8_t channel) {
     return;
   }
   new_serial = cmd_get_serial(channel);
-  EEPROM.get(cntadr, devcnt);
+  devcnt = getDeviceCounter();
   button = 0x2;
   disc_l = disc_low[channel];
   disc_h = disc_high[channel];
@@ -430,7 +473,7 @@ void JaroliftController::cmdGroupDown(uint16_t group_mask) {
   if (!initOK) {
     return;
   }
-  EEPROM.get(cntadr, devcnt);
+  devcnt = getDeviceCounter();
   new_serial = cmd_get_serial(0);
   button = 0x2;
   disc_l = group_mask & 0x00FF;
@@ -456,7 +499,7 @@ void JaroliftController::cmdStop(uint8_t channel) {
     return;
   }
   new_serial = cmd_get_serial(channel);
-  EEPROM.get(cntadr, devcnt);
+  devcnt = getDeviceCounter();
   button = 0x4;
   disc_l = disc_low[channel];
   disc_h = disc_high[channel];
@@ -477,7 +520,7 @@ void JaroliftController::cmdGroupStop(uint16_t group_mask) {
   if (!initOK) {
     return;
   }
-  EEPROM.get(cntadr, devcnt);
+  devcnt = getDeviceCounter();
   new_serial = cmd_get_serial(0);
   button = 0x4;
   disc_l = group_mask & 0x00FF;
@@ -503,7 +546,7 @@ void JaroliftController::cmdShade(uint8_t channel) {
     return;
   }
   new_serial = cmd_get_serial(channel);
-  EEPROM.get(cntadr, devcnt);
+  devcnt = getDeviceCounter();
   button = 0x4;
   disc_l = disc_low[channel];
   disc_h = disc_high[channel];
@@ -524,7 +567,7 @@ void JaroliftController::cmdGroupShade(uint16_t group_mask) {
   if (!initOK) {
     return;
   }
-  EEPROM.get(cntadr, devcnt);
+  devcnt = getDeviceCounter();
   new_serial = cmd_get_serial(0);
   button = 0x4;
   disc_l = group_mask & 0x00FF;
@@ -551,7 +594,7 @@ void JaroliftController::cmdSetShade(uint8_t channel) {
   }
 
   new_serial = cmd_get_serial(channel);
-  EEPROM.get(cntadr, devcnt);
+  devcnt = getDeviceCounter();
   button = 0x4;
   disc_l = disc_low[channel];
   disc_h = disc_high[channel];
@@ -569,7 +612,7 @@ void JaroliftController::cmdSetShade(uint8_t channel) {
     delay(300);
   }
   rx_function = 0x6;
-  sendMsg(ESP_LOG_INFO, "command SET SHADE for channel %i sent", channel + 1);
+  ESP_LOGI(TAG, "command SET SHADE for channel %i sent", channel + 1);
   devcnt_handler(false);
   delay(2000); // Safety time to prevent accidentally erase of end-points.
 } // void cmd_set_shade_position
@@ -584,11 +627,11 @@ void JaroliftController::cmdLearn(uint8_t channel) {
     return;
   }
 
-  sendMsg(ESP_LOG_INFO, "putting channel %i into learn mode ...", channel + 1);
+  ESP_LOGI(TAG, "putting channel %i into learn mode ...", channel + 1);
   new_serial = cmd_get_serial(channel);
-  EEPROM.get(cntadr, devcnt);
-  sendMsg(ESP_LOG_DEBUG, "Device Counter from EEPROM: %i", devcnt);
-  sendMsg(ESP_LOG_DEBUG, "get serial: %#llx", new_serial);
+  devcnt = getDeviceCounter();
+  ESP_LOGD(TAG, "Device Counter from EEPROM: %i", devcnt);
+  ESP_LOGD(TAG, "get serial: %#llx", new_serial);
   if (config.learn_mode == true)
     button = 0xA; // New learn method. Up+Down followd by Stop.
   else
@@ -612,7 +655,7 @@ void JaroliftController::cmdLearn(uint8_t channel) {
     devcnt++;
   }
   devcnt_handler(false);
-  sendMsg(ESP_LOG_INFO, "Channel learned!");
+  ESP_LOGI(TAG, "Channel learned!");
 } // void jaroCmdLearn
 
 // ####################################################################
@@ -625,7 +668,7 @@ void JaroliftController::cmdUpDown(uint8_t channel) {
   }
 
   new_serial = cmd_get_serial(channel);
-  EEPROM.get(cntadr, devcnt);
+  devcnt = getDeviceCounter();
   button = 0xA;
   disc_l = disc_low[channel];
   disc_h = disc_high[channel];
@@ -636,19 +679,19 @@ void JaroliftController::cmdUpDown(uint8_t channel) {
   radio_tx(1);
   enterrx();
   devcnt_handler(true);
-  sendMsg(ESP_LOG_INFO, "command UPDOWN for channel %i sent", channel + 1);
+  ESP_LOGI(TAG, "command UPDOWN for channel %i sent", channel + 1);
 } // void cmd_updown
 
 void JaroliftController::begin() {
 
   EEPROM.begin(sizeof(devcnt));
-  EEPROM.get(cntadr, devcnt);
+  devcnt = getDeviceCounter();
 
   // initialize the transceiver chip
   cc1101.setGPIO(gpio.sck, gpio.miso, gpio.mosi, gpio.cs, gpio.gdo0);
 
   if (cc1101.init() == false) {
-    sendMsg(ESP_LOG_ERROR, "Initialisation of the CC1101 module aborted!");
+    ESP_LOGE(TAG, "Initialisation of the CC1101 module aborted!");
     return;
   }
 
@@ -730,10 +773,10 @@ void JaroliftController::loop() {
       steadycnt = 0;
     }
 
-    sendMsg(ESP_LOG_DEBUG, "(INF1) serial: 0x%08lx, rx_function: 0x%x, rx_disc_low: %d, rx_disc_high: %d", rx_serial, rx_function, rx_disc_low[0],
+    ESP_LOGD(TAG, "(INF1) serial: 0x%08lx, rx_function: 0x%x, rx_disc_low: %d, rx_disc_high: %d", rx_serial, rx_function, rx_disc_low[0],
             rx_disc_h);
-    sendMsg(ESP_LOG_DEBUG, "(INF2) RSSI: %d, counter: %d", getRssi(), rx_disc_low[3]);
-    sendMsg(ESP_LOG_DEBUG, "(INF3) rx_device_key_lsb: 0x%08x, rx_device_key_msb: 0x%08x, decoded: 0x%08lx", rx_device_key_lsb, rx_device_key_msb,
+    ESP_LOGD(TAG, "(INF2) RSSI: %d, counter: %d", getRssi(), rx_disc_low[3]);
+    ESP_LOGD(TAG, "(INF3) rx_device_key_lsb: 0x%08x, rx_device_key_msb: 0x%08x, decoded: 0x%08lx", rx_device_key_lsb, rx_device_key_msb,
             decoded);
 
     rx_disc_h = 0;
