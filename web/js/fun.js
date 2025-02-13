@@ -429,6 +429,7 @@ function validateIP(input) {
     input.setAttribute("aria-invalid", "true");
   } else {
     input.setAttribute("aria-invalid", "false");
+    sendData(input.id, input.value);
   }
 }
 
