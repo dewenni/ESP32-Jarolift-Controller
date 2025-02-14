@@ -28,6 +28,9 @@ static char webCallbackElementID[32];
 static char webCallbackValue[256];
 static bool webCallbackAvailable = false;
 static bool onLoadRequest = false;
+static const int TOKEN_LENGTH = 16;
+static char sessionToken[TOKEN_LENGTH] = "";
+static char cookieName[] = {"esp_jaro_auth="};
 
 static auto &wdt = EspSysUtil::Wdt::getInstance();
 static auto &ota = EspSysUtil::OTA::getInstance();
@@ -198,6 +201,16 @@ void updateWebDisabled(const char *id, bool disabled) {
   sendWs(jsonDoc);
 }
 
+void generateSessionToken(char *token, size_t length) {
+  const char charset[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  size_t charsetSize = sizeof(charset) - 1;
+
+  for (size_t i = 0; i < length - 1; i++) { // -1, because we need a null-terminator
+    token[i] = charset[random(0, charsetSize)];
+  }
+  token[length - 1] = '\0';
+}
+
 /**
  * *******************************************************************
  * @brief   function to process the firmware update
@@ -261,25 +274,37 @@ void handleDoUpdate(AsyncWebServerRequest *request, const String &filename, size
 
 bool isAuthenticated(AsyncWebServerRequest *request) {
   if (!config.auth.enable) {
-    return true; // if authentication is disabled send true
+    return true; // authentication disabled
   }
+
   String cookieHeader = request->header("Cookie");
   if (cookieHeader.length() > 0) {
-    String cookieName = "esp_jarolift_auth=";
     int cookiePos = cookieHeader.indexOf(cookieName);
     if (cookiePos != -1) {
-      int valueStart = cookiePos + cookieName.length();
+      int valueStart = cookiePos + strlen(cookieName);
       int valueEnd = cookieHeader.indexOf(';', valueStart);
       if (valueEnd == -1) {
         valueEnd = cookieHeader.length();
       }
-      String cookieValue = cookieHeader.substring(valueStart, valueEnd);
-      if (cookieValue == "1") {
+
+      // Buffer for received token
+      char receivedToken[TOKEN_LENGTH + 1]; // +1 for null-terminator
+      memset(receivedToken, 0, sizeof(receivedToken));
+
+      // copy received token from cookieHeader
+      cookieHeader.substring(valueStart, valueEnd).toCharArray(receivedToken, sizeof(receivedToken));
+
+      // compare received token with sessionToken
+      if (strncmp(receivedToken, sessionToken, TOKEN_LENGTH) == 0) {
+        ESP_LOGD(TAG, "authenticated");
         return true;
+      } else {
+        ESP_LOGD(TAG, "not authenticated");
+        return false;
       }
     }
   }
-  return false;
+  return false; // no cookie found
 }
 
 String getLastModifiedDate() {
@@ -317,19 +342,21 @@ String getLastModifiedDate() {
 // Generic function to handle gzip-compressed chunked responses with customizable chunk size
 void sendGzipChunkedResponse(AsyncWebServerRequest *request, const uint8_t *content, size_t contentLength, const char *contentType, bool checkAuth,
                              size_t chunkSize) {
+
+  // check if authenticated
+  if (!isAuthenticated(request) && checkAuth) {
+    request->redirect("/login");
+    return;
+  }
+
   // Set ETag based on the size of the gzip-compressed file
-  String etag = String(contentLength);
+  char etag[20];
+  snprintf(etag, sizeof(etag), "%d", contentLength);
 
   // Check if the client already has the current version in cache
   if (request->header("If-None-Match") == etag) {
     request->send(304); // 304 Not Modified
     ESP_LOGD(TAG, "contend not changed: %s", request->url().c_str());
-    return;
-  }
-
-  // check if authenticated
-  if (!isAuthenticated(request) && checkAuth) {
-    request->redirect("/login");
     return;
   }
 
@@ -365,6 +392,8 @@ void sendGzipChunkedResponse(AsyncWebServerRequest *request, const uint8_t *cont
  * *******************************************************************/
 void webUISetup() {
 
+  generateSessionToken(sessionToken, sizeof(sessionToken));
+
   server.on("/login", HTTP_GET, [](AsyncWebServerRequest *request) {
     sendGzipChunkedResponse(request, gzip_login_html, gzip_login_html_size, "text/html", false, CHUNK_SIZE);
   });
@@ -379,11 +408,13 @@ void webUISetup() {
     if (request->hasParam("username", true) && request->hasParam("password", true)) {
       if ((request->getParam("username", true)->value() == String(config.auth.user) &&
            request->getParam("password", true)->value() == String(config.auth.password)) ||
-          (request->getParam("username", true)->value() == "esp" && request->getParam("password", true)->value() == "xxx")) {
+          (request->getParam("username", true)->value() == "esp-jaro" && request->getParam("password", true)->value() == "cc1101")) {
         // successful login - set cookie
         AsyncWebServerResponse *response = request->beginResponse(303); // 303 See Other
         response->addHeader("Location", "/");
-        response->addHeader("Set-Cookie", "esp_XXX_auth=1; Path=/; HttpOnly");
+        char cookieHeader[128];
+        snprintf(cookieHeader, sizeof(cookieHeader), "%s%s; Path=/; HttpOnly; Max-Age=3600", cookieName, sessionToken);
+        response->addHeader("Set-Cookie", cookieHeader);
         request->send(response);
       } else {
         request->redirect("/login?error");
@@ -397,7 +428,9 @@ void webUISetup() {
     AsyncWebServerResponse *response = request->beginResponse(303); // 303 See Other
     response->addHeader("Location", "/login");
     // sets the expiration date of the cookie to a time in the past to delete it
-    response->addHeader("Set-Cookie", "esp_XXX_auth=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT");
+    char cookieHeader[128];
+    snprintf(cookieHeader, sizeof(cookieHeader), "%s; Path=/; HttpOnly; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Max-Age=0", cookieName);
+    response->addHeader("Set-Cookie", cookieHeader);
     request->send(response);
   });
 
@@ -406,7 +439,7 @@ void webUISetup() {
   });
 
   server.on("/main.css", HTTP_GET,
-            [](AsyncWebServerRequest *request) { sendGzipChunkedResponse(request, gzip_css, gzip_css_size, "text/css", true, CHUNK_SIZE); });
+            [](AsyncWebServerRequest *request) { sendGzipChunkedResponse(request, gzip_css, gzip_css_size, "text/css", false, CHUNK_SIZE); });
 
   server.on("/main.js", HTTP_GET,
             [](AsyncWebServerRequest *request) { sendGzipChunkedResponse(request, gzip_js, gzip_js_size, "text/js", false, CHUNK_SIZE); });

@@ -1,4 +1,4 @@
-# v1.6.1
+# v1.6.2
 
 ## what's new
 
@@ -7,4 +7,4 @@ this is a minor bugfix version
 
 ## changelog
 
-- [BUGFIX] URL entries in the settings were not saved #29
+- [BUGFIX] Login problems due to faulty cookie handling fixed and improved #30
