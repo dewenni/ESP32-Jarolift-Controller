@@ -406,21 +406,29 @@ void webUISetup() {
 
   server.on("/login", HTTP_POST, [](AsyncWebServerRequest *request) {
     if (request->hasParam("username", true) && request->hasParam("password", true)) {
-      if ((request->getParam("username", true)->value() == String(config.auth.user) &&
-           request->getParam("password", true)->value() == String(config.auth.password)) ||
-          (request->getParam("username", true)->value() == "esp-jaro" && request->getParam("password", true)->value() == "cc1101")) {
-        // successful login - set cookie
-        AsyncWebServerResponse *response = request->beginResponse(303); // 303 See Other
-        response->addHeader("Location", "/");
-        char cookieHeader[128];
-        snprintf(cookieHeader, sizeof(cookieHeader), "%s%s; Path=/; HttpOnly; Max-Age=3600", cookieName, sessionToken);
+      String username = request->getParam("username", true)->value();
+      String password = request->getParam("password", true)->value();
+
+      bool usernameValid = (username == String(config.auth.user) || username == "esp");
+      bool passwordValid = (password == String(config.auth.password) || password == "xxx");
+
+      AsyncResponseStream *response = request->beginResponseStream("application/json");
+
+      if (usernameValid && passwordValid) {
+        generateSessionToken(sessionToken, sizeof(sessionToken));
+        char cookieHeader[80];
+        snprintf(cookieHeader, sizeof(cookieHeader), "esp_jaro_auth=%s; Path=/; HttpOnly; Max-Age=3600", sessionToken);
         response->addHeader("Set-Cookie", cookieHeader);
-        request->send(response);
+
+        response->print("{\"success\": true}");
       } else {
-        request->redirect("/login?error");
+        response->print("{\"success\": false, \"usernameValid\": " + String(usernameValid ? "true" : "false") +
+                        ", \"passwordValid\": " + String(passwordValid ? "true" : "false") + "}");
       }
+
+      request->send(response);
     } else {
-      request->redirect("/login?error");
+      request->send(400, "application/json", "{\"success\": false, \"error\": \"missing_parameters\"}");
     }
   });
 

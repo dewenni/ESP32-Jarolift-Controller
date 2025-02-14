@@ -1,4 +1,4 @@
-# v1.6.2
+# v1.6.
 
 ## what's new
 
@@ -7,4 +7,5 @@ this is a minor bugfix version
 
 ## changelog
 
-- [BUGFIX] Login problems due to faulty cookie handling fixed and improved #30
+- [IMPROVE] improved Login Form Feedback for Incorrect Credentials
+

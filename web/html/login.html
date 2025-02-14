@@ -13,9 +13,15 @@
       <article>
         <h2>ESP32-Jarolift</h2>
         <p>Please Login</p>
-        <form action="/login" method="post">
-          <input type="text" name="username" placeholder="user name" required />
+        <form id="loginForm">
           <input
+            id="username"
+            type="text"
+            name="username"
+            placeholder="user name"
+            required />
+          <input
+            id="password"
             type="password"
             name="password"
             placeholder="password"
@@ -24,5 +30,40 @@
         </form>
       </article>
     </dialog>
+
+    <script>
+      function setValidation(data) {
+        var element = document.getElementById(data.id);
+        if (element) {
+          if (data.valid) {
+            element.removeAttribute("aria-invalid");
+          } else {
+            element.setAttribute("aria-invalid", "true");
+          }
+        }
+      }
+
+      document
+        .getElementById("loginForm")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
+
+          fetch("/login", {
+            method: "POST",
+            body: new FormData(this),
+            headers: { Accept: "application/json" },
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                window.location.href = "/";
+              } else {
+                setValidation({ id: "username", valid: data.usernameValid });
+                setValidation({ id: "password", valid: data.passwordValid });
+              }
+            })
+            .catch((error) => console.error("Error:", error));
+        });
+    </script>
   </body>
 </html>
