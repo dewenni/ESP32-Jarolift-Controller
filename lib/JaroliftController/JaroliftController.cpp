@@ -1,4 +1,3 @@
-#include "esp_log.h"
 #include <JaroliftController.h>
 #include <nvs.h>
 #include <nvs_flash.h>
@@ -10,7 +9,7 @@
 
 #define BITS_SIZE 8
 
-static const char *TAG = "JARO-CTRL"; // LOG TAG
+static const char *TAG = "JARO-LIB"; // LOG TAG
 
 // RX variables and defines
 #define debounce 200 // Ignoring short pulses in reception... no clue if required and if it makes sense ;)
@@ -116,7 +115,23 @@ void JaroliftController::devcnt_handler(bool do_increment) {
 // ####################################################################
 void JaroliftController::setDeviceCounter(uint16_t newDevCnt) {
   devcnt = newDevCnt;
-  devcnt_handler(false);
+
+  nvs_handle_t nvs_handle;
+  esp_err_t err = nvs_open(NVS_NAMESPACE, NVS_READWRITE, &nvs_handle);
+  if (err != ESP_OK) {
+    ESP_LOGE(TAG, "Failed to open NVS");
+    return;
+  }
+
+  nvs_set_u16(nvs_handle, "devcnt", devcnt);
+  nvs_commit(nvs_handle);
+
+  ESP_LOGD(TAG, "stored Device Counter: %i", devcnt);
+  ESP_LOGW(TAG, "Wstored Device Counter: %i", devcnt);
+  ESP_LOGE(TAG, "Estored Device Counter: %i", devcnt);
+
+  nvs_close(nvs_handle);
+
   delay(100);
 }
 
@@ -145,6 +160,7 @@ uint16_t JaroliftController::getDeviceCounter() {
   }
 
   nvs_close(nvs_handle);
+
   return devcnt;
 }
 
@@ -361,7 +377,7 @@ uint8_t JaroliftController::getRssi() {
     value = rssi / 2;
     value = value + 74;
   }
-  ESP_LOGD(TAG, " CC1101_RSSI: %i", value);
+  ESP_LOGD(TAG, "CC1101_RSSI: %i", value);
   return value;
 } // void ReadRSSI
 
@@ -684,6 +700,8 @@ void JaroliftController::cmdUpDown(uint8_t channel) {
 
 void JaroliftController::begin() {
 
+  ESP_LOGI(TAG, "start CC1101 setup");
+
   EEPROM.begin(sizeof(devcnt));
   devcnt = getDeviceCounter();
 
@@ -773,11 +791,9 @@ void JaroliftController::loop() {
       steadycnt = 0;
     }
 
-    ESP_LOGD(TAG, "(INF1) serial: 0x%08lx, rx_function: 0x%x, rx_disc_low: %d, rx_disc_high: %d", rx_serial, rx_function, rx_disc_low[0],
-            rx_disc_h);
+    ESP_LOGD(TAG, "(INF1) serial: 0x%08lx, rx_function: 0x%x, rx_disc_low: %d, rx_disc_high: %d", rx_serial, rx_function, rx_disc_low[0], rx_disc_h);
     ESP_LOGD(TAG, "(INF2) RSSI: %d, counter: %d", getRssi(), rx_disc_low[3]);
-    ESP_LOGD(TAG, "(INF3) rx_device_key_lsb: 0x%08x, rx_device_key_msb: 0x%08x, decoded: 0x%08lx", rx_device_key_lsb, rx_device_key_msb,
-            decoded);
+    ESP_LOGD(TAG, "(INF3) rx_device_key_lsb: 0x%08x, rx_device_key_msb: 0x%08x, decoded: 0x%08lx", rx_device_key_lsb, rx_device_key_msb, decoded);
 
     rx_disc_h = 0;
     rx_hopcode = 0;

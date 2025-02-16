@@ -109,6 +109,7 @@ void setLogLevel(uint8_t level) {
   }
   esp_log_level_set("*", logLevel);
   esp_log_level_set("ARDUINO", ESP_LOG_WARN);
+  
 }
 
 /**
