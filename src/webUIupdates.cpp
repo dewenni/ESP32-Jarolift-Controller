@@ -81,10 +81,10 @@ void updateAllElements() {
 
   refreshRequest = true; // start combined json refresh
 
-  updateWebLanguage(LANG::CODE[config.lang]);
+  webUI.wsUpdateWebLanguage(LANG::CODE[config.lang]);
 
   if (setupMode) {
-    showElementClass("setupModeBar", true);
+    webUI.wsShowElementClass("setupModeBar", true);
   }
 }
 
@@ -178,7 +178,7 @@ void updateSystemInfoElements() {
   // act Time
   addJson(jsonDoc, "p09_act_time", EspStrUtil::getTimeString());
 
-  updateWebJSON(jsonDoc);
+  webUI.wsUpdateWebJSON(jsonDoc);
 }
 
 /**
@@ -217,7 +217,7 @@ void updateSystemInfoElementsStatic() {
   // Date
   addJson(jsonDoc, "p09_act_date", EspStrUtil::getDateString());
 
-  updateWebJSON(jsonDoc);
+  webUI.wsUpdateWebJSON(jsonDoc);
 }
 
 /**
@@ -279,7 +279,7 @@ void webReadLogBufferCyclic() {
     }
     if (logLine == MAX_LOG_LINES - 1) {
       // end
-      updateWebJSON(jsonLog);
+      webUI.wsUpdateWebJSON(jsonLog);
       logReadActive = false;
       return;
     } else {
@@ -289,7 +289,7 @@ void webReadLogBufferCyclic() {
       } else {
         // no more entries
         logReadActive = false;
-        updateWebJSON(jsonLog);
+        webUI.wsUpdateWebJSON(jsonLog);
         return;
       }
     }
@@ -304,10 +304,10 @@ void webReadLogBufferCyclic() {
  * *******************************************************************/
 void otaProgressCallback(int progress) {
   if (otaProgessTimer.cycleTrigger(1000)) {
-    sendHeartbeat();
+    webUI.wsSendHeartbeat();
     char buttonTxt[32];
     snprintf(buttonTxt, sizeof(buttonTxt), "updating: %i%%", progress);
-    updateWebText("p00_update_btn", buttonTxt, false);
+    webUI.wsUpdateWebText("p00_update_btn", buttonTxt, false);
   }
 }
 
@@ -323,19 +323,19 @@ void processGitHubVersion() {
   if (startCheckGitHubVersion) {
     startCheckGitHubVersion = false;
     if (ghGetLatestRelease(&ghLatestRelease, &ghReleaseInfo)) {
-      updateWebBusy("p00_dialog_git_version", false);
-      updateWebText("p00_dialog_git_version", ghReleaseInfo.tag, false);
-      updateWebHref("p00_dialog_git_version", ghReleaseInfo.url);
+      webUI.wsUpdateWebBusy("p00_dialog_git_version", false);
+      webUI.wsUpdateWebText("p00_dialog_git_version", ghReleaseInfo.tag, false);
+      webUI.wsUpdateWebHref("p00_dialog_git_version", ghReleaseInfo.url);
       // if new version is available, show update button
       if (strcmp(ghReleaseInfo.tag, VERSION) != 0) {
         char buttonTxt[32];
         snprintf(buttonTxt, sizeof(buttonTxt), "Update %s", ghReleaseInfo.tag);
-        updateWebText("p00_update_btn", buttonTxt, false);
-        updateWebHideElement("p00_update_btn_hide", false);
+        webUI.wsUpdateWebText("p00_update_btn", buttonTxt, false);
+        webUI.wsUpdateWebHideElement("p00_update_btn_hide", false);
       }
     } else {
-      updateWebBusy("p00_dialog_git_version", false);
-      updateWebText("p00_dialog_git_version", "error", false);
+      webUI.wsUpdateWebBusy("p00_dialog_git_version", false);
+      webUI.wsUpdateWebText("p00_dialog_git_version", "error", false);
     }
   }
 }
@@ -352,15 +352,15 @@ void processGitHubUpdate() {
   if (startGitHubUpdate) {
     startGitHubUpdate = false;
     ghSetProgressCallback(otaProgressCallback);
-    updateWebText("p00_update_btn", "updating: 0%", false);
-    updateWebDisabled("p00_update_btn", true);
+    webUI.wsUpdateWebText("p00_update_btn", "updating: 0%", false);
+    webUI.wsUpdateWebDisabled("p00_update_btn", true);
     ota.setActive(true);
     wdt.disable();
     int result = ghStartOtaUpdate(ghLatestRelease, ghReleaseInfo.asset);
     if (result == OTA_SUCCESS) {
-      updateWebText("p00_update_btn", "updating: 100%", false);
-      updateWebDialog("version_dialog", "close");
-      updateWebDialog("ota_update_done_dialog", "open");
+      webUI.wsUpdateWebText("p00_update_btn", "updating: 100%", false);
+      webUI.wsUpdateWebDialog("version_dialog", "close");
+      webUI.wsUpdateWebDialog("ota_update_done_dialog", "open");
       ESP_LOGI(TAG, "GitHub OTA-Update successful");
     } else {
       char errMsg[32];
@@ -384,9 +384,9 @@ void processGitHubUpdate() {
         strcpy(errMsg, "Unknown error");
         break;
       }
-      updateWebText("p00_ota_upd_err", errMsg, false);
-      updateWebDialog("version_dialog", "close");
-      updateWebDialog("ota_update_failed_dialog", "open");
+      webUI.wsUpdateWebText("p00_ota_upd_err", errMsg, false);
+      webUI.wsUpdateWebDialog("version_dialog", "close");
+      webUI.wsUpdateWebDialog("ota_update_failed_dialog", "open");
       ESP_LOGE(TAG, "GitHub OTA-Update failed: %s", errMsg);
     }
     ota.setActive(false);
@@ -423,7 +423,7 @@ void webUIupdates() {
   if (refreshTimer2.cycleTrigger(WEBUI_SLOW_REFRESH_TIME_MS) && !refreshRequest && !ota.isActive()) {
 
     if (!setupMode) {
-      updateWebHideElement("cc1101errorBar", getCC1101State());
+      webUI.wsUpdateWebHideElement("cc1101errorBar", getCC1101State());
     }
     updateSystemInfoElements(); // refresh all "System" elements as one big JSON update (≈ 570 Bytes)
   }

@@ -1,0 +1,49 @@
+name: Create Release
+
+# Erstellt ein Release bei einem Push mit Tag
+# Prüft ob die Version in der changeNew.md mit dem Tag übereinstimmen
+# liest die changeNew.md und nutzt diese als Beschreibung für das Release
+
+on:
+  workflow_dispatch: # Ermöglicht das manuelle Anstoßen des Workflows
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  create_release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check changelog header and prepare release notes
+        id: check_changelog
+        env:
+          GITHUB_TAG: ${{ github.ref_name }}
+        run: |
+          # Lese die erste Zeile der changeNew.md und vergleiche sie mit dem Tag
+          header=$(grep -m 1 . changeNew.md | sed 's/^# //')
+          echo "Changelog header: $header"
+
+          if [[ "$header" != "$GITHUB_TAG" ]]; then
+            echo "Changelog header $header does not match the tag $GITHUB_TAG"
+            exit 1
+          fi
+
+          # Entferne die erste Zeile und speichere den Rest in einer temporären Datei
+          tail -n +2 changeNew.md > release_notes.md
+        shell: bash
+
+      - name: Create release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.ref_name }}
+        run: |
+          # Erstelle das Release ohne Dateien als Assets
+          gh release create "$tag" \
+              --repo="$GITHUB_REPOSITORY" \
+              --title="${tag}" \
+              -F release_notes.md
+

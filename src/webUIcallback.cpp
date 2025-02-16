@@ -32,7 +32,7 @@ void webCallback(const char *elementId, const char *value) {
   }
   // OTA-Confirm
   if (strcmp(elementId, "p00_ota_confirm_btn") == 0) {
-    updateWebDialog("ota_update_done_dialog", "close");
+    webUI.wsUpdateWebDialog("ota_update_done_dialog", "close");
     EspSysUtil::RestartReason::saveLocal("ota update");
     yield();
     delay(1000);
@@ -412,16 +412,16 @@ void webCallback(const char *elementId, const char *value) {
     config.log.level = strtoul(value, NULL, 10);
     setLogLevel(config.log.level);
     clearLogBuffer();
-    updateWebLog("", "clr_log"); // clear log
+    webUI.wsUpdateWebLog("", "clr_log"); // clear log
   }
   if (strcmp(elementId, "cfg_logger_order") == 0) {
     config.log.order = strtoul(value, NULL, 10);
-    updateWebLog("", "clr_log"); // clear log
+    webUI.wsUpdateWebLog("", "clr_log"); // clear log
     webReadLogBuffer();
   }
   if (strcmp(elementId, "p10_log_clr_btn") == 0) {
     clearLogBuffer();
-    updateWebLog("", "clr_log"); // clear log
+    webUI.wsUpdateWebLog("", "clr_log"); // clear log
   }
   if (strcmp(elementId, "p10_log_refresh_btn") == 0) {
     webReadLogBuffer();
