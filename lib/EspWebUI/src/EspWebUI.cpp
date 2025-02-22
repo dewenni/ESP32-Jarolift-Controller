@@ -8,15 +8,13 @@ EspWebUI::EspWebUI(uint16_t port) : server(port), ws("/ws"), lastHeartbeatTime(0
 }
 
 void EspWebUI::begin() {
-  // Generiere ein Session-Token
-  generateSessionToken(sessionToken, sizeof(sessionToken));
 
-  // Setup der Websocket-Events und Server-Routen
+  generateSessionToken(sessionToken, sizeof(sessionToken));
   setupWebSocket();
   setupRoutes();
 
   server.addHandler(&ws).addMiddleware([this](AsyncWebServerRequest *request, ArMiddlewareNext next) {
-    if (ws.count() >= MAX_WS_CLIENT) {
+    if (ws.count() >= WEBUI_MAX_WS_CLIENT) {
       // too many clients - answer back immediately and stop processing next middlewares and handler
       request->send(429, "text/plain", "no more client connection allowed");
     } else {
@@ -25,7 +23,6 @@ void EspWebUI::begin() {
     }
   });
 
-  // Start des Servers
   server.begin();
 }
 

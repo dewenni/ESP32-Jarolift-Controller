@@ -34,6 +34,11 @@ void EspWebUI::generateSessionToken(char *token, size_t length) {
 
 bool EspWebUI::isAuthenticated(AsyncWebServerRequest *request) {
 
+  if (config.enableAuth == false) {
+    ESP_LOGD(TAG, "authentication disabled");
+    return true;
+  }
+
   String cookieHeader = request->header("Cookie");
   if (cookieHeader.length() > 0) {
     int cookiePos = cookieHeader.indexOf(cookieName);

@@ -58,6 +58,23 @@ void webUISetup() {
     }
   });
 
+  webUI.setCallbackUpload([](EspWebUI::uploadStatus uploadState, const char *msg) {
+    switch (uploadState) {
+    case EspWebUI::UPLOAD_BEGIN:
+      webUI.wsUpdateWebText("upload_status_txt", msg, false);
+      break;
+    case EspWebUI::UPLOAD_FINISH:
+      webUI.wsUpdateWebText("upload_status_txt", msg, false);
+      configLoadFromFile(); // load configuration
+      webUI.wsUpdateWebLanguage(LANG::CODE[config.lang]);
+      webUI.wsLoadConfigWebUI(); // update webUI settings
+      break;
+    case EspWebUI::UPLOAD_ERROR:
+      webUI.wsUpdateWebText("upload_status_txt", msg, false);
+      break;
+    }
+  });
+
   // callback for reload
   webUI.setCallbackReload([]() { onLoadRequest = true; });
 
@@ -67,6 +84,9 @@ void webUISetup() {
     snprintf(webCallbackValue, sizeof(webCallbackValue), "%s", elementValue);
     webCallbackAvailable = true;
   });
+
+  webUI.setCredentials(config.auth.user, config.auth.password);
+  webUI.setAuthentication(config.auth.enable);
 
   webUI.begin();
 } // END SETUP
@@ -78,6 +98,8 @@ void webUISetup() {
  * @return  none
  * *******************************************************************/
 void webUICyclic() {
+
+  webUI.loop();
 
   // request for update alle elements - not faster than every 1s
   if (onLoadRequest && onLoadTimer.cycleTrigger(1000)) {

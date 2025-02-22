@@ -14,7 +14,7 @@ void EspWebUI::sendWs(JsonDocument &jsonDoc) {
 }
 
 void EspWebUI::wsSendHeartbeat() {
-  ws.cleanupClients(MAX_WS_CLIENT);
+  ws.cleanupClients(WEBUI_MAX_WS_CLIENT);
   if (ws.count()) {
     ws.textAll("{\"type\":\"heartbeat\"}");
   }

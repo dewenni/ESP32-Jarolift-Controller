@@ -26,7 +26,6 @@ static char tmpMessage[300] = {'\0'};
 static bool refreshRequest = false;
 static uint16_t devCntNew, devCntOld = 0;
 static JsonDocument jsonDoc;
-static bool jsonDataToSend = false;
 static int logLine, logIdx = 0;
 static bool logReadActive = false;
 JsonDocument jsonLog;
@@ -41,35 +40,6 @@ GithubReleaseInfo ghReleaseInfo;
  * functions to create a JSON Buffer that contains webUI element updates
  * *******************************************************************/
 
-// initialize JSON-Buffer
-void initJsonBuffer(JsonDocument &jsonBuf) {
-  jsonBuf.clear();
-  jsonBuf["type"] = "updateJSON";
-  jsonDataToSend = false;
-}
-
-// check JSON-Buffer
-bool dataInJsonBuffer() { return jsonDataToSend; }
-
-// add JSON Element to JSON-Buffer
-void addJsonElement(JsonDocument &jsonBuf, const char *elementID, const char *value) {
-  jsonBuf[elementID] = value; // make sure value is handled as a copy not as pointer
-  jsonDataToSend = true;
-};
-
-// add webElement - numeric Type
-template <typename NumericType, typename std::enable_if<std::is_integral<NumericType>::value, NumericType>::type * = nullptr>
-inline void addJson(JsonDocument &jsonBuf, const char *elementID, NumericType value) {
-  addJsonElement(jsonBuf, elementID, EspStrUtil::intToString(static_cast<intmax_t>(value)));
-};
-// add webElement - float Type
-inline void addJson(JsonDocument &jsonBuf, const char *elementID, float value) {
-  addJsonElement(jsonBuf, elementID, EspStrUtil::floatToString(value, 1));
-};
-// add webElement - char Type
-inline void addJson(JsonDocument &jsonBuf, const char *elementID, const char *value) { addJsonElement(jsonBuf, elementID, value); };
-// add webElement - bool Type
-inline void addJson(JsonDocument &jsonBuf, const char *elementID, bool value) { addJsonElement(jsonBuf, elementID, (value ? "true" : "false")); };
 
 /**
  * *******************************************************************
@@ -96,87 +66,87 @@ void updateAllElements() {
  * *******************************************************************/
 void updateSystemInfoElements() {
 
-  initJsonBuffer(jsonDoc);
+  webUI.initJsonBuffer(jsonDoc);
 
   // WiFi information
   if (config.wifi.enable) {
-    addJson(jsonDoc, "p09_wifi_ip", wifi.ipAddress);
+    webUI.addJson(jsonDoc, "p09_wifi_ip", wifi.ipAddress);
     snprintf(tmpMessage, sizeof(tmpMessage), "%i %%", wifi.signal);
-    addJson(jsonDoc, "p09_wifi_signal", tmpMessage);
+    webUI.addJson(jsonDoc, "p09_wifi_signal", tmpMessage);
     snprintf(tmpMessage, sizeof(tmpMessage), "%ld dbm", wifi.rssi);
-    addJson(jsonDoc, "p09_wifi_rssi", tmpMessage);
+    webUI.addJson(jsonDoc, "p09_wifi_rssi", tmpMessage);
 
     if (!WiFi.isConnected()) {
-      addJson(jsonDoc, "p00_wifi_icon", "i_wifi_nok");
+      webUI.addJson(jsonDoc, "p00_wifi_icon", "i_wifi_nok");
     } else if (wifi.rssi < -80) {
-      addJson(jsonDoc, "p00_wifi_icon", "i_wifi_1");
+      webUI.addJson(jsonDoc, "p00_wifi_icon", "i_wifi_1");
     } else if (wifi.rssi < -70) {
-      addJson(jsonDoc, "p00_wifi_icon", "i_wifi_2");
+      webUI.addJson(jsonDoc, "p00_wifi_icon", "i_wifi_2");
     } else if (wifi.rssi < -60) {
-      addJson(jsonDoc, "p00_wifi_icon", "i_wifi_3");
+      webUI.addJson(jsonDoc, "p00_wifi_icon", "i_wifi_3");
     } else {
-      addJson(jsonDoc, "p00_wifi_icon", "i_wifi_4");
+      webUI.addJson(jsonDoc, "p00_wifi_icon", "i_wifi_4");
     }
 
   } else {
-    addJson(jsonDoc, "p00_wifi_icon", "");
-    addJson(jsonDoc, "p09_wifi_ip", "-.-.-.-");
-    addJson(jsonDoc, "p09_wifi_signal", "0");
-    addJson(jsonDoc, "p09_wifi_rssi", "0 dbm");
+    webUI.addJson(jsonDoc, "p00_wifi_icon", "");
+    webUI.addJson(jsonDoc, "p09_wifi_ip", "-.-.-.-");
+    webUI.addJson(jsonDoc, "p09_wifi_signal", "0");
+    webUI.addJson(jsonDoc, "p09_wifi_rssi", "0 dbm");
   }
 
-  addJson(jsonDoc, "p09_eth_ip", strlen(eth.ipAddress) ? eth.ipAddress : "-.-.-.-");
-  addJson(jsonDoc, "p09_eth_status", eth.connected ? WEB_TXT::CONNECTED[config.lang] : WEB_TXT::NOT_CONNECTED[config.lang]);
+  webUI.addJson(jsonDoc, "p09_eth_ip", strlen(eth.ipAddress) ? eth.ipAddress : "-.-.-.-");
+  webUI.addJson(jsonDoc, "p09_eth_status", eth.connected ? WEB_TXT::CONNECTED[config.lang] : WEB_TXT::NOT_CONNECTED[config.lang]);
 
   // ETH information
   if (config.eth.enable) {
     if (eth.connected) {
-      addJson(jsonDoc, "p00_eth_icon", "i_eth_ok");
+      webUI.addJson(jsonDoc, "p00_eth_icon", "i_eth_ok");
       snprintf(tmpMessage, sizeof(tmpMessage), "%d Mbps", eth.linkSpeed);
-      addJson(jsonDoc, "p09_eth_link_speed", tmpMessage);
-      addJson(jsonDoc, "p09_eth_full_duplex", eth.fullDuplex ? WEB_TXT::FULL_DUPLEX[config.lang] : "---");
+      webUI.addJson(jsonDoc, "p09_eth_link_speed", tmpMessage);
+      webUI.addJson(jsonDoc, "p09_eth_full_duplex", eth.fullDuplex ? WEB_TXT::FULL_DUPLEX[config.lang] : "---");
 
     } else {
-      addJson(jsonDoc, "p00_eth_icon", "i_eth_nok");
-      addJson(jsonDoc, "p09_eth_link_speed", "---");
-      addJson(jsonDoc, "p09_eth_full_duplex", "---");
+      webUI.addJson(jsonDoc, "p00_eth_icon", "i_eth_nok");
+      webUI.addJson(jsonDoc, "p09_eth_link_speed", "---");
+      webUI.addJson(jsonDoc, "p09_eth_full_duplex", "---");
     }
   } else {
-    addJson(jsonDoc, "p00_eth_icon", "");
-    addJson(jsonDoc, "p09_eth_link_speed", "---");
-    addJson(jsonDoc, "p09_eth_full_duplex", "---");
+    webUI.addJson(jsonDoc, "p00_eth_icon", "");
+    webUI.addJson(jsonDoc, "p09_eth_link_speed", "---");
+    webUI.addJson(jsonDoc, "p09_eth_full_duplex", "---");
   }
 
   // MQTT Status
-  addJson(jsonDoc, "p09_mqtt_status", config.mqtt.enable ? WEB_TXT::ACTIVE[config.lang] : WEB_TXT::INACTIVE[config.lang]);
-  addJson(jsonDoc, "p09_mqtt_connection", mqttIsConnected() ? WEB_TXT::CONNECTED[config.lang] : WEB_TXT::NOT_CONNECTED[config.lang]);
+  webUI.addJson(jsonDoc, "p09_mqtt_status", config.mqtt.enable ? WEB_TXT::ACTIVE[config.lang] : WEB_TXT::INACTIVE[config.lang]);
+  webUI.addJson(jsonDoc, "p09_mqtt_connection", mqttIsConnected() ? WEB_TXT::CONNECTED[config.lang] : WEB_TXT::NOT_CONNECTED[config.lang]);
 
   if (mqttGetLastError() != nullptr) {
-    addJson(jsonDoc, "p09_mqtt_last_err", mqttGetLastError());
+    webUI.addJson(jsonDoc, "p09_mqtt_last_err", mqttGetLastError());
   } else {
-    addJson(jsonDoc, "p09_mqtt_last_err", "---");
+    webUI.addJson(jsonDoc, "p09_mqtt_last_err", "---");
   }
 
   // ESP informations
-  addJson(jsonDoc, "p09_esp_flash_usage", ESP.getSketchSize() * 100.0f / ESP.getFreeSketchSpace());
-  addJson(jsonDoc, "p09_esp_heap_usage", (ESP.getHeapSize() - ESP.getFreeHeap()) * 100.0f / ESP.getHeapSize());
-  addJson(jsonDoc, "p09_esp_maxallocheap", ESP.getMaxAllocHeap() / 1000.0f);
-  addJson(jsonDoc, "p09_esp_minfreeheap", ESP.getMinFreeHeap() / 1000.0f);
+  webUI.addJson(jsonDoc, "p09_esp_flash_usage", ESP.getSketchSize() * 100.0f / ESP.getFreeSketchSpace());
+  webUI.addJson(jsonDoc, "p09_esp_heap_usage", (ESP.getHeapSize() - ESP.getFreeHeap()) * 100.0f / ESP.getHeapSize());
+  webUI.addJson(jsonDoc, "p09_esp_maxallocheap", ESP.getMaxAllocHeap() / 1000.0f);
+  webUI.addJson(jsonDoc, "p09_esp_minfreeheap", ESP.getMinFreeHeap() / 1000.0f);
 
   // Uptime
   char uptimeStr[64];
   getUptime(uptimeStr, sizeof(uptimeStr));
-  addJson(jsonDoc, "p09_uptime", uptimeStr);
+  webUI.addJson(jsonDoc, "p09_uptime", uptimeStr);
 
   // Device Counter
   devCntNew = jaroGetDevCnt();
   if (devCntNew != devCntOld) {
     devCntOld = devCntNew;
-    addJson(jsonDoc, "p12_jaro_devcnt", devCntNew);
+    webUI.addJson(jsonDoc, "p12_jaro_devcnt", devCntNew);
   }
 
   // act Time
-  addJson(jsonDoc, "p09_act_time", EspStrUtil::getTimeString());
+  webUI.addJson(jsonDoc, "p09_act_time", EspStrUtil::getTimeString());
 
   webUI.wsUpdateWebJSON(jsonDoc);
 }
@@ -189,33 +159,33 @@ void updateSystemInfoElements() {
  * *******************************************************************/
 void updateSystemInfoElementsStatic() {
 
-  initJsonBuffer(jsonDoc);
+  webUI.initJsonBuffer(jsonDoc);
 
   // Version informations
-  addJson(jsonDoc, "p00_version", VERSION);
-  addJson(jsonDoc, "p09_sw_version", VERSION);
-  addJson(jsonDoc, "p00_dialog_version", VERSION);
+  webUI.addJson(jsonDoc, "p00_version", VERSION);
+  webUI.addJson(jsonDoc, "p09_sw_version", VERSION);
+  webUI.addJson(jsonDoc, "p00_dialog_version", VERSION);
 
-  addJson(jsonDoc, "p09_sw_date", EspStrUtil::getBuildDateTime());
+  webUI.addJson(jsonDoc, "p09_sw_date", EspStrUtil::getBuildDateTime());
 
   // restart reason
-  addJson(jsonDoc, "p09_restart_reason", EspSysUtil::RestartReason::get());
+  webUI.addJson(jsonDoc, "p09_restart_reason", EspSysUtil::RestartReason::get());
 
-  addJson(jsonDoc, "p12_jaro_devcnt", jaroGetDevCnt());
+  webUI.addJson(jsonDoc, "p12_jaro_devcnt", jaroGetDevCnt());
 
   // Sunrise, Sunset
   uint8_t sunriseHour, sunriseMinute;
   getSunriseOrSunset(TYPE_SUNRISE, 0, config.geo.latitude, config.geo.longitude, sunriseHour, sunriseMinute);
   snprintf(tmpMessage, sizeof(tmpMessage), "%02d:%02d", sunriseHour, sunriseMinute);
-  addJson(jsonDoc, "p09_sunrise", tmpMessage);
+  webUI.addJson(jsonDoc, "p09_sunrise", tmpMessage);
 
   uint8_t sundownHour, sundownMinute;
   getSunriseOrSunset(TYPE_SUNDOWN, 0, config.geo.latitude, config.geo.longitude, sundownHour, sundownMinute);
   snprintf(tmpMessage, sizeof(tmpMessage), "%02d:%02d", sundownHour, sundownMinute);
-  addJson(jsonDoc, "p09_sundown", tmpMessage);
+  webUI.addJson(jsonDoc, "p09_sundown", tmpMessage);
 
   // Date
-  addJson(jsonDoc, "p09_act_date", EspStrUtil::getDateString());
+  webUI.addJson(jsonDoc, "p09_act_date", EspStrUtil::getDateString());
 
   webUI.wsUpdateWebJSON(jsonDoc);
 }

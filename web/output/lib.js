@@ -1,3 +1,226 @@
+// --------------------------------------
+// --------------------------------------
+document.addEventListener("DOMContentLoaded", function () {
+  // call functions on refresh
+  setupWS();
+  loadSimulatedData();
+  synchronizeDataSyncFields();
+  initializeVisibilityBasedOnSwitches();
+  localizePage("de");
+  loadConfig();
+  setupBitmaskDialog();
+
+  // Event Listener for Reload-Button
+  document
+    .getElementById("p99_reloadButton")
+    .addEventListener("click", function () {
+      window.location.reload();
+    });
+
+  // VERSION: is called when version dialog is opened
+  document.getElementById("p00_version").addEventListener("click", function () {
+    document.getElementById("version_dialog").showModal();
+    sendData("check_git_version", "");
+  });
+
+  // VERSION: is called when github ota button is clicked
+  document
+    .getElementById("p11_check_git_btn")
+    .addEventListener("click", function () {
+      document.getElementById("version_dialog").showModal();
+    });
+
+  // VERSION: close version dialog on button click
+  document
+    .getElementById("close_version_Dialog_btn")
+    .addEventListener("click", function () {
+      document.getElementById("version_dialog").close();
+    });
+
+  // OTA: close ota-failed dialog on button click
+  document
+    .getElementById("p00_ota_failed_btn")
+    .addEventListener("click", function () {
+      document.getElementById("ota_update_failed_dialog").close();
+    });
+
+  // OTA: send form data to server
+  document
+    .getElementById("ota_upload_form")
+    .addEventListener("submit", function (event) {
+      event.preventDefault();
+      document.getElementById("ota_status_txt").textContent = "Uploading...";
+      var form = document.getElementById("ota_upload_form");
+      var formData = new FormData(form);
+      var xhr = new XMLHttpRequest();
+      xhr.open("POST", "/update", true);
+      xhr.send(formData);
+    });
+
+  // CONFIG: send form data for config file upload
+  document
+    .getElementById("file_upload_form")
+    .addEventListener("submit", function (event) {
+      event.preventDefault();
+      var form = document.getElementById("file_upload_form");
+      var formData = new FormData(form);
+      var xhr = new XMLHttpRequest();
+      xhr.open("POST", "/config-upload", true);
+      xhr.send(formData);
+    });
+
+  // CONFIG: open dialog to show config.json
+  document
+    .getElementById("p11_file_show_btn")
+    .addEventListener("click", function () {
+      const dialog = document.getElementById("open_config_dialog");
+      dialog.showModal();
+      fetch("/config.json")
+        .then((response) => response.json())
+        .then((data) => {
+          document.getElementById("config_output").textContent = JSON.stringify(
+            data,
+            null,
+            2
+          );
+        })
+        .catch((error) => console.error("error loading data:", error));
+    });
+
+  // CONFIG: close dialog to show config.json
+  document
+    .getElementById("p11_config_dialog_btn")
+    .addEventListener("click", function () {
+      document.getElementById("open_config_dialog").close();
+    });
+
+  // NTP: open dialog to show ntp timezones
+  document
+    .getElementById("p12_ntp_open_dialog_btn")
+    .addEventListener("click", function () {
+      fetch("/gzip_ntp")
+        .then((response) => response.text())
+        .then((data) => {
+          document.getElementById("p12_ntp_help_output").innerHTML = data;
+          document.getElementById("p12_ntp_dialog").showModal();
+        })
+        .catch((error) => console.error("error loading data:", error));
+    });
+
+  // NTP: close dialog to show ntp timezones
+  document
+    .getElementById("p12_ntp_close_dialog_btn")
+    .addEventListener("click", function () {
+      document.getElementById("p12_ntp_dialog").close();
+    });
+
+  // control for Tab-Menu
+  document.querySelectorAll(".nav-list a").forEach((tab) => {
+    tab.onclick = function (e) {
+      e.preventDefault();
+      document
+        .querySelectorAll(".nav-list a")
+        .forEach((t) => t.classList.remove("active"));
+      document
+        .querySelectorAll(".tab-content")
+        .forEach((content) => content.classList.remove("active"));
+
+      const activeTab = this.getAttribute("data-tab");
+      this.classList.add("active");
+      document.getElementById(activeTab).classList.add("active");
+    };
+  });
+
+  // language selection
+  document.getElementById("cfg_lang").addEventListener("change", function () {
+    var languageValue = this.value;
+    if (languageValue === "1") {
+      localizePage("en");
+    } else if (languageValue === "0") {
+      localizePage("de");
+    }
+  });
+
+  // event listener for all input fields that call sendData on "blur"
+  document
+    .querySelectorAll(
+      'input[type="text"], input[type="number"], input[type="password"], input[type="date"], input[type="time"]'
+    )
+    .forEach(function (input) {
+      input.addEventListener("blur", function () {
+        sendData(input.id, input.value);
+      });
+      input.addEventListener("keypress", function (e) {
+        if (e.key === "Enter") {
+          input.blur(); // Triggers "blur" event and sends data
+        }
+      });
+    });
+
+  // Event-Listener for Range Inputs (Slider)
+  document.querySelectorAll('input[type="range"]').forEach(function (slider) {
+    slider.addEventListener("change", function () {
+      sendData(slider.id, slider.value);
+    });
+  });
+
+  // Event-Listener for Slider labels
+  document.querySelectorAll(".rangeSlider").forEach((slider) => {
+    const valueId = slider.getAttribute("data-value-id");
+    const valueDisplay = document.getElementById(valueId);
+    slider.oninput = () => {
+      valueDisplay.textContent = slider.value;
+    };
+    // set initial value
+    valueDisplay.textContent = slider.value;
+  });
+
+  // Event-Listener for Buttons
+  document.querySelectorAll("button").forEach(function (button) {
+    button.addEventListener("click", function () {
+      sendData(button.id, true);
+    });
+  });
+
+  // Event-Listener for Switches
+  document
+    .querySelectorAll('input[type="checkbox"][role="switch"]')
+    .forEach(function (switchElement) {
+      switchElement.addEventListener("change", function () {
+        sendData(switchElement.id, switchElement.checked);
+        toggleElementVisibility(
+          switchElement.getAttribute("hideOpt"),
+          switchElement.checked
+        );
+      });
+    });
+
+  // Event-Listener for Radio
+  document
+    .querySelectorAll('input[type="radio"]')
+    .forEach(function (switchElement) {
+      switchElement.addEventListener("change", function () {
+        sendData(switchElement.id, switchElement.checked);
+      });
+    });
+
+  // Event-Listener for Checkbox
+  document
+    .querySelectorAll('input[type="checkbox"]')
+    .forEach(function (switchElement) {
+      switchElement.addEventListener("change", function () {
+        sendData(switchElement.id, switchElement.checked);
+      });
+    });
+
+  // Event-Listener for Select Elements
+  document.querySelectorAll("select").forEach(function (selectElement) {
+    selectElement.addEventListener("change", function () {
+      sendData(selectElement.id, selectElement.value);
+    });
+  });
+});
+
 let ws;
 let heartbeatTimeout;
 const maxReconnectDelay = 5000;
@@ -293,26 +516,6 @@ function updateDialog(data) {
   }
 }
 
-// open bitmask help dialog
-function openGrpMaskHelp(button) {
-  const dialog = document.getElementById("p12_bitmask_dialog");
-  if (dialog) {
-    dialog.showModal();
-  } else {
-    console.error("Dialog mit ID 'p12_bitmask_dialog' wurde nicht gefunden.");
-  }
-}
-
-// close bitmask help dialog
-function closeGrpMaskHelp() {
-  const dialog = document.getElementById("p12_bitmask_dialog");
-  if (dialog) {
-    dialog.close();
-  } else {
-    console.error("Dialog mit ID 'p12_bitmask_dialog' wurde nicht gefunden.");
-  }
-}
-
 // Function for switching the visibility of elements
 function toggleElementVisibility(className, isVisible) {
   const elements = document.querySelectorAll(`.${className}`);
@@ -375,8 +578,10 @@ function localizePage(lang = "en") {
         text += match.slice(1, -1);
       } else {
         // check if translation key is valid
-        if (translations.hasOwnProperty(match)) {
-          text += translations[match][lang] || match;
+        if (lib_translations.hasOwnProperty(match)) {
+          text += lib_translations[match][lang] || match;
+        } else if (user_translations.hasOwnProperty(match)) {
+          text += user_translations[match][lang] || match;
         } else {
           console.error(`translation key "${match}" not found`);
           continue;
@@ -590,327 +795,13 @@ function toggleTimeInputs(selectElement) {
   }
 }
 
-function setupBitmaskDialog() {
-  const bitmaskDialog = document.getElementById("bitmask_dialog");
-  const applyButton = document.getElementById("apply_bitmask");
-  const closeButton = document.getElementById("close_bitmask_dialog");
-
-  let currentInput = null; // reference to existing input
-
-  // open the dialog for the source input field
-  document.querySelectorAll(".bitmask-input").forEach((input) => {
-    input.addEventListener("click", () => {
-      currentInput = input;
-
-      // Parse the bitmask as a mutable variable
-      let bitmask = parseInt(input.value || "0", 2);
-
-      // Set checkboxes based on actual bitmask
-      for (let i = 0; i < 16; i++) {
-        const checkbox = document.getElementById(`channel-${i}`);
-        if (checkbox) {
-          // Check the visibility of the checkbox
-          const isVisible = checkbox.parentElement.style.display !== "none";
-
-          // Set checkbox state only if visible
-          checkbox.checked = isVisible && (bitmask & (1 << i)) !== 0;
-
-          // Clear bit if the checkbox is not visible
-          if (!isVisible) {
-            bitmask &= ~(1 << i);
-          }
-        }
-      }
-
-      // Safely update the input value with the sanitized bitmask
-      if (currentInput && !Object.isFrozen(currentInput)) {
-        currentInput.value = bitmask.toString(2).padStart(16, "0");
-      }
-
-      bitmaskDialog.showModal();
-    });
-  });
-
-  // apply checkboxes and close the dialog
-  applyButton.addEventListener("click", () => {
-    let bitmask = 0;
-    for (let i = 0; i < 16; i++) {
-      const checkbox = document.getElementById(`channel-${i}`);
-      if (checkbox && checkbox.checked) {
-        bitmask |= 1 << i;
-      }
-    }
-
-    if (currentInput) {
-      currentInput.value = bitmask.toString(2).padStart(16, "0");
-    }
-
-    bitmaskDialog.close();
-  });
-
-  // close the dialog without changes
-  closeButton.addEventListener("click", () => {
-    bitmaskDialog.close();
-  });
-}
-
-function isGitHubPages() {
-  return window.location.hostname.includes("github.io");
-}
-
-async function loadSimulatedData() {
-  if (!isGitHubPages()) {
-    return; // Kein Simulationsmodus, wenn nicht auf GitHub Pages
-  }
-
-  console.log("GitHub Pages erkannt – Simulationsdaten werden geladen.");
-
-  try {
-    const response = await fetch("sim.json");
-    if (!response.ok)
-      throw new Error("Fehler beim Abrufen der Simulationsdaten");
-
-    const simData = await response.json();
-    updateJSON(simData); // Aktualisiert die UI mit den Simulationsdaten
-  } catch (error) {
-    console.error("Fehler beim Laden von sim.json:", error);
-  }
-}
-
-// --------------------------------------
-// --------------------------------------
-document.addEventListener("DOMContentLoaded", function () {
-  // call functions on refresh
-  setupWS();
-  loadSimulatedData();
-  synchronizeDataSyncFields();
-  initializeVisibilityBasedOnSwitches();
-  localizePage("de");
-  loadConfig();
-  setupBitmaskDialog();
-
-  // Event Listener for Reload-Button
-  document
-    .getElementById("p99_reloadButton")
-    .addEventListener("click", function () {
-      window.location.reload();
-    });
-
-  // VERSION: is called when version dialog is opened
-  document.getElementById("p00_version").addEventListener("click", function () {
-    document.getElementById("version_dialog").showModal();
-    sendData("check_git_version", "");
-  });
-
-  // VERSION: is called when github ota button is clicked
-  document
-    .getElementById("p11_check_git_btn")
-    .addEventListener("click", function () {
-      document.getElementById("version_dialog").showModal();
-    });
-
-  // VERSION: close version dialog on button click
-  document
-    .getElementById("close_version_Dialog_btn")
-    .addEventListener("click", function () {
-      document.getElementById("version_dialog").close();
-    });
-
-  // OTA: close ota-failed dialog on button click
-  document
-    .getElementById("p00_ota_failed_btn")
-    .addEventListener("click", function () {
-      document.getElementById("ota_update_failed_dialog").close();
-    });
-
-  // OTA: send form data to server
-  document
-    .getElementById("ota_upload_form")
-    .addEventListener("submit", function (event) {
-      event.preventDefault();
-      document.getElementById("ota_status_txt").textContent = "Uploading...";
-      var form = document.getElementById("ota_upload_form");
-      var formData = new FormData(form);
-      var xhr = new XMLHttpRequest();
-      xhr.open("POST", "/update", true);
-      xhr.send(formData);
-    });
-
-  // CONFIG: send form data for config file upload
-  document
-    .getElementById("file_upload_form")
-    .addEventListener("submit", function (event) {
-      event.preventDefault();
-      var form = document.getElementById("file_upload_form");
-      var formData = new FormData(form);
-      var xhr = new XMLHttpRequest();
-      xhr.open("POST", "/config-upload", true);
-      xhr.send(formData);
-    });
-
-  // CONFIG: open dialog to show config.json
-  document
-    .getElementById("p11_file_show_btn")
-    .addEventListener("click", function () {
-      const dialog = document.getElementById("open_config_dialog");
-      dialog.showModal();
-      fetch("/config.json")
-        .then((response) => response.json())
-        .then((data) => {
-          document.getElementById("config_output").textContent = JSON.stringify(
-            data,
-            null,
-            2
-          );
-        })
-        .catch((error) => console.error("error loading data:", error));
-    });
-
-  // CONFIG: close dialog to show config.json
-  document
-    .getElementById("p11_config_dialog_btn")
-    .addEventListener("click", function () {
-      document.getElementById("open_config_dialog").close();
-    });
-
-  // NTP: open dialog to show ntp timezones
-  document
-    .getElementById("p12_ntp_open_dialog_btn")
-    .addEventListener("click", function () {
-      fetch("/gzip_ntp")
-        .then((response) => response.text())
-        .then((data) => {
-          document.getElementById("p12_ntp_help_output").innerHTML = data;
-          document.getElementById("p12_ntp_dialog").showModal();
-        })
-        .catch((error) => console.error("error loading data:", error));
-    });
-
-  // NTP: close dialog to show ntp timezones
-  document
-    .getElementById("p12_ntp_close_dialog_btn")
-    .addEventListener("click", function () {
-      document.getElementById("p12_ntp_dialog").close();
-    });
-
-  // control for Tab-Menu
-  document.querySelectorAll(".nav-list a").forEach((tab) => {
-    tab.onclick = function (e) {
-      e.preventDefault();
-      document
-        .querySelectorAll(".nav-list a")
-        .forEach((t) => t.classList.remove("active"));
-      document
-        .querySelectorAll(".tab-content")
-        .forEach((content) => content.classList.remove("active"));
-
-      const activeTab = this.getAttribute("data-tab");
-      this.classList.add("active");
-      document.getElementById(activeTab).classList.add("active");
-    };
-  });
-
-  // language selection
-  document.getElementById("cfg_lang").addEventListener("change", function () {
-    var languageValue = this.value;
-    if (languageValue === "1") {
-      localizePage("en");
-    } else if (languageValue === "0") {
-      localizePage("de");
-    }
-  });
-
-  // event listener for all input fields that call sendData on "blur"
-  document
-    .querySelectorAll(
-      'input[type="text"], input[type="number"], input[type="password"], input[type="date"], input[type="time"]'
-    )
-    .forEach(function (input) {
-      input.addEventListener("blur", function () {
-        sendData(input.id, input.value);
-      });
-      input.addEventListener("keypress", function (e) {
-        if (e.key === "Enter") {
-          input.blur(); // Triggers "blur" event and sends data
-        }
-      });
-    });
-
-  // Event-Listener for Range Inputs (Slider)
-  document.querySelectorAll('input[type="range"]').forEach(function (slider) {
-    slider.addEventListener("change", function () {
-      sendData(slider.id, slider.value);
-    });
-  });
-
-  // Event-Listener for Slider labels
-  document.querySelectorAll(".rangeSlider").forEach((slider) => {
-    const valueId = slider.getAttribute("data-value-id");
-    const valueDisplay = document.getElementById(valueId);
-    slider.oninput = () => {
-      valueDisplay.textContent = slider.value;
-    };
-    // set initial value
-    valueDisplay.textContent = slider.value;
-  });
-
-  // Event-Listener for Buttons
-  document.querySelectorAll("button").forEach(function (button) {
-    button.addEventListener("click", function () {
-      sendData(button.id, true);
-    });
-  });
-
-  // Event-Listener for Switches
-  document
-    .querySelectorAll('input[type="checkbox"][role="switch"]')
-    .forEach(function (switchElement) {
-      switchElement.addEventListener("change", function () {
-        sendData(switchElement.id, switchElement.checked);
-        toggleElementVisibility(
-          switchElement.getAttribute("hideOpt"),
-          switchElement.checked
-        );
-      });
-    });
-
-  // Event-Listener for Radio
-  document
-    .querySelectorAll('input[type="radio"]')
-    .forEach(function (switchElement) {
-      switchElement.addEventListener("change", function () {
-        sendData(switchElement.id, switchElement.checked);
-      });
-    });
-
-  // Event-Listener for Checkbox
-  document
-    .querySelectorAll('input[type="checkbox"]')
-    .forEach(function (switchElement) {
-      switchElement.addEventListener("change", function () {
-        sendData(switchElement.id, switchElement.checked);
-      });
-    });
-
-  // Event-Listener for Select Elements
-  document.querySelectorAll("select").forEach(function (selectElement) {
-    selectElement.addEventListener("change", function () {
-      sendData(selectElement.id, selectElement.value);
-    });
-  });
-});
-
 // --------------------------------------
 // localization texts
 // --------------------------------------
-const translations = {
+const lib_translations = {
   system: {
     de: "System",
     en: "System",
-  },
-  timer: {
-    de: "Timer",
-    en: "Timer",
   },
   settings: {
     de: "Einstellungen",
@@ -1035,10 +926,6 @@ const translations = {
   gpio: {
     de: "GPIO-Zuweisung",
     en: "GPIO-Settings",
-  },
-  led_setup: {
-    de: "LED-Setup-Mode",
-    en: "LED-Setup-Mode",
   },
   restart: {
     de: "Neustart",
@@ -1207,190 +1094,6 @@ const translations = {
   state: {
     de: "Zustand",
     en: "State",
-  },
-  learn_mode: {
-    de: "neuer Anlernmodus",
-    en: "new learn mode",
-  },
-  shutter: {
-    de: "Rolladen",
-    en: "Shutter",
-  },
-  serial_nr: {
-    de: "Seriennummer",
-    en: "serial number",
-  },
-  set_shade: {
-    de: "setze Schatten",
-    en: "set shade",
-  },
-  learn: {
-    de: "anlernen",
-    en: "learn",
-  },
-  channel: {
-    de: "Kanal",
-    en: "Channel",
-  },
-  info_leanmode: {
-    de: "Der neue Lernmodus ist für Empfänger neuer als 2010, die eine Lernsequenz haben, bei der die Tasten UP+DOWN gleichzeitig gedrückt werden und dann die Taste STOP. Die alte Lernmethode für Empfänger, die vor 2010 hergestellt wurden, verwendet eine spezielle LEARN-Taste.",
-    en: "new learn mode is for receivers newer than 2010, which have a learning sequence of buttons UP+DOWN pressed simultaneously, then press STOP. the old learn method for receivers manufactured before 2010 uses a special LEARN button.",
-  },
-  info_serial: {
-    de: "Jeder Kanal benötigt eine individuelle Seriennummer. Wenn Sie hier ein neues Seriennummernpräfix eingeben, ändern sich die Seriennummern für alle Kanäle. ACHTUNG: alle Empfänger müssen danach (erneut) eingelernt werden und der Device Counter muss zurückgesetzt werden!",
-    en: "Each channel requires an individual serial number. If you enter a new serial number prefix here, the serial numbers for all channels will change. ATTENTION: all receivers must then be learned (again) and the device counter must be reset!",
-  },
-  info_devcnt: {
-    de: "Der Zähler wird zusammen mit jedem Datagramm über den Funk gesendet. Er beginnt bei null und wird bei jedem Datagramm inkrementiert. Jeder empfänger hört die empfangenen Datagramme ab und zeichnet den Zähler des Senders auf. Wenn der Zähler des Senders und des Empfängers zu sehr voneinander abweichen, müssen Sie den Empfänger neu anlernen. Um dies zu vermeiden, wenn Sie einen Dongle austauschen (oder wenn ein Update schief geht), können Sie hier einen Zähler ungleich null eingeben. ACHTUNG: lassen Sie die Finger davon, wenn Sie die Wirkung nicht verstehen, Sie riskieren, dass Sie alle Ihre Empfänger (wieder) neu anlernen müssen!",
-    en: "the device counter is send together with every datagram over the radio. beginning with zero, it is incremented on every datagram. each receiver listens to received datagrams and records the sender's device counter. when the sender's and receiver's device counter differ too much, you must re-learn the receiver. to avoid this when replacing a dongle (or when an update goes wrong) you can enter a non-zero device counter here. ATTENTION: don't touch this if you don't understand the effect, you risk to re-learn all your receivers (again)!",
-  },
-  cc1101error: {
-    de: "Fehler: CC1101 Modul ist nicht verbunden!",
-    en: "Error: CC1101 Modul not connected!",
-  },
-  help: {
-    de: "Hilfe",
-    en: "Help",
-  },
-  gpio_restart_info: {
-    de: "Änderungen an den GPIO Einstellungen benötigen einen Neustart!",
-    en: "Changes to GPIO or Jarolift settings require a restart!",
-  },
-  gpio_info: {
-    de: "Beispiel für einen typischen ESP32",
-    en: "example for typical ESP32",
-  },
-  mqtt_info2: {
-    de: "< ../ > ist der Platzhalter für das MQTT Topic welches in den Einstellungen vorgegeben wird.",
-    en: "< ../ > is the placeholder for the MQTT topic which is specified in the settings.",
-  },
-  groups: {
-    de: "Gruppen",
-    en: "Groups",
-  },
-  group: {
-    de: "Gruppe",
-    en: "Group",
-  },
-  channels: {
-    de: "Kanäle",
-    en: "Channels",
-  },
-  name: {
-    de: "Name",
-    en: "Name",
-  },
-  mask: {
-    de: "Bitmaske",
-    en: "Bitmask",
-  },
-  mask_help: {
-    de: "In diesem Feld wird über eine Bitmaske festgelegt, welche Kanäle zu dieser Gruppe gehören.\nDie Bitmaske ist eine 16-Bit-Zahl, wobei das niederwertigste Bit (rechts) den Kanal 1 repräsentiert. \nEin gesetztes Bit bedeutet, dass der Kanal zu dieser Gruppe gehört.\n\nBeispiel: 0000000000010101 bedeutet, dass die Kanäle 1, 3 und 5 zu dieser Gruppe gehören.",
-    en: "In this field, a bitmask is used to determine which channels belong to this group.\nThe bitmask is a 16-bit number, with the least significant bit (right) representing channel 1.\nA set bit means that the channel belongs to this group.\n\nExample: 0000000000010101 means that channels 1, 3 and 5 belong to this group.",
-  },
-  grp_mask_help: {
-    de: "Sie können auch ein generisches Gruppenkommando verwenden und die Bitmaske verwenden, um die Rolläden direkt auszuwählen. Die Bitmaske ist eine 16-Bit-Zahl, wobei das niederwertigste Bit (rechts) den Kanal 1 repräsentiert. Ein gesetztes Bit bedeutet, dass der Kanal zu dieser Gruppe gehört.\n\nBeispiel: 0000000000010101 bedeutet, dass die Kanäle 1, 3 und 5 zu dieser Gruppe gehören.\n\nAls Payload können Sie drei verschiedene Formate verwenden, um die gleiche Bitmaske darzustellen:",
-    en: "You can also use a generic group command and provide the bitmask to select the shutters directly. The bitmask is a 16-bit number, with the least significant bit (on the right) representing channel 1. A set bit means that the channel belongs to this group.\n\nExample: `0000000000010101` means that channels 1, 3, and 5 belong to this group.\n\nAs payload, you can use three different formats to represent the same bitmask:",
-  },
-  bitmask_wizard: {
-    de: "Auswahl Assistent",
-    en: "Selection Wizard",
-  },
-  general: {
-    de: "Allgemein",
-    en: "General",
-  },
-  sunrise: {
-    de: "Sonnenaufgang",
-    en: "sunrise",
-  },
-  sundown: {
-    de: "Sonnenuntergang",
-    en: "sundown",
-  },
-  cmd_up: {
-    de: "Hochfahren",
-    en: "up",
-  },
-  cmd_down: {
-    de: "Runterfahren",
-    en: "down",
-  },
-  cmd_shade: {
-    de: "Schatten",
-    en: "shade",
-  },
-  timer_type: {
-    de: "Zeitgeber",
-    en: "Time-Source",
-  },
-  time: {
-    de: "Uhrzeit",
-    en: "Time",
-  },
-  time_HH_MM: {
-    de: "Zeit (HH:MM)",
-    en: "Time (HH:MM)",
-  },
-  offset_desc: {
-    de: "Offset in Minuten (z. B. -15 oder +20)",
-    en: "Offset in Minutens (e.g. -15 oder +20)",
-  },
-  command: {
-    de: "Befehl",
-    en: "Command",
-  },
-  weekdays: {
-    de: "Wochentage",
-    en: "weekdays",
-  },
-  day_mo: {
-    de: "Mo",
-    en: "Mo",
-  },
-  day_tu: {
-    de: "Di",
-    en: "Tu",
-  },
-  day_we: {
-    de: "Mi",
-    en: "We",
-  },
-  day_th: {
-    de: "Do",
-    en: "Th",
-  },
-  day_fr: {
-    de: "Fr",
-    en: "Fr",
-  },
-  day_sa: {
-    de: "Sa",
-    en: "Sa",
-  },
-  day_su: {
-    de: "So",
-    en: "Su",
-  },
-  geo_location: {
-    de: "Geografische Lage",
-    en: "Geographical location",
-  },
-  geo_info: {
-    de: "Wird benötigt für die Timer Funktion mit Sonnenaufgang und Sonnenuntergang",
-    en: "Required for the timer function with sunrise and sunset",
-  },
-  latitude: {
-    de: "Breitengrad",
-    en: "Latitude",
-  },
-  longitude: {
-    de: "Längengrad",
-    en: "Longitude",
-  },
-  time_info: {
-    de: "Zeitinformationen",
-    en: "Time information",
   },
   apply: {
     de: "Übernehmen",

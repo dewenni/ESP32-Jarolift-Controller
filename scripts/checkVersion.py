@@ -68,4 +68,4 @@ keys= [
     'p09_sw_version',
     'p00_dialog_version',
 ]
-update_json_version("web/ghpages/sim.json", "include/config.h", keys)
+update_json_version("web/output/sim.json", "include/config.h", keys)

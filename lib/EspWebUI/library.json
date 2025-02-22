@@ -1,11 +1,11 @@
 {
-    "name": "ESP-WebUI",
+    "name": "EspWebUI",
     "version": "1.0.0",
     "description": "ESP WebUI Framework Library",
     "keywords": ["esp32", "webserver", "framework"],
     "repository": {
         "type": "git",
-        "url": "https://github.com/dewenni/ESP-WebUI.git"
+        "url": "https://github.com/dewenni/EspWebUI.git"
     },
     "authors": [
         {
@@ -20,6 +20,6 @@
     "dependencies": {},
     "build": 
         {
-            "extraScript": "scripts/build_webui.py"
+            "extraScript": "scripts/lib_script.py"
         }
 }

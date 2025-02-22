@@ -55,7 +55,7 @@ void EspWebUI::sendGzipChunkedResponse(AsyncWebServerRequest *request, const uin
 void EspWebUI::setupRoutes() {
 
   server.on("/login", HTTP_GET, [this](AsyncWebServerRequest *request) {
-    sendGzipChunkedResponse(request, gzip_login_html, gzip_login_html_size, "text/html", false, CHUNK_SIZE);
+    sendGzipChunkedResponse(request, gzip_login_html, gzip_login_html_size, "text/html", false, WEBUI_CHUNK_SIZE);
   });
 
   server.on("/close_all_ws_clients", HTTP_POST, [this](AsyncWebServerRequest *request) {
@@ -103,27 +103,27 @@ void EspWebUI::setupRoutes() {
   });
 
   server.on("/", HTTP_GET, [this](AsyncWebServerRequest *request) {
-    sendGzipChunkedResponse(request, gzip_user_html, gzip_user_html_size, "text/html", true, CHUNK_SIZE);
+    sendGzipChunkedResponse(request, gzip_user_html, gzip_user_html_size, "text/html", true, WEBUI_CHUNK_SIZE);
   });
 
   server.on("/lib.css", HTTP_GET, [this](AsyncWebServerRequest *request) {
-    sendGzipChunkedResponse(request, gzip_lib_css, gzip_lib_css_size, "text/css", false, CHUNK_SIZE);
+    sendGzipChunkedResponse(request, gzip_lib_css, gzip_lib_css_size, "text/css", false, WEBUI_CHUNK_SIZE);
   });
 
   server.on("/user.css", HTTP_GET, [this](AsyncWebServerRequest *request) {
-    sendGzipChunkedResponse(request, gzip_user_css, gzip_user_css_size, "text/css", false, CHUNK_SIZE);
+    sendGzipChunkedResponse(request, gzip_user_css, gzip_user_css_size, "text/css", false, WEBUI_CHUNK_SIZE);
   });
 
   server.on("/lib.js", HTTP_GET, [this](AsyncWebServerRequest *request) {
-    sendGzipChunkedResponse(request, gzip_lib_js, gzip_lib_js_size, "text/js", false, CHUNK_SIZE);
+    sendGzipChunkedResponse(request, gzip_lib_js, gzip_lib_js_size, "text/js", false, WEBUI_CHUNK_SIZE);
   });
 
   server.on("/user.js", HTTP_GET, [this](AsyncWebServerRequest *request) {
-    sendGzipChunkedResponse(request, gzip_user_js, gzip_user_js_size, "text/js", false, CHUNK_SIZE);
+    sendGzipChunkedResponse(request, gzip_user_js, gzip_user_js_size, "text/js", false, WEBUI_CHUNK_SIZE);
   });
 
   server.on("/gzip_ntp", HTTP_GET, [this](AsyncWebServerRequest *request) {
-    sendGzipChunkedResponse(request, gzip_ntp_html, gzip_ntp_html_size, "text/html", false, CHUNK_SIZE);
+    sendGzipChunkedResponse(request, gzip_ntp_html, gzip_ntp_html_size, "text/html", false, WEBUI_CHUNK_SIZE);
   });
 
   server.on("/favicon.svg", HTTP_GET, [this](AsyncWebServerRequest *request) { request->send(200, "image/svg+xml", faviconSvg); });
@@ -143,13 +143,13 @@ void EspWebUI::setupRoutes() {
         const String targetFilename = "/config.json"; // fix to config.json
 
         if (!index) { // firs call for upload
-          wsUpdateWebText("upload_status_txt", "uploading...", false);
+          callbackUpload(UPLOAD_BEGIN, "uploading...");
           ESP_LOGI(TAG, "Upload Start: %s\n", filename.c_str());
           uploadFile = LittleFS.open(targetFilename, "w"); // fix to config.json
 
           if (!uploadFile) {
-            ESP_LOGE(TAG, "Error: file could not be opened");
-            wsUpdateWebText("upload_status_txt", "error on file close!", false);
+            callbackUpload(UPLOAD_ERROR, "error on file close!");
+            ESP_LOGE(TAG, "error on file close!");
             return;
           }
         }
@@ -162,13 +162,9 @@ void EspWebUI::setupRoutes() {
           if (uploadFile) {
             uploadFile.close();
             ESP_LOGI(TAG, "UploadEnd: %s, %u B\n", filename.c_str(), index + len);
-            wsUpdateWebText("upload_status_txt", "upload done!", false);
-            // ConfigLoadFromFile(); // load configuration
-            // wsUpdateWebLanguage(LANG::CODE[config.lang]);
-            // TODO: callback Funktion definieren
-            wsLoadConfigWebUI(); // update webUI settings
+            callbackUpload(UPLOAD_FINISH, "upload done!");
           } else {
-            wsUpdateWebText("upload_status_txt", "error on file close!", false);
+            callbackUpload(UPLOAD_ERROR, "error on file close!");
           }
         }
       });
