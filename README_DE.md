@@ -82,7 +82,8 @@ Die Homepage des Projekts ist hier: [Project Home](http://www.bastelbudenbuben.d
 # Inhaltsverzeichnis
 
 - [Hardware](#hardware)
-  - [ESP32+CC1101](#esp32+cc1101)
+  - [ESP32](#esp32)
+  - [CC1101 433Mhz](#cc1101-433mhz)
   - [Optional: Ethernet Modul W5500](#optional-ethernet-modul-w5500)
 - [Erste Schritte](#erste-schritte)
   - [Platform-IO](#platform-io)

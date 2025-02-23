@@ -83,7 +83,8 @@ The project home is here: [Project Home](http://www.bastelbudenbuben.de/2017/04/
 # Table of Contents
 
 - [Hardware](#hardware)
-  - [ESP32 + CC1101](#esp32-+-cc1101)
+  - [ESP32](#esp32)
+  - [CC1101 433Mhz](#cc1101-433mhz)
   - [Optional: Ethernet Module W5500](#optional-ethernet-module-w5500)
 - [Getting started](#getting-started)
   - [Platform-IO](#platform-io)
