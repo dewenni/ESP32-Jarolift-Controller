@@ -1,3 +1,7 @@
+#include "esp_chip_info.h"
+#include "esp_flash.h"
+#include "esp_system.h"
+
 #include <ETH.h>
 #include <SPI.h>
 #include <basics.h>
@@ -212,6 +216,53 @@ void basicSetup() {
 
   // NTP
   ntpSetup();
+
+  ESP_LOGI(TAG, "ESP-ChipModel: %s", ESP.getChipModel());
+  ESP_LOGI(TAG, "ESP-ChipRevision: %ld", ESP.getChipRevision());
+  ESP_LOGI(TAG, "ESP-CpuFreq: %lu", ESP.getCpuFreqMHz());
+  ESP_LOGI(TAG, "ESP-FlashChipSize: %lu", ESP.getFlashChipSize());
+  ESP_LOGI(TAG, "ESP-FlashChipSpeed: %lu", ESP.getFlashChipSpeed());
+
+  /* Print chip information */
+  esp_chip_info_t chip_info;
+  uint32_t flash_size;
+  esp_chip_info(&chip_info);
+
+  switch (chip_info.model) {
+  case CHIP_ESP32:
+    ESP_LOGD(TAG, "ESP32");
+    break;
+  case CHIP_ESP32S2:
+    ESP_LOGD(TAG, "ESP32-S2");
+    break;
+  case CHIP_ESP32S3:
+    ESP_LOGD(TAG, "ESP32-S3");
+    break;
+  case CHIP_ESP32C2:
+    ESP_LOGD(TAG, "ESP32-C2");
+    break;
+  case CHIP_ESP32C3:
+    ESP_LOGD(TAG, "ESP32-C3");
+    break;
+  case CHIP_ESP32C6:
+    ESP_LOGD(TAG, "ESP32-C6");
+    break;
+  case CHIP_ESP32H2:
+    ESP_LOGD(TAG, "ESP32-H2");
+    break;
+  case CHIP_ESP32P4:
+    ESP_LOGD(TAG, "ESP32-P4");
+    break;
+  case CHIP_ESP32C61:
+    ESP_LOGD(TAG, "ESP32-C61");
+    break;
+  case CHIP_POSIX_LINUX:
+    ESP_LOGD(TAG, "POSIX/Linux");
+    break;
+  default:
+    ESP_LOGD(TAG, "Unknown");
+    break;
+  }
 }
 
 /**
