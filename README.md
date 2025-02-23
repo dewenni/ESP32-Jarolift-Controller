@@ -110,7 +110,33 @@ The project home is here: [Project Home](http://www.bastelbudenbuben.de/2017/04/
 
 # Hardware
 
-## ESP32 + CC1101
+you can find working setups from users of this project here: [working setups](https://github.com/dewenni/ESP32-Jarolift-Controller/discussions/34)
+
+## ESP32
+
+The firmware is currently only available for the following chips:
+
+**Standard ESP32 (Xtensa® 32-bit LX6, 4MB Flash)**
+
+- `ESP32-WROOM-32 series` (e.g. WROOM, WROOM-32D, WROOM-32U)
+- `ESP32-WROVER series` (e.g. WROVER, WROVER-B, WROVER-IE)
+- `ESP32-MINI series`
+
+**Not compatible:**
+
+- `ESP32-S series`
+- `ESP32-H series`
+- `ESP32-C series`
+- `YB-ESP32-S3-ETH`
+- `WT32-ETH01`
+
+## CC1101 433Mhz
+
+**compatible and tested products:**
+
+- `EBYTE E07-M1101D-SMA V2.0`
+- `CC1101 433MHZ Green`
+
 
 a standard SPI GPIO configuration is:
 
@@ -140,6 +166,12 @@ example for direct replacement with ESP32-Mini and the custom board from M. Mayw
 ## Optional: Ethernet Module W5500
 
 It is also possible to connect a W5500 Ethernet module to the Board or a generic ESP32.  
+
+**compatible and tested products:**
+
+- `W5500` HanRun (HR911105A)
+- `W5500 Lite` HanRun (HR961160C)
+
 
 > [!IMPORTANT]
 > The connection cable should be as short as possible (approx 10cm)
