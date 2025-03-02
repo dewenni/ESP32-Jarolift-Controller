@@ -3,9 +3,9 @@ import os
 import re
 import shutil
 
-
-OTA_NAME = "esp32_jarolift_controller_ota_update"     # prefix for ota release image
-INSTALL_NAME = "esp32_jarolift_controller_flash"      # prefix for merged flash image
+pioenv = env.get("PIOENV")
+OTA_NAME = f"{pioenv}_jarolift_UPDATE"   # prefix for ota release image
+INSTALL_NAME = f"{pioenv}_jarolift_FLASH"    # prefix for merged flash image     
 
 APP_BIN = "$BUILD_DIR/${PROGNAME}.bin"
 MERGED_BIN = "$BUILD_DIR/${PROGNAME}_merged.bin"
@@ -48,9 +48,14 @@ def merge_bin(source, target, env):
         
     release_path = env.subst(RELEASE_PATH) # path to release folder
     # delete old release files
-    if os.path.exists(env.subst(RELEASE_PATH)):
-        shutil.rmtree(env.subst(RELEASE_PATH))
-    os.makedirs(env.subst(RELEASE_PATH))
+    if env.get("PIOENV") == "esp32":
+        if os.path.exists(release_path):
+            shutil.rmtree(release_path)
+        os.makedirs(release_path)
+    else:
+        # if release folder does not exist create it
+        if not os.path.exists(release_path):
+            os.makedirs(release_path)
 
     version = extract_version() # get version from config 
     merged_file = os.path.join(release_path, f"{INSTALL_NAME}_{version}.bin")  # path and name of merged image
