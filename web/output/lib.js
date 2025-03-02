@@ -1,3 +1,224 @@
+// --------------------------------------
+// --------------------------------------
+document.addEventListener("DOMContentLoaded", function () {
+  // call functions on refresh
+  setupWS();
+  synchronizeDataSyncFields();
+  initializeVisibilityBasedOnSwitches();
+  localizePage("de");
+  loadConfig();
+
+  // Event Listener for Reload-Button
+  document
+    .getElementById("p99_reloadButton")
+    .addEventListener("click", function () {
+      window.location.reload();
+    });
+
+  // VERSION: is called when version dialog is opened
+  document.getElementById("p00_version").addEventListener("click", function () {
+    document.getElementById("version_dialog").showModal();
+    sendData("check_git_version", "");
+  });
+
+  // VERSION: is called when github ota button is clicked
+  document
+    .getElementById("p11_check_git_btn")
+    .addEventListener("click", function () {
+      document.getElementById("version_dialog").showModal();
+    });
+
+  // VERSION: close version dialog on button click
+  document
+    .getElementById("close_version_Dialog_btn")
+    .addEventListener("click", function () {
+      document.getElementById("version_dialog").close();
+    });
+
+  // OTA: close ota-failed dialog on button click
+  document
+    .getElementById("p00_ota_failed_btn")
+    .addEventListener("click", function () {
+      document.getElementById("ota_update_failed_dialog").close();
+    });
+
+  // OTA: send form data to server
+  document
+    .getElementById("ota_upload_form")
+    .addEventListener("submit", function (event) {
+      event.preventDefault();
+      document.getElementById("ota_status_txt").textContent = "Uploading...";
+      var form = document.getElementById("ota_upload_form");
+      var formData = new FormData(form);
+      var xhr = new XMLHttpRequest();
+      xhr.open("POST", "/update", true);
+      xhr.send(formData);
+    });
+
+  // CONFIG: send form data for config file upload
+  document
+    .getElementById("file_upload_form")
+    .addEventListener("submit", function (event) {
+      event.preventDefault();
+      var form = document.getElementById("file_upload_form");
+      var formData = new FormData(form);
+      var xhr = new XMLHttpRequest();
+      xhr.open("POST", "/config-upload", true);
+      xhr.send(formData);
+    });
+
+  // CONFIG: open dialog to show config.json
+  document
+    .getElementById("p11_file_show_btn")
+    .addEventListener("click", function () {
+      const dialog = document.getElementById("open_config_dialog");
+      dialog.showModal();
+      fetch("/config.json")
+        .then((response) => response.json())
+        .then((data) => {
+          document.getElementById("config_output").textContent = JSON.stringify(
+            data,
+            null,
+            2
+          );
+        })
+        .catch((error) => console.error("error loading data:", error));
+    });
+
+  // CONFIG: close dialog to show config.json
+  document
+    .getElementById("p11_config_dialog_btn")
+    .addEventListener("click", function () {
+      document.getElementById("open_config_dialog").close();
+    });
+
+  // NTP: open dialog to show ntp timezones
+  document
+    .getElementById("p12_ntp_open_dialog_btn")
+    .addEventListener("click", function () {
+      fetch("/gzip_ntp")
+        .then((response) => response.text())
+        .then((data) => {
+          document.getElementById("p12_ntp_help_output").innerHTML = data;
+          document.getElementById("p12_ntp_dialog").showModal();
+        })
+        .catch((error) => console.error("error loading data:", error));
+    });
+
+  // NTP: close dialog to show ntp timezones
+  document
+    .getElementById("p12_ntp_close_dialog_btn")
+    .addEventListener("click", function () {
+      document.getElementById("p12_ntp_dialog").close();
+    });
+
+  // control for Tab-Menu
+  document.querySelectorAll(".nav-list a").forEach((tab) => {
+    tab.onclick = function (e) {
+      e.preventDefault();
+      document
+        .querySelectorAll(".nav-list a")
+        .forEach((t) => t.classList.remove("active"));
+      document
+        .querySelectorAll(".tab-content")
+        .forEach((content) => content.classList.remove("active"));
+
+      const activeTab = this.getAttribute("data-tab");
+      this.classList.add("active");
+      document.getElementById(activeTab).classList.add("active");
+    };
+  });
+
+  // language selection
+  document.getElementById("cfg_lang").addEventListener("change", function () {
+    var languageValue = this.value;
+    if (languageValue === "1") {
+      localizePage("en");
+    } else if (languageValue === "0") {
+      localizePage("de");
+    }
+  });
+
+  // event listener for all input fields that call sendData on "blur"
+  document
+    .querySelectorAll(
+      'input[type="text"], input[type="number"], input[type="password"], input[type="date"], input[type="time"]'
+    )
+    .forEach(function (input) {
+      input.addEventListener("blur", function () {
+        sendData(input.id, input.value);
+      });
+      input.addEventListener("keypress", function (e) {
+        if (e.key === "Enter") {
+          input.blur(); // Triggers "blur" event and sends data
+        }
+      });
+    });
+
+  // Event-Listener for Range Inputs (Slider)
+  document.querySelectorAll('input[type="range"]').forEach(function (slider) {
+    slider.addEventListener("change", function () {
+      sendData(slider.id, slider.value);
+    });
+  });
+
+  // Event-Listener for Slider labels
+  document.querySelectorAll(".rangeSlider").forEach((slider) => {
+    const valueId = slider.getAttribute("data-value-id");
+    const valueDisplay = document.getElementById(valueId);
+    slider.oninput = () => {
+      valueDisplay.textContent = slider.value;
+    };
+    // set initial value
+    valueDisplay.textContent = slider.value;
+  });
+
+  // Event-Listener for Buttons
+  document.querySelectorAll("button").forEach(function (button) {
+    button.addEventListener("click", function () {
+      sendData(button.id, true);
+    });
+  });
+
+  // Event-Listener for Switches
+  document
+    .querySelectorAll('input[type="checkbox"][role="switch"]')
+    .forEach(function (switchElement) {
+      switchElement.addEventListener("change", function () {
+        sendData(switchElement.id, switchElement.checked);
+        toggleElementVisibility(
+          switchElement.getAttribute("hideOpt"),
+          switchElement.checked
+        );
+      });
+    });
+
+  // Event-Listener for Radio
+  document
+    .querySelectorAll('input[type="radio"]')
+    .forEach(function (switchElement) {
+      switchElement.addEventListener("change", function () {
+        sendData(switchElement.id, switchElement.checked);
+      });
+    });
+
+  // Event-Listener for Checkbox
+  document
+    .querySelectorAll('input[type="checkbox"]')
+    .forEach(function (switchElement) {
+      switchElement.addEventListener("change", function () {
+        sendData(switchElement.id, switchElement.checked);
+      });
+    });
+
+  // Event-Listener for Select Elements
+  document.querySelectorAll("select").forEach(function (selectElement) {
+    selectElement.addEventListener("change", function () {
+      sendData(selectElement.id, selectElement.value);
+    });
+  });
+});
+
 let ws;
 let heartbeatTimeout;
 const maxReconnectDelay = 5000;
@@ -293,26 +514,6 @@ function updateDialog(data) {
   }
 }
 
-// open bitmask help dialog
-function openGrpMaskHelp(button) {
-  const dialog = document.getElementById("p12_bitmask_dialog");
-  if (dialog) {
-    dialog.showModal();
-  } else {
-    console.error("Dialog mit ID 'p12_bitmask_dialog' wurde nicht gefunden.");
-  }
-}
-
-// close bitmask help dialog
-function closeGrpMaskHelp() {
-  const dialog = document.getElementById("p12_bitmask_dialog");
-  if (dialog) {
-    dialog.close();
-  } else {
-    console.error("Dialog mit ID 'p12_bitmask_dialog' wurde nicht gefunden.");
-  }
-}
-
 // Function for switching the visibility of elements
 function toggleElementVisibility(className, isVisible) {
   const elements = document.querySelectorAll(`.${className}`);
@@ -375,8 +576,10 @@ function localizePage(lang = "en") {
         text += match.slice(1, -1);
       } else {
         // check if translation key is valid
-        if (translations.hasOwnProperty(match)) {
-          text += translations[match][lang] || match;
+        if (lib_translations.hasOwnProperty(match)) {
+          text += lib_translations[match][lang] || match;
+        } else if (user_translations.hasOwnProperty(match)) {
+          text += user_translations[match][lang] || match;
         } else {
           console.error(`translation key "${match}" not found`);
           continue;
@@ -590,89 +793,305 @@ function toggleTimeInputs(selectElement) {
   }
 }
 
-function setupBitmaskDialog() {
-  const bitmaskDialog = document.getElementById("bitmask_dialog");
-  const applyButton = document.getElementById("apply_bitmask");
-  const closeButton = document.getElementById("close_bitmask_dialog");
+// --------------------------------------
+// localization texts
+// --------------------------------------
+const lib_translations = {
+  system: {
+    de: "System",
+    en: "System",
+  },
+  settings: {
+    de: "Einstellungen",
+    en: "Settings",
+  },
+  ok: {
+    de: "OK",
+    en: "OK",
+  },
+  network_info: {
+    de: "Netzwerk-Information",
+    en: "Network-Informations",
+  },
+  wifi_ip: {
+    de: "WiFi IP-Adresse",
+    en: "WiFi IP-Address",
+  },
+  wifi_signal: {
+    de: "WiFi Signal",
+    en: "WiFi Signal",
+  },
+  wifi_rssi: {
+    de: "WiFi Rssi",
+    en: "WiFi Rssi",
+  },
+  eth_ip: {
+    de: "ETH IP-Adresse",
+    en: "ETH IP-Address",
+  },
+  eth_status: {
+    de: "ETH Status",
+    en: "ETH Status",
+  },
+  static_ip: {
+    de: "feste IP-Adresse",
+    en: "static ip address",
+  },
+  eth_link_speed: {
+    de: "ETH Geschwindigkeit",
+    en: "ETH Link Speed",
+  },
+  eth_full_duplex: {
+    de: "ETH Vollduplex",
+    en: "ETH Full Duplex",
+  },
+  sw_version: {
+    de: "Software-Version",
+    en: "Software-Version",
+  },
+  version_info: {
+    de: "Versionsinformationen",
+    en: "Version Informations",
+  },
+  esp_maxallocheap: {
+    de: "ESP MaxAllocHeap",
+    en: "ESP MaxAllocHeap",
+  },
+  esp_minfreeheap: {
+    de: "ESP MinFreeHeap",
+    en: "ESP MinFreeHeap",
+  },
+  esp_flash_usage: {
+    de: "ESP Flash usage",
+    en: "ESP Flash usage",
+  },
+  esp_heap_usage: {
+    de: "ESP Heap usage",
+    en: "ESP Heap usage",
+  },
+  sysinfo: {
+    de: "Systeminformationen",
+    en: "System Informations",
+  },
+  date: {
+    de: "Datum",
+    en: "Date",
+  },
+  wifi: {
+    de: "WiFi",
+    en: "WiFi",
+  },
+  ssid: {
+    de: "SSID",
+    en: "SSID",
+  },
+  password: {
+    de: "Passwort",
+    en: "Password",
+  },
+  user: {
+    de: "Benutzer",
+    en: "User",
+  },
+  hostname: {
+    de: "Hostname",
+    en: "Hostname",
+  },
+  server: {
+    de: "Server",
+    en: "Server",
+  },
+  topic: {
+    de: "Topic",
+    en: "Topic",
+  },
+  mqtt: {
+    de: "MQTT",
+    en: "MQTT",
+  },
+  port: {
+    de: "Port",
+    en: "Port",
+  },
+  ntp: {
+    de: "NTP-Server",
+    en: "NTP-Server",
+  },
+  ntp_tz: {
+    de: "Time-Zone",
+    en: "Time-Zone",
+  },
+  restart: {
+    de: "Neustart",
+    en: "restart",
+  },
+  ota: {
+    de: "OTA Firmware Update",
+    en: "OTA Firmware Update",
+  },
+  config_mgn: {
+    de: "Konfiguration import/export",
+    en: "configuration import/export",
+  },
+  tools: {
+    de: "Tools",
+    en: "Tools",
+  },
+  activate: {
+    de: "Aktivieren",
+    en: "activate",
+  },
+  ip_adr: {
+    de: "IP-Adresse",
+    en: "IP-Address",
+  },
+  ip_subnet: {
+    de: "Subnetz",
+    en: "Subnet",
+  },
+  ip_gateway: {
+    de: "Gateway",
+    en: "Gateway",
+  },
+  ip_dns: {
+    de: "DNS-Server",
+    en: "DNS-Server",
+  },
+  access: {
+    de: "Zugangskontrolle",
+    en: "Authentication",
+  },
+  logger: {
+    de: "Logbuch",
+    en: "Logger",
+  },
+  clear: {
+    de: "L\u00f6schen",
+    en: "clear",
+  },
+  refresh: {
+    de: "Aktualisieren",
+    en: "refresh",
+  },
+  lifetime: {
+    de: "Laufzeit",
+    en: "Runtime",
+  },
+  restart_reason: {
+    de: "Neustart Grund",
+    en: "restart reason",
+  },
+  language: {
+    de: "Sprache",
+    en: "language",
+  },
+  german: {
+    de: "Deutsch",
+    en: "german",
+  },
+  english: {
+    de: "Englisch",
+    en: "english",
+  },
+  lost_connection: {
+    de: "keine Verbindung!",
+    en: "no connection",
+  },
+  sort_up: {
+    de: "aufsteigend \u2B06",
+    en: "ascending \u2B06",
+  },
+  sort_down: {
+    de: "absteigend \u2B07",
+    en: "descending \u2B07",
+  },
+  log_mode_4: {
+    de: "Modus: Debug",
+    en: "Mode: Debug",
+  },
+  log_mode_3: {
+    de: "Modus: Info",
+    en: "Mode: Info",
+  },
+  log_mode_2: {
+    de: "Modus: Warnung",
+    en: "Mode: Warning",
+  },
+  log_mode_1: {
+    de: "Modus: Fehler",
+    en: "Modus: Error",
+  },
+  import: {
+    de: "import (config.json)",
+    en: "import (config.json)",
+  },
+  export: {
+    de: "export (config.json)",
+    en: "export (config.json)",
+  },
+  open: {
+    de: "öffne (config.json)",
+    en: "open (config.json)",
+  },
+  update_done: {
+    de: "Update erfolgreich!",
+    en: "Update sucessfull!",
+  },
+  update_failed: {
+    de: "Update nicht erfolgreich!",
+    en: "Update not sucessfull!",
+  },
+  update_ready: {
+    de: "Update bereit!",
+    en: "Update ready!",
+  },
+  update_info: {
+    de: "ESP muss neu gestartet werden um das Update zu übernehmen.",
+    en: "ESP must be restarted to apply the update",
+  },
+  error_text: {
+    de: "Fehler:",
+    en: "Error:",
+  },
+  update_error_info: {
+    de: "Bitte das Update erneut ausführen!",
+    en: "Please run the update again!",
+  },
+  import_ready: {
+    de: "Import bereit!",
+    en: "import ready!",
+  },
+  close: {
+    de: "schließen",
+    en: "close",
+  },
+  act_version: {
+    de: "aktuelle Version",
+    en: "actual version",
+  },
+  github_version: {
+    de: "letztes Release",
+    en: "latest release",
+  },
+  mqtt_info: {
+    de: "MQTT-Informationen",
+    en: "MQTT information",
+  },
+  last_error: {
+    de: "letzter Fehler",
+    en: "last error",
+  },
+  connection: {
+    de: "Verbindung",
+    en: "connection",
+  },
+  state: {
+    de: "Zustand",
+    en: "State",
+  },
+  check_github: {
+    de: "Prüfe GitHub OTA Update",
+    en: "Check for GitHub OTA Update",
+  },
+};
 
-  let currentInput = null; // reference to existing input
-
-  // open the dialog for the source input field
-  document.querySelectorAll(".bitmask-input").forEach((input) => {
-    input.addEventListener("click", () => {
-      currentInput = input;
-
-      // Parse the bitmask as a mutable variable
-      let bitmask = parseInt(input.value || "0", 2);
-
-      // Set checkboxes based on actual bitmask
-      for (let i = 0; i < 16; i++) {
-        const checkbox = document.getElementById(`channel-${i}`);
-        if (checkbox) {
-          // Check the visibility of the checkbox
-          const isVisible = checkbox.parentElement.style.display !== "none";
-
-          // Set checkbox state only if visible
-          checkbox.checked = isVisible && (bitmask & (1 << i)) !== 0;
-
-          // Clear bit if the checkbox is not visible
-          if (!isVisible) {
-            bitmask &= ~(1 << i);
-          }
-        }
-      }
-
-      // Safely update the input value with the sanitized bitmask
-      if (currentInput && !Object.isFrozen(currentInput)) {
-        currentInput.value = bitmask.toString(2).padStart(16, "0");
-      }
-
-      bitmaskDialog.showModal();
-    });
-  });
-
-  // apply checkboxes and close the dialog
-  applyButton.addEventListener("click", () => {
-    let bitmask = 0;
-    for (let i = 0; i < 16; i++) {
-      const checkbox = document.getElementById(`channel-${i}`);
-      if (checkbox && checkbox.checked) {
-        bitmask |= 1 << i;
-      }
-    }
-
-    if (currentInput) {
-      currentInput.value = bitmask.toString(2).padStart(16, "0");
-    }
-
-    bitmaskDialog.close();
-  });
-
-  // close the dialog without changes
-  closeButton.addEventListener("click", () => {
-    bitmaskDialog.close();
-  });
-}
-
-function isGitHubPages() {
-  return window.location.hostname.includes("github.io");
-}
-
-async function loadSimulatedData() {
-  if (!isGitHubPages()) {
-    return; // Kein Simulationsmodus, wenn nicht auf GitHub Pages
-  }
-
-  console.log("GitHub Pages erkannt – Simulationsdaten werden geladen.");
-
-  try {
-    const response = await fetch("sim.json");
-    if (!response.ok)
-      throw new Error("Fehler beim Abrufen der Simulationsdaten");
-
-    const simData = await response.json();
-    updateJSON(simData); // Aktualisiert die UI mit den Simulationsdaten
-  } catch (error) {
-    console.error("Fehler beim Laden von sim.json:", error);
-  }
-}

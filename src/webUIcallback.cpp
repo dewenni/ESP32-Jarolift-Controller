@@ -32,7 +32,7 @@ void webCallback(const char *elementId, const char *value) {
   }
   // OTA-Confirm
   if (strcmp(elementId, "p00_ota_confirm_btn") == 0) {
-    updateWebDialog("ota_update_done_dialog", "close");
+    webUI.wsUpdateWebDialog("ota_update_done_dialog", "close");
     EspSysUtil::RestartReason::saveLocal("ota update");
     yield();
     delay(1000);
@@ -117,12 +117,15 @@ void webCallback(const char *elementId, const char *value) {
   // Authentication
   if (strcmp(elementId, "cfg_auth_enable") == 0) {
     config.auth.enable = EspStrUtil::stringToBool(value);
+    webUI.setAuthentication(config.auth.enable);
   }
   if (strcmp(elementId, "cfg_auth_user") == 0) {
     snprintf(config.auth.user, sizeof(config.auth.user), "%s", value);
+    webUI.setCredentials(config.auth.user, config.auth.password);
   }
   if (strcmp(elementId, "cfg_auth_password") == 0) {
     snprintf(config.auth.password, sizeof(config.auth.password), "%s", value);
+    webUI.setCredentials(config.auth.user, config.auth.password);
   }
 
   // NTP-Server
@@ -412,16 +415,16 @@ void webCallback(const char *elementId, const char *value) {
     config.log.level = strtoul(value, NULL, 10);
     setLogLevel(config.log.level);
     clearLogBuffer();
-    updateWebLog("", "clr_log"); // clear log
+    webUI.wsUpdateWebLog("", "clr_log"); // clear log
   }
   if (strcmp(elementId, "cfg_logger_order") == 0) {
     config.log.order = strtoul(value, NULL, 10);
-    updateWebLog("", "clr_log"); // clear log
+    webUI.wsUpdateWebLog("", "clr_log"); // clear log
     webReadLogBuffer();
   }
   if (strcmp(elementId, "p10_log_clr_btn") == 0) {
     clearLogBuffer();
-    updateWebLog("", "clr_log"); // clear log
+    webUI.wsUpdateWebLog("", "clr_log"); // clear log
   }
   if (strcmp(elementId, "p10_log_refresh_btn") == 0) {
     webReadLogBuffer();

@@ -8,12 +8,12 @@
 #include <mqtt.h>
 
 // include extern
-#include <EspStrUtil.h>
-#include <EspSysUtil.h>
 #include "esp_system.h"
 #include <Arduino.h>
 #include <ArduinoJson.h>
 #include <ESPmDNS.h>
+#include <EspStrUtil.h>
+#include <EspSysUtil.h>
 #include <HTTPClient.h>
 #include <SPI.h>
 #include <WiFi.h>
@@ -47,3 +47,4 @@ void sendETHInfo();
 void getUptime(char *buffer, size_t bufferSize);
 void sendSysInfo();
 void setupETH();
+void refreshNetworkInfo();

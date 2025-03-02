@@ -148,7 +148,7 @@ void onEthEvent(arduino_event_id_t event, arduino_event_info_t info) {
   case ARDUINO_EVENT_ETH_GOT_IP:
     eth.connected = true;
     snprintf(eth.ipAddress, sizeof(eth.ipAddress), "%s", ETH.localIP().toString().c_str());
-    ESP_LOGI(TAG, "ETH Got IP: '%s'\n", eth.ipAddress);
+    ESP_LOGI(TAG, "ETH Got IP: '%s'", eth.ipAddress);
     break;
   case ARDUINO_EVENT_ETH_LOST_IP:
     ESP_LOGI(TAG, "ETH Lost IP");
@@ -216,13 +216,11 @@ void basicSetup() {
 
 /**
  * *******************************************************************
- * @brief   Send WiFi Information in JSON format via MQTT
+ * @brief   refresh Network Information
  * @param   none
  * @return  none
  * *******************************************************************/
-void sendWiFiInfo() {
-
-  JsonDocument wifiJSON;
+void refreshNetworkInfo() {
 
   if (wifi.connected) {
     // check  RSSI
@@ -235,7 +233,35 @@ void sendWiFiInfo() {
       wifi.signal = 100;
     else
       wifi.signal = 2 * (wifi.rssi + 100);
+  } else {
+    wifi.rssi = 0;
+    wifi.signal = 0;
+  }
 
+  if (eth.connected) {
+    eth.fullDuplex = ETH.fullDuplex();
+    eth.linkUp = ETH.linkUp();
+    eth.linkSpeed = ETH.linkSpeed();
+  } else {
+    eth.fullDuplex = false;
+    eth.linkUp = false;
+    eth.linkSpeed = 0;
+  }
+}
+
+/**
+ * *******************************************************************
+ * @brief   Send WiFi Information in JSON format via MQTT
+ * @param   none
+ * @return  none
+ * *******************************************************************/
+void sendWiFiInfo() {
+
+  JsonDocument wifiJSON;
+
+  refreshNetworkInfo();
+
+  if (wifi.connected) {
     wifiJSON["status"] = wifi.connected ? "connected" : "disconnected";
     wifiJSON["rssi"] = wifi.rssi;
     wifiJSON["signal"] = wifi.signal;
@@ -264,11 +290,8 @@ void sendWiFiInfo() {
  * @return  none
  * *******************************************************************/
 void sendETHInfo() {
-  ETH.desc();
 
-  eth.fullDuplex = ETH.fullDuplex();
-  eth.linkUp = ETH.linkUp();
-  eth.linkSpeed = ETH.linkSpeed();
+  refreshNetworkInfo();
 
   JsonDocument ethJSON;
   ethJSON["ip"] = eth.ipAddress;
