@@ -194,4 +194,16 @@ const user_translations = {
     de: "Zeitinformationen",
     en: "Time information",
   },
+  apply: {
+    de: "Übernehmen",
+    en: "apply",
+  },
+  cancel: {
+    de: "Abbrechen",
+    en: "cancel",
+  },
+  gpio: {
+    de: "GPIO-Zuweisung",
+    en: "GPIO-Settings",
+  },
 };
