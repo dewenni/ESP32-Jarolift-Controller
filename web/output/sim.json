@@ -1,8 +1,8 @@
 {
     "type": "updateJSON",
-    "p00_version": "v1.6.2",
-    "p09_sw_version": "v1.6.2",
-    "p00_dialog_version": "v1.6.2",
+    "p00_version": "v1.7.0",
+    "p09_sw_version": "v1.7.0",
+    "p00_dialog_version": "v1.7.0",
     "p09_sw_date": "06.02.2025 - 07:47:00",
     "p09_restart_reason": "ota update",
     "p12_jaro_devcnt": "26",

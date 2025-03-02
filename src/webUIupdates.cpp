@@ -40,7 +40,6 @@ GithubReleaseInfo ghReleaseInfo;
  * functions to create a JSON Buffer that contains webUI element updates
  * *******************************************************************/
 
-
 /**
  * *******************************************************************
  * @brief   update all values (only call once)
@@ -65,6 +64,8 @@ void updateAllElements() {
  * @return  none
  * *******************************************************************/
 void updateSystemInfoElements() {
+
+  refreshNetworkInfo();
 
   webUI.initJsonBuffer(jsonDoc);
 
