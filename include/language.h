@@ -24,6 +24,9 @@ constexpr const char *INACTIVE[] = {"inaktiv", "inactive"};
 constexpr const char *FULL_DUPLEX[] = {"Vollduplex", "Full-Duplex"};
 constexpr const char *CONNECTED[] = {"verbunden", "connected"};
 constexpr const char *NOT_CONNECTED[] = {"nicht verbunden", "not connected"};
+constexpr const char *CC1101_NOT_FOUND[] = {"Fehler: CC1101 Modul ist nicht verbunden!", "Error: CC1101 Modul not connected!"};
+constexpr const char *JARO_KEYS_INVALID[] = {"Fehler: Jarolift Keys ungültig!", "Error: Jarolift keys invalid!"};
+constexpr const char *SERIAL_INVALID[] = {"Fehler: Serialnummer ungültig!", "Error: Serialnumber invalid!"};
 }; // namespace WEB_TXT
 
 // ======================================================================================
@@ -34,7 +37,7 @@ constexpr const char *CMD_RESTART = {"/cmd/restart"};
 constexpr const char *CMD_SHUTTER = {"/cmd/shutter"};
 constexpr const char *STAT_SHUTTER = {"/status/shutter"};
 
-}; // namespace MQTT_CMD
+}; // namespace MQTT_TOPIC
 
 // ======================================================================================
 // mqtt messages : texts that are used for mqtt messages

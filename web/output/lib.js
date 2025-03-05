@@ -767,6 +767,7 @@ function toggleEdit(button, inputId) {
     button.innerText = "Lock";
     console.log("button edit");
   } else {
+    input.blur();
     input.disabled = true;
     button.innerText = "Edit";
     console.log("button save");

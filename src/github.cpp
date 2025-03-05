@@ -1,5 +1,6 @@
 #include <Arduino.h>
 
+#include <basics.h>
 #include <github.h>
 #include <message.h>
 
@@ -12,7 +13,7 @@ GithubReleaseOTA ota(GITHUB_OWNER, GITHUB_REPO);
 
 void ghSetProgressCallback(void (*callback)(int)) { ota.setProgressCallback(callback); }
 
-bool ghGetLatestRelease(GithubRelease *release, GithubReleaseInfo *info) {
+bool ghGetLatestRelease(GithubRelease *release, GithubReleaseInfo *info, const char *espSeries) {
 
   if (release == nullptr || info == nullptr) {
     return false;
@@ -21,32 +22,27 @@ bool ghGetLatestRelease(GithubRelease *release, GithubReleaseInfo *info) {
   // Get the latest release from GitHub
   *release = ota.getLatestRelease();
 
+  // check if the release is valid
   if (release->tag_name == nullptr || release->html_url == nullptr) {
     return false;
   }
 
   snprintf(info->tag, sizeof(info->tag), "%s", release->tag_name);
   snprintf(info->url, sizeof(info->url), "%s", release->html_url);
-  ESP_LOGI(TAG, "GitHb latest Release: %s", info->tag);
+  ESP_LOGD(TAG, "GitHub latest Release: %s", info->tag);
 
-  // search for the first asset that contains "ota" in its name
-  const char *otaAssetName = NULL;
+  // search for the first asset that contains the right "chipSeries" and "ota or UPDATE" in its name
+  info->assetFound = false;
   for (const auto &asset : release->assets) {
-    if (asset.name != NULL && strstr(asset.name, "ota") != NULL) {
-      otaAssetName = asset.name;
+    if (asset.name != NULL && strcasestr(asset.name, espSeries) != NULL && strcasestr(asset.name, "UPDATE") != NULL) {
+      ESP_LOGD(TAG, "GitHub OTA Asset found: %s", asset.name);
+      snprintf(info->asset, sizeof(info->asset), "%s", asset.name);
+      info->assetFound = true;
       break;
     }
   }
 
-  // copy the asset name to the info struct
-  if (otaAssetName != NULL) {
-    ESP_LOGI(TAG, "OTA Asset found: %s", otaAssetName);
-    snprintf(info->asset, sizeof(info->asset), "%s", otaAssetName);
-    return true;
-  } else {
-    ESP_LOGE(TAG, "No OTA Asset found!");
-    return false;
-  }
+  return true;
 }
 
 int ghStartOtaUpdate(GithubRelease release, const char *asset) {

@@ -188,6 +188,13 @@ void updateSystemInfoElementsStatic() {
   // Date
   webUI.addJson(jsonDoc, "p09_act_date", EspStrUtil::getDateString());
 
+  // ESP-Info
+  webUI.addJson(jsonDoc, "p09_esp_chip_series", espInfo.chipSeries);
+  webUI.addJson(jsonDoc, "p09_esp_chip_model", espInfo.chipModel);
+  webUI.addJson(jsonDoc, "p09_esp_chip_rev", espInfo.chipRev);
+  webUI.addJson(jsonDoc, "p09_esp_chip_mhz", espInfo.chipMhz);
+  webUI.addJson(jsonDoc, "p09_esp_flash_size", espInfo.flashSize);
+
   webUI.wsUpdateWebJSON(jsonDoc);
 }
 
@@ -293,12 +300,12 @@ void requestGitHubVersion() { startCheckGitHubVersion = true; }
 void processGitHubVersion() {
   if (startCheckGitHubVersion) {
     startCheckGitHubVersion = false;
-    if (ghGetLatestRelease(&ghLatestRelease, &ghReleaseInfo)) {
+    if (ghGetLatestRelease(&ghLatestRelease, &ghReleaseInfo, espInfo.chipSeries)) {
       webUI.wsUpdateWebBusy("p00_dialog_git_version", false);
       webUI.wsUpdateWebText("p00_dialog_git_version", ghReleaseInfo.tag, false);
       webUI.wsUpdateWebHref("p00_dialog_git_version", ghReleaseInfo.url);
       // if new version is available, show update button
-      if (strcmp(ghReleaseInfo.tag, VERSION) != 0) {
+      if (strcmp(ghReleaseInfo.tag, VERSION) != 0 && ghReleaseInfo.assetFound) {
         char buttonTxt[32];
         snprintf(buttonTxt, sizeof(buttonTxt), "Update %s", ghReleaseInfo.tag);
         webUI.wsUpdateWebText("p00_update_btn", buttonTxt, false);
@@ -394,7 +401,18 @@ void webUIupdates() {
   if (refreshTimer2.cycleTrigger(WEBUI_SLOW_REFRESH_TIME_MS) && !refreshRequest && !ota.isActive()) {
 
     if (!setupMode) {
-      webUI.wsUpdateWebHideElement("cc1101errorBar", getCC1101State());
+      if (getCC1101State() == false) {
+        webUI.wsUpdateWebHideElement("errorBar", false);
+        webUI.wsUpdateWebText("errorBarText", WEB_TXT::CC1101_NOT_FOUND[config.lang], false);
+      } else if (config.jaro.masterLSB == 0 || config.jaro.masterMSB == 0) {
+        webUI.wsUpdateWebHideElement("errorBar", false);
+        webUI.wsUpdateWebText("errorBarText", WEB_TXT::JARO_KEYS_INVALID[config.lang], false);
+      } else if (config.jaro.serial == 0) {
+        webUI.wsUpdateWebHideElement("errorBar", false);
+        webUI.wsUpdateWebText("errorBarText", WEB_TXT::SERIAL_INVALID[config.lang], false);
+      } else {
+        webUI.wsUpdateWebHideElement("errorBar", true);
+      }
     }
     updateSystemInfoElements(); // refresh all "System" elements as one big JSON update (≈ 570 Bytes)
   }

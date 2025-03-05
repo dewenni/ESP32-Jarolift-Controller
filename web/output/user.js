@@ -46,10 +46,6 @@ const user_translations = {
     de: "Der Zähler wird zusammen mit jedem Datagramm über den Funk gesendet. Er beginnt bei null und wird bei jedem Datagramm inkrementiert. Jeder empfänger hört die empfangenen Datagramme ab und zeichnet den Zähler des Senders auf. Wenn der Zähler des Senders und des Empfängers zu sehr voneinander abweichen, müssen Sie den Empfänger neu anlernen. Um dies zu vermeiden, wenn Sie einen Dongle austauschen (oder wenn ein Update schief geht), können Sie hier einen Zähler ungleich null eingeben. ACHTUNG: lassen Sie die Finger davon, wenn Sie die Wirkung nicht verstehen, Sie riskieren, dass Sie alle Ihre Empfänger (wieder) neu anlernen müssen!",
     en: "the device counter is send together with every datagram over the radio. beginning with zero, it is incremented on every datagram. each receiver listens to received datagrams and records the sender's device counter. when the sender's and receiver's device counter differ too much, you must re-learn the receiver. to avoid this when replacing a dongle (or when an update goes wrong) you can enter a non-zero device counter here. ATTENTION: don't touch this if you don't understand the effect, you risk to re-learn all your receivers (again)!",
   },
-  cc1101error: {
-    de: "Fehler: CC1101 Modul ist nicht verbunden!",
-    en: "Error: CC1101 Modul not connected!",
-  },
   help: {
     de: "Hilfe",
     en: "Help",
@@ -193,6 +189,18 @@ const user_translations = {
   time_info: {
     de: "Zeitinformationen",
     en: "Time information",
+  },
+  apply: {
+    de: "Übernehmen",
+    en: "apply",
+  },
+  cancel: {
+    de: "Abbrechen",
+    en: "cancel",
+  },
+  gpio: {
+    de: "GPIO-Zuweisung",
+    en: "GPIO-Settings",
   },
 };
 

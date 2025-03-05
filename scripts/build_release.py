@@ -4,8 +4,8 @@ import re
 import shutil
 
 pioenv = env.get("PIOENV")
-OTA_NAME = f"{pioenv}_jarolift_UPDATE"   # prefix for ota release image
-INSTALL_NAME = f"{pioenv}_jarolift_FLASH"    # prefix for merged flash image     
+OTA_NAME = f"{pioenv}_jarolift_ota"         # prefix for ota release image
+INSTALL_NAME = f"{pioenv}_jarolift_flash"   # prefix for merged flash image     
 
 APP_BIN = "$BUILD_DIR/${PROGNAME}.bin"
 MERGED_BIN = "$BUILD_DIR/${PROGNAME}_merged.bin"

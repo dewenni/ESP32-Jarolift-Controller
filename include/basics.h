@@ -39,6 +39,16 @@ struct s_eth {
 };
 extern s_eth eth;
 
+struct s_espInfo {
+  char chipSeries[20];
+  char chipModel[20];
+  char chipMhz[20];
+  char chipRev[20];
+  char flashSize[20];
+  bool supported = false;
+};
+extern s_espInfo espInfo;
+
 /* P R O T O T Y P E S ********************************************************/
 void checkWiFi();
 void basicSetup();

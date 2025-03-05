@@ -20,6 +20,7 @@ void setup_wifi();
 s_wifi wifi; // global WiFi Informations
 s_eth eth;   // global ETH Informations
 SPIClass *SPI_2;
+s_espInfo espInfo;
 
 static muTimer wifiReconnectTimer = muTimer(); // timer for reconnect delay
 static int wifi_retry = 0;
@@ -217,52 +218,72 @@ void basicSetup() {
   // NTP
   ntpSetup();
 
-  ESP_LOGI(TAG, "ESP-ChipModel: %s", ESP.getChipModel());
-  ESP_LOGI(TAG, "ESP-ChipRevision: %ld", ESP.getChipRevision());
-  ESP_LOGI(TAG, "ESP-CpuFreq: %lu", ESP.getCpuFreqMHz());
-  ESP_LOGI(TAG, "ESP-FlashChipSize: %lu", ESP.getFlashChipSize());
-  ESP_LOGI(TAG, "ESP-FlashChipSpeed: %lu", ESP.getFlashChipSpeed());
-
   /* Print chip information */
   esp_chip_info_t chip_info;
-  uint32_t flash_size;
   esp_chip_info(&chip_info);
 
   switch (chip_info.model) {
   case CHIP_ESP32:
-    ESP_LOGD(TAG, "ESP32");
+    ESP_LOGI(TAG, "ESP-ChipSeries: ESP32");
+    snprintf(espInfo.chipSeries, sizeof(espInfo.chipSeries), "ESP32");
+    espInfo.supported = true;
     break;
   case CHIP_ESP32S2:
-    ESP_LOGD(TAG, "ESP32-S2");
+    ESP_LOGI(TAG, "ESP-ChipSeries: ESP32-S2");
+    snprintf(espInfo.chipSeries, sizeof(espInfo.chipSeries), "ESP32-S2");
+    espInfo.supported = true;
     break;
   case CHIP_ESP32S3:
-    ESP_LOGD(TAG, "ESP32-S3");
+    ESP_LOGI(TAG, "ESP-ChipSeries: ESP32-S3");
+    snprintf(espInfo.chipSeries, sizeof(espInfo.chipSeries), "ESP32-S3");
+    espInfo.supported = true;
     break;
   case CHIP_ESP32C2:
-    ESP_LOGD(TAG, "ESP32-C2");
+    ESP_LOGI(TAG, "ESP-ChipSeries: ESP32-C2");
+    snprintf(espInfo.chipSeries, sizeof(espInfo.chipSeries), "ESP32-C2");
+    espInfo.supported = false;
     break;
   case CHIP_ESP32C3:
-    ESP_LOGD(TAG, "ESP32-C3");
+    ESP_LOGI(TAG, "ESP-ChipSeries: ESP32-C3");
+    snprintf(espInfo.chipSeries, sizeof(espInfo.chipSeries), "ESP32-C3");
+    espInfo.supported = true;
     break;
   case CHIP_ESP32C6:
-    ESP_LOGD(TAG, "ESP32-C6");
+    ESP_LOGI(TAG, "ESP-ChipSeries: ESP32-C6");
+    snprintf(espInfo.chipSeries, sizeof(espInfo.chipSeries), "ESP32-C6");
+    espInfo.supported = false;
     break;
   case CHIP_ESP32H2:
-    ESP_LOGD(TAG, "ESP32-H2");
+    ESP_LOGI(TAG, "ESP-ChipSeries: ESP32-H2");
+    snprintf(espInfo.chipSeries, sizeof(espInfo.chipSeries), "ESP32-H2");
+    espInfo.supported = false;
     break;
   case CHIP_ESP32P4:
-    ESP_LOGD(TAG, "ESP32-P4");
+    ESP_LOGI(TAG, "ESP-ChipSeries: ESP32-P4");
+    snprintf(espInfo.chipSeries, sizeof(espInfo.chipSeries), "ESP32-P4");
+    espInfo.supported = false;
     break;
   case CHIP_ESP32C61:
-    ESP_LOGD(TAG, "ESP32-C61");
-    break;
-  case CHIP_POSIX_LINUX:
-    ESP_LOGD(TAG, "POSIX/Linux");
+    ESP_LOGI(TAG, "ESP-ChipSeries: ESP32-C61");
+    snprintf(espInfo.chipSeries, sizeof(espInfo.chipSeries), "ESP32-C61");
+    espInfo.supported = false;
     break;
   default:
-    ESP_LOGD(TAG, "Unknown");
+    ESP_LOGI(TAG, "ESP-ChipSeries: Unknown");
     break;
   }
+
+  snprintf(espInfo.chipModel, sizeof(espInfo.chipModel), ESP.getChipModel());
+  ESP_LOGI(TAG, "ESP-ChipModel: %s", espInfo.chipModel);
+
+  sniprintf(espInfo.chipRev, sizeof(espInfo.chipRev), "%d", ESP.getChipRevision());
+  ESP_LOGI(TAG, "ESP-ChipRevision: %s", espInfo.chipRev);
+
+  snprintf(espInfo.chipMhz, sizeof(espInfo.chipMhz), "%lu", ESP.getCpuFreqMHz());
+  ESP_LOGI(TAG, "ESP-CpuFreq: %s", espInfo.chipMhz);
+
+  snprintf(espInfo.flashSize, sizeof(espInfo.flashSize), "%s", EspStrUtil::formatBytes(ESP.getFlashChipSize()));
+  ESP_LOGI(TAG, "ESP-FlashChipSize: %s", espInfo.flashSize);
 }
 
 /**
