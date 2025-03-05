@@ -27,6 +27,16 @@ constexpr const char *NOT_CONNECTED[] = {"nicht verbunden", "not connected"};
 constexpr const char *CC1101_NOT_FOUND[] = {"Fehler: CC1101 Modul ist nicht verbunden!", "Error: CC1101 Modul not connected!"};
 constexpr const char *JARO_KEYS_INVALID[] = {"Fehler: Jarolift Keys ungültig!", "Error: Jarolift keys invalid!"};
 constexpr const char *SERIAL_INVALID[] = {"Fehler: Serialnummer ungültig!", "Error: Serialnumber invalid!"};
+constexpr const char *SHUTTER_CMD_UP[] = {"Rolladen AUF", "Shutter UP"};
+constexpr const char *SHUTTER_CMD_DOWN[] = {"Rolladen ZU", "Shutter DOWN"};
+constexpr const char *SHUTTER_CMD_STOP[] = {"Rolladen STOP", "Shutter STOP"};
+constexpr const char *SHUTTER_CMD_SHADE[] = {"Rolladen SCHATTEN", "Shutter SHADE"};
+constexpr const char *GROUP_CMD_UP[] = {"Gruppe AUF", "Group UP"};
+constexpr const char *GROUP_CMD_DOWN[] = {"Gruppe ZU", "Group DOWN"};
+constexpr const char *GROUP_CMD_STOP[] = {"Gruppe STOP", "Group STOP"};
+constexpr const char *GROUP_CMD_SHADE[] = {"Gruppe SCHATTEN", "Group SHADE"};
+constexpr const char *CMD_SET_SHADE[] = {"Kommando setze Schatten", "Command set shade"};
+constexpr const char *CMD_LEARN[] = {"Kommando anlernen", "Command learn"};
 }; // namespace WEB_TXT
 
 // ======================================================================================

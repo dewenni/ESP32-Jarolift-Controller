@@ -210,7 +210,6 @@ document.addEventListener("DOMContentLoaded", function () {
   setupBitmaskDialog();
 });
 
-
 // open bitmask help dialog
 function openGrpMaskHelp(button) {
   const dialog = document.getElementById("p12_bitmask_dialog");
@@ -295,10 +294,6 @@ function setupBitmaskDialog() {
   });
 }
 
-function isGitHubPages() {
-  return window.location.hostname.includes("github.io");
-}
-
 async function loadSimulatedData() {
   if (!isGitHubPages()) {
     return; // Kein Simulationsmodus, wenn nicht auf GitHub Pages
@@ -317,3 +312,4 @@ async function loadSimulatedData() {
     console.error("Fehler beim Laden von sim.json:", error);
   }
 }
+

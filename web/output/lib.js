@@ -225,7 +225,15 @@ const maxReconnectDelay = 5000;
 const minReconnectDelay = 1000;
 let reconnectDelay = minReconnectDelay;
 
+function isGitHubPages() {
+  return window.location.hostname.includes("github.io");
+}
+
 function setupWS() {
+  if (isGitHubPages()) {
+    return;
+  }
+
   ws = new WebSocket("ws://" + window.location.host + "/ws");
 
   ws.onopen = function () {
@@ -286,11 +294,37 @@ function setupWS() {
       otaProgress(message);
     } else if (message.type === "updateDialog") {
       updateDialog(message);
+    } else if (message.type === "showInfoMsg") {
+      showMsgBar(message);
     }
   };
 }
 
-// Heartbeat-Timeout zurücksetzen
+function showMsgBar(message) {
+  const msgBar = document.getElementById("msgBar");
+  const msgBarText = document.getElementById("msgBarText");
+
+  // update the message text
+  msgBarText.textContent = message.text;
+  msgBar.style.display = "block";
+
+  // Force reflow to start slide-down animation
+  void msgBar.offsetWidth;
+
+  // slide up the message bar
+  msgBar.classList.add("visible");
+
+  // hide the message bar after 2 seconds
+  setTimeout(() => {
+    msgBar.classList.remove("visible");
+
+    setTimeout(() => {
+      msgBar.style.display = "none";
+    }, 500);
+  }, 3000);
+}
+
+// heartbeat function
 function resetHeartbeat() {
   clearTimeout(heartbeatTimeout);
   heartbeatTimeout = setTimeout(() => {

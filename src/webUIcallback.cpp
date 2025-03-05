@@ -250,26 +250,32 @@ void webCallback(const char *elementId, const char *value) {
     if (strcmp(elementId, setShadeId) == 0) {
       jaroCmd(CMD_SET_SHADE, i);
       ESP_LOGI(TAG, "cmd SET-SHADE - channel %i", i + 1);
+      webUI.wsShowInfoMsg(WEB_TXT::CMD_SET_SHADE[config.lang]);
     }
     if (strcmp(elementId, learnId) == 0) {
       jaroCmd(CMD_LEARN, i);
       ESP_LOGI(TAG, "cmd LEARN - channel %i", i + 1);
+      webUI.wsShowInfoMsg(WEB_TXT::CMD_LEARN[config.lang]);
     }
     if (strcmp(elementId, cmdUpId) == 0) {
       ESP_LOGI(TAG, "cmd UP - channel %i", i + 1);
       jaroCmd(CMD_UP, i);
+      webUI.wsShowInfoMsg(WEB_TXT::SHUTTER_CMD_UP[config.lang]);
     }
     if (strcmp(elementId, cmdStopId) == 0) {
       ESP_LOGI(TAG, "cmd STOP - channel %i", i + 1);
       jaroCmd(CMD_STOP, i);
+      webUI.wsShowInfoMsg(WEB_TXT::SHUTTER_CMD_STOP[config.lang]);
     }
     if (strcmp(elementId, cmdDownId) == 0) {
       ESP_LOGI(TAG, "cmd DOWN - channel %i", i + 1);
       jaroCmd(CMD_DOWN, i);
+      webUI.wsShowInfoMsg(WEB_TXT::SHUTTER_CMD_DOWN[config.lang]);
     }
     if (strcmp(elementId, cmdShadeId) == 0) {
       ESP_LOGI(TAG, "cmd SHADE - channel %i", i + 1);
       jaroCmd(CMD_SHADE, i);
+      webUI.wsShowInfoMsg(WEB_TXT::SHUTTER_CMD_SHADE[config.lang]);
     }
   }
 
@@ -304,18 +310,22 @@ void webCallback(const char *elementId, const char *value) {
     if (strcmp(elementId, cmdUpId) == 0) {
       ESP_LOGI(TAG, "cmd UP - group %i", i + 1);
       jaroCmd(CMD_GRP_UP, config.jaro.grp_mask[i]);
+      webUI.wsShowInfoMsg(WEB_TXT::GROUP_CMD_UP[config.lang]);
     }
     if (strcmp(elementId, cmdStopId) == 0) {
       ESP_LOGI(TAG, "cmd STOP - group %i", i + 1);
       jaroCmd(CMD_GRP_STOP, config.jaro.grp_mask[i]);
+      webUI.wsShowInfoMsg(WEB_TXT::GROUP_CMD_STOP[config.lang]);
     }
     if (strcmp(elementId, cmdDownId) == 0) {
       ESP_LOGI(TAG, "cmd DOWN - group %i", i + 1);
       jaroCmd(CMD_GRP_DOWN, config.jaro.grp_mask[i]);
+      webUI.wsShowInfoMsg(WEB_TXT::GROUP_CMD_DOWN[config.lang]);
     }
     if (strcmp(elementId, cmdShadeId) == 0) {
       ESP_LOGI(TAG, "cmd SHADE - group %i", i + 1);
       jaroCmd(CMD_GRP_SHADE, config.jaro.grp_mask[i]);
+      webUI.wsShowInfoMsg(WEB_TXT::GROUP_CMD_SHADE[config.lang]);
     }
   }
 
