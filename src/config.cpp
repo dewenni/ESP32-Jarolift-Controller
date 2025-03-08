@@ -361,6 +361,26 @@ void configSaveToFile() {
     grp_mask.add(config.jaro.grp_mask[i]);
   }
 
+  JsonArray remote_enable = doc["jaro"]["remote_enable"].to<JsonArray>();
+  for (int i = 0; i < 16; i++) {
+    remote_enable.add(config.jaro.remote_enable[i]);
+  }
+
+  JsonArray remote_name = doc["jaro"]["remote_name"].to<JsonArray>();
+  for (int i = 0; i < 16; i++) {
+    remote_name.add(config.jaro.remote_name[i]);
+  }
+
+  JsonArray remote_mask = doc["jaro"]["remote_mask"].to<JsonArray>();
+  for (int i = 0; i < 16; i++) {
+    remote_mask.add(config.jaro.remote_mask[i]);
+  }
+
+  JsonArray remote_serial = doc["jaro"]["remote_serial"].to<JsonArray>();
+  for (int i = 0; i < 16; i++) {
+    remote_serial.add(config.jaro.remote_serial[i]);
+  }
+
   JsonArray timers = doc["timer"].to<JsonArray>();
   for (int i = 0; i < 6; i++) {
     JsonObject timer = timers.add<JsonObject>();
@@ -533,6 +553,23 @@ void configLoadFromFile() {
     for (int i = 0; i < 6; i++) {
       config.jaro.grp_mask[i] = grp_mask[i];
     }
+    JsonArray remote_enable = doc["jaro"]["remote_enable"].as<JsonArray>();
+    for (int i = 0; i < 16; i++) {
+      config.jaro.remote_enable[i] = remote_enable[i];
+    }
+    JsonArray remote_name = doc["jaro"]["remote_name"].as<JsonArray>();
+    for (int i = 0; i < 16; i++) {
+      EspStrUtil::readJSONstring(config.jaro.remote_name[i], sizeof(config.jaro.remote_name[0]), remote_name[i]);
+    }
+    JsonArray remote_mask = doc["jaro"]["remote_mask"].as<JsonArray>();
+    for (int i = 0; i < 16; i++) {
+      config.jaro.remote_mask[i] = remote_mask[i];
+    }
+    JsonArray remote_serial = doc["jaro"]["remote_serial"].as<JsonArray>();
+    for (int i = 0; i < 16; i++) {
+      config.jaro.remote_serial[i] = remote_serial[i];
+    }
+
     JsonArray timers = doc["timer"].as<JsonArray>();
     for (size_t i = 0; i < timers.size() && i < 6; i++) { // Schleife über die Timer
       JsonObject timer = timers[i];

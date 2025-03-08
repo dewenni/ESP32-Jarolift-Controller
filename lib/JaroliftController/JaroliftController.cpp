@@ -127,8 +127,6 @@ void JaroliftController::setDeviceCounter(uint16_t newDevCnt) {
   nvs_commit(nvs_handle);
 
   ESP_LOGD(TAG, "stored Device Counter: %i", devcnt);
-  ESP_LOGW(TAG, "Wstored Device Counter: %i", devcnt);
-  ESP_LOGE(TAG, "Estored Device Counter: %i", devcnt);
 
   nvs_close(nvs_handle);
 
@@ -297,7 +295,7 @@ void JaroliftController::keygen() {
   keylow = new_serial | 0x60000000;
   enc = k.decrypt(keylow);
   device_key_msb = enc; // Stores MSB devicekey 16Bit
-  ESP_LOGD(TAG, "created devicekey low: 0x%08x // high: 0x%08x", device_key_lsb, device_key_msb);
+  //ESP_LOGD(TAG, "created devicekey low: 0x%08x // high: 0x%08x", device_key_lsb, device_key_msb);
 } // void keygen
 
 // ####################################################################
@@ -345,7 +343,7 @@ void JaroliftController::rx_keygen() {
   enc = k.decrypt(keylow);
   rx_device_key_msb = enc; // Stores MSB devicekey 16Bit
 
-  ESP_LOGD(TAG, "received devicekey low: 0x%08x // high: 0x%08x", rx_device_key_lsb, rx_device_key_msb);
+  //ESP_LOGD(TAG, "received devicekey low: 0x%08x // high: 0x%08x", rx_device_key_lsb, rx_device_key_msb);
 } // void rx_keygen
 
 // ####################################################################
@@ -360,7 +358,7 @@ void JaroliftController::rx_decoder() {
   rx_disc_low[2] = (decoded >> 8) & 0xFF;
   rx_disc_low[3] = decoded & 0xFF;
 
-  ESP_LOGD(TAG, "decoded devicekey: 0x%08lx", decoded);
+  //ESP_LOGD(TAG, "decoded devicekey: 0x%08lx", decoded);
 } // void rx_decoder
 
 // ####################################################################
@@ -377,7 +375,7 @@ uint8_t JaroliftController::getRssi() {
     value = rssi / 2;
     value = value + 74;
   }
-  ESP_LOGD(TAG, "CC1101_RSSI: %i", value);
+  //ESP_LOGD(TAG, "CC1101_RSSI: %i", value);
   return value;
 } // void ReadRSSI
 
@@ -794,6 +792,8 @@ void JaroliftController::loop() {
     ESP_LOGD(TAG, "(INF1) serial: 0x%08lx, rx_function: 0x%x, rx_disc_low: %d, rx_disc_high: %d", rx_serial, rx_function, rx_disc_low[0], rx_disc_h);
     ESP_LOGD(TAG, "(INF2) RSSI: %d, counter: %d", getRssi(), rx_disc_low[3]);
     ESP_LOGD(TAG, "(INF3) rx_device_key_lsb: 0x%08x, rx_device_key_msb: 0x%08x, decoded: 0x%08lx", rx_device_key_lsb, rx_device_key_msb, decoded);
+
+    remoteCallback(rx_serial, rx_function, getRssi());
 
     rx_disc_h = 0;
     rx_hopcode = 0;

@@ -19,6 +19,10 @@ struct s_cfg_jaro {
   char grp_name[6][64]{"\0"};
   bool grp_enable[6];
   uint16_t grp_mask[6];
+  char remote_name[16][64]{"\0"};
+  uint32_t remote_serial[16];
+  bool remote_enable[16];
+  uint16_t remote_mask[16];
 };
 
 struct s_cfg_timer {

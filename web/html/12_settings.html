@@ -1140,6 +1140,842 @@
               <br />
             </details>
             <hr />
+            <!-- Remotes 1-16 -->
+            <details>
+              <summary data-i18n="remotes"></summary>
+              <!-- Remote 1 -->
+              <div class="section-header">
+                <label for="remote0" data-i18n="remote++ 1"></label>
+                <div class="switch-container">
+                  <input
+                    name="remote0_enable"
+                    type="checkbox"
+                    role="switch"
+                    id="cfg_jaro_remote_enable_0" />
+                </div>
+              </div>
+              <br />
+              <div class="settings-container">
+                <div>
+                  <label for="name_remote_0" data-i18n="name"></label>
+                  <input
+                    name="name_remote_0"
+                    type="text"
+                    id="cfg_jaro_remote_name_0"
+                    placeholder="name" />
+                </div>
+                <div>
+                  <label for="serial_remote_0" data-i18n="serial_nr"></label>
+                  <input
+                    name="serial_remote_0"
+                    id="cfg_jaro_remote_serial_0"
+                    type="text"
+                    data-type="hex"
+                    data-length="6"
+                    oninput="validateHex(this)"
+                    pattern="[0-9a-fA-F]{1,6}"
+                    title="Enter up to 6 HEX digits"
+                    maxlength="6"
+                    onblur="formatHex(this)"
+                    placeholder="serial" />
+                </div>
+                <div>
+                  <label for="mask_remote_0" data-i18n="mask"></label>
+                  <input
+                    class="bitmask-input"
+                    name="mask_remote_0"
+                    type="text"
+                    data-type="bin"
+                    id="cfg_jaro_remote_mask_0"
+                    oninput="validateBin(this)"
+                    onblur="formatBin(this)"
+                    pattern="[01]{1,16}"
+                    placeholder="click for Dialog"
+                    maxlength="16" />
+                </div>
+              </div>
+              <hr />
+              <!-- Remote 2 -->
+              <div class="section-header">
+                <label for="remote1" data-i18n="remote++ 2"></label>
+                <div class="switch-container">
+                  <input
+                    name="remote1_enable"
+                    type="checkbox"
+                    role="switch"
+                    id="cfg_jaro_remote_enable_1" />
+                </div>
+              </div>
+              <br />
+              <div class="settings-container">
+                <div>
+                  <label for="name_remote_1" data-i18n="name"></label>
+                  <input
+                    name="name_remote_1"
+                    type="text"
+                    id="cfg_jaro_remote_name_1"
+                    placeholder="name" />
+                </div>
+                <div>
+                  <label for="serial_remote_1" data-i18n="serial_nr"></label>
+                  <input
+                    name="serial_remote_1"
+                    id="cfg_jaro_remote_serial_1"
+                    type="text"
+                    data-type="hex"
+                    data-length="6"
+                    oninput="validateHex(this)"
+                    pattern="[0-9a-fA-F]{1,6}"
+                    title="Enter up to 6 HEX digits"
+                    maxlength="6"
+                    onblur="formatHex(this)"
+                    placeholder="serial" />
+                </div>
+                <div>
+                  <label for="mask_remote_1" data-i18n="mask"></label>
+                  <input
+                    class="bitmask-input"
+                    name="mask_remote_1"
+                    type="text"
+                    data-type="bin"
+                    id="cfg_jaro_remote_mask_1"
+                    oninput="validateBin(this)"
+                    onblur="formatBin(this)"
+                    pattern="[01]{1,16}"
+                    placeholder="click for Dialog"
+                    maxlength="16" />
+                </div>
+              </div>
+              <hr />
+              <!-- Remote 3 -->
+              <div class="section-header">
+                <label for="remote2" data-i18n="remote++ 3"></label>
+                <div class="switch-container">
+                  <input
+                    name="remote2_enable"
+                    type="checkbox"
+                    role="switch"
+                    id="cfg_jaro_remote_enable_2" />
+                </div>
+              </div>
+              <br />
+              <div class="settings-container">
+                <div>
+                  <label for="name_remote_2" data-i18n="name"></label>
+                  <input
+                    name="name_remote_2"
+                    type="text"
+                    id="cfg_jaro_remote_name_2"
+                    placeholder="name" />
+                </div>
+                <div>
+                  <label for="serial_remote_2" data-i18n="serial_nr"></label>
+                  <input
+                    name="serial_remote_2"
+                    id="cfg_jaro_remote_serial_2"
+                    type="text"
+                    data-type="hex"
+                    data-length="6"
+                    oninput="validateHex(this)"
+                    pattern="[0-9a-fA-F]{1,6}"
+                    title="Enter up to 6 HEX digits"
+                    maxlength="6"
+                    onblur="formatHex(this)"
+                    placeholder="serial" />
+                </div>
+                <div>
+                  <label for="mask_remote_2" data-i18n="mask"></label>
+                  <input
+                    class="bitmask-input"
+                    name="mask_remote_2"
+                    type="text"
+                    data-type="bin"
+                    id="cfg_jaro_remote_mask_2"
+                    oninput="validateBin(this)"
+                    onblur="formatBin(this)"
+                    pattern="[01]{1,16}"
+                    placeholder="click for Dialog"
+                    maxlength="16" />
+                </div>
+              </div>
+              <hr />
+              <!-- Remote 4 -->
+              <div class="section-header">
+                <label for="remote3" data-i18n="remote++ 4"></label>
+                <div class="switch-container">
+                  <input
+                    name="remote3_enable"
+                    type="checkbox"
+                    role="switch"
+                    id="cfg_jaro_remote_enable_3" />
+                </div>
+              </div>
+              <br />
+              <div class="settings-container">
+                <div>
+                  <label for="name_remote_3" data-i18n="name"></label>
+                  <input
+                    name="name_remote_3"
+                    type="text"
+                    id="cfg_jaro_remote_name_3"
+                    placeholder="name" />
+                </div>
+                <div>
+                  <label for="serial_remote_3" data-i18n="serial_nr"></label>
+                  <input
+                    name="serial_remote_3"
+                    id="cfg_jaro_remote_serial_3"
+                    type="text"
+                    data-type="hex"
+                    data-length="6"
+                    oninput="validateHex(this)"
+                    pattern="[0-9a-fA-F]{1,6}"
+                    title="Enter up to 6 HEX digits"
+                    maxlength="6"
+                    onblur="formatHex(this)"
+                    placeholder="serial" />
+                </div>
+                <div>
+                  <label for="mask_remote_3" data-i18n="mask"></label>
+                  <input
+                    class="bitmask-input"
+                    name="mask_remote_3"
+                    type="text"
+                    data-type="bin"
+                    id="cfg_jaro_remote_mask_3"
+                    oninput="validateBin(this)"
+                    onblur="formatBin(this)"
+                    pattern="[01]{1,16}"
+                    placeholder="click for Dialog"
+                    maxlength="16" />
+                </div>
+              </div>
+              <hr />
+              <!-- Remote 5 -->
+              <div class="section-header">
+                <label for="remote4" data-i18n="remote++ 5"></label>
+                <div class="switch-container">
+                  <input
+                    name="remote4_enable"
+                    type="checkbox"
+                    role="switch"
+                    id="cfg_jaro_remote_enable_4" />
+                </div>
+              </div>
+              <br />
+              <div class="settings-container">
+                <div>
+                  <label for="name_remote_4" data-i18n="name"></label>
+                  <input
+                    name="name_remote_4"
+                    type="text"
+                    id="cfg_jaro_remote_name_4"
+                    placeholder="name" />
+                </div>
+                <div>
+                  <label for="serial_remote_4" data-i18n="serial_nr"></label>
+                  <input
+                    name="serial_remote_4"
+                    id="cfg_jaro_remote_serial_4"
+                    type="text"
+                    data-type="hex"
+                    data-length="6"
+                    oninput="validateHex(this)"
+                    pattern="[0-9a-fA-F]{1,6}"
+                    title="Enter up to 6 HEX digits"
+                    maxlength="6"
+                    onblur="formatHex(this)"
+                    placeholder="serial" />
+                </div>
+                <div>
+                  <label for="mask_remote_4" data-i18n="mask"></label>
+                  <input
+                    class="bitmask-input"
+                    name="mask_remote_4"
+                    type="text"
+                    data-type="bin"
+                    id="cfg_jaro_remote_mask_4"
+                    oninput="validateBin(this)"
+                    onblur="formatBin(this)"
+                    pattern="[01]{1,16}"
+                    placeholder="click for Dialog"
+                    maxlength="16" />
+                </div>
+              </div>
+              <hr />
+              <!-- Remote 6 -->
+              <div class="section-header">
+                <label for="remote5" data-i18n="remote++ 6"></label>
+                <div class="switch-container">
+                  <input
+                    name="remote5_enable"
+                    type="checkbox"
+                    role="switch"
+                    id="cfg_jaro_remote_enable_5" />
+                </div>
+              </div>
+              <br />
+              <div class="settings-container">
+                <div>
+                  <label for="name_remote_5" data-i18n="name"></label>
+                  <input
+                    name="name_remote_5"
+                    type="text"
+                    id="cfg_jaro_remote_name_5"
+                    placeholder="name" />
+                </div>
+                <div>
+                  <label for="serial_remote_5" data-i18n="serial_nr"></label>
+                  <input
+                    name="serial_remote_5"
+                    id="cfg_jaro_remote_serial_5"
+                    type="text"
+                    data-type="hex"
+                    data-length="6"
+                    oninput="validateHex(this)"
+                    pattern="[0-9a-fA-F]{1,6}"
+                    title="Enter up to 6 HEX digits"
+                    maxlength="6"
+                    onblur="formatHex(this)"
+                    placeholder="serial" />
+                </div>
+                <div>
+                  <label for="mask_remote_5" data-i18n="mask"></label>
+                  <input
+                    class="bitmask-input"
+                    name="mask_remote_5"
+                    type="text"
+                    data-type="bin"
+                    id="cfg_jaro_remote_mask_5"
+                    oninput="validateBin(this)"
+                    onblur="formatBin(this)"
+                    pattern="[01]{1,16}"
+                    placeholder="click for Dialog"
+                    maxlength="16" />
+                </div>
+              </div>
+              <hr />
+              <!-- Remote 7 -->
+              <div class="section-header">
+                <label for="remote6" data-i18n="remote++ 7"></label>
+                <div class="switch-container">
+                  <input
+                    name="remote6_enable"
+                    type="checkbox"
+                    role="switch"
+                    id="cfg_jaro_remote_enable_6" />
+                </div>
+              </div>
+              <br />
+              <div class="settings-container">
+                <div>
+                  <label for="name_remote_6" data-i18n="name"></label>
+                  <input
+                    name="name_remote_6"
+                    type="text"
+                    id="cfg_jaro_remote_name_6"
+                    placeholder="name" />
+                </div>
+                <div>
+                  <label for="serial_remote_6" data-i18n="serial_nr"></label>
+                  <input
+                    name="serial_remote_6"
+                    id="cfg_jaro_remote_serial_6"
+                    type="text"
+                    data-type="hex"
+                    data-length="6"
+                    oninput="validateHex(this)"
+                    pattern="[0-9a-fA-F]{1,6}"
+                    title="Enter up to 6 HEX digits"
+                    maxlength="6"
+                    onblur="formatHex(this)"
+                    placeholder="serial" />
+                </div>
+                <div>
+                  <label for="mask_remote_6" data-i18n="mask"></label>
+                  <input
+                    class="bitmask-input"
+                    name="mask_remote_6"
+                    type="text"
+                    data-type="bin"
+                    id="cfg_jaro_remote_mask_6"
+                    oninput="validateBin(this)"
+                    onblur="formatBin(this)"
+                    pattern="[01]{1,16}"
+                    placeholder="click for Dialog"
+                    maxlength="16" />
+                </div>
+              </div>
+              <hr />
+              <!-- Remote 8 -->
+              <div class="section-header">
+                <label for="remote7" data-i18n="remote++ 8"></label>
+                <div class="switch-container">
+                  <input
+                    name="remote7_enable"
+                    type="checkbox"
+                    role="switch"
+                    id="cfg_jaro_remote_enable_7" />
+                </div>
+              </div>
+              <br />
+              <div class="settings-container">
+                <div>
+                  <label for="name_remote_7" data-i18n="name"></label>
+                  <input
+                    name="name_remote_7"
+                    type="text"
+                    id="cfg_jaro_remote_name_7"
+                    placeholder="name" />
+                </div>
+                <div>
+                  <label for="serial_remote_7" data-i18n="serial_nr"></label>
+                  <input
+                    name="serial_remote_7"
+                    id="cfg_jaro_remote_serial_7"
+                    type="text"
+                    data-type="hex"
+                    data-length="6"
+                    oninput="validateHex(this)"
+                    pattern="[0-9a-fA-F]{1,6}"
+                    title="Enter up to 6 HEX digits"
+                    maxlength="6"
+                    onblur="formatHex(this)"
+                    placeholder="serial" />
+                </div>
+                <div>
+                  <label for="mask_remote_7" data-i18n="mask"></label>
+                  <input
+                    class="bitmask-input"
+                    name="mask_remote_7"
+                    type="text"
+                    data-type="bin"
+                    id="cfg_jaro_remote_mask_7"
+                    oninput="validateBin(this)"
+                    onblur="formatBin(this)"
+                    pattern="[01]{1,16}"
+                    placeholder="click for Dialog"
+                    maxlength="16" />
+                </div>
+              </div>
+              <hr />
+              <!-- Remote 9 -->
+              <div class="section-header">
+                <label for="remote8" data-i18n="remote++ 9"></label>
+                <div class="switch-container">
+                  <input
+                    name="remote8_enable"
+                    type="checkbox"
+                    role="switch"
+                    id="cfg_jaro_remote_enable_8" />
+                </div>
+              </div>
+              <br />
+              <div class="settings-container">
+                <div>
+                  <label for="name_remote_8" data-i18n="name"></label>
+                  <input
+                    name="name_remote_8"
+                    type="text"
+                    id="cfg_jaro_remote_name_8"
+                    placeholder="name" />
+                </div>
+                <div>
+                  <label for="serial_remote_8" data-i18n="serial_nr"></label>
+                  <input
+                    name="serial_remote_8"
+                    id="cfg_jaro_remote_serial_8"
+                    type="text"
+                    data-type="hex"
+                    data-length="6"
+                    oninput="validateHex(this)"
+                    pattern="[0-9a-fA-F]{1,6}"
+                    title="Enter up to 6 HEX digits"
+                    maxlength="6"
+                    onblur="formatHex(this)"
+                    placeholder="serial" />
+                </div>
+                <div>
+                  <label for="mask_remote_8" data-i18n="mask"></label>
+                  <input
+                    class="bitmask-input"
+                    name="mask_remote_8"
+                    type="text"
+                    data-type="bin"
+                    id="cfg_jaro_remote_mask_8"
+                    oninput="validateBin(this)"
+                    onblur="formatBin(this)"
+                    pattern="[01]{1,16}"
+                    placeholder="click for Dialog"
+                    maxlength="16" />
+                </div>
+              </div>
+              <hr />
+              <!-- Remote 10 -->
+              <div class="section-header">
+                <label for="remote9" data-i18n="remote++ 10"></label>
+                <div class="switch-container">
+                  <input
+                    name="remote9_enable"
+                    type="checkbox"
+                    role="switch"
+                    id="cfg_jaro_remote_enable_9" />
+                </div>
+              </div>
+              <br />
+              <div class="settings-container">
+                <div>
+                  <label for="name_remote_9" data-i18n="name"></label>
+                  <input
+                    name="name_remote_9"
+                    type="text"
+                    id="cfg_jaro_remote_name_9"
+                    placeholder="name" />
+                </div>
+                <div>
+                  <label for="serial_remote_9" data-i18n="serial_nr"></label>
+                  <input
+                    name="serial_remote_9"
+                    id="cfg_jaro_remote_serial_9"
+                    type="text"
+                    data-type="hex"
+                    data-length="6"
+                    oninput="validateHex(this)"
+                    pattern="[0-9a-fA-F]{1,6}"
+                    title="Enter up to 6 HEX digits"
+                    maxlength="6"
+                    onblur="formatHex(this)"
+                    placeholder="serial" />
+                </div>
+                <div>
+                  <label for="mask_remote_9" data-i18n="mask"></label>
+                  <input
+                    class="bitmask-input"
+                    name="mask_remote_9"
+                    type="text"
+                    data-type="bin"
+                    id="cfg_jaro_remote_mask_9"
+                    oninput="validateBin(this)"
+                    onblur="formatBin(this)"
+                    pattern="[01]{1,16}"
+                    placeholder="click for Dialog"
+                    maxlength="16" />
+                </div>
+              </div>
+              <hr />
+              <!-- Remote 11 -->
+              <div class="section-header">
+                <label for="remote10" data-i18n="remote++ 11"></label>
+                <div class="switch-container">
+                  <input
+                    name="remote10_enable"
+                    type="checkbox"
+                    role="switch"
+                    id="cfg_jaro_remote_enable_10" />
+                </div>
+              </div>
+              <br />
+              <div class="settings-container">
+                <div>
+                  <label for="name_remote_10" data-i18n="name"></label>
+                  <input
+                    name="name_remote_10"
+                    type="text"
+                    id="cfg_jaro_remote_name_10"
+                    placeholder="name" />
+                </div>
+                <div>
+                  <label for="serial_remote_10" data-i18n="serial_nr"></label>
+                  <input
+                    name="serial_remote_10"
+                    id="cfg_jaro_remote_serial_10"
+                    type="text"
+                    data-type="hex"
+                    data-length="6"
+                    oninput="validateHex(this)"
+                    pattern="[0-9a-fA-F]{1,6}"
+                    title="Enter up to 6 HEX digits"
+                    maxlength="6"
+                    onblur="formatHex(this)"
+                    placeholder="serial" />
+                </div>
+                <div>
+                  <label for="mask_remote_10" data-i18n="mask"></label>
+                  <input
+                    class="bitmask-input"
+                    name="mask_remote_10"
+                    type="text"
+                    data-type="bin"
+                    id="cfg_jaro_remote_mask_10"
+                    oninput="validateBin(this)"
+                    onblur="formatBin(this)"
+                    pattern="[01]{1,16}"
+                    placeholder="click for Dialog"
+                    maxlength="16" />
+                </div>
+              </div>
+              <hr />
+              <!-- Remote 12 -->
+              <div class="section-header">
+                <label for="remote11" data-i18n="remote++ 12"></label>
+                <div class="switch-container">
+                  <input
+                    name="remote11_enable"
+                    type="checkbox"
+                    role="switch"
+                    id="cfg_jaro_remote_enable_11" />
+                </div>
+              </div>
+              <br />
+              <div class="settings-container">
+                <div>
+                  <label for="name_remote_11" data-i18n="name"></label>
+                  <input
+                    name="name_remote_11"
+                    type="text"
+                    id="cfg_jaro_remote_name_11"
+                    placeholder="name" />
+                </div>
+                <div>
+                  <label for="serial_remote_11" data-i18n="serial_nr"></label>
+                  <input
+                    name="serial_remote_11"
+                    id="cfg_jaro_remote_serial_11"
+                    type="text"
+                    data-type="hex"
+                    data-length="6"
+                    oninput="validateHex(this)"
+                    pattern="[0-9a-fA-F]{1,6}"
+                    title="Enter up to 6 HEX digits"
+                    maxlength="6"
+                    onblur="formatHex(this)"
+                    placeholder="serial" />
+                </div>
+                <div>
+                  <label for="mask_remote_11" data-i18n="mask"></label>
+                  <input
+                    class="bitmask-input"
+                    name="mask_remote_11"
+                    type="text"
+                    data-type="bin"
+                    id="cfg_jaro_remote_mask_11"
+                    oninput="validateBin(this)"
+                    onblur="formatBin(this)"
+                    pattern="[01]{1,16}"
+                    placeholder="click for Dialog"
+                    maxlength="16" />
+                </div>
+              </div>
+              <hr />
+              <!-- Remote 13 -->
+              <div class="section-header">
+                <label for="remote12" data-i18n="remote++ 13"></label>
+                <div class="switch-container">
+                  <input
+                    name="remote12_enable"
+                    type="checkbox"
+                    role="switch"
+                    id="cfg_jaro_remote_enable_12" />
+                </div>
+              </div>
+              <br />
+              <div class="settings-container">
+                <div>
+                  <label for="name_remote_12" data-i18n="name"></label>
+                  <input
+                    name="name_remote_12"
+                    type="text"
+                    id="cfg_jaro_remote_name_12"
+                    placeholder="name" />
+                </div>
+                <div>
+                  <label for="serial_remote_12" data-i18n="serial_nr"></label>
+                  <input
+                    name="serial_remote_12"
+                    id="cfg_jaro_remote_serial_12"
+                    type="text"
+                    data-type="hex"
+                    data-length="6"
+                    oninput="validateHex(this)"
+                    pattern="[0-9a-fA-F]{1,6}"
+                    title="Enter up to 6 HEX digits"
+                    maxlength="6"
+                    onblur="formatHex(this)"
+                    placeholder="serial" />
+                </div>
+                <div>
+                  <label for="mask_remote_12" data-i18n="mask"></label>
+                  <input
+                    class="bitmask-input"
+                    name="mask_remote_12"
+                    type="text"
+                    data-type="bin"
+                    id="cfg_jaro_remote_mask_12"
+                    oninput="validateBin(this)"
+                    onblur="formatBin(this)"
+                    pattern="[01]{1,16}"
+                    placeholder="click for Dialog"
+                    maxlength="16" />
+                </div>
+              </div>
+              <hr />
+              <!-- Remote 14 -->
+              <div class="section-header">
+                <label for="remote13" data-i18n="remote++ 14"></label>
+                <div class="switch-container">
+                  <input
+                    name="remote13_enable"
+                    type="checkbox"
+                    role="switch"
+                    id="cfg_jaro_remote_enable_13" />
+                </div>
+              </div>
+              <br />
+              <div class="settings-container">
+                <div>
+                  <label for="name_remote_13" data-i18n="name"></label>
+                  <input
+                    name="name_remote_13"
+                    type="text"
+                    id="cfg_jaro_remote_name_13"
+                    placeholder="name" />
+                </div>
+                <div>
+                  <label for="serial_remote_13" data-i18n="serial_nr"></label>
+                  <input
+                    name="serial_remote_13"
+                    id="cfg_jaro_remote_serial_13"
+                    type="text"
+                    data-type="hex"
+                    data-length="6"
+                    oninput="validateHex(this)"
+                    pattern="[0-9a-fA-F]{1,6}"
+                    title="Enter up to 6 HEX digits"
+                    maxlength="6"
+                    onblur="formatHex(this)"
+                    placeholder="serial" />
+                </div>
+                <div>
+                  <label for="mask_remote_13" data-i18n="mask"></label>
+                  <input
+                    class="bitmask-input"
+                    name="mask_remote_13"
+                    type="text"
+                    data-type="bin"
+                    id="cfg_jaro_remote_mask_13"
+                    oninput="validateBin(this)"
+                    onblur="formatBin(this)"
+                    pattern="[01]{1,16}"
+                    placeholder="click for Dialog"
+                    maxlength="16" />
+                </div>
+              </div>
+              <hr />
+              <!-- Remote 15 -->
+              <div class="section-header">
+                <label for="remote14" data-i18n="remote++ 15"></label>
+                <div class="switch-container">
+                  <input
+                    name="remote14_enable"
+                    type="checkbox"
+                    role="switch"
+                    id="cfg_jaro_remote_enable_14" />
+                </div>
+              </div>
+              <br />
+              <div class="settings-container">
+                <div>
+                  <label for="name_remote_14" data-i18n="name"></label>
+                  <input
+                    name="name_remote_14"
+                    type="text"
+                    id="cfg_jaro_remote_name_14"
+                    placeholder="name" />
+                </div>
+                <div>
+                  <label for="serial_remote_14" data-i18n="serial_nr"></label>
+                  <input
+                    name="serial_remote_14"
+                    id="cfg_jaro_remote_serial_14"
+                    type="text"
+                    data-type="hex"
+                    data-length="6"
+                    oninput="validateHex(this)"
+                    pattern="[0-9a-fA-F]{1,6}"
+                    title="Enter up to 6 HEX digits"
+                    maxlength="6"
+                    onblur="formatHex(this)"
+                    placeholder="serial" />
+                </div>
+                <div>
+                  <label for="mask_remote_14" data-i18n="mask"></label>
+                  <input
+                    class="bitmask-input"
+                    name="mask_remote_14"
+                    type="text"
+                    data-type="bin"
+                    id="cfg_jaro_remote_mask_14"
+                    oninput="validateBin(this)"
+                    onblur="formatBin(this)"
+                    pattern="[01]{1,16}"
+                    placeholder="click for Dialog"
+                    maxlength="16" />
+                </div>
+              </div>
+              <hr />
+              <!-- Remote 16 -->
+              <div class="section-header">
+                <label for="remote15" data-i18n="remote++ 16"></label>
+                <div class="switch-container">
+                  <input
+                    name="remote15_enable"
+                    type="checkbox"
+                    role="switch"
+                    id="cfg_jaro_remote_enable_15" />
+                </div>
+              </div>
+              <br />
+              <div class="settings-container">
+                <div>
+                  <label for="name_remote_15" data-i18n="name"></label>
+                  <input
+                    name="name_remote_15"
+                    type="text"
+                    id="cfg_jaro_remote_name_15"
+                    placeholder="name" />
+                </div>
+                <div>
+                  <label for="serial_remote_15" data-i18n="serial_nr"></label>
+                  <input
+                    name="serial_remote_15"
+                    id="cfg_jaro_remote_serial_15"
+                    type="text"
+                    data-type="hex"
+                    data-length="6"
+                    oninput="validateHex(this)"
+                    pattern="[0-9a-fA-F]{1,6}"
+                    title="Enter up to 6 HEX digits"
+                    maxlength="6"
+                    onblur="formatHex(this)"
+                    placeholder="serial" />
+                </div>
+                <div>
+                  <label for="mask_remote_15" data-i18n="mask"></label>
+                  <input
+                    class="bitmask-input"
+                    name="mask_remote_15"
+                    type="text"
+                    data-type="bin"
+                    id="cfg_jaro_remote_mask_15"
+                    oninput="validateBin(this)"
+                    onblur="formatBin(this)"
+                    pattern="[01]{1,16}"
+                    placeholder="click for Dialog"
+                    maxlength="16" />
+                </div>
+              </div>
+            </details>
+            <hr />
             <!-- Language -->
             <details>
               <summary data-i18n="language"></summary>

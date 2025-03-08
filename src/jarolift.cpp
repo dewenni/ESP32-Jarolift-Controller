@@ -20,6 +20,120 @@ std::queue<JaroCommand> jaroCmdQueue;
 
 JaroliftController jarolift;
 
+/**
+ * *******************************************************************
+ * @brief   send expected position via mqtt
+ * @param   channel, position
+ * @return  none
+ * *******************************************************************/
+void mqttSendPosition(uint8_t channel, uint8_t position) {
+  char topic[64];
+  char pos[16];
+
+  if (position > 100)
+    position = 100;
+  if (position < 0)
+    position = 0;
+  if (mqttIsConnected()) {
+    itoa(position, pos, 10);
+    snprintf(topic, sizeof(topic), "%s%d", addTopic("/status/shutter/"), channel + 1);
+    mqttPublish(topic, pos, true);
+  }
+}
+
+/**
+ * *******************************************************************
+ * @brief   send expected position via mqtt
+ * @param   channel, position
+ * @return  none
+ * *******************************************************************/
+void mqttSendPositionGroup(uint16_t group_mask, uint8_t position) {
+
+  // check all 16 channels
+  for (uint8_t c = 0; c < 16; c++) {
+    // check if channel is in group
+    if (group_mask & (1 << c)) {
+      mqttSendPosition(c, position);
+    }
+  }
+}
+
+/**
+ * *******************************************************************
+ * @brief   send remote command via mqtt
+ * @param   serial, function, rssi
+ * @return  none
+ * *******************************************************************/
+void mqttSendRemote(uint32_t serial, int8_t function, uint8_t rssi) {
+  ESP_LOGI(TAG, "received remote signal | serial: 0x%08lx | function: 0x%x, | rssi: %i", serial, function, rssi);
+
+  if (!mqttIsConnected()) {
+    return;
+  }
+
+  char topic[64];
+  char fun[8];
+  uint8_t channel = serial & 0xFF;
+
+  switch (function) {
+  case 0x2:
+    snprintf(fun, sizeof(fun), "DOWN");
+    break;
+  case 0x3:
+    snprintf(fun, sizeof(fun), "SHADE");
+    break;
+  case 0x4:
+    snprintf(fun, sizeof(fun), "STOP");
+    break;
+  case 0x8:
+    snprintf(fun, sizeof(fun), "UP");
+    break;
+  default:
+    snprintf(fun, sizeof(fun), "0x%x", function);
+    break;
+  }
+
+  // unknown as default
+  const char *remoteName = "unknown";
+
+  for (int i = 0; i < 16; i++) {
+    if (config.jaro.remote_enable[i] && (serial >> 8 == config.jaro.remote_serial[i])) {
+      remoteName = config.jaro.remote_name[i];
+
+      // check if this remote is registered for one or more shutter
+      for (int j = 0; j < 16; j++) {
+        if (config.jaro.remote_mask[i] & (1 << j)) {
+          switch (function) {
+          case 0x2:
+            mqttSendPosition(j, POS_CLOSE);
+            break;
+          case 0x8:
+            mqttSendPosition(j, POS_OPEN);
+            break;
+          case 0x3:
+            mqttSendPosition(j, POS_SHADE);
+            break;
+          default:
+            break;
+          }
+        }
+      }
+      break; // stop is first remote was found
+    }
+  }
+
+  JsonDocument remoteJSON;
+  remoteJSON["name"] = remoteName;
+  remoteJSON["channel"] = channel;
+  remoteJSON["comand"] = fun;
+  remoteJSON["rssi"] = rssi;
+
+  char sendremoteJSON[255];
+  serializeJson(remoteJSON, sendremoteJSON);
+  snprintf(topic, sizeof(topic), "%s%08lx", addTopic("/status/remote/"), serial);
+
+  mqttPublish(topic, sendremoteJSON, false);
+}
 
 /**
  * *******************************************************************
@@ -67,44 +181,8 @@ void jaroliftSetup() {
   }
 
   ESP_LOGI(TAG, "read Device Counter from FLASH: %i", jarolift.getDeviceCounter());
-}
 
-/**
- * *******************************************************************
- * @brief   send expected position via mqtt
- * @param   channel, position
- * @return  none
- * *******************************************************************/
-void mqttSendPosition(uint8_t channel, uint8_t position) {
-  char topic[64];
-  char pos[16];
-
-  if (position > 100)
-    position = 100;
-  if (position < 0)
-    position = 0;
-  if (mqttIsConnected()) {
-    itoa(position, pos, 10);
-    snprintf(topic, sizeof(topic), "%s%d", addTopic("/status/shutter/"), channel + 1);
-    mqttPublish(topic, pos, true);
-  }
-}
-
-/**
- * *******************************************************************
- * @brief   send expected position via mqtt
- * @param   channel, position
- * @return  none
- * *******************************************************************/
-void mqttSendPositionGroup(uint16_t group_mask, uint8_t position) {
-
-  // check all 16 channels
-  for (uint8_t c = 0; c < 16; c++) {
-    // check if channel is in group
-    if (group_mask & (1 << c)) {
-      mqttSendPosition(c, position);
-    }
-  }
+  jarolift.setRemoteCallback(mqttSendRemote);
 }
 
 void jaroCmdReInit() { jaroliftSetup(); };

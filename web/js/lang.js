@@ -202,4 +202,12 @@ const user_translations = {
     de: "GPIO-Zuweisung",
     en: "GPIO-Settings",
   },
+  remote: {
+    de: "Fernbedienung",
+    en: "Remote",
+  },
+  remotes: {
+    de: "Fernbedienungen",
+    en: "Remotes",
+  },
 };

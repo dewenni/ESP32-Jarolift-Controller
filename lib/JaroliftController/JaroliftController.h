@@ -18,12 +18,14 @@ private:
   void ReadRSSI();
   void enterrx();
   void entertx();
+  void (*remoteCallback)(uint32_t serial, int8_t function, uint8_t rssi) = nullptr;
 
- 
 public:
   void begin();
 
   void loop();
+
+  void setRemoteCallback(void (*callback)(uint32_t serial, int8_t function, uint8_t rssi)) { remoteCallback = callback; }
 
   void setGPIO(int8_t sck, int8_t miso, int8_t mosi, int8_t ss, int8_t gdo0, int8_t gdo2);
 

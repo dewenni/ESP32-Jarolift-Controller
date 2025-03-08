@@ -1,1 +1,11 @@
+.settings-container {
+  display: flex;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  align-items: center;
+  width: 100%;
+}
 
+.settings-container > div {
+  flex: 1;
+}

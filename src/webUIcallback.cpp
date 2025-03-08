@@ -403,6 +403,33 @@ void webCallback(const char *elementId, const char *value) {
     }
   }
 
+  // remote 1-16
+  for (int i = 0; i < 16; i++) {
+    char enableId[32];
+    char nameId[32];
+    char maskId[32];
+    char serialId[32];
+
+    snprintf(enableId, sizeof(enableId), "cfg_jaro_remote_enable_%d", i);
+    snprintf(nameId, sizeof(nameId), "cfg_jaro_remote_name_%d", i);
+    snprintf(maskId, sizeof(maskId), "cfg_jaro_remote_mask_%d", i);
+    snprintf(serialId, sizeof(serialId), "cfg_jaro_remote_serial_%d", i);
+
+    if (strcmp(elementId, enableId) == 0) {
+      config.jaro.remote_enable[i] = EspStrUtil::stringToBool(value);
+    }
+    if (strcmp(elementId, nameId) == 0) {
+      snprintf(config.jaro.remote_name[i], sizeof(config.jaro.remote_name[i]), "%s", value);
+    }
+    if (strcmp(elementId, maskId) == 0) {
+      config.jaro.remote_mask[i] = strtoul(value, NULL, 2);
+    }
+    if (strcmp(elementId, serialId) == 0) {
+      config.jaro.remote_serial[i] = strtoul(value, NULL, 16);
+    }
+  }
+
+
   // Language
   if (strcmp(elementId, "cfg_lang") == 0) {
     config.lang = strtoul(value, NULL, 10);
