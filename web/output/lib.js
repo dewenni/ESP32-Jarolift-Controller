@@ -226,12 +226,19 @@ const minReconnectDelay = 1000;
 let reconnectDelay = minReconnectDelay;
 
 function isGitHubPages() {
-  return window.location.hostname.includes("github.io");
+  return (
+    window.location.hostname === "127.0.0.1" ||
+    window.location.hostname === "localhost" ||
+    window.location.hostname.includes("github.io")
+  );
 }
 
 function setupWS() {
   if (isGitHubPages()) {
+    console.log("localhost or github.io detected, skipping WebSocket setup");
     return;
+  } else {
+    console.log("WebSocket setup started");
   }
 
   ws = new WebSocket("ws://" + window.location.host + "/ws");
@@ -321,7 +328,7 @@ function showMsgBar(message) {
     setTimeout(() => {
       msgBar.style.display = "none";
     }, 500);
-  }, 3000);
+  }, 2500);
 }
 
 // heartbeat function
