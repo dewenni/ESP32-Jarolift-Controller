@@ -121,12 +121,13 @@ Die Firmware ist aktuell nur für folgende Chips erstellt
 - `ESP32-WROOM-32 Serie` (z.B. WROOM, WROOM-32D, WROOM-32U)
 - `ESP32-WROVER Serie` (z. B. WROVER, WROVER-B, WROVER-IE)
 - `ESP32-MINI Serie`
+- `ESP32-S2 series`
+- `ESP32-S3 series`
+- `ESP32-C3 series`
 
-**nicht kompatibel:**
+**nicht Kompatibel:**
 
-- `ESP32-S series`
 - `ESP32-H series`
-- `ESP32-C series`
 - `YB-ESP32-S3-ETH`
 - `WT32-ETH01`
 
@@ -291,6 +292,21 @@ hier können die einzelnen Rollläden mit individuellen Namen konfiguriert werde
 
 - **Group**  
 Hier können wahlweise Rollladengruppen definiert werden
+
+- **Fernebdienungen**
+  Hier können vorhandenen Jarolift-Fernbedienungen registrieren.
+  Dies kann hilfreich sein, wenn Befehle dieser Fernbedienungen erkennen und darauf reagieren möchte.
+
+  Man kann der Fernbedienung einen beliebigen Namen zuweisen. Dieser wird auch in der MQTT-Nachricht ausgegeben.
+
+  Für die Seriennummer müssen die oberen 6 Ziffern der 8-stelligen Seriennummer eingegeben werden. Die Seriennummer kann im Logbuch gefunden werden, indem die Fernbedienung in der Nähe des Controllers gedrückt wird. Im Logbuch sollte dann eine Meldung wie diese erscheinen:  
+  `I (220364) JARO: received remote signal | serial: 0c7c00 | ch: 3 | cmd: 0x8, | rssi: -96 dbm`  
+  
+  Mit Hilfe der Bitmaske und dem dahinter liegenden Dialog kann man dann wie bei den Gruppen festlegen, welche Rollläden dieser Fernbedienung zugeordnet sind. 
+  Der Status dieser Rollläden wird dann in Abhängigkeit vom empfangenen Signal aktualisiert.
+  Das bedeutet, dass der Status der Rollläden auch dann aktualisiert werden kann, wenn sie nicht über den ESP-Controller, sondern über die Original-Fernbedienung gesteuert werden.
+
+  Bitte beachten, dass dies nicht zu 100% zuverlässig ist und ggf. nicht jedes Signal der Fernbedienung erkannt wird.
 
 - **Language**  
 Es sind zwei Sprachen verfügbar. Wählen deine bevorzugte Sprache.
@@ -506,6 +522,8 @@ payload:    {0b0000000000010101, 0x15, 21}
 
 ## Status
 
+## Rolladen-Status
+
 Der Controller sendet auch einen Status, **basierend auf den empfangenen Kommandos.**  
 
 > [!IMPORTANT]
@@ -525,6 +543,24 @@ Status:     Rolladen SCHATTEN
 topic:      ../status/shutter/1 ... status/shutter/16
 payload:    {90}
 ```
+
+### Remotes (Fernbedienungen)
+
+Sind in den Einstellungen auch originale Fernbedienungen über die Seriennummer hinterlegt, dann können auch Signale dieser Fernbedienungen erfasst und per MQTT ausgegeben werden.
+
+```json
+
+topic:      ../status/remote/<serial-number>
+payload:    {
+              "name": "<alias-name>", 
+              "ch":   "<channel>",
+              "cmd":  "<UP, DOWN, STOP, SHADE>",
+              "rssi": "<signal dbm>"
+            }
+
+```
+
+
 
 > [!NOTE]
 > < ../ > ist der Platzhalter für das MQTT-Topic, das in den Einstellungen angegeben ist.

@@ -122,12 +122,13 @@ The firmware is currently only available for the following chips:
 - `ESP32-WROOM-32 series` (e.g. WROOM, WROOM-32D, WROOM-32U)
 - `ESP32-WROVER series` (e.g. WROVER, WROVER-B, WROVER-IE)
 - `ESP32-MINI series`
+- `ESP32-S2 series`
+- `ESP32-S3 series`
+- `ESP32-C3 series`
 
 **Not compatible:**
 
-- `ESP32-S series`
 - `ESP32-H series`
-- `ESP32-C series`
 - `YB-ESP32-S3-ETH`
 - `WT32-ETH01`
 
@@ -295,6 +296,21 @@ here you can configure each shutter with individual name
 
 - **Group**  
 here you can define optional shutter-groups
+
+- **Remotes**  
+
+  You can register some of your existing jarolift remote controls here.
+  This can be helpful if you want to recognize and react on the commands of these remote controls.
+
+  You can assign any name you like to the remote control. This is also output in the MQTT message.
+
+  The upper 6 digits of the 8-digit serial number must be entered for the serial number. The serial number can be found in the logbook by pressing the remote control near the controller. A message like this should then appear in the log:  
+  `I (220364) JARO: received remote signal | serial: 0c7c00 | ch: 3 | cmd: 0x8, | rssi: -96 dbm`  
+  
+  With the help of the bit mask and the dialogue behind it, it is then possible to define which shutters are assigned to this remote control, as with the groups. The status of these shutters is then updated depending on the signal received.
+  This means that the status of the roller shutters can be updated even if they are not operated via the ESP controller but via the original remote control.
+  
+  But please be aware that this will not be 100% reliable.
 
 - **Language**  
 There are two languages available. Choose what you prefer.
@@ -509,6 +525,8 @@ payload:    {0b0000000000010101, 0x15, 21}
 
 ## Status
 
+### shutter status
+
 The controller will also send a status **based on the commands**.  
 
 > [!IMPORTANT]
@@ -528,6 +546,22 @@ payload:    {100}
 Status:     Shutter SHADE
 topic:      ../status/shutter/1 ... status/shutter/16
 payload:    {90}
+```
+
+### Remotes
+
+If original remote controls are also stored in the settings via the serial number, signals from these remote controls can also be recorded and output via MQTT.
+
+```json
+
+topic:      ../status/remote/<serial-number>
+payload:    {
+              "name": "<alias-name>", 
+              "ch":   "<channel>",
+              "cmd":  "<UP, DOWN, STOP, SHADE>",
+              "rssi": "<signal dbm>"
+            }
+
 ```
 
 > [!NOTE]
