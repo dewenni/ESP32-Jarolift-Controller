@@ -159,6 +159,12 @@ uint16_t JaroliftController::getDeviceCounter() {
 
   nvs_close(nvs_handle);
 
+  // set device counter to 1 - 0 seems to be a problem
+  if (devcnt == 0) {
+    devcnt = 1;
+    setDeviceCounter(devcnt);
+  }
+
   return devcnt;
 }
 
@@ -295,7 +301,7 @@ void JaroliftController::keygen() {
   keylow = new_serial | 0x60000000;
   enc = k.decrypt(keylow);
   device_key_msb = enc; // Stores MSB devicekey 16Bit
-  //ESP_LOGD(TAG, "created devicekey low: 0x%08x // high: 0x%08x", device_key_lsb, device_key_msb);
+  // ESP_LOGD(TAG, "created devicekey low: 0x%08x // high: 0x%08x", device_key_lsb, device_key_msb);
 } // void keygen
 
 // ####################################################################
@@ -343,7 +349,7 @@ void JaroliftController::rx_keygen() {
   enc = k.decrypt(keylow);
   rx_device_key_msb = enc; // Stores MSB devicekey 16Bit
 
-  //ESP_LOGD(TAG, "received devicekey low: 0x%08x // high: 0x%08x", rx_device_key_lsb, rx_device_key_msb);
+  // ESP_LOGD(TAG, "received devicekey low: 0x%08x // high: 0x%08x", rx_device_key_lsb, rx_device_key_msb);
 } // void rx_keygen
 
 // ####################################################################
@@ -358,7 +364,7 @@ void JaroliftController::rx_decoder() {
   rx_disc_low[2] = (decoded >> 8) & 0xFF;
   rx_disc_low[3] = decoded & 0xFF;
 
-  //ESP_LOGD(TAG, "decoded devicekey: 0x%08lx", decoded);
+  // ESP_LOGD(TAG, "decoded devicekey: 0x%08lx", decoded);
 } // void rx_decoder
 
 // ####################################################################
@@ -375,7 +381,7 @@ uint8_t JaroliftController::getRssi() {
     value = rssi / 2;
     value = value + 74;
   }
-  //ESP_LOGD(TAG, "CC1101_RSSI: %i", value);
+  // ESP_LOGD(TAG, "CC1101_RSSI: %i", value);
   return value;
 } // void ReadRSSI
 
