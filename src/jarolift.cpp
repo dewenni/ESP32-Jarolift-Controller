@@ -65,7 +65,7 @@ void mqttSendPositionGroup(uint16_t group_mask, uint8_t position) {
  * @return  none
  * *******************************************************************/
 void mqttSendRemote(uint32_t serial, int8_t function, uint8_t rssi) {
-  ESP_LOGI(TAG, "received remote signal | serial: 0x%08lx | function: 0x%x, | rssi: %i", serial, function, rssi);
+  ESP_LOGI(TAG, "received remote signal | serial: %06lx | ch: %ld | cmd: 0x%x, | rssi: -%i dbm", serial >> 8, (serial & 0xFF)+1, function, rssi);
 
   if (!mqttIsConnected()) {
     return;
@@ -73,7 +73,7 @@ void mqttSendRemote(uint32_t serial, int8_t function, uint8_t rssi) {
 
   char topic[64];
   char fun[8];
-  uint8_t channel = serial & 0xFF;
+  uint8_t channel = (serial & 0xFF) +1;
 
   switch (function) {
   case 0x2:
@@ -124,13 +124,13 @@ void mqttSendRemote(uint32_t serial, int8_t function, uint8_t rssi) {
 
   JsonDocument remoteJSON;
   remoteJSON["name"] = remoteName;
-  remoteJSON["channel"] = channel;
-  remoteJSON["comand"] = fun;
+  remoteJSON["ch"] = channel;
+  remoteJSON["cmd"] = fun;
   remoteJSON["rssi"] = rssi;
 
   char sendremoteJSON[255];
   serializeJson(remoteJSON, sendremoteJSON);
-  snprintf(topic, sizeof(topic), "%s%08lx", addTopic("/status/remote/"), serial);
+  snprintf(topic, sizeof(topic), "%s%06lx", addTopic("/status/remote/"), serial >> 8);
 
   mqttPublish(topic, sendremoteJSON, false);
 }
