@@ -371,8 +371,8 @@ It is possible to migrate from a latest version of [madmartin/Jarolift_MQTT](htt
 
 - execute a shutter UP command of "old" Setup `(madmartin/Jarolift_MQTT)` for **channel 0!**.
 - now you should see a debug message of this command in the Logger of the WebUI.  
-It contains a message with `D (APP-JARO): (INF1) serial: 0xaabbcc00,`  
-The first 6 digits are the serial number that you have to use for this project (in this example: **aabbcc**). this should be the same as configured in the WebUI of the "old" setup, but now we are sure to have the right one.
+It contains a message with `I (220364) JARO: received remote signal | serial: 0c7c00 | ch: 3 | cmd: 0x8, | rssi: -96 dbm` 
+This **serial** number should be the same as configured in the WebUI of the "old" setup, but now we are sure to have the right one.
 - set this serial in the WebUI of this project
 
 ### Get the right Device Counter

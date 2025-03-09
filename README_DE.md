@@ -366,8 +366,8 @@ Es ist möglich, von einer vorherigen Version von [madmartin/Jarolift_MQTT](http
 
 - Führe einen Shutter HOCH Befehl des „alten“ Setups `(madmartin/Jarolift_MQTT)` für **Kanal 0!** aus.
 - Du solltest nun eine Debug-Meldung dieses Befehls im Logger der WebUI sehen.  
-Sie enthält eine Meldung mit `D (APP-JARO): (INF1) serial: 0xaabbcc00,`  
-Die ersten 6 Ziffern sind die Seriennummer, die für dieses Projekt verwenden werden kann (in diesem Beispiel: **aabbcc**). Dies sollte die gleiche sein, die in der WebUI des „alten“ Setups konfiguriert wurde, aber jetzt sind wir sicher, dass wir die richtige haben.
+Sie enthält eine Meldung mit   `I (220364) JARO: received remote signal | serial: 0c7c00 | ch: 3 | cmd: 0x8, | rssi: -96 dbm` 
+Dies sollte die gleiche Seriennummer sein, die in der WebUI des „alten“ Setups konfiguriert wurde, aber jetzt sind wir sicher, dass wir die richtige haben.
 - Setze diese Seriennummer in der WebUI dieses Projekts in den Einstellungen.
 
 

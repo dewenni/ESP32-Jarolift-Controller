@@ -32,7 +32,7 @@ Supported Chips:
 ## changelog
 
 - [UPDATE]  ESP32Async/AsyncTCP @ 3.3.6
-- [UPDATE]  ESP32Async/ESPAsyncWebServer @ 3.7.1
+- [UPDATE]  ESP32Async/ESPAsyncWebServer @ 3.7.2
 - [UPDATE]  bblanchon/ArduinoJson @ 7.3.1
 - [CHANGE] Basic WebUI functions were outsourced to a separate [EspWebUI](https://github.com/dewenni/EspWebUI) library
 - [FIX] update WiFi and Ethernet Status also if mqtt is not connected
