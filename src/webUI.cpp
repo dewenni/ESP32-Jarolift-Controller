@@ -41,17 +41,21 @@ void webUISetup() {
   webUI.setCallbackOta([](EspWebUI::otaStatus otaState, const char *msg) {
     switch (otaState) {
     case EspWebUI::OTA_BEGIN:
-      webUI.wsUpdateWebText("p00_ota_upd_err", msg, false);
-      webUI.wsUpdateWebDialog("ota_update_failed_dialog", "open");
+      ota.setActive(true);
+      wdt.disable();
       break;
     case EspWebUI::OTA_PROGRESS:
       webUI.wsUpdateOTAprogress(msg);
       break;
     case EspWebUI::OTA_FINISH:
+      ota.setActive(false);
+      wdt.enable();
       webUI.wsUpdateOTAprogress("100");
       webUI.wsUpdateWebDialog("ota_update_done_dialog", "open");
       break;
     case EspWebUI::OTA_ERROR:
+      ota.setActive(false);
+      wdt.enable();
       webUI.wsUpdateWebText("p00_ota_upd_err", msg, false);
       webUI.wsUpdateWebDialog("ota_update_failed_dialog", "open");
       break;
