@@ -751,6 +751,7 @@ void JaroliftController::loop() {
 
     iset = true;
     pbwrite = 0;
+    uint8_t rssi = getRssi();
 
     for (int i = 0; i <= 31; i++) { // extracting Hopcode
       if (lowbuf[i + 1] < hibuf[i + 1]) {
@@ -795,11 +796,11 @@ void JaroliftController::loop() {
       steadycnt = 0;
     }
 
-    ESP_LOGD(TAG, "(INF1) serial: 0x%08lx, rx_function: 0x%x, rx_disc_low: %d, rx_disc_high: %d", rx_serial, rx_function, rx_disc_low[0], rx_disc_h);
-    ESP_LOGD(TAG, "(INF2) RSSI: %d, counter: %d", getRssi(), rx_disc_low[3]);
-    ESP_LOGD(TAG, "(INF3) rx_device_key_lsb: 0x%08x, rx_device_key_msb: 0x%08x, decoded: 0x%08lx", rx_device_key_lsb, rx_device_key_msb, decoded);
+    // ESP_LOGD(TAG, "(INF1) serial: 0x%08lx, rx_function: 0x%x, rx_disc_low: %d, rx_disc_high: %d", rx_serial, rx_function, rx_disc_low[0],
+    // rx_disc_h); ESP_LOGD(TAG, "(INF2) RSSI: %d, counter: %d", rssi, rx_disc_low[3]); ESP_LOGD(TAG, "(INF3) rx_device_key_lsb:
+    // 0x%08x,rx_device_key_msb: 0x%08x, decoded: 0x%08lx", rx_device_key_lsb, rx_device_key_msb, decoded);
 
-    remoteCallback(rx_serial, rx_function, getRssi());
+    remoteCallback(rx_serial, rx_function, rssi);
 
     rx_disc_h = 0;
     rx_hopcode = 0;
