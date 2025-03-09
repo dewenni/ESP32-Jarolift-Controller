@@ -1,5 +1,4 @@
 #include <Arduino.h>
-
 #include <basics.h>
 #include <github.h>
 #include <message.h>
@@ -11,8 +10,22 @@ static const char *TAG = "GITHUB"; // LOG TAG
 
 GithubReleaseOTA ota(GITHUB_OWNER, GITHUB_REPO);
 
+/**
+ * *******************************************************************
+ * @brief   set the progress callback
+ * @param   callback
+ * @return  none
+ * *******************************************************************/
 void ghSetProgressCallback(void (*callback)(int)) { ota.setProgressCallback(callback); }
 
+/**
+ * *******************************************************************
+ * @brief   get the latest release from GitHub
+ * @param   release
+ * @param   info
+ * @param   espSeries
+ * @return  true if successful, else false
+ * *******************************************************************/
 bool ghGetLatestRelease(GithubRelease *release, GithubReleaseInfo *info, const char *espSeries) {
 
   if (release == nullptr || info == nullptr) {
@@ -45,6 +58,13 @@ bool ghGetLatestRelease(GithubRelease *release, GithubReleaseInfo *info, const c
   return true;
 }
 
+/**
+ * *******************************************************************
+ * @brief   start the OTA update
+ * @param   release
+ * @param   asset
+ * @return  0 if successful, else error code
+ * *******************************************************************/
 int ghStartOtaUpdate(GithubRelease release, const char *asset) {
   int result = ota.flashFirmware(release, asset);
 
@@ -56,3 +76,11 @@ int ghStartOtaUpdate(GithubRelease release, const char *asset) {
   }
   return result;
 }
+
+/**
+ * *******************************************************************
+ * @brief   free the release memory
+ * @param   release
+ * @return  none
+ * *******************************************************************/
+void ghFreeRelease(GithubRelease &release) { ota.freeRelease(release); }

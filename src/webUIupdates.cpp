@@ -310,10 +310,13 @@ void processGitHubVersion() {
         snprintf(buttonTxt, sizeof(buttonTxt), "Update %s", ghReleaseInfo.tag);
         webUI.wsUpdateWebText("p00_update_btn", buttonTxt, false);
         webUI.wsUpdateWebHideElement("p00_update_btn_hide", false);
+      } else {
+        ghFreeRelease(ghLatestRelease);
       }
     } else {
       webUI.wsUpdateWebBusy("p00_dialog_git_version", false);
       webUI.wsUpdateWebText("p00_dialog_git_version", "error", false);
+      ghFreeRelease(ghLatestRelease);
     }
   }
 }
