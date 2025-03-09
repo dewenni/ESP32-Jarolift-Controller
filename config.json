@@ -82,7 +82,11 @@
         "ch_name":["Bedroom left","Bedroom right","office","Bathroom","Kitchen","Livingroom","","","","","","","","","",""],
         "grp_enable":[true,true,false,false,false,false],
         "grp_name":["Bedroom","Ground Floor","","","",""],
-        "grp_mask":[15,56,448,3584,28672,32769]
+        "grp_mask":[15,56,448,3584,28672,32769],
+        "remote_enable": [true,true,true,false,false,true,false,false,false,false,false,false,false,false,false,false],
+        "remote_name": ["Bedroom","office","Bathroom","","","","","","","","","","","","",""],
+        "remote_mask": [3,4,24,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        "remote_serial": [818176,185444,185445,0,0,0,0,0,0,0,0,0,0,0,0,0]
     },
     "timer":[
         {"enable":true,"type":0,"time_value":"06:45","offset_value":-30,"cmd":2,"monday":true,"tuesday":true,"wednesday":true,"thursday":true,"friday":true,"saturday":false,"sunday":false,"grp_mask":32787},

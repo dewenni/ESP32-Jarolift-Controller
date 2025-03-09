@@ -1,8 +1,8 @@
 {
     "type": "updateJSON",
-    "p00_version": "v1.6.3",
-    "p09_sw_version": "v1.6.3",
-    "p00_dialog_version": "v1.6.3",
+    "p00_version": "v1.7.0",
+    "p09_sw_version": "v1.7.0",
+    "p00_dialog_version": "v1.7.0",
     "p09_sw_date": "06.02.2025 - 07:47:00",
     "p09_restart_reason": "ota update",
     "p12_jaro_devcnt": "26",
@@ -26,5 +26,10 @@
     "p09_esp_maxallocheap": "110.6",
     "p09_esp_minfreeheap": "123.5",
     "p09_uptime": "14d 2m 27s",
-    "p09_act_time": "07:55:51"
+    "p09_act_time": "07:55:51",
+    "p09_esp_chip_series": "ESP32",
+    "p09_esp_chip_model": "ESP32-D0WD-V3",
+    "p09_esp_chip_rev": "301",
+    "p09_esp_chip_mhz": "240",
+    "p09_esp_flash_size": "4.00 MB"
 }
