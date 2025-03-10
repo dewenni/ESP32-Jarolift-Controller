@@ -12,6 +12,31 @@ GithubReleaseOTA ota(GITHUB_OWNER, GITHUB_REPO);
 
 /**
  * *******************************************************************
+ * @brief   check if the asset name contains the chip series
+ * @param   assetName
+ * @param   espSeries
+ * @return  true if the asset name contains the chip series, else false
+ * *******************************************************************/
+bool isChipSeriesMatch(const char *assetName, const char *espSeries) {
+  if (assetName == NULL || espSeries == NULL)
+    return false;
+
+  char formattedEspSeries[16];
+  size_t j = 0;
+  for (size_t i = 0; espSeries[i] != '\0' && j < sizeof(formattedEspSeries) - 1; i++) {
+    if (espSeries[i] != '-') { // remove '-' from chip series
+      formattedEspSeries[j++] = tolower((unsigned char)espSeries[i]);
+    }
+  }
+  formattedEspSeries[j] = '\0';
+
+  // check if the asset name contains the chip series
+  size_t len = strlen(formattedEspSeries);
+  return (strncasecmp(assetName, formattedEspSeries, len) == 0 && assetName[len] == '_');
+}
+
+/**
+ * *******************************************************************
  * @brief   set the progress callback
  * @param   callback
  * @return  none
@@ -47,7 +72,7 @@ bool ghGetLatestRelease(GithubRelease *release, GithubReleaseInfo *info, const c
   // search for the first asset that contains the right "chipSeries" and "ota or UPDATE" in its name
   info->assetFound = false;
   for (const auto &asset : release->assets) {
-    if (asset.name != NULL && strcasestr(asset.name, espSeries) != NULL && strcasestr(asset.name, "UPDATE") != NULL) {
+    if (isChipSeriesMatch(asset.name, espSeries) && strcasestr(asset.name, "ota") != NULL) {
       ESP_LOGD(TAG, "GitHub OTA Asset found: %s", asset.name);
       snprintf(info->asset, sizeof(info->asset), "%s", asset.name);
       info->assetFound = true;
