@@ -106,3 +106,21 @@ async function loadSimulatedData() {
     console.error("Fehler beim Laden von sim.json:", error);
   }
 }
+
+
+function userToggleTimeInputs(selectElement) {
+  toggleTimeInputs(selectElement);
+
+  const matches = selectElement.id.match(/\d+/g);
+  const timerId = matches[matches.length - 1];
+  const minMaxTimeSettings = document.getElementById(`timer${timerId}-minmaxtime-settings`);
+
+  //  value: 0 == fixed Time
+  if (selectElement.value === "0") {
+    minMaxTimeSettings.style.display = "none";
+  }
+  // otherwise sunrise/sundown
+  else {
+    minMaxTimeSettings.style.display = "block";
+  }
+}

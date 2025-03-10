@@ -89,14 +89,58 @@ void getSunriseOrSunset(uint8_t type, int16_t offset, float latitude, float long
   minute = timeInMinutes % 60;
 }
 
+int getHour(const char* time_value) {
+  // Format must be HH:MM -> 5 characters.
+  if (strlen(time_value) == 5) {
+    return (time_value[0] - '0') * 10 + (time_value[1] - '0');
+  }
+  else {
+    return -1;
+  }
+}
+
+int getMinute(const char* time_value) {
+  // Format must be HH:MM -> 5 characters.
+  if (strlen(time_value) == 5) {
+    return (time_value[3] - '0') * 10 + (time_value[4] - '0');
+  }
+  else {
+    return -1;
+  }
+}
+
 bool checkTimerTrigger(const s_cfg_timer &timer, uint8_t currentHour, uint8_t currentMinute) {
   if (timer.type == TYPE_FIXED_TIME) {
-    uint8_t timerHour = (timer.time_value[0] - '0') * 10 + (timer.time_value[1] - '0');
-    uint8_t timerMinute = (timer.time_value[3] - '0') * 10 + (timer.time_value[4] - '0');
+    uint8_t timerHour = getHour(timer.time_value);
+    uint8_t timerMinute = getMinute(timer.time_value);
     return (timerHour == currentHour && timerMinute == currentMinute);
   } else if (timer.type == TYPE_SUNRISE || timer.type == TYPE_SUNDOWN) {
     uint8_t eventHour, eventMinute;
     getSunriseOrSunset(timer.type, timer.offset_value, config.geo.latitude, config.geo.longitude, eventHour, eventMinute);
+
+    // Check min/max time ranges:
+    if (timer.use_min_time) {
+      uint8_t minHour = getHour(timer.min_time_value);
+      uint8_t minMinute = getMinute(timer.min_time_value);
+      if (minHour >= 0) {
+        eventHour = max(eventHour, minHour);
+      }
+      if (eventHour == minHour) {
+        eventMinute = max(eventMinute, minMinute);
+      }
+    }
+
+    if (timer.use_max_time) {
+      uint8_t maxHour = getHour(timer.max_time_value);
+      uint8_t maxMinute = getMinute(timer.max_time_value);
+      if (maxHour >= 0) {
+        eventHour = min(eventHour, maxHour);
+      }
+      if (eventHour == maxHour) {
+        eventMinute = min(eventMinute, maxMinute);
+      }
+    }
+
     return (eventHour == currentHour && eventMinute == currentMinute);
   }
   return false;

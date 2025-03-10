@@ -39,6 +39,10 @@ struct s_cfg_timer {
   bool saturday;
   bool sunday;
   uint16_t grp_mask; // Group mask for included channels
+  bool use_min_time;
+  char min_time_value[6];   // fixed Time value (hh:mm)
+  bool use_max_time;
+  char max_time_value[6];   // fixed Time value (hh:mm)
 };
 
 struct s_cfg_geo {

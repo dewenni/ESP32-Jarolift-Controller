@@ -130,6 +130,14 @@ const user_translations = {
     de: "Zeit (HH:MM)",
     en: "Time (HH:MM)",
   },
+  use_min_time: {
+    de: "Frühestens um (HH:MM)",
+    en: "Not earlier than (HH:MM)",
+  },
+  use_max_time: {
+    de: "Spätestes um (HH:MM)",
+    en: "Not later than (HH:MM)",
+  },
   offset_desc: {
     de: "Offset in Minuten (z. B. -15 oder +20)",
     en: "Offset in Minutens (e.g. -15 oder +20)",
@@ -321,3 +329,20 @@ async function loadSimulatedData() {
   }
 }
 
+
+function userToggleTimeInputs(selectElement) {
+  toggleTimeInputs(selectElement);
+
+  const matches = selectElement.id.match(/\d+/g);
+  const timerId = matches[matches.length - 1];
+  const minMaxTimeSettings = document.getElementById(`timer${timerId}-minmaxtime-settings`);
+
+  //  value: 0 == fixed Time
+  if (selectElement.value === "0") {
+    minMaxTimeSettings.style.display = "none";
+  }
+  // otherwise sunrise/sundown
+  else {
+    minMaxTimeSettings.style.display = "block";
+  }
+}

@@ -9,3 +9,7 @@
 .settings-container > div {
   flex: 1;
 }
+
+.minmaxtime-switch {
+  margin-bottom: 10px;
+}

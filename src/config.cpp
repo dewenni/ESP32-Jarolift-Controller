@@ -7,7 +7,11 @@
 
 /* D E C L A R A T I O N S ****************************************************/
 
-const int CFG_VERSION = 1;
+/**
+ * V1: Initial version of dewenni.
+ * V2: Added min/max times for timers.
+ */
+const int CFG_VERSION = 2;
 
 char filename[24] = {"/config.json"};
 bool setupMode;
@@ -242,6 +246,14 @@ void configInitValue() {
   config.gpio.mosi = 23;
   config.gpio.cs = 5;
   config.gpio.led_setup = LED_BUILTIN;
+
+  // timer
+  for (int i = 0; i < 6; i++) {
+    config.timer[i].use_min_time = false;
+    config.timer[i].use_max_time = false;
+    strncpy(config.timer[i].min_time_value, "", sizeof(config.timer[i].min_time_value));
+    strncpy(config.timer[i].max_time_value, "", sizeof(config.timer[i].max_time_value));
+  }
 }
 
 /**
@@ -397,6 +409,10 @@ void configSaveToFile() {
     timer["saturday"] = config.timer[i].saturday;
     timer["sunday"] = config.timer[i].sunday;
     timer["grp_mask"] = config.timer[i].grp_mask;
+    timer["use_min_time"] = config.timer[i].use_min_time;
+    timer["use_max_time"] = config.timer[i].use_max_time;
+    timer["min_time_value"] = config.timer[i].min_time_value;
+    timer["max_time_value"] = config.timer[i].max_time_value;
   }
 
   // Delete existing file, otherwise the configuration is appended to the file
@@ -586,6 +602,10 @@ void configLoadFromFile() {
       config.timer[i].saturday = timer["saturday"];
       config.timer[i].sunday = timer["sunday"];
       config.timer[i].grp_mask = timer["grp_mask"];
+      config.timer[i].use_min_time = timer["use_min_time"];
+      config.timer[i].use_max_time = timer["use_max_time"];
+      EspStrUtil::readJSONstring(config.timer[i].min_time_value, sizeof(config.timer[i].min_time_value), timer["min_time_value"]);
+      EspStrUtil::readJSONstring(config.timer[i].max_time_value, sizeof(config.timer[i].max_time_value), timer["max_time_value"]);
     }
   }
 
