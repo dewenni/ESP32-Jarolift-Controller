@@ -362,6 +362,11 @@ function restartFunction() {
 }
 
 function sendData(elementId, value) {
+  if (isGitHubPages()) {
+    console.log("localhost or github.io detected, skipping sendData");
+    return;
+  }
+
   // Find the element by its ID
   const element = document.getElementById(elementId);
 
@@ -1116,4 +1121,3 @@ const lib_translations = {
     en: "Check for GitHub OTA Update",
   },
 };
-
