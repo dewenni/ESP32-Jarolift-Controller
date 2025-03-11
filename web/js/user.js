@@ -106,3 +106,55 @@ async function loadSimulatedData() {
     console.error("Fehler beim Laden von sim.json:", error);
   }
 }
+
+function updateUIcallbackSelect(elementId, value) {
+  const element = document.getElementById(elementId);
+  if (element) {
+    // Rufe toggleTimeInputs nur auf, wenn data-toggle="timeInputs" gesetzt ist
+    if (element.dataset.toggle === "timeInputs") {
+      toggleTimeInputs(element);
+      toggleTimeInputsMinMax(element);
+    }
+  }
+}
+
+function toggleTimeInputsMinMax(selectElement) {
+
+  const matches = selectElement.id.match(/\d+/g);
+  const timerId = matches[matches.length - 1];
+  const minMaxTimeSettings = document.getElementById(
+    `timer${timerId}-minmaxtime-settings`
+  );
+
+  //  value: 0 == hide
+  if (selectElement.value === "0") {
+    minMaxTimeSettings.style.display = "none";
+  }
+  // otherwise show
+  else {
+    minMaxTimeSettings.style.display = "block";
+  }
+}
+
+function toggleTimeInputs(selectElement) {
+  
+  toggleTimeInputsMinMax(selectElement);
+  
+  const matches = selectElement.id.match(/\d+/g);
+  const timerId = matches[matches.length - 1];
+  const timeInput = document.getElementById(`timeInput${timerId}`);
+  const offsetInput = document.getElementById(`offsetInput${timerId}`);
+
+  if (!timeInput || !offsetInput) {
+    console.error("Eines der Elemente nicht gefunden!");
+    return;
+  }
+  //  value:0 == fixed Time
+  if (selectElement.value === "0") {
+    timeInput.style.display = "block";
+    offsetInput.style.display = "none";
+  } else {
+    timeInput.style.display = "none";
+    offsetInput.style.display = "block";
+  }
+}

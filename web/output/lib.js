@@ -714,9 +714,9 @@ function updateUI(config, prefix = "cfg", ignoreKeys = ["version"]) {
             // Setze den "value"-Attribut für <select>-Elemente
             element.value = value;
 
-            // Rufe toggleTimeInputs nur auf, wenn data-toggle="timeInputs" gesetzt ist
-            if (element.dataset.toggle === "timeInputs") {
-              toggleTimeInputs(element);
+            // Prüfen, ob im globalen Scope eine Funktion updateUIcallbackSelect existiert
+            if (typeof window.updateUIcallbackSelect === "function") {
+              window.updateUIcallbackSelect(elementId, value);
             }
           } else if (element.type === "password") {
             // Always set password fields to "XxXxXxXxXxX" as a placeholder
@@ -812,26 +812,6 @@ function toggleEdit(button, inputId) {
     input.disabled = true;
     button.innerText = "Edit";
     console.log("button save");
-  }
-}
-
-function toggleTimeInputs(selectElement) {
-  const matches = selectElement.id.match(/\d+/g);
-  const timerId = matches[matches.length - 1];
-  const timeInput = document.getElementById(`timeInput${timerId}`);
-  const offsetInput = document.getElementById(`offsetInput${timerId}`);
-
-  if (!timeInput || !offsetInput) {
-    console.error("Eines der Elemente nicht gefunden!");
-    return;
-  }
-  //  value:0 == fixex Time
-  if (selectElement.value === "0") {
-    timeInput.style.display = "block";
-    offsetInput.style.display = "none";
-  } else {
-    timeInput.style.display = "none";
-    offsetInput.style.display = "block";
   }
 }
 

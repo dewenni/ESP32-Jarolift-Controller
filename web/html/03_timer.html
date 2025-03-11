@@ -8,6 +8,7 @@
     <link rel="stylesheet" type="text/css" href="../css/icons.css" />
     <script src="../js/fun.js" defer></script>
     <script src="../js/doc.js" defer></script>
+    <script src="../js/user.js" defer></script>
     <script src="../js/lang.js" defer></script>
     <style></style>
     <script>
@@ -80,6 +81,51 @@
                       name="offsetValue0"
                       placeholder="0"
                       step="1" />
+                  </div>
+
+                  <!-- min/max time settings for sunrise/sundown -->
+                  <div id="timer0-minmaxtime-settings" style="display: none">
+                    <div class="minmaxtime-switch">
+                      <input
+                        data-toggle="timeInputs"
+                        name="timer0_use_min_time"
+                        type="checkbox"
+                        role="switch"
+                        hideOpt="OPT_MINTIME0"
+                        id="cfg_timer_0_use_min_time" />
+
+                      <label
+                        for="timer0_use_min_time"
+                        data-i18n="use_min_time"></label>
+                    </div>
+
+                    <div class="time-input OPT_MINTIME0" id="minTimeInput0">
+                      <input
+                        type="time"
+                        id="cfg_timer_0_min_time_value"
+                        name="minTimeValue0" />
+                    </div>
+
+                    <div class="minmaxtime-switch">
+                      <input
+                        data-toggle="timeInputs"
+                        name="timer0_use_max_time"
+                        type="checkbox"
+                        role="switch"
+                        hideOpt="OPT_MAXTIME0"
+                        id="cfg_timer_0_use_max_time" />
+
+                      <label
+                        for="timer0_use_max_time"
+                        data-i18n="use_max_time"></label>
+                    </div>
+
+                    <div class="time-input OPT_MAXTIME0" id="maxTimeInput0">
+                      <input
+                        type="time"
+                        id="cfg_timer_0_max_time_value"
+                        name="maxTimeValue0" />
+                    </div>
                   </div>
 
                   <!-- Dropdown for shutter cmd -->
@@ -223,6 +269,51 @@
                       step="1" />
                   </div>
 
+                  <!-- min/max time settings for sunrise/sundown -->
+                  <div id="timer1-minmaxtime-settings" style="display: none">
+                    <div class="minmaxtime-switch">
+                      <input
+                        data-toggle="timeInputs"
+                        name="timer1_use_min_time"
+                        type="checkbox"
+                        role="switch"
+                        hideOpt="OPT_MINTIME1"
+                        id="cfg_timer_1_use_min_time" />
+
+                      <label
+                        for="timer1_use_min_time"
+                        data-i18n="use_min_time"></label>
+                    </div>
+
+                    <div class="time-input OPT_MINTIME1" id="minTimeInput1">
+                      <input
+                        type="time"
+                        id="cfg_timer_1_min_time_value"
+                        name="minTimeValue1" />
+                    </div>
+
+                    <div class="minmaxtime-switch">
+                      <input
+                        data-toggle="timeInputs"
+                        name="timer1_use_max_time"
+                        type="checkbox"
+                        role="switch"
+                        hideOpt="OPT_MAXTIME1"
+                        id="cfg_timer_1_use_max_time" />
+
+                      <label
+                        for="timer1_use_max_time"
+                        data-i18n="use_max_time"></label>
+                    </div>
+
+                    <div class="time-input OPT_MAXTIME1" id="maxTimeInput1">
+                      <input
+                        type="time"
+                        id="cfg_timer_1_max_time_value"
+                        name="maxTimeValue1" />
+                    </div>
+                  </div>
+
                   <!-- Dropdown for shutter cmd -->
                   <label for="command1" data-i18n="command"></label>
                   <select id="cfg_timer_1_cmd" name="command1">
@@ -349,6 +440,49 @@
                       type="time"
                       id="cfg_timer_2_time_value"
                       name="timeValue2" />
+                  </div>
+
+                  <!-- min/max time settings for sunrise/sundown -->
+                  <div id="timer2-minmaxtime-settings" style="display: none">
+                    <div class="minmaxtime-switch">
+                      <input
+                        name="timer2_use_min_time"
+                        type="checkbox"
+                        role="switch"
+                        hideOpt="OPT_MINTIME2"
+                        id="cfg_timer_2_use_min_time" />
+
+                      <label
+                        for="timer2_use_min_time"
+                        data-i18n="use_min_time"></label>
+                    </div>
+
+                    <div class="time-input OPT_MINTIME2" id="minTimeInput2">
+                      <input
+                        type="time"
+                        id="cfg_timer_2_min_time_value"
+                        name="minTimeValue2" />
+                    </div>
+
+                    <div class="minmaxtime-switch">
+                      <input
+                        name="timer2_use_max_time"
+                        type="checkbox"
+                        role="switch"
+                        hideOpt="OPT_MAXTIME2"
+                        id="cfg_timer_2_use_max_time" />
+
+                      <label
+                        for="timer2_use_max_time"
+                        data-i18n="use_max_time"></label>
+                    </div>
+
+                    <div class="time-input OPT_MAXTIME2" id="maxTimeInput2">
+                      <input
+                        type="time"
+                        id="cfg_timer_2_max_time_value"
+                        name="maxTimeValue2" />
+                    </div>
                   </div>
 
                   <div
@@ -492,6 +626,49 @@
                       name="timeValue3" />
                   </div>
 
+                  <!-- min/max time settings for sunrise/sundown -->
+                  <div id="timer3-minmaxtime-settings" style="display: none">
+                    <div class="minmaxtime-switch">
+                      <input
+                        name="timer3_use_min_time"
+                        type="checkbox"
+                        role="switch"
+                        hideOpt="OPT_MINTIME3"
+                        id="cfg_timer_3_use_min_time" />
+
+                      <label
+                        for="timer3_use_min_time"
+                        data-i18n="use_min_time"></label>
+                    </div>
+
+                    <div class="time-input OPT_MINTIME3" id="minTimeInput3">
+                      <input
+                        type="time"
+                        id="cfg_timer_3_min_time_value"
+                        name="minTimeValue3" />
+                    </div>
+
+                    <div class="minmaxtime-switch">
+                      <input
+                        name="timer3_use_max_time"
+                        type="checkbox"
+                        role="switch"
+                        hideOpt="OPT_MAXTIME3"
+                        id="cfg_timer_3_use_max_time" />
+
+                      <label
+                        for="timer3_use_max_time"
+                        data-i18n="use_max_time"></label>
+                    </div>
+
+                    <div class="time-input OPT_MAXTIME3" id="maxTimeInput3">
+                      <input
+                        type="time"
+                        id="cfg_timer_3_max_time_value"
+                        name="maxTimeValue3" />
+                    </div>
+                  </div>
+
                   <div
                     class="time-input"
                     id="offsetInput3"
@@ -633,6 +810,49 @@
                       name="timeValue4" />
                   </div>
 
+                  <!-- min/max time settings for sunrise/sundown -->
+                  <div id="timer4-minmaxtime-settings" style="display: none">
+                    <div class="minmaxtime-switch">
+                      <input
+                        name="timer4_use_min_time"
+                        type="checkbox"
+                        role="switch"
+                        hideOpt="OPT_MINTIME4"
+                        id="cfg_timer_4_use_min_time" />
+
+                      <label
+                        for="timer4_use_min_time"
+                        data-i18n="use_min_time"></label>
+                    </div>
+
+                    <div class="time-input OPT_MINTIME4" id="minTimeInput4">
+                      <input
+                        type="time"
+                        id="cfg_timer_4_min_time_value"
+                        name="minTimeValue4" />
+                    </div>
+
+                    <div class="minmaxtime-switch">
+                      <input
+                        name="timer4_use_max_time"
+                        type="checkbox"
+                        role="switch"
+                        hideOpt="OPT_MAXTIME4"
+                        id="cfg_timer_4_use_max_time" />
+
+                      <label
+                        for="timer4_use_max_time"
+                        data-i18n="use_max_time"></label>
+                    </div>
+
+                    <div class="time-input OPT_MAXTIME4" id="maxTimeInput4">
+                      <input
+                        type="time"
+                        id="cfg_timer_4_max_time_value"
+                        name="maxTimeValue4" />
+                    </div>
+                  </div>
+
                   <div
                     class="time-input"
                     id="offsetInput4"
@@ -772,6 +992,49 @@
                       type="time"
                       id="cfg_timer_5_time_value"
                       name="timeValue5" />
+                  </div>
+
+                  <!-- min/max time settings for sunrise/sundown -->
+                  <div id="timer5-minmaxtime-settings" style="display: none">
+                    <div class="minmaxtime-switch">
+                      <input
+                        name="timer5_use_min_time"
+                        type="checkbox"
+                        role="switch"
+                        hideOpt="OPT_MINTIME5"
+                        id="cfg_timer_5_use_min_time" />
+
+                      <label
+                        for="timer5_use_min_time"
+                        data-i18n="use_min_time"></label>
+                    </div>
+
+                    <div class="time-input OPT_MINTIME5" id="minTimeInput5">
+                      <input
+                        type="time"
+                        id="cfg_timer_5_min_time_value"
+                        name="minTimeValue5" />
+                    </div>
+
+                    <div class="minmaxtime-switch">
+                      <input
+                        name="timer5_use_max_time"
+                        type="checkbox"
+                        role="switch"
+                        hideOpt="OPT_MAXTIME5"
+                        id="cfg_timer_5_use_max_time" />
+
+                      <label
+                        for="timer5_use_max_time"
+                        data-i18n="use_max_time"></label>
+                    </div>
+
+                    <div class="time-input OPT_MAXTIME5" id="maxTimeInput5">
+                      <input
+                        type="time"
+                        id="cfg_timer_5_max_time_value"
+                        name="maxTimeValue5" />
+                    </div>
                   </div>
 
                   <div

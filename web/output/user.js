@@ -130,6 +130,14 @@ const user_translations = {
     de: "Zeit (HH:MM)",
     en: "Time (HH:MM)",
   },
+  use_min_time: {
+    de: "Frühestens um (HH:MM)",
+    en: "Not earlier than (HH:MM)",
+  },
+  use_max_time: {
+    de: "Spätestes um (HH:MM)",
+    en: "Not later than (HH:MM)",
+  },
   offset_desc: {
     de: "Offset in Minuten (z. B. -15 oder +20)",
     en: "Offset in Minutens (e.g. -15 oder +20)",
@@ -318,6 +326,58 @@ async function loadSimulatedData() {
     updateJSON(simData); // Aktualisiert die UI mit den Simulationsdaten
   } catch (error) {
     console.error("Fehler beim Laden von sim.json:", error);
+  }
+}
+
+function updateUIcallbackSelect(elementId, value) {
+  const element = document.getElementById(elementId);
+  if (element) {
+    // Rufe toggleTimeInputs nur auf, wenn data-toggle="timeInputs" gesetzt ist
+    if (element.dataset.toggle === "timeInputs") {
+      toggleTimeInputs(element);
+      toggleTimeInputsMinMax(element);
+    }
+  }
+}
+
+function toggleTimeInputsMinMax(selectElement) {
+
+  const matches = selectElement.id.match(/\d+/g);
+  const timerId = matches[matches.length - 1];
+  const minMaxTimeSettings = document.getElementById(
+    `timer${timerId}-minmaxtime-settings`
+  );
+
+  //  value: 0 == hide
+  if (selectElement.value === "0") {
+    minMaxTimeSettings.style.display = "none";
+  }
+  // otherwise show
+  else {
+    minMaxTimeSettings.style.display = "block";
+  }
+}
+
+function toggleTimeInputs(selectElement) {
+  
+  toggleTimeInputsMinMax(selectElement);
+  
+  const matches = selectElement.id.match(/\d+/g);
+  const timerId = matches[matches.length - 1];
+  const timeInput = document.getElementById(`timeInput${timerId}`);
+  const offsetInput = document.getElementById(`offsetInput${timerId}`);
+
+  if (!timeInput || !offsetInput) {
+    console.error("Eines der Elemente nicht gefunden!");
+    return;
+  }
+  //  value:0 == fixed Time
+  if (selectElement.value === "0") {
+    timeInput.style.display = "block";
+    offsetInput.style.display = "none";
+  } else {
+    timeInput.style.display = "none";
+    offsetInput.style.display = "block";
   }
 }
 
