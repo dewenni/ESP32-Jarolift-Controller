@@ -13,6 +13,14 @@
 int lastProcessedTime = -1;       // last processed time
 static const char *TAG = "TIMER"; // LOG TAG
 
+/**
+ * *******************************************************************
+ * @brief   Check if a day is enabled in the timer configuration.
+ * @param   timer: Timer configuration.
+ * @param   day: Day of the week (0-6).
+ * @return  true if the day is enabled, false otherwise.
+ * *******************************************************************
+ */
 bool isDayEnabled(const s_cfg_timer &timer, int day) {
   switch (day) {
   case 0:
@@ -34,6 +42,14 @@ bool isDayEnabled(const s_cfg_timer &timer, int day) {
   }
 }
 
+/**
+ * *******************************************************************
+ * @brief   Execute a command from a timer.
+ * @param   timer: Timer configuration.
+ * @param   number: Timer number (0-5).
+ * @return  none
+ * *******************************************************************
+ */
 void executeCommand(const s_cfg_timer &timer, uint8_t number) {
 
   switch (timer.cmd) {
@@ -55,6 +71,18 @@ void executeCommand(const s_cfg_timer &timer, uint8_t number) {
   }
 }
 
+/**
+ * *******************************************************************
+ * @brief   Get the sunrise or sunset time.
+ * @param   type: TYPE_SUNRISE or TYPE_SUNDOWN.
+ * @param   offset: Time offset in minutes.
+ * @param   latitude: Latitude.
+ * @param   longitude: Longitude.
+ * @param   hour: Sunrise or sunset hour.
+ * @param   minute: Sunrise or sunset minute.
+ * @return  none
+ * *******************************************************************
+ */
 void getSunriseOrSunset(uint8_t type, int16_t offset, float latitude, float longitude, uint8_t &hour, uint8_t &minute) {
 
   int16_t timeInMinutes;
@@ -89,26 +117,47 @@ void getSunriseOrSunset(uint8_t type, int16_t offset, float latitude, float long
   minute = timeInMinutes % 60;
 }
 
-int getHour(const char* time_value) {
+/**
+ * *******************************************************************
+ * @brief   Get the hour from a time value.
+ * @param   time_value: Time value in HH:MM format.
+ * @return  Hour value.
+ * *******************************************************************
+ */
+int getHour(const char *time_value) {
   // Format must be HH:MM -> 5 characters.
   if (strlen(time_value) == 5) {
     return (time_value[0] - '0') * 10 + (time_value[1] - '0');
-  }
-  else {
+  } else {
     return -1;
   }
 }
 
-int getMinute(const char* time_value) {
+/**
+ * *******************************************************************
+ * @brief   Get the minute from a time value.
+ * @param   time_value: Time value in HH:MM format.
+ * @return  Minute value.
+ * *******************************************************************
+ */
+int getMinute(const char *time_value) {
   // Format must be HH:MM -> 5 characters.
   if (strlen(time_value) == 5) {
     return (time_value[3] - '0') * 10 + (time_value[4] - '0');
-  }
-  else {
+  } else {
     return -1;
   }
 }
 
+/**
+ * *******************************************************************
+ * @brief   Check if a timer is triggered.
+ * @param   timer: Timer configuration.
+ * @param   currentHour: Current hour.
+ * @param   currentMinute: Current minute.
+ * @return  true if the timer is triggered, false otherwise.
+ * *******************************************************************
+ */
 bool checkTimerTrigger(const s_cfg_timer &timer, uint8_t currentHour, uint8_t currentMinute) {
   if (timer.type == TYPE_FIXED_TIME) {
     uint8_t timerHour = getHour(timer.time_value);
@@ -146,6 +195,13 @@ bool checkTimerTrigger(const s_cfg_timer &timer, uint8_t currentHour, uint8_t cu
   return false;
 }
 
+/**
+ * *******************************************************************
+ * @brief   Timer Cyclic Loop
+ * @param   none
+ * @return  none
+ * *******************************************************************
+ */
 void timerCyclic() {
   time_t now;
   tm dti;
