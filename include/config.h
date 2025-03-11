@@ -4,7 +4,7 @@
 /*-------------------------------------------------------------------------------
 General Configuration
 --------------------------------------------------------------------------------*/
-#define VERSION "v1.7.0" // internal program version
+#define VERSION "v1.8.0" // internal program version
 
 #define WIFI_RECONNECT 30000 // Delay between wifi reconnection tries
 #define MQTT_RECONNECT 10000 // Delay between mqtt reconnection tries
@@ -40,9 +40,9 @@ struct s_cfg_timer {
   bool sunday;
   uint16_t grp_mask; // Group mask for included channels
   bool use_min_time;
-  char min_time_value[6];   // fixed Time value (hh:mm)
+  char min_time_value[6]; // fixed Time value (hh:mm)
   bool use_max_time;
-  char max_time_value[6];   // fixed Time value (hh:mm)
+  char max_time_value[6]; // fixed Time value (hh:mm)
 };
 
 struct s_cfg_geo {
