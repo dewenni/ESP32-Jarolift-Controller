@@ -346,6 +346,11 @@ void webCallback(const char *elementId, const char *value) {
     char saturdayId[32];
     char sundayId[32];
 
+    char useMinTime[32];
+    char minTimeValueId[32];
+    char useMaxTime[32];
+    char maxTimeValueId[32];
+
     snprintf(enableId, sizeof(enableId), "cfg_timer_%d_enable", i);
     snprintf(typeId, sizeof(typeId), "cfg_timer_%d_type", i);
     snprintf(timeValueId, sizeof(timeValueId), "cfg_timer_%d_time_value", i);
@@ -361,45 +366,63 @@ void webCallback(const char *elementId, const char *value) {
     snprintf(saturdayId, sizeof(saturdayId), "cfg_timer_%d_saturday", i);
     snprintf(sundayId, sizeof(sundayId), "cfg_timer_%d_sunday", i);
 
+    snprintf(useMinTime, sizeof(useMinTime), "cfg_timer_%d_use_min_time", i);
+    snprintf(useMaxTime, sizeof(useMaxTime), "cfg_timer_%d_use_max_time", i);
+    snprintf(minTimeValueId, sizeof(minTimeValueId), "cfg_timer_%d_min_time_value", i);
+    snprintf(maxTimeValueId, sizeof(maxTimeValueId), "cfg_timer_%d_max_time_value", i);
+
     if (strcmp(elementId, enableId) == 0) {
       config.timer[i].enable = EspStrUtil::stringToBool(value);
     }
-    if (strcmp(elementId, typeId) == 0) {
+    else if (strcmp(elementId, typeId) == 0) {
       config.timer[i].type = atoi(value);
     }
-    if (strcmp(elementId, timeValueId) == 0) {
+    else if (strcmp(elementId, timeValueId) == 0) {
       snprintf(config.timer[i].time_value, sizeof(config.timer[i].time_value), "%s", value);
     }
-    if (strcmp(elementId, offsetValueId) == 0) {
+    else if (strcmp(elementId, offsetValueId) == 0) {
       config.timer[i].offset_value = atoi(value);
     }
-    if (strcmp(elementId, cmdId) == 0) {
+    else if (strcmp(elementId, cmdId) == 0) {
       config.timer[i].cmd = atoi(value);
     }
-    if (strcmp(elementId, maskId) == 0) {
+    else if (strcmp(elementId, maskId) == 0) {
       config.timer[i].grp_mask = strtoul(value, NULL, 2);
     }
 
-    if (strcmp(elementId, mondayId) == 0) {
+    else if (strcmp(elementId, mondayId) == 0) {
       config.timer[i].monday = EspStrUtil::stringToBool(value);
     }
-    if (strcmp(elementId, tuesdayId) == 0) {
+    else if (strcmp(elementId, tuesdayId) == 0) {
       config.timer[i].tuesday = EspStrUtil::stringToBool(value);
     }
-    if (strcmp(elementId, wednesdayId) == 0) {
+    else if (strcmp(elementId, wednesdayId) == 0) {
       config.timer[i].wednesday = EspStrUtil::stringToBool(value);
     }
-    if (strcmp(elementId, thursdayId) == 0) {
+    else if (strcmp(elementId, thursdayId) == 0) {
       config.timer[i].thursday = EspStrUtil::stringToBool(value);
     }
-    if (strcmp(elementId, fridayId) == 0) {
+    else if (strcmp(elementId, fridayId) == 0) {
       config.timer[i].friday = EspStrUtil::stringToBool(value);
     }
-    if (strcmp(elementId, saturdayId) == 0) {
+    else if (strcmp(elementId, saturdayId) == 0) {
       config.timer[i].saturday = EspStrUtil::stringToBool(value);
     }
-    if (strcmp(elementId, sundayId) == 0) {
+    else if (strcmp(elementId, sundayId) == 0) {
       config.timer[i].sunday = EspStrUtil::stringToBool(value);
+    }
+
+    else if (strcmp(elementId, useMinTime) == 0) {
+      config.timer[i].use_min_time = EspStrUtil::stringToBool(value);
+    }
+    else if (strcmp(elementId, useMaxTime) == 0) {
+      config.timer[i].use_max_time = EspStrUtil::stringToBool(value);
+    }
+    else if (strcmp(elementId, minTimeValueId) == 0) {
+      snprintf(config.timer[i].min_time_value, sizeof(config.timer[i].min_time_value), "%s", value);
+    }
+    else if (strcmp(elementId, maxTimeValueId) == 0) {
+      snprintf(config.timer[i].max_time_value, sizeof(config.timer[i].max_time_value), "%s", value);
     }
   }
 
