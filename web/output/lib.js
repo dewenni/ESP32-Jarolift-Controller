@@ -362,6 +362,7 @@ function restartFunction() {
 }
 
 function sendData(elementId, value) {
+  // check if the page is hosted on localhost or GitHub Pages
   if (isGitHubPages()) {
     console.log("localhost or github.io detected, skipping sendData");
     return;
@@ -1121,3 +1122,4 @@ const lib_translations = {
     en: "Check for GitHub OTA Update",
   },
 };
+
