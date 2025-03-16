@@ -610,7 +610,6 @@ void JaroliftController::cmdUnlearn(uint8_t channel) {
   radioTx(2);
   updateDeviceCounter(true);
   enterRx();
-  delay(1000);
   updateDeviceCounter(false);
 }
 
@@ -653,7 +652,6 @@ void JaroliftController::cmdSetEndPointUp(uint8_t channel) {
   radioTx(1);
   updateDeviceCounter(true);
   enterRx();
-  delay(1000);
 }
 
 /**
@@ -695,7 +693,6 @@ void JaroliftController::cmdDeleteEndPointUp(uint8_t channel) {
   radioTx(1);
   updateDeviceCounter(true);
   enterRx();
-  delay(1000);
 }
 
 /**
@@ -737,7 +734,6 @@ void JaroliftController::cmdSetEndPointDown(uint8_t channel) {
   radioTx(1);
   updateDeviceCounter(true);
   enterRx();
-  delay(1000);
 }
 
 /**
@@ -779,7 +775,6 @@ void JaroliftController::cmdDeleteEndPointDown(uint8_t channel) {
   radioTx(1);
   updateDeviceCounter(true);
   enterRx();
-  delay(1000);
 }
 
 /**
