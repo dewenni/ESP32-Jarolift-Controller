@@ -37,6 +37,11 @@ constexpr const char *GROUP_CMD_STOP[] = {"Gruppe STOP", "Group STOP"};
 constexpr const char *GROUP_CMD_SHADE[] = {"Gruppe SCHATTEN", "Group SHADE"};
 constexpr const char *CMD_SET_SHADE[] = {"Kommando setze Schatten", "Command set shade"};
 constexpr const char *CMD_LEARN[] = {"Kommando anlernen", "Command learn"};
+constexpr const char *CMD_UNLEARN[] = {"Kommando ablernen", "Command unlearn"};
+constexpr const char *CMD_SET_ENDPOINT_UP[] = {"setze Endlage oben", "set upper end point"};
+constexpr const char *CMD_DEL_ENDPOINT_UP[] = {"lösche Endlage oben", "delete upper end point"};
+constexpr const char *CMD_SET_ENDPOINT_DOWN[] = {"setze Endlage unten", "set lower end point"};
+constexpr const char *CMD_DEL_ENDPOINT_DOWN[] = {"lösche Endlage unten", "delete lower end point"};
 }; // namespace WEB_TXT
 
 // ======================================================================================

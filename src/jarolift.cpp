@@ -64,8 +64,7 @@ void mqttSendPositionGroup(uint16_t group_mask, uint8_t position) {
  * @param   serial, function, rssi
  * @return  none
  * *******************************************************************/
-void mqttSendRemote(uint32_t serial, int8_t function, uint8_t rssi) {
-  ESP_LOGI(TAG, "received remote signal | serial: %06lx | ch: %ld | cmd: 0x%x, | rssi: -%i dbm", serial >> 8, (serial & 0xFF)+1, function, rssi);
+void mqttSendRemote(uint32_t serial, int8_t function, uint16_t channel) {
 
   if (!mqttIsConnected()) {
     return;
@@ -73,7 +72,15 @@ void mqttSendRemote(uint32_t serial, int8_t function, uint8_t rssi) {
 
   char topic[64];
   char fun[8];
-  uint8_t channel = (serial & 0xFF) +1;
+  char chBIN[18];
+  int pos = 0;
+  for (int i = 15; i >= 0; i--) {
+    chBIN[pos++] = ((channel >> i) & 1) ? '1' : '0';
+    if (i == 8) {
+      chBIN[pos++] = ' ';
+    }
+  }
+  chBIN[pos] = '\0';
 
   switch (function) {
   case 0x2:
@@ -95,7 +102,6 @@ void mqttSendRemote(uint32_t serial, int8_t function, uint8_t rssi) {
 
   // unknown as default
   const char *remoteName = "unknown";
-
   for (int i = 0; i < 16; i++) {
     if (config.jaro.remote_enable[i] && (serial >> 8 == config.jaro.remote_serial[i])) {
       remoteName = config.jaro.remote_name[i];
@@ -124,15 +130,17 @@ void mqttSendRemote(uint32_t serial, int8_t function, uint8_t rssi) {
 
   JsonDocument remoteJSON;
   remoteJSON["name"] = remoteName;
-  remoteJSON["ch"] = channel;
   remoteJSON["cmd"] = fun;
-  remoteJSON["rssi"] = rssi;
+  remoteJSON["chBin"] = chBIN;
+  remoteJSON["chDec"] = channel;
 
   char sendremoteJSON[255];
   serializeJson(remoteJSON, sendremoteJSON);
-  snprintf(topic, sizeof(topic), "%s%06lx", addTopic("/status/remote/"), serial >> 8);
+  snprintf(topic, sizeof(topic), "%s%08lx", addTopic("/status/remote/"), serial);
 
   mqttPublish(topic, sendremoteJSON, false);
+
+  ESP_LOGI(TAG, "received remote signal | serial: 0x%08lx | cmd: %s, | channel: %s", serial, fun, chBIN);
 }
 
 /**
@@ -154,6 +162,15 @@ void jaroCmd(JaroCmdGrpType type, uint16_t group_mask) {
   if (jaroCmdQueue.size() < MAX_CMD) {
     jaroCmdQueue.push({JaroCommand::GROUP, {.group = {type, group_mask}}});
     ESP_LOGD(TAG, "add group cmd to buffer: %i, %04X", type, group_mask);
+  } else {
+    ESP_LOGE(TAG, "too many commands within too short time");
+  }
+}
+
+void jaroCmd(JaroCmdSrvType type, uint8_t channel) {
+  if (jaroCmdQueue.size() < MAX_CMD) {
+    jaroCmdQueue.push({JaroCommand::SERVICE, {.service = {type, channel}}});
+    ESP_LOGD(TAG, "add service cmd to buffer: %i, %i", type, channel + 1);
   } else {
     ESP_LOGE(TAG, "too many commands within too short time");
   }
@@ -204,53 +221,76 @@ void processJaroCommands() {
     if (cmd.cmdType == JaroCommand::SINGLE) {
       switch (cmd.single.type) {
       case CMD_UP:
-        jarolift.cmdUp(cmd.single.channel);
+        jarolift.cmdChannel(JaroliftController::CMD_UP, cmd.single.channel);
         mqttSendPosition(cmd.single.channel, POS_OPEN);
         ESP_LOGI(TAG, "execute cmd: UP - channel: %i", cmd.single.channel + 1);
         break;
       case CMD_DOWN:
-        jarolift.cmdDown(cmd.single.channel);
+        jarolift.cmdChannel(JaroliftController::CMD_DOWN, cmd.single.channel);
         mqttSendPosition(cmd.single.channel, POS_CLOSE);
         ESP_LOGI(TAG, "execute cmd: DOWN - channel: %i", cmd.single.channel + 1);
         break;
       case CMD_STOP:
-        jarolift.cmdStop(cmd.single.channel);
+        jarolift.cmdChannel(JaroliftController::CMD_STOP, cmd.single.channel);
         ESP_LOGI(TAG, "execute cmd: STOP - channel: %i", cmd.single.channel + 1);
         break;
       case CMD_SET_SHADE:
-        jarolift.cmdSetShade(cmd.single.channel);
+        jarolift.cmdChannel(JaroliftController::CMD_SET_SHADE, cmd.single.channel);
         mqttSendPosition(cmd.single.channel, POS_SHADE);
         ESP_LOGI(TAG, "execute cmd: SETSHADE - channel: %i", cmd.single.channel + 1);
         break;
       case CMD_SHADE:
-        jarolift.cmdShade(cmd.single.channel);
+        jarolift.cmdChannel(JaroliftController::CMD_SHADE, cmd.single.channel);
         ESP_LOGI(TAG, "execute cmd: SHADE - channel: %i", cmd.single.channel + 1);
-        break;
-      case CMD_LEARN:
-        jarolift.cmdLearn(cmd.single.channel);
-        ESP_LOGI(TAG, "execute cmd: LEARN - channel: %i", cmd.single.channel + 1);
         break;
       }
     } else if (cmd.cmdType == JaroCommand::GROUP) {
       switch (cmd.group.type) {
       case CMD_GRP_UP:
-        jarolift.cmdGroupUp(cmd.group.group_mask);
+        jarolift.cmdGroup(JaroliftController::CMD_UP, cmd.group.group_mask);
         ESP_LOGI(TAG, "execute group cmd: UP - mask: %04X", cmd.group.group_mask);
         mqttSendPositionGroup(cmd.group.group_mask, POS_OPEN);
         break;
       case CMD_GRP_DOWN:
-        jarolift.cmdGroupDown(cmd.group.group_mask);
+        jarolift.cmdGroup(JaroliftController::CMD_DOWN, cmd.group.group_mask);
         ESP_LOGI(TAG, "execute group cmd: DOWN - mask: %04X", cmd.group.group_mask);
         mqttSendPositionGroup(cmd.group.group_mask, POS_CLOSE);
         break;
       case CMD_GRP_STOP:
-        jarolift.cmdGroupStop(cmd.group.group_mask);
+        jarolift.cmdGroup(JaroliftController::CMD_STOP, cmd.group.group_mask);
         ESP_LOGI(TAG, "execute group cmd: STOP - mask: %04X", cmd.group.group_mask);
         break;
       case CMD_GRP_SHADE:
-        jarolift.cmdGroupShade(cmd.group.group_mask);
+        jarolift.cmdGroup(JaroliftController::CMD_SHADE, cmd.group.group_mask);
         mqttSendPositionGroup(cmd.group.group_mask, POS_SHADE);
         ESP_LOGI(TAG, "execute group cmd: SHADE - mask: %04X", cmd.group.group_mask);
+        break;
+      }
+    } else if (cmd.cmdType == JaroCommand::SERVICE) {
+      switch (cmd.service.type) {
+      case CMD_LEARN:
+        jarolift.cmdLearn(cmd.service.channel);
+        ESP_LOGI(TAG, "execute service cmd: CMD_LEARN - channel: %i", cmd.single.channel + 1);
+        break;
+      case CMD_UNLEARN:
+        jarolift.cmdUnlearn(cmd.service.channel);
+        ESP_LOGI(TAG, "execute service cmd: CMD_UNLEARN - channel: %i", cmd.single.channel + 1);
+        break;
+      case CMD_SET_END_POINT_UP:
+        jarolift.cmdSetEndPointUp(cmd.service.channel);
+        ESP_LOGI(TAG, "execute service cmd: SET_END_POINT_UP - channel: %i", cmd.single.channel + 1);
+        break;
+      case CMD_DEL_END_POINT_UP:
+        jarolift.cmdDeleteEndPointUp(cmd.service.channel);
+        ESP_LOGI(TAG, "execute service cmd: CMD_DEL_END_POINT_UP - channel: %i", cmd.single.channel + 1);
+        break;
+      case CMD_SET_END_POINT_DOWN:
+        jarolift.cmdSetEndPointDown(cmd.service.channel);
+        ESP_LOGI(TAG, "execute service cmd: SET_END_POINT_DOWN - channel: %i", cmd.single.channel + 1);
+        break;
+      case CMD_DEL_END_POINT_DOWN:
+        jarolift.cmdDeleteEndPointDown(cmd.service.channel);
+        ESP_LOGI(TAG, "execute service cmd: CMD_DEL_END_POINT_DOWN - channel: %i", cmd.single.channel + 1);
         break;
       }
     }
