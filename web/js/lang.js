@@ -218,4 +218,36 @@ const user_translations = {
     de: "Fernbedienungen",
     en: "Remotes",
   },
+  service: {
+    de: "Service",
+    en: "Service",
+  },
+  service_cmds: {
+    de: "Service-Befehle",
+    en: "Service-Commands",
+  },
+  cmd_rotation: {
+    de: "Drehrichtung ändern",
+    en: "Change rotation",
+  },
+  cmd_endpoint_up: {
+    de: "Endlage oben",
+    en: "Endpoint up",
+  },
+  cmd_endpoint_down: {
+    de: "Endlage unten",
+    en: "Endpoint down",
+  },
+  set: {
+    de: "setzen",
+    en: "set",
+  },
+  delete: {
+    de: "löschen",
+    en: "delete",
+  },
+  unlearn: {
+    de: "ablernen",
+    en: "unlearn",
+  },
 };

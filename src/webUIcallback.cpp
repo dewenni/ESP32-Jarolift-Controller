@@ -6,6 +6,7 @@
 #include <webUIupdates.h>
 
 static const char *TAG = "WEB"; // LOG TAG
+uint8_t srvShutter = 0;
 
 /**
  * *******************************************************************
@@ -225,7 +226,7 @@ void webCallback(const char *elementId, const char *value) {
     char enableId[32];
     char nameId[32];
     char learnId[32];
-    char setShadeId[32];
+    char unlearnId[32];
     char cmdUpId[32];
     char cmdDownId[32];
     char cmdStopId[32];
@@ -233,7 +234,7 @@ void webCallback(const char *elementId, const char *value) {
 
     snprintf(enableId, sizeof(enableId), "cfg_jaro_ch_enable_%d", i);
     snprintf(nameId, sizeof(nameId), "cfg_jaro_ch_name_%d", i);
-    snprintf(setShadeId, sizeof(setShadeId), "p12_setshade_%d", i);
+    snprintf(unlearnId, sizeof(unlearnId), "p12_unlearn_%d", i);
     snprintf(learnId, sizeof(learnId), "p12_learn_%d", i);
 
     snprintf(cmdUpId, sizeof(cmdUpId), "p01_up_%d", i);
@@ -247,10 +248,10 @@ void webCallback(const char *elementId, const char *value) {
     if (strcmp(elementId, nameId) == 0) {
       snprintf(config.jaro.ch_name[i], sizeof(config.jaro.ch_name[i]), "%s", value);
     }
-    if (strcmp(elementId, setShadeId) == 0) {
-      jaroCmd(CMD_SET_SHADE, i);
-      ESP_LOGI(TAG, "cmd SET-SHADE - channel %i", i + 1);
-      webUI.wsShowInfoMsg(WEB_TXT::CMD_SET_SHADE[config.lang]);
+    if (strcmp(elementId, unlearnId) == 0) {
+      jaroCmd(CMD_UNLEARN, i);
+      ESP_LOGI(TAG, "cmd UNLEARN - channel %i", i + 1);
+      webUI.wsShowInfoMsg(WEB_TXT::CMD_UNLEARN[config.lang]);
     }
     if (strcmp(elementId, learnId) == 0) {
       jaroCmd(CMD_LEARN, i);
@@ -373,55 +374,41 @@ void webCallback(const char *elementId, const char *value) {
 
     if (strcmp(elementId, enableId) == 0) {
       config.timer[i].enable = EspStrUtil::stringToBool(value);
-    }
-    else if (strcmp(elementId, typeId) == 0) {
+    } else if (strcmp(elementId, typeId) == 0) {
       config.timer[i].type = atoi(value);
-    }
-    else if (strcmp(elementId, timeValueId) == 0) {
+    } else if (strcmp(elementId, timeValueId) == 0) {
       snprintf(config.timer[i].time_value, sizeof(config.timer[i].time_value), "%s", value);
-    }
-    else if (strcmp(elementId, offsetValueId) == 0) {
+    } else if (strcmp(elementId, offsetValueId) == 0) {
       config.timer[i].offset_value = atoi(value);
-    }
-    else if (strcmp(elementId, cmdId) == 0) {
+    } else if (strcmp(elementId, cmdId) == 0) {
       config.timer[i].cmd = atoi(value);
-    }
-    else if (strcmp(elementId, maskId) == 0) {
+    } else if (strcmp(elementId, maskId) == 0) {
       config.timer[i].grp_mask = strtoul(value, NULL, 2);
     }
 
     else if (strcmp(elementId, mondayId) == 0) {
       config.timer[i].monday = EspStrUtil::stringToBool(value);
-    }
-    else if (strcmp(elementId, tuesdayId) == 0) {
+    } else if (strcmp(elementId, tuesdayId) == 0) {
       config.timer[i].tuesday = EspStrUtil::stringToBool(value);
-    }
-    else if (strcmp(elementId, wednesdayId) == 0) {
+    } else if (strcmp(elementId, wednesdayId) == 0) {
       config.timer[i].wednesday = EspStrUtil::stringToBool(value);
-    }
-    else if (strcmp(elementId, thursdayId) == 0) {
+    } else if (strcmp(elementId, thursdayId) == 0) {
       config.timer[i].thursday = EspStrUtil::stringToBool(value);
-    }
-    else if (strcmp(elementId, fridayId) == 0) {
+    } else if (strcmp(elementId, fridayId) == 0) {
       config.timer[i].friday = EspStrUtil::stringToBool(value);
-    }
-    else if (strcmp(elementId, saturdayId) == 0) {
+    } else if (strcmp(elementId, saturdayId) == 0) {
       config.timer[i].saturday = EspStrUtil::stringToBool(value);
-    }
-    else if (strcmp(elementId, sundayId) == 0) {
+    } else if (strcmp(elementId, sundayId) == 0) {
       config.timer[i].sunday = EspStrUtil::stringToBool(value);
     }
 
     else if (strcmp(elementId, useMinTime) == 0) {
       config.timer[i].use_min_time = EspStrUtil::stringToBool(value);
-    }
-    else if (strcmp(elementId, useMaxTime) == 0) {
+    } else if (strcmp(elementId, useMaxTime) == 0) {
       config.timer[i].use_max_time = EspStrUtil::stringToBool(value);
-    }
-    else if (strcmp(elementId, minTimeValueId) == 0) {
+    } else if (strcmp(elementId, minTimeValueId) == 0) {
       snprintf(config.timer[i].min_time_value, sizeof(config.timer[i].min_time_value), "%s", value);
-    }
-    else if (strcmp(elementId, maxTimeValueId) == 0) {
+    } else if (strcmp(elementId, maxTimeValueId) == 0) {
       snprintf(config.timer[i].max_time_value, sizeof(config.timer[i].max_time_value), "%s", value);
     }
   }
@@ -452,6 +439,47 @@ void webCallback(const char *elementId, const char *value) {
     }
   }
 
+  // Shutter Service commands
+  if (strcmp(elementId, "p04_selected_shutter") == 0) {
+    srvShutter = atoi(value);
+    ESP_LOGD(TAG, "selected service shutter: %i", srvShutter);
+  }
+  if (strcmp(elementId, "p04_up") == 0) {
+    jaroCmd(CMD_UP, srvShutter);
+    webUI.wsShowInfoMsg(WEB_TXT::SHUTTER_CMD_UP[config.lang]);
+  }
+  if (strcmp(elementId, "p04_stop") == 0) {
+    jaroCmd(CMD_STOP, srvShutter);
+    webUI.wsShowInfoMsg(WEB_TXT::SHUTTER_CMD_STOP[config.lang]);
+  }
+  if (strcmp(elementId, "p04_down") == 0) {
+    jaroCmd(CMD_DOWN, srvShutter);
+    webUI.wsShowInfoMsg(WEB_TXT::SHUTTER_CMD_DOWN[config.lang]);
+  }
+  if (strcmp(elementId, "p04_shade") == 0) {
+    jaroCmd(CMD_SHADE, srvShutter);
+    webUI.wsShowInfoMsg(WEB_TXT::SHUTTER_CMD_SHADE[config.lang]);
+  }
+  if (strcmp(elementId, "p04_cmd_set_shade") == 0) {
+    jaroCmd(CMD_SET_SHADE, srvShutter);
+    webUI.wsShowInfoMsg(WEB_TXT::CMD_SET_SHADE[config.lang]);
+  }
+  if (strcmp(elementId, "p04_cmd_end_up_set") == 0) {
+    jaroCmd(CMD_SET_END_POINT_UP, srvShutter);
+    webUI.wsShowInfoMsg(WEB_TXT::CMD_SET_ENDPOINT_UP[config.lang]);
+  }
+  if (strcmp(elementId, "p04_cmd_end_down_set") == 0) {
+    jaroCmd(CMD_SET_END_POINT_DOWN, srvShutter);
+    webUI.wsShowInfoMsg(WEB_TXT::CMD_SET_ENDPOINT_DOWN[config.lang]);
+  }
+  if (strcmp(elementId, "p04_cmd_end_up_delete") == 0) {
+    jaroCmd(CMD_DEL_END_POINT_UP, srvShutter);
+    webUI.wsShowInfoMsg(WEB_TXT::CMD_DEL_ENDPOINT_UP[config.lang]);
+  }
+  if (strcmp(elementId, "p04_cmd_end_down_delete") == 0) {
+    jaroCmd(CMD_DEL_END_POINT_DOWN, srvShutter);
+    webUI.wsShowInfoMsg(WEB_TXT::CMD_DEL_ENDPOINT_DOWN[config.lang]);
+  }
 
   // Language
   if (strcmp(elementId, "cfg_lang") == 0) {

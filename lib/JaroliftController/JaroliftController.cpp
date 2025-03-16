@@ -1,378 +1,282 @@
-#include <JaroliftController.h>
-#include <nvs.h>
-#include <nvs_flash.h>
+// JaroliftController.cpp
+#include "JaroliftController.h"
 
-#define NVS_NAMESPACE "device_data"
+// Definition of the static instance pointer
+JaroliftController *JaroliftController::instance_ = nullptr;
 
-#define Lowpulse 400 // Defines pulse-width in microseconds. Adapt for your use...
-#define Highpulse 800
+JaroliftController::JaroliftController()
+    : devCount_(0), deviceKeyMSB_(0), deviceKeyLSB_(0), button_(0), discL_(0), discH_(0), disc_(0), newSerial_(0), encrypted_(0), pack_(0),
+      pbWrite_(0), rxSerial_(0), rxHopCode_(0), rxFunction_(0), rxDiscH_(0), initOK_(false), steadyCount_(0), rxDataReady_(false) {
 
-#define BITS_SIZE 8
+  memset((void *)lowBuf_, 0, sizeof(lowBuf_));
+  memset((void *)hiBuf_, 0, sizeof(hiBuf_));
 
-static const char *TAG = "JARO-LIB"; // LOG TAG
+  uint8_t defaultDiscLow[16] = {0x1, 0x2, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
+  uint8_t defaultDiscHigh[16] = {0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x1, 0x2, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80};
+  memcpy(discLowArr_, defaultDiscLow, sizeof(discLowArr_));
+  memcpy(discHighArr_, defaultDiscHigh, sizeof(discHighArr_));
 
-// RX variables and defines
-#define debounce 200 // Ignoring short pulses in reception... no clue if required and if it makes sense ;)
-#define pufsize 216  // Pulsepuffer
+  config_.serial = 0;
+  config_.learnMode = true;
+  config_.masterMSB = 0;
+  config_.masterLSB = 0;
 
-struct s_gpio {
-  int gdo0; // TX
-  int gdo2; // RX
-  int sck;
-  int mosi;
-  int miso;
-  int cs;
-};
-
-struct s_cfg {
-  unsigned long masterMSB = 0;
-  unsigned long masterLSB = 0;
-  bool learn_mode = true;
-  uint32_t serial = 0;
-};
-
-static s_gpio gpio;
-static s_cfg config;
-static bool initOK = false;
-
-unsigned short devcnt = 0x0; // Initial 16Bit countervalue, stored in EEPROM and incremented once every time a command is send
-
-static int device_key_msb = 0x0; // stores cryptkey MSB
-static int device_key_lsb = 0x0; // stores cryptkey LSB
-static uint64_t button = 0x0;    // 1000=0x8 up, 0100=0x4 stop, 0010=0x2 down, 0001=0x1 learning
-static int disc = 0x0;
-static uint32_t dec = 0;  // stores the 32Bit encrypted code
-static uint64_t pack = 0; // Contains data to send.
-static byte disc_low[16] = {0x1, 0x2, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
-static byte disc_high[16] = {0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x1, 0x2, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80};
-static byte disc_l = 0;
-static byte disc_h = 0;
-uint64_t new_serial = 0;
-static byte marcState;
-byte syncWord = 199;
-
-static uint32_t rx_serial = 0;
-static char rx_disc_low[8] = {0};
-static char rx_disc_high[8] = {0};
-static uint32_t rx_hopcode = 0;
-static uint16_t rx_disc_h = 0;
-static byte rx_function = 0;
-static int rx_device_key_msb = 0x0;     // stores cryptkey MSB
-static int rx_device_key_lsb = 0x0;     // stores cryptkey LSB
-static volatile uint32_t decoded = 0x0; // decoded hop code
-static volatile byte pbwrite;
-static volatile unsigned int lowbuf[pufsize]; // ring buffer storing LOW pulse lengths
-static volatile unsigned int hibuf[pufsize];  // ring buffer storing HIGH pulse lengths
-static long rx_time;
-static int steadycnt = 0;
-volatile bool iset = false;
-
-static CC1101 cc1101; // The connection to the hardware chip CC1101 the RF Chip
-
-// ####################################################################
-//  set Device Counter
-// ####################################################################
-void JaroliftController::setGPIO(int8_t sck, int8_t miso, int8_t mosi, int8_t ss, int8_t gdo0, int8_t gdo2) {
-  gpio.sck = sck;
-  gpio.miso = miso;
-  gpio.mosi = mosi;
-  gpio.cs = ss;
-  gpio.gdo0 = gdo0;
-  gpio.gdo2 = gdo2;
+  // Set the Singleton instance
+  instance_ = this;
 }
 
-// ####################################################################
-//  increment and store devcnt, send devcnt as mqtt state topic
-// ####################################################################
-void JaroliftController::devcnt_handler(bool do_increment) {
-  nvs_handle_t nvs_handle;
-  esp_err_t err = nvs_open(NVS_NAMESPACE, NVS_READWRITE, &nvs_handle);
-  if (err != ESP_OK) {
-    ESP_LOGE(TAG, "Failed to open NVS");
-    return;
-  }
+JaroliftController::~JaroliftController() { instance_ = nullptr; }
 
-  // Wert aus NVS laden
-  err = nvs_get_u16(nvs_handle, "devcnt", &devcnt);
-  if (err == ESP_ERR_NVS_NOT_FOUND) {
-    devcnt = 0; // Falls Key noch nicht existiert, mit 0 starten
-  }
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// helper and setter functions
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-  // Falls gewünscht, erhöhen und speichern
-  if (do_increment) {
-    devcnt++;
-    nvs_set_u16(nvs_handle, "devcnt", devcnt);
-    nvs_commit(nvs_handle);
-  }
-
-  ESP_LOGD(TAG, "Device Counter: %i", devcnt);
-
-  nvs_close(nvs_handle);
+/**
+ *******************************************************************
+ * @brief   set gpio for CC1101
+ * @param   sck, miso, mosi, cs, gd0, gd2
+ * @return  none
+ * *******************************************************************/
+void JaroliftController::setGPIO(int sck, int miso, int mosi, int cs, int gdo0, int gdo2) {
+  gpio_.sck = sck;
+  gpio_.miso = miso;
+  gpio_.mosi = mosi;
+  gpio_.cs = cs;
+  gpio_.gdo0 = gdo0;
+  gpio_.gdo2 = gdo2;
 }
 
-// ####################################################################
-//  set Device Counter
-// ####################################################################
-void JaroliftController::setDeviceCounter(uint16_t newDevCnt) {
-  devcnt = newDevCnt;
-
-  nvs_handle_t nvs_handle;
-  esp_err_t err = nvs_open(NVS_NAMESPACE, NVS_READWRITE, &nvs_handle);
-  if (err != ESP_OK) {
-    ESP_LOGE(TAG, "Failed to open NVS");
-    return;
-  }
-
-  nvs_set_u16(nvs_handle, "devcnt", devcnt);
-  nvs_commit(nvs_handle);
-
-  ESP_LOGD(TAG, "stored Device Counter: %i", devcnt);
-
-  nvs_close(nvs_handle);
-
-  delay(100);
+/**
+ *******************************************************************
+ * @brief   set serial number (6 of 8 bytes)
+ * @param   serial
+ * @return  none
+ * *******************************************************************/
+void JaroliftController::setBaseSerial(uint32_t serial) {
+  config_.serial = serial;
+  ESP_LOGI(TAG, "Set base serial: 0x%08lx", config_.serial);
 }
 
-// ####################################################################
-//  get Device Counter
-// ####################################################################
+/**
+ *******************************************************************
+ * @brief   get serial for given channel
+ * @param   channel
+ * @return  none
+ * *******************************************************************/
+uint32_t JaroliftController::getSerial(uint8_t channel) {
+  uint32_t serial = (config_.serial << 8) | channel;
+  ESP_LOGD(TAG, "serial: 0x%08lx | channel: %d", serial, channel + 1);
+  return serial;
+}
+
+/**
+ *******************************************************************
+ * @brief   set legacy learn mode
+ * @param   legacyMode
+ * @return  none
+ * *******************************************************************/
+void JaroliftController::setLegacyLearnMode(bool legacyMode) { config_.learnMode = !legacyMode; }
+
+/**
+ *******************************************************************
+ * @brief   set jarolift master keys
+ * @param   masterMSB, masterLSB
+ * @return  none
+ * *******************************************************************/
+void JaroliftController::setKeys(unsigned long masterMSB, unsigned long masterLSB) {
+  config_.masterMSB = masterMSB;
+  config_.masterLSB = masterLSB;
+}
+
+/**
+ *******************************************************************
+ * @brief   get state if CC1101 is connected
+ * @param   none
+ * @return  none
+ * *******************************************************************/
+bool JaroliftController::getCC1101State() { return cc1101_.connected(); }
+
+/**
+ *******************************************************************
+ * @brief   get state if CC1101 is connected
+ * @param   none
+ * @return  none
+ * *******************************************************************/
 uint16_t JaroliftController::getDeviceCounter() {
-  nvs_handle_t nvs_handle;
-  esp_err_t err = nvs_open(NVS_NAMESPACE, NVS_READWRITE, &nvs_handle);
+  nvs_handle_t nvsHandle;
+  esp_err_t err = nvs_open("device_data", NVS_READWRITE, &nvsHandle);
   if (err != ESP_OK) {
     ESP_LOGE(TAG, "Failed to open NVS");
     return 0;
   }
-
-  uint16_t devcnt = 0;
-  err = nvs_get_u16(nvs_handle, "devcnt", &devcnt);
-
+  uint16_t counter = 0;
+  err = nvs_get_u16(nvsHandle, "devcnt", &counter);
   if (err == ESP_ERR_NVS_NOT_FOUND) {
     // try to read from EEPROM if not found in NVS (migration)
-    EEPROM.get(0, devcnt);
-
-    // save to NVS for future use
-    nvs_set_u16(nvs_handle, "devcnt", devcnt);
-    nvs_commit(nvs_handle);
-    ESP_LOGI(TAG, "Migrated devcnt=%d from EEPROM to NVS", devcnt);
+    EEPROM.get(0, counter);
+    nvs_set_u16(nvsHandle, "devcnt", counter);
+    nvs_commit(nvsHandle);
+    ESP_LOGI(TAG, "Migrated devcnt=%d from EEPROM to NVS", counter);
   }
-
-  nvs_close(nvs_handle);
-
-  // set device counter to 1 - 0 seems to be a problem
-  if (devcnt == 0) {
-    devcnt = 1;
-    setDeviceCounter(devcnt);
+  nvs_close(nvsHandle);
+  if (counter == 0) {
+    counter = 1;
+    setDeviceCounter(counter);
   }
-
-  return devcnt;
+  return counter;
 }
 
-// ####################################################################
-//  set Base Serial
-// ####################################################################
-void JaroliftController::setBaseSerial(uint32_t serial) {
-  config.serial = serial;
-  ESP_LOGD(TAG, "set base serial: 0x%08lx", config.serial);
+/**
+ *******************************************************************
+ * @brief   set device counter
+ * @param   newDevCnt
+ * @return  none
+ * *******************************************************************/
+void JaroliftController::setDeviceCounter(uint16_t newDevCnt) {
+  devCount_ = newDevCnt;
+  nvs_handle_t nvsHandle;
+  esp_err_t err = nvs_open("device_data", NVS_READWRITE, &nvsHandle);
+  if (err != ESP_OK) {
+    ESP_LOGE(TAG, "Failed to open NVS");
+    return;
+  }
+  nvs_set_u16(nvsHandle, "devcnt", devCount_);
+  nvs_commit(nvsHandle);
+  nvs_close(nvsHandle);
+  delay(100);
 }
 
-// ####################################################################
-//  set Legacy Learn Mode
-// ####################################################################
-void JaroliftController::setLegacyLearnMode(bool LearnModeLegacy) { config.learn_mode = !LearnModeLegacy; }
-
-// ####################################################################
-//  set Keys
-// ####################################################################
-void JaroliftController::setKeys(unsigned long masterMSB, unsigned long masterLSB) {
-  config.masterMSB = masterMSB;
-  config.masterLSB = masterLSB;
-}
-
-// ####################################################################
-//  get CC1101 connection state - return true if connected
-// ####################################################################
-bool JaroliftController::getCC1101State(void) { return cc1101.connected(); }
-
-// ####################################################################
-//  generates 16 serial numbers
-// ####################################################################
-uint32_t JaroliftController::cmd_get_serial(int channel) {
-  uint32_t serial = (config.serial << 8) + channel;
-  ESP_LOGD(TAG, "get serial: 0x%08lx for channel: %i", serial, channel + 1);
-  return serial;
+/**
+ *******************************************************************
+ * @brief   update and increment device counter
+ * @param   increment
+ * @return  none
+ * *******************************************************************/
+void JaroliftController::updateDeviceCounter(bool increment) {
+  devCount_ = getDeviceCounter();
+  if (increment) {
+    devCount_++;
+    setDeviceCounter(devCount_);
+  }
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // CC1101 radio functions group
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-// ####################################################################
-//  Generates sync-pulses
-// ####################################################################
-void JaroliftController::radio_tx_frame(int l) {
-  for (int i = 0; i < l; ++i) {
-    digitalWrite(gpio.gdo0, LOW);
-    delayMicroseconds(400); // change 28.01.2018 default highpulse
-    digitalWrite(gpio.gdo0, HIGH);
-    delayMicroseconds(380); // change 28.01.2018 default lowpulse
+/**
+ *******************************************************************
+ * @brief   Generates sync-pulses (protocoll start)
+ * @param   length
+ * @return  none
+ * *******************************************************************/
+void JaroliftController::radioTxFrame(int length) {
+  for (int i = 0; i < length; ++i) {
+    digitalWrite(gpio_.gdo0, LOW);
+    delayMicroseconds(400);
+    digitalWrite(gpio_.gdo0, HIGH);
+    delayMicroseconds(380);
   }
-} // void radio_tx_frame
+}
 
-// ####################################################################
-//  Sending of high_group_bits 8-16
-// ####################################################################
-void JaroliftController::radio_tx_group_h() {
+/**
+ *******************************************************************
+ * @brief   Sending of high_group_bits 8-16 (discH_)
+ * @param   none
+ * @return  none
+ * *******************************************************************/
+void JaroliftController::radioTxGroupH() {
   for (int i = 0; i < 8; i++) {
-    int out = ((disc_h >> i) & 0x1); // Bitmask to get MSB and send it first
-    if (out == 0x1) {
-      digitalWrite(gpio.gdo0, LOW); // Simple encoding of bit state 1
-      delayMicroseconds(Lowpulse);
-      digitalWrite(gpio.gdo0, HIGH);
-      delayMicroseconds(Highpulse);
+    int bitVal = (discH_ >> i) & 0x1;
+    if (bitVal == 1) {
+      digitalWrite(gpio_.gdo0, LOW);
+      delayMicroseconds(kLowPulse);
+      digitalWrite(gpio_.gdo0, HIGH);
+      delayMicroseconds(kHighPulse);
     } else {
-      digitalWrite(gpio.gdo0, LOW); // Simple encoding of bit state 0
-      delayMicroseconds(Highpulse);
-      digitalWrite(gpio.gdo0, HIGH);
-      delayMicroseconds(Lowpulse);
+      digitalWrite(gpio_.gdo0, LOW);
+      delayMicroseconds(kHighPulse);
+      digitalWrite(gpio_.gdo0, HIGH);
+      delayMicroseconds(kLowPulse);
     }
   }
-} // void radio_tx_group_h
+}
 
-// ####################################################################
-//  Receive Routine
-// ####################################################################
-void ICACHE_RAM_ATTR radio_rx_measure() {
-  static long LineUp, LineDown, Timeout;
-  long LowVal, HighVal;
-  int pinstate = digitalRead(gpio.gdo2); // Read current pin state GDO2
-  if (micros() - Timeout > 3500) {
-    pbwrite = 0;
-  }
-  if (pinstate) // pin is now HIGH, was low
-  {
-    LineUp = micros();          // Get actual time in LineUp
-    LowVal = LineUp - LineDown; // calculate the LOW pulse time
-    if (LowVal < debounce)
-      return;
-    if ((LowVal > 300) && (LowVal < 4300)) {
-      if ((LowVal > 3650) && (LowVal < 4300)) {
-        Timeout = micros();
-        pbwrite = 0;
-        lowbuf[pbwrite] = LowVal;
-        pbwrite = pbwrite + 1;
-      }
-      if ((LowVal > 300) && (LowVal < 1000)) {
-        lowbuf[pbwrite] = LowVal;
-        pbwrite = pbwrite + 1;
-        Timeout = micros();
-      }
-    }
-  } else {
-    LineDown = micros();         // line went LOW after being HIGH
-    HighVal = LineDown - LineUp; // calculate the HIGH pulse time
-    if (HighVal < debounce)
-      return;
-    if ((HighVal > 300) && (HighVal < 1000)) {
-      hibuf[pbwrite] = HighVal;
-    }
-  }
-} // void ICACHE_RAM_ATTR radio_rx_measure
-
-// ####################################################################
-//  Generation of the encrypted message (Hopcode)
-// ####################################################################
-void JaroliftController::keeloq() {
-  Keeloq k(device_key_msb, device_key_lsb);
-  unsigned int result = (disc << 16) | devcnt; // Append counter value to discrimination value
-  dec = k.encrypt(result);
-} // void keeloq
-
-// ####################################################################
-//  Keygen generates the device crypt key in relation to the masterkey and provided serial number.
-//  Here normal key-generation is used according to 00745a_c.PDF Appendix G.
-//  https://github.com/hnhkj/documents/blob/master/KEELOQ/docs/AN745/00745a_c.pdf
-// ####################################################################
-void JaroliftController::keygen() {
-  Keeloq k(config.masterMSB, config.masterLSB);
-  uint64_t keylow = new_serial | 0x20000000;
-  unsigned long enc = k.decrypt(keylow);
-  device_key_lsb = enc; // Stores LSB devicekey 16Bit
-  keylow = new_serial | 0x60000000;
-  enc = k.decrypt(keylow);
-  device_key_msb = enc; // Stores MSB devicekey 16Bit
-  // ESP_LOGD(TAG, "created devicekey low: 0x%08x // high: 0x%08x", device_key_lsb, device_key_msb);
-} // void keygen
-
-// ####################################################################
-//  Simple TX routine. Repetitions for simulate continuous button press.
-//  Send code two times. In case of one shutter did not "hear" the command.
-// ####################################################################
-void JaroliftController::radio_tx(int repetitions) {
-  pack = (button << 60) | (new_serial << 32) | dec;
+/**
+ *******************************************************************
+ * @brief   tx routine to send data
+ * @param   repetitions
+ * @return  none
+ * *******************************************************************/
+void JaroliftController::radioTx(int repetitions) {
+  pack_ = (button_ << 60) | (newSerial_ << 32) | encrypted_;
   for (int a = 0; a < repetitions; a++) {
-    digitalWrite(gpio.gdo0, LOW); // CC1101 in TX Mode+
+    digitalWrite(gpio_.gdo0, LOW);
     delayMicroseconds(1150);
-    radio_tx_frame(13); // change 28.01.2018 default 10
+    radioTxFrame(13);
     delayMicroseconds(3500);
-
     for (int i = 0; i < 64; i++) {
-
-      int out = ((pack >> i) & 0x1); // Bitmask to get MSB and send it first
-      if (out == 0x1) {
-        digitalWrite(gpio.gdo0, LOW); // Simple encoding of bit state 1
-        delayMicroseconds(Lowpulse);
-        digitalWrite(gpio.gdo0, HIGH);
-        delayMicroseconds(Highpulse);
+      int bitVal = (pack_ >> i) & 0x1;
+      if (bitVal == 1) {
+        digitalWrite(gpio_.gdo0, LOW);
+        delayMicroseconds(kLowPulse);
+        digitalWrite(gpio_.gdo0, HIGH);
+        delayMicroseconds(kHighPulse);
       } else {
-        digitalWrite(gpio.gdo0, LOW); // Simple encoding of bit state 0
-        delayMicroseconds(Highpulse);
-        digitalWrite(gpio.gdo0, HIGH);
-        delayMicroseconds(Lowpulse);
+        digitalWrite(gpio_.gdo0, LOW);
+        delayMicroseconds(kHighPulse);
+        digitalWrite(gpio_.gdo0, HIGH);
+        delayMicroseconds(kLowPulse);
       }
     }
-    radio_tx_group_h(); // Last 8Bit. For motor 8-16.
-
-    delay(16); // delay in loop context is save for wdt
+    radioTxGroupH();
+    delay(16);
   }
-} // void radio_tx
+}
 
-// ####################################################################
-//  Calculate device code from received serial number
-// ####################################################################
-void JaroliftController::rx_keygen() {
-  Keeloq k(config.masterMSB, config.masterLSB);
-  uint32_t keylow = rx_serial | 0x20000000;
-  unsigned long enc = k.decrypt(keylow);
-  rx_device_key_lsb = enc; // Stores LSB devicekey 16Bit
-  keylow = rx_serial | 0x60000000;
-  enc = k.decrypt(keylow);
-  rx_device_key_msb = enc; // Stores MSB devicekey 16Bit
+/**
+ *******************************************************************
+ * @brief   put CC1101 to receive mode
+ * @param   none
+ * @return  none
+ * *******************************************************************/
+void JaroliftController::enterRx() {
+  cc1101_.setRxState();
+  delay(2);
+  unsigned long startTime = micros();
+  uint8_t marcState = 0;
+  while (((marcState = cc1101_.readStatusReg(CC1101_MARCSTATE)) & 0x1F) != 0x0D) {
+    if (micros() - startTime > 50000)
+      break;
+  }
+}
 
-  // ESP_LOGD(TAG, "received devicekey low: 0x%08x // high: 0x%08x", rx_device_key_lsb, rx_device_key_msb);
-} // void rx_keygen
+/**
+ *******************************************************************
+ * @brief   put CC1101 to send mode
+ * @param   none
+ * @return  none
+ * *******************************************************************/
+void JaroliftController::enterTx() {
+  cc1101_.setTxState();
+  delay(2);
+  unsigned long startTime = micros();
+  uint8_t marcState = 0;
+  while (((marcState = cc1101_.readStatusReg(CC1101_MARCSTATE)) & 0x1F) != 0x13 && ((marcState & 0x1F) != 0x14) && ((marcState & 0x1F) != 0x15)) {
+    if (micros() - startTime > 50000)
+      break;
+  }
+}
 
-// ####################################################################
-//  Decoding of the hopping code
-// ####################################################################
-void JaroliftController::rx_decoder() {
-  Keeloq k(rx_device_key_msb, rx_device_key_lsb);
-  unsigned int result = rx_hopcode;
-  decoded = k.decrypt(result);
-  rx_disc_low[0] = (decoded >> 24) & 0xFF;
-  rx_disc_low[1] = (decoded >> 16) & 0xFF;
-  rx_disc_low[2] = (decoded >> 8) & 0xFF;
-  rx_disc_low[3] = decoded & 0xFF;
-
-  // ESP_LOGD(TAG, "decoded devicekey: 0x%08lx", decoded);
-} // void rx_decoder
-
-// ####################################################################
-//  calculate RSSI value (Received Signal Strength Indicator)
-// ####################################################################
+/**
+ *******************************************************************
+ * @brief   calculate RSSI value (Received Signal Strength Indicator)
+ * @param   none
+ * @return  none
+ * *******************************************************************/
 uint8_t JaroliftController::getRssi() {
-  uint8_t rssi, value = 0;
-  rssi = (cc1101.readReg(CC1101_RSSI, CC1101_STATUS_REGISTER));
+  uint8_t rssi = cc1101_.readReg(CC1101_RSSI, CC1101_STATUS_REGISTER);
+  uint8_t value = 0;
   if (rssi >= 128) {
     value = 255 - rssi;
     value = value / 2;
@@ -381,429 +285,620 @@ uint8_t JaroliftController::getRssi() {
     value = rssi / 2;
     value = value + 74;
   }
-  // ESP_LOGD(TAG, "CC1101_RSSI: %i", value);
   return value;
-} // void ReadRSSI
+}
 
-// ####################################################################
-//  put CC1101 to receive mode
-// ####################################################################
-void JaroliftController::enterrx() {
-  cc1101.setRxState();
-  delay(2);
-  rx_time = micros();
+/**
+ *******************************************************************
+ * @brief   Calculate device keys based on serial and master keys
+ * @param   none
+ * @return  none
+ * *******************************************************************/
+void JaroliftController::generateKey() {
+  Keeloq k(config_.masterMSB, config_.masterLSB);
+  uint64_t keyInput = newSerial_ | 0x20000000;
+  unsigned long enc = k.decrypt(keyInput);
+  deviceKeyLSB_ = enc;
+  keyInput = newSerial_ | 0x60000000;
+  enc = k.decrypt(keyInput);
+  deviceKeyMSB_ = enc;
+}
 
-  while (((marcState = cc1101.readStatusReg(CC1101_MARCSTATE)) & 0x1F) != 0x0D) {
-    if (micros() - rx_time > 50000)
-      break; // Quit when marcState does not change...
+/**
+ *******************************************************************
+ * @brief   Generation of the encrypted message (Hopcode)
+ * @param   none
+ * @return  none
+ * *******************************************************************/
+void JaroliftController::generateEncrypted() {
+  Keeloq k(deviceKeyMSB_, deviceKeyLSB_);
+  devCount_ = getDeviceCounter();
+  unsigned int result = (disc_ << 16) | devCount_; // Append counter value to discrimination value
+  encrypted_ = k.encrypt(result);
+}
+
+/**
+ *******************************************************************
+ * @brief   encrypt device keys from received hopcode based on received Serialnumber
+ * @details Here normal key-generation is used according to 00745a_c.PDF Appendix G.
+ * @details https://github.com/hnhkj/documents/blob/master/KEELOQ/docs/AN745/00745a_c.pdf
+ * @param   none
+ * @return  none
+ * *******************************************************************/
+void JaroliftController::rxKeyGen() {
+  Keeloq k(config_.masterMSB, config_.masterLSB);
+  uint32_t keylow = rxSerial_ | 0x20000000;
+  unsigned long enc = k.decrypt(keylow);
+  deviceKeyLSB_ = enc; // Stores LSB devicekey 16Bit
+  keylow = rxSerial_ | 0x60000000;
+  enc = k.decrypt(keylow);
+  deviceKeyMSB_ = enc; // Stores MSB devicekey 16Bit
+}
+
+/**
+ *******************************************************************
+ * @brief   encrypt received hopcode based calculated device keys
+ * @param   none
+ * @return  none
+ * *******************************************************************/
+uint32_t JaroliftController::rxDecode() {
+  Keeloq k(deviceKeyMSB_, deviceKeyLSB_);
+  unsigned int result = rxHopCode_;
+  return k.decrypt(result);
+}
+
+/**
+ *******************************************************************
+ * @brief   Interrupt-Service-Routine (ISR)
+ * @param   none
+ * @return  none
+ * *******************************************************************/
+void IRAM_ATTR JaroliftController::radioRxMeasureISR() {
+  if (instance_) {
+    instance_->handleRadioRxMeasure();
   }
-} // void enterrx
+}
 
-// ####################################################################
-//  put CC1101 to send mode
-// ####################################################################
-void JaroliftController::entertx() {
-  cc1101.setTxState();
-  delay(2);
-  rx_time = micros();
-  while (((marcState = cc1101.readStatusReg(CC1101_MARCSTATE)) & 0x1F) != 0x13 && 0x14 && 0x15) {
-    if (micros() - rx_time > 50000)
-      break; // Quit when marcState does not change...
+/**
+ *******************************************************************
+ * @brief   Handling incoming data
+ * @param   none
+ * @return  none
+ * *******************************************************************/
+void JaroliftController::handleRadioRxMeasure() {
+  static unsigned long lineUp = 0;
+  static unsigned long lineDown = 0;
+  static unsigned long timeout = 0;
+  unsigned long currentMicros = micros();
+  int pinState = digitalRead(gpio_.gdo2);
+  if (currentMicros - timeout > 3500) {
+    pbWrite_ = 0;
   }
-} // void entertx
+  if (pinState) { // Übergang zu HIGH
+    lineUp = currentMicros;
+    unsigned long lowVal = lineUp - lineDown;
+    if (lowVal < kDebounce)
+      return;
+    if (lowVal > 300 && lowVal < 4300) {
+      if (lowVal > 3650 && lowVal < 4300) {
+        timeout = currentMicros;
+        pbWrite_ = 0;
+        lowBuf_[pbWrite_] = lowVal;
+        pbWrite_++;
+      } else if (lowVal > 300 && lowVal < 1000) {
+        lowBuf_[pbWrite_] = lowVal;
+        pbWrite_++;
+        timeout = currentMicros;
+      }
+    }
+  } else { // Übergang zu LOW
+    lineDown = currentMicros;
+    unsigned long highVal = lineDown - lineUp;
+    if (highVal < kDebounce)
+      return;
+    if (highVal > 300 && highVal < 1000) {
+      hiBuf_[pbWrite_] = highVal;
+    }
+  }
+}
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// execute cmd_ functions group
+// Shutter command functions
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-// ####################################################################
-//  function to move the shutter up
-// ####################################################################
-void JaroliftController::cmdUp(uint8_t channel) {
-
-  if (!initOK) {
+/**
+ * *******************************************************************
+ * @brief   send channel commands (Up, DOWN, STOP, SHADE)
+ * @param   cmd, channel
+ * @return  none
+ * *******************************************************************/
+void JaroliftController::cmdChannel(commands cmd, uint8_t channel) {
+  if (!initOK_)
     return;
+  newSerial_ = getSerial(channel);
+
+  switch (cmd) {
+  case CMD_UP:
+    button_ = FCT_CODE_UP;
+    discL_ = discLowArr_[channel];
+    discH_ = discHighArr_[channel];
+    disc_ = (discL_ << 8) | (newSerial_ & 0xFF);
+    generateKey();
+    generateEncrypted();
+    enterTx();
+    radioTx(2); // send command 2-times with same devCnt
+    enterRx();
+    updateDeviceCounter(true);
+    break;
+
+  case CMD_DOWN:
+    button_ = FCT_CODE_DOWN;
+    discL_ = discLowArr_[channel];
+    discH_ = discHighArr_[channel];
+    disc_ = (discL_ << 8) | (newSerial_ & 0xFF);
+    generateKey();
+    generateEncrypted();
+    enterTx();
+    radioTx(2); // send command 2-times with same devCnt
+    enterRx();
+    updateDeviceCounter(true);
+    break;
+
+  case CMD_STOP:
+    button_ = FCT_CODE_STOP;
+    discL_ = discLowArr_[channel];
+    discH_ = discHighArr_[channel];
+    disc_ = (discL_ << 8) | (newSerial_ & 0xFF);
+    generateKey();
+    generateEncrypted();
+    enterTx();
+    radioTx(2); // send command 2-times
+    enterRx();
+    updateDeviceCounter(true);
+    break;
+
+  case CMD_SHADE:
+    button_ = FCT_CODE_STOP;
+    discL_ = discLowArr_[channel];
+    discH_ = discHighArr_[channel];
+    disc_ = (discL_ << 8) | (newSerial_ & 0xFF);
+    generateKey();
+    generateEncrypted();
+    enterTx();
+    radioTx(20); // send "continuos STOP"
+    enterRx();
+    updateDeviceCounter(true);
+    break;
+
+  case CMD_SET_SHADE:
+    button_ = FCT_CODE_STOP;
+    discL_ = discLowArr_[channel];
+    discH_ = discHighArr_[channel];
+    disc_ = (discL_ << 8) | (newSerial_ & 0xFF);
+    generateKey();
+    // send 4-times STOP
+    for (int i = 0; i < 4; i++) {
+      enterTx();
+      generateEncrypted();
+      radioTx(1);
+      updateDeviceCounter(true);
+      enterRx();
+      delay(300);
+    }
+    break;
+
+  default:
+    break;
   }
-  new_serial = cmd_get_serial(channel);
-  devcnt = getDeviceCounter();
-  button = 0x8;
-  disc_l = disc_low[channel];
-  disc_h = disc_high[channel];
-  disc = (disc_l << 8) | (new_serial & 0xFF);
-  rx_disc_low[0] = disc_l;
-  rx_disc_high[0] = disc_h;
-  keygen();
-  keeloq();
-  entertx();
-  radio_tx(2);
-  enterrx();
-  rx_function = 0x8;
-  devcnt_handler(true);
-} // void jaroCmdUp
+}
 
-void JaroliftController::cmdGroupUp(uint16_t group_mask) {
-
-  if (!initOK) {
+/**
+ * *******************************************************************
+ * @brief   send group commands (Up, DOWN, STOP, SHADE)
+ * @param   cmd, channel
+ * @return  none
+ * *******************************************************************/
+void JaroliftController::cmdGroup(commands cmd, uint16_t groupMask) {
+  if (!initOK_)
     return;
-  }
-  devcnt = getDeviceCounter();
-  new_serial = cmd_get_serial(0);
-  button = 0x8;
-  disc_l = group_mask & 0x00FF;
-  disc_h = (group_mask >> 8) & 0x00FF;
-  disc = (disc_l << 8) | (new_serial & 0xFF);
-  rx_disc_low[0] = disc_l;
-  rx_disc_high[0] = disc_h;
-  keygen();
-  keeloq();
-  entertx();
-  radio_tx(2);
-  enterrx();
-  rx_function = 0x8;
-  devcnt_handler(true);
-} // void cmdGroupUp
+  devCount_ = getDeviceCounter();
+  newSerial_ = getSerial(0);
 
-// ####################################################################
-//  function to move the shutter down
-// ####################################################################
-void JaroliftController::cmdDown(uint8_t channel) {
+  switch (cmd) {
+  case CMD_UP:
+    button_ = FCT_CODE_UP;
+    break;
 
-  if (!initOK) {
-    return;
-  }
-  new_serial = cmd_get_serial(channel);
-  devcnt = getDeviceCounter();
-  button = 0x2;
-  disc_l = disc_low[channel];
-  disc_h = disc_high[channel];
-  disc = (disc_l << 8) | (new_serial & 0xFF);
-  rx_disc_low[0] = disc_l;
-  rx_disc_high[0] = disc_h;
-  keygen();
-  keeloq(); // Generate encrypted message 32Bit hopcode
-  entertx();
-  radio_tx(2); // Call TX routine
-  enterrx();
-  rx_function = 0x2;
-  devcnt_handler(true);
-} // void jaroCmdDown
+  case CMD_DOWN:
+    button_ = FCT_CODE_DOWN;
+    break;
 
-void JaroliftController::cmdGroupDown(uint16_t group_mask) {
+  case CMD_STOP:
+  case CMD_SHADE:
+    button_ = FCT_CODE_STOP;
+    break;
 
-  if (!initOK) {
-    return;
-  }
-  devcnt = getDeviceCounter();
-  new_serial = cmd_get_serial(0);
-  button = 0x2;
-  disc_l = group_mask & 0x00FF;
-  disc_h = (group_mask >> 8) & 0x00FF;
-  disc = (disc_l << 8) | (new_serial & 0xFF);
-  rx_disc_low[0] = disc_l;
-  rx_disc_high[0] = disc_h;
-  keygen();
-  keeloq();
-  entertx();
-  radio_tx(2);
-  enterrx();
-  rx_function = 0x2;
-  devcnt_handler(true);
-} // void cmdGroupDown
-
-// ####################################################################
-//  function to stop the shutter
-// ####################################################################
-void JaroliftController::cmdStop(uint8_t channel) {
-
-  if (!initOK) {
-    return;
-  }
-  new_serial = cmd_get_serial(channel);
-  devcnt = getDeviceCounter();
-  button = 0x4;
-  disc_l = disc_low[channel];
-  disc_h = disc_high[channel];
-  disc = (disc_l << 8) | (new_serial & 0xFF);
-  rx_disc_low[0] = disc_l;
-  rx_disc_high[0] = disc_h;
-  keygen();
-  keeloq();
-  entertx();
-  radio_tx(2);
-  enterrx();
-  rx_function = 0x4;
-  devcnt_handler(true);
-} // void jaroCmdStop
-
-void JaroliftController::cmdGroupStop(uint16_t group_mask) {
-
-  if (!initOK) {
-    return;
-  }
-  devcnt = getDeviceCounter();
-  new_serial = cmd_get_serial(0);
-  button = 0x4;
-  disc_l = group_mask & 0x00FF;
-  disc_h = (group_mask >> 8) & 0x00FF;
-  disc = (disc_l << 8) | (new_serial & 0xFF);
-  rx_disc_low[0] = disc_l;
-  rx_disc_high[0] = disc_h;
-  keygen();
-  keeloq();
-  entertx();
-  radio_tx(2);
-  enterrx();
-  rx_function = 0x4;
-  devcnt_handler(true);
-} // void cmdGroupStop
-
-// ####################################################################
-//  function to move shutter to shade position
-// ####################################################################
-void JaroliftController::cmdShade(uint8_t channel) {
-
-  if (!initOK) {
-    return;
-  }
-  new_serial = cmd_get_serial(channel);
-  devcnt = getDeviceCounter();
-  button = 0x4;
-  disc_l = disc_low[channel];
-  disc_h = disc_high[channel];
-  disc = (disc_l << 8) | (new_serial & 0xFF);
-  rx_disc_low[0] = disc_l;
-  rx_disc_high[0] = disc_h;
-  keygen();
-  keeloq();
-  entertx();
-  radio_tx(20);
-  enterrx();
-  rx_function = 0x3;
-  devcnt_handler(true);
-} // void jaroCmdShade
-
-void JaroliftController::cmdGroupShade(uint16_t group_mask) {
-
-  if (!initOK) {
-    return;
-  }
-  devcnt = getDeviceCounter();
-  new_serial = cmd_get_serial(0);
-  button = 0x4;
-  disc_l = group_mask & 0x00FF;
-  disc_h = (group_mask >> 8) & 0x00FF;
-  disc = (disc_l << 8) | (new_serial & 0xFF);
-  rx_disc_low[0] = disc_l;
-  rx_disc_high[0] = disc_h;
-  keygen();
-  keeloq();
-  entertx();
-  radio_tx(20);
-  enterrx();
-  rx_function = 0x3;
-  devcnt_handler(true);
-} // void cmdGroupShade
-
-// ####################################################################
-//  function to set the learn/set the shade position
-// ####################################################################
-void JaroliftController::cmdSetShade(uint8_t channel) {
-
-  if (!initOK) {
-    return;
+  default:
+    break;
   }
 
-  new_serial = cmd_get_serial(channel);
-  devcnt = getDeviceCounter();
-  button = 0x4;
-  disc_l = disc_low[channel];
-  disc_h = disc_high[channel];
-  disc = (disc_l << 8) | (new_serial & 0xFF);
-  rx_disc_low[0] = disc_l;
-  rx_disc_high[0] = disc_h;
-  keygen();
+  discL_ = groupMask & 0x00FF;
+  discH_ = (groupMask >> 8) & 0x00FF;
+  disc_ = (discL_ << 8) | (newSerial_ & 0xFF);
+  generateKey();
+  generateEncrypted();
+  enterTx();
+  if (cmd == CMD_SHADE) {
+    radioTx(20); // send "continuos STOP"
+  } else {
+    radioTx(2); // send command 2-times
+  }
 
-  for (int i = 0; i < 4; i++) {
-    entertx();
-    keeloq();
-    radio_tx(1);
-    devcnt++;
-    enterrx();
+  enterRx();
+  updateDeviceCounter(true);
+}
+
+/**
+ * *******************************************************************
+ * @brief   send command to learn a new shutter
+ * @param   channel
+ * @return  none
+ * *******************************************************************/
+void JaroliftController::cmdLearn(uint8_t channel) {
+  if (!initOK_)
+    return;
+  newSerial_ = getSerial(channel);
+  devCount_ = getDeviceCounter();
+  ESP_LOGD(TAG, "learn | Device Counter: %d | Serial: 0x%08llx", devCount_, newSerial_);
+  button_ = config_.learnMode ? 0xA : 0x1;
+  discL_ = discLowArr_[channel];
+  discH_ = discHighArr_[channel];
+  disc_ = (discL_ << 8) | (newSerial_ & 0xFF);
+  generateKey();
+  generateEncrypted();
+  enterTx();
+  radioTx(2);
+  enterRx();
+  updateDeviceCounter(true);
+  if (config_.learnMode) {
+    delay(1000);
+    button_ = 0x4; // Stop
+    generateEncrypted();
+    enterTx();
+    radioTx(2);
+    enterRx();
+    updateDeviceCounter(true);
+  }
+}
+
+/**
+ * *******************************************************************
+ * @brief   send command to unlearn a existing shutter
+ * @details UP/DOWN -> 6x STOP -> UP
+ * @param   channel
+ * @return  none
+ * *******************************************************************/
+void JaroliftController::cmdUnlearn(uint8_t channel) {
+  if (!initOK_)
+    return;
+  newSerial_ = getSerial(channel);
+  devCount_ = getDeviceCounter();
+  ESP_LOGD(TAG, "unlearn | Device Counter: %d | Serial: 0x%08llx", devCount_, newSerial_);
+  discL_ = discLowArr_[channel];
+  discH_ = discHighArr_[channel];
+  disc_ = (discL_ << 8) | (newSerial_ & 0xFF);
+  generateKey();
+  generateEncrypted();
+  enterTx();
+  button_ = FCT_CODE_UPDOWN; // Up+Down
+  radioTx(2);
+  enterRx();
+  updateDeviceCounter(true);
+  delay(300);
+  for (int i = 0; i < 6; i++) {
+    button_ = FCT_CODE_STOP; // 6x Stop
+    enterTx();
+    generateEncrypted();
+    radioTx(2);
+    updateDeviceCounter(true);
+    enterRx();
     delay(300);
   }
-  rx_function = 0x6;
-  ESP_LOGI(TAG, "command SET SHADE for channel %i sent", channel + 1);
-  devcnt_handler(false);
-  delay(2000); // Safety time to prevent accidentally erase of end-points.
-} // void cmd_set_shade_position
+  button_ = FCT_CODE_UP; // UP
+  enterTx();
+  generateEncrypted();
+  radioTx(2);
+  updateDeviceCounter(true);
+  enterRx();
+  updateDeviceCounter(false);
+}
 
-// ####################################################################
-//  function to put the dongle into the learn mode and
-//  send learning packet.
-// ####################################################################
-void JaroliftController::cmdLearn(uint8_t channel) {
-
-  if (!initOK) {
+/**
+ * *******************************************************************
+ * @brief   send command to set the upper end point
+ * @details UP/DOWN -> 2x STOP -> UP
+ * @param   channel
+ * @return  none
+ * *******************************************************************/
+void JaroliftController::cmdSetEndPointUp(uint8_t channel) {
+  if (!initOK_)
     return;
+  newSerial_ = getSerial(channel);
+  devCount_ = getDeviceCounter();
+  ESP_LOGD(TAG, "set upper end point | Device Counter: %d | Serial: 0x%08llx", devCount_, newSerial_);
+  discL_ = discLowArr_[channel];
+  discH_ = discHighArr_[channel];
+  disc_ = (discL_ << 8) | (newSerial_ & 0xFF);
+  generateKey();
+  generateEncrypted();
+  enterTx();
+  button_ = FCT_CODE_UPDOWN; // Up+Down
+  radioTx(1);
+  enterRx();
+  updateDeviceCounter(true);
+  delay(300);
+  for (int i = 0; i < 2; i++) {
+    button_ = FCT_CODE_STOP; // 2x Stop
+    enterTx();
+    generateEncrypted();
+    radioTx(1);
+    updateDeviceCounter(true);
+    enterRx();
+    delay(300);
   }
+  button_ = FCT_CODE_UP; // UP
+  enterTx();
+  generateEncrypted();
+  radioTx(1);
+  updateDeviceCounter(true);
+  enterRx();
+}
 
-  ESP_LOGI(TAG, "putting channel %i into learn mode ...", channel + 1);
-  new_serial = cmd_get_serial(channel);
-  devcnt = getDeviceCounter();
-  ESP_LOGD(TAG, "Device Counter from EEPROM: %i", devcnt);
-  ESP_LOGD(TAG, "get serial: %#llx", new_serial);
-  if (config.learn_mode == true)
-    button = 0xA; // New learn method. Up+Down followd by Stop.
-  else
-    button = 0x1; // Old learn method for receiver before Mfg date 2010.
-  disc_l = disc_low[channel];
-  disc_h = disc_high[channel];
-  disc = (disc_l << 8) | (new_serial & 0xFF);
-  keygen();
-  keeloq();
-  entertx();
-  radio_tx(1);
-  enterrx();
-  devcnt++;
-  if (config.learn_mode == true) {
-    delay(1000);
-    button = 0x4; // Stop
-    keeloq();
-    entertx();
-    radio_tx(1);
-    enterrx();
-    devcnt++;
-  }
-  devcnt_handler(false);
-  ESP_LOGI(TAG, "Channel learned!");
-} // void jaroCmdLearn
-
-// ####################################################################
-//  function to send UP+DOWN button at same time
-// ####################################################################
-void JaroliftController::cmdUpDown(uint8_t channel) {
-
-  if (!initOK) {
+/**
+ * *******************************************************************
+ * @brief   send command to delete the upper end point
+ * @details UP/DOWN -> 2x STOP -> UP
+ * @param   channel
+ * @return  none
+ * *******************************************************************/
+void JaroliftController::cmdDeleteEndPointUp(uint8_t channel) {
+  if (!initOK_)
     return;
+  newSerial_ = getSerial(channel);
+  devCount_ = getDeviceCounter();
+  ESP_LOGD(TAG, "delete upper end point | Device Counter: %d | Serial: 0x%08llx", devCount_, newSerial_);
+  discL_ = discLowArr_[channel];
+  discH_ = discHighArr_[channel];
+  disc_ = (discL_ << 8) | (newSerial_ & 0xFF);
+  generateKey();
+  generateEncrypted();
+  enterTx();
+  button_ = FCT_CODE_UPDOWN; // Up+Down
+  radioTx(1);
+  enterRx();
+  updateDeviceCounter(true);
+  delay(300);
+  for (int i = 0; i < 4; i++) {
+    button_ = FCT_CODE_STOP; // 4x Stop
+    enterTx();
+    generateEncrypted();
+    radioTx(1);
+    updateDeviceCounter(true);
+    enterRx();
+    delay(300);
   }
+  button_ = FCT_CODE_UP; // UP
+  enterTx();
+  generateEncrypted();
+  radioTx(1);
+  updateDeviceCounter(true);
+  enterRx();
+}
 
-  new_serial = cmd_get_serial(channel);
-  devcnt = getDeviceCounter();
-  button = 0xA;
-  disc_l = disc_low[channel];
-  disc_h = disc_high[channel];
-  disc = (disc_l << 8) | (new_serial & 0xFF);
-  keygen();
-  keeloq();
-  entertx();
-  radio_tx(1);
-  enterrx();
-  devcnt_handler(true);
-  ESP_LOGI(TAG, "command UPDOWN for channel %i sent", channel + 1);
-} // void cmd_updown
+/**
+ * *******************************************************************
+ * @brief   send command to set the lower end point
+ * @details UP/DOWN -> 2x STOP -> DOWN
+ * @param   channel
+ * @return  none
+ * *******************************************************************/
+void JaroliftController::cmdSetEndPointDown(uint8_t channel) {
+  if (!initOK_)
+    return;
+  newSerial_ = getSerial(channel);
+  devCount_ = getDeviceCounter();
+  ESP_LOGD(TAG, "set lower end point | Device Counter: %d | Serial: 0x%08llx", devCount_, newSerial_);
+  discL_ = discLowArr_[channel];
+  discH_ = discHighArr_[channel];
+  disc_ = (discL_ << 8) | (newSerial_ & 0xFF);
+  generateKey();
+  generateEncrypted();
+  enterTx();
+  button_ = FCT_CODE_UPDOWN; // Up+Down
+  radioTx(1);
+  enterRx();
+  updateDeviceCounter(true);
+  delay(300);
+  for (int i = 0; i < 2; i++) {
+    button_ = FCT_CODE_STOP; // 2x Stop
+    enterTx();
+    generateEncrypted();
+    radioTx(1);
+    updateDeviceCounter(true);
+    enterRx();
+    delay(300);
+  }
+  button_ = FCT_CODE_DOWN; // DOWN
+  enterTx();
+  generateEncrypted();
+  radioTx(1);
+  updateDeviceCounter(true);
+  enterRx();
+}
 
+/**
+ * *******************************************************************
+ * @brief   send command to delete the lower end point
+ * @details UP/DOWN -> 2x STOP -> UP
+ * @param   channel
+ * @return  none
+ * *******************************************************************/
+void JaroliftController::cmdDeleteEndPointDown(uint8_t channel) {
+  if (!initOK_)
+    return;
+  newSerial_ = getSerial(channel);
+  devCount_ = getDeviceCounter();
+  ESP_LOGD(TAG, "delete lower end point | Device Counter: %d | Serial: 0x%08llx", devCount_, newSerial_);
+  discL_ = discLowArr_[channel];
+  discH_ = discHighArr_[channel];
+  disc_ = (discL_ << 8) | (newSerial_ & 0xFF);
+  generateKey();
+  generateEncrypted();
+  enterTx();
+  button_ = FCT_CODE_UPDOWN; // Up+Down
+  radioTx(1);
+  enterRx();
+  updateDeviceCounter(true);
+  delay(300);
+  for (int i = 0; i < 4; i++) {
+    button_ = FCT_CODE_STOP; // 4x Stop
+    enterTx();
+    generateEncrypted();
+    radioTx(1);
+    updateDeviceCounter(true);
+    enterRx();
+    delay(300);
+  }
+  button_ = FCT_CODE_DOWN; // DOWN
+  enterTx();
+  generateEncrypted();
+  radioTx(1);
+  updateDeviceCounter(true);
+  enterRx();
+}
+
+/**
+ * *******************************************************************
+ * @brief   process received data
+ * @param   none
+ * @return  none
+ * *******************************************************************/
+void JaroliftController::processRxData() {
+
+  // check if RX-Buffer is full and start to decode
+  if ((lowBuf_[0] > 3650 && lowBuf_[0] < 4300) && (pbWrite_ >= 65 && pbWrite_ <= 75)) {
+    rxDataReady_ = true;
+    pbWrite_ = 0;
+
+    // extract Hopcode (32 Bit)
+    rxHopCode_ = 0;
+    for (int i = 0; i < 32; i++) {
+      if (lowBuf_[i + 1] < hiBuf_[i + 1])
+        rxHopCode_ &= ~(1 << i);
+      else
+        rxHopCode_ |= (1 << i);
+    }
+
+    // extract Serial (28 Bit)
+    rxSerial_ = 0;
+    for (int i = 0; i < 28; i++) {
+      if (lowBuf_[i + 33] < hiBuf_[i + 33])
+        rxSerial_ &= ~(1 << i);
+      else
+        rxSerial_ |= (1 << i);
+    }
+
+    // extract function code (4 Bit)
+    rxFunction_ = 0;
+    for (int i = 0; i < 4; i++) {
+      if (lowBuf_[61 + i] < hiBuf_[61 + i])
+        rxFunction_ &= ~(1 << i);
+      else
+        rxFunction_ |= (1 << i);
+    }
+    // extract high disc - group bits (9-16 Bit)
+    rxDiscH_ = 0;
+    for (int i = 0; i < 8; i++) {
+      if (lowBuf_[65 + i] < hiBuf_[65 + i])
+        rxDiscH_ &= ~(1 << i);
+      else
+        rxDiscH_ |= (1 << i);
+    }
+
+    rxKeyGen();
+    uint32_t decoded = rxDecode();
+    if (rxFunction_ == 0x4)
+      steadyCount_++;
+    else
+      steadyCount_--;
+    if (steadyCount_ > 10 && steadyCount_ <= 40) {
+      rxFunction_ = 0x3;
+      steadyCount_ = 0;
+    }
+
+    // build channel information
+    uint8_t ch_low = (decoded >> 24) & 0xFF;
+    uint8_t ch_high = rxDiscH_ & 0xFF;
+    uint16_t channel = (ch_high << 8) | ch_low;
+
+    // callback function to receive information outside this library
+    remoteCallback(rxSerial_, rxFunction_, channel);
+
+    // reset variables
+    rxDiscH_ = 0;
+    rxHopCode_ = 0;
+    rxFunction_ = 0;
+    memset((void *)lowBuf_, 0, sizeof(lowBuf_));
+    memset((void *)hiBuf_, 0, sizeof(hiBuf_));
+  }
+}
+
+/**
+ * *******************************************************************
+ * @brief   Setup function for jarolift controller
+ * @param   none
+ * @return  none
+ * *******************************************************************/
 void JaroliftController::begin() {
-
   ESP_LOGI(TAG, "start CC1101 setup");
+  EEPROM.begin(sizeof(devCount_));
+  devCount_ = getDeviceCounter();
 
-  EEPROM.begin(sizeof(devcnt));
-  devcnt = getDeviceCounter();
-
-  // initialize the transceiver chip
-  cc1101.setGPIO(gpio.sck, gpio.miso, gpio.mosi, gpio.cs, gpio.gdo0);
-
-  if (cc1101.init() == false) {
+  cc1101_.setGPIO(gpio_.sck, gpio_.miso, gpio_.mosi, gpio_.cs, gpio_.gdo0);
+  if (!cc1101_.init()) {
     ESP_LOGE(TAG, "Initialisation of the CC1101 module aborted!");
     return;
   }
+  cc1101_.setSyncWord(kSyncWord, false);
+  cc1101_.setCarrierFreq(CFREQ_433);
+  cc1101_.disableAddressCheck();
+  cc1101_.setTxPowerAmp(PA_LongDistance);
 
-  cc1101.setSyncWord(syncWord, false);
-  cc1101.setCarrierFreq(CFREQ_433);
-  cc1101.disableAddressCheck();          // if not specified, will only display "packet received"
-  cc1101.setTxPowerAmp(PA_LongDistance); // Long Distance
+  pinMode(gpio_.gdo0, OUTPUT);
+  pinMode(gpio_.gdo2, INPUT_PULLUP);
+  attachInterrupt(gpio_.gdo2, radioRxMeasureISR, CHANGE);
 
-  // TX (GDO0) Pin
-  pinMode(gpio.gdo0, OUTPUT);
-  // RX (GDO2)
-  pinMode(gpio.gdo2, INPUT_PULLUP);
-  attachInterrupt(gpio.gdo2, radio_rx_measure, CHANGE); // Interrupt on change of RX_PORT
-
-  initOK = true;
+  initOK_ = true;
 }
 
+/**
+ * *******************************************************************
+ * @brief   cyclic process of jarolift controller
+ * @param   none
+ * @return  none
+ * *******************************************************************/
 void JaroliftController::loop() {
-
-  if (!initOK) {
+  if (!initOK_)
     return;
-  }
 
-  if (iset) {
-    cc1101.cmdStrobe(CC1101_SCAL);
+  if (rxDataReady_) {
+    cc1101_.cmdStrobe(CC1101_SCAL);
     delay(50);
-    enterrx();
-    iset = false;
+    enterRx();
+    rxDataReady_ = false;
     delay(200);
-    attachInterrupt(gpio.gdo2, radio_rx_measure, CHANGE); // Interrupt on change of gpio.gdo2
+    attachInterrupt(gpio_.gdo2, radioRxMeasureISR, CHANGE);
   }
 
-  // Check if RX buffer is full
-  if ((lowbuf[0] > 3650) && (lowbuf[0] < 4300) && (pbwrite >= 65) && (pbwrite <= 75)) { // Decode received data...
-
-    iset = true;
-    pbwrite = 0;
-    uint8_t rssi = getRssi();
-
-    for (int i = 0; i <= 31; i++) { // extracting Hopcode
-      if (lowbuf[i + 1] < hibuf[i + 1]) {
-        rx_hopcode = (rx_hopcode & ~(1 << i)) | (0 << i);
-      } else {
-        rx_hopcode = (rx_hopcode & ~(1 << i)) | (1 << i);
-      }
-    }
-    for (int i = 0; i <= 27; i++) { // extracting Serialnumber
-      if (lowbuf[i + 33] < hibuf[i + 33]) {
-        rx_serial = (rx_serial & ~(1 << i)) | (0 << i);
-      } else {
-        rx_serial = (rx_serial & ~(1 << i)) | (1 << i);
-      }
-    }
-
-    for (int i = 0; i <= 3; i++) { // extracting function code
-      if (lowbuf[61 + i] < hibuf[61 + i]) {
-        rx_function = (rx_function & ~(1 << i)) | (0 << i);
-      } else {
-        rx_function = (rx_function & ~(1 << i)) | (1 << i);
-      }
-    }
-
-    for (int i = 0; i <= 7; i++) { // extracting high disc
-      if (lowbuf[65 + i] < hibuf[65 + i]) {
-        rx_disc_h = (rx_disc_h & ~(1 << i)) | (0 << i);
-      } else {
-        rx_disc_h = (rx_disc_h & ~(1 << i)) | (1 << i);
-      }
-    }
-
-    rx_disc_high[0] = rx_disc_h & 0xFF;
-    rx_keygen();
-    rx_decoder();
-    if (rx_function == 0x4)
-      steadycnt++; // to detect a long press....
-    else
-      steadycnt--;
-    if (steadycnt > 10 && steadycnt <= 40) {
-      rx_function = 0x3;
-      steadycnt = 0;
-    }
-
-    // ESP_LOGD(TAG, "(INF1) serial: 0x%08lx, rx_function: 0x%x, rx_disc_low: %d, rx_disc_high: %d", rx_serial, rx_function, rx_disc_low[0],
-    // rx_disc_h); ESP_LOGD(TAG, "(INF2) RSSI: %d, counter: %d", rssi, rx_disc_low[3]); ESP_LOGD(TAG, "(INF3) rx_device_key_lsb:
-    // 0x%08x,rx_device_key_msb: 0x%08x, decoded: 0x%08lx", rx_device_key_lsb, rx_device_key_msb, decoded);
-
-    remoteCallback(rx_serial, rx_function, rssi);
-
-    rx_disc_h = 0;
-    rx_hopcode = 0;
-    rx_function = 0;
-  }
+  processRxData(); // process received data
 }

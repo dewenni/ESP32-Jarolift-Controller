@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>ESP Async Web Server</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" type="text/css" href="../css/pico.css" />
+    <link rel="stylesheet" type="text/css" href="../css/custom.css" />
+    <link rel="stylesheet" type="text/css" href="../css/icons.css" />
+    <script src="../js/fun.js" defer></script>
+    <script src="../js/doc.js" defer></script>
+    <script src="../js/lang.js" defer></script>
+    <style></style>
+    <script>
+      function test() {
+        document.getElementById("tab4").classList.add("active");
+        localizePage("de");
+      }
+      setInterval(test, 1000);
+    </script>
+  </head>
+  <body>
+    <!-- Layout -->
+    <header
+      style="
+        height: 100px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      "></header>
+    <!-- Tab-Content -->
+    <main class="container">
+      <!--SECTION-START-->
+      <!-- Logger-Inhalt hier -->
+      <div id="tab4" class="tab-content">
+        <div class="grid">
+          <!-- Grid 1 -->
+          <article class="dash">
+            <div class="dash-main" style="gap: 10px">
+              <div class="dash-header" data-i18n="service_cmds">
+                Service Commands
+              </div>
+              <label for="selected_shutter" data-i18n="shutter"></label>
+              <select id="p04_selected_shutter" name="selected_shutter">
+                <option class="CH1" value="0" id="p04_shutter_name_0"></option>
+                <option class="CH2" value="1" id="p04_shutter_name_1"></option>
+                <option class="CH3" value="2" id="p04_shutter_name_2"></option>
+                <option class="CH4" value="3" id="p04_shutter_name_3"></option>
+                <option class="CH5" value="4" id="p04_shutter_name_4"></option>
+                <option class="CH6" value="5" id="p04_shutter_name_5"></option>
+                <option class="CH7" value="6" id="p04_shutter_name_6"></option>
+                <option class="CH8" value="7" id="p04_shutter_name_7"></option>
+                <option class="CH9" value="8" id="p04_shutter_name_8"></option>
+                <option class="CH10" value="9" id="p04_shutter_name_9"></option>
+                <option
+                  class="CH11"
+                  value="10"
+                  id="p04_shutter_name_10"></option>
+                <option
+                  class="CH12"
+                  value="11"
+                  id="p04_shutter_name_11"></option>
+                <option
+                  class="CH13"
+                  value="12"
+                  id="p04_shutter_name_12"></option>
+                <option
+                  class="CH14"
+                  value="13"
+                  id="p04_shutter_name_13"></option>
+                <option
+                  class="CH15"
+                  value="14"
+                  id="p04_shutter_name_14"></option>
+                <option
+                  class="CH16"
+                  value="15"
+                  id="p04_shutter_name_15"></option>
+              </select>
+              <div class="dash-content">
+                <button id="p04_up" class="svgbtn i_up"></button>
+                <button id="p04_stop" class="svgbtn i_stop"></button>
+                <button id="p04_down" class="svgbtn i_down"></button>
+                <button id="p04_shade" class="svgbtn i_shade"></button>
+              </div>
+              <hr />
+              <button
+                id="p04_cmd_set_shade"
+                data-i18n="set_shade"
+                class="svgbtn2 i_shade"></button>
+              <hr />
+              <button
+                class="svgbtn2 i_end_up"
+                id="p04_cmd_end_up_set"
+                data-i18n="cmd_endpoint_up$ $set"></button>
+              <button
+                class="svgbtn2 i_end_down"
+                id="p04_cmd_end_down_set"
+                data-i18n="cmd_endpoint_down$ $set"></button>
+              <hr />
+              <button
+                class="svgbtn2 i_end_up_bin"
+                id="p04_cmd_end_up_delete"
+                data-i18n="cmd_endpoint_up$ $delete"></button>
+              <button
+                class="svgbtn2 i_end_down_bin"
+                id="p04_cmd_end_down_delete"
+                data-i18n="cmd_endpoint_down$ $delete"></button>
+            </div>
+          </article>
+        </div>
+      </div>
+      <!--SECTION-END-->
+    </main>
+    <!-- Footer -->
+    <footer
+      style="
+        height: 100px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      ">
+      <div id="status">STATUS</div>
+    </footer>
+  </body>
+</html>
