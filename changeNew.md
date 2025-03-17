@@ -1,15 +1,35 @@
-# v1.8.0
+# v1.9.0
 
 ## what's new
 
-### Timer: new option to set minimum or maximum time in combination with sunrise or sundown
+### Service Commands
 
-Thanks to @blissi it is now possible to set additional minimum or maximum time in combination with sunrise or sundown.
-You can therefore define that the shutter should open at sunrise, but not before 06:30, for example
-Or close at sunset, but no later than 21:00
+there is a new WebUI Page with service commands like:
+
+- set shade
+- set/delete upper end point
+- set/delete lower end point
+
+### remote signals (update)
+
+The MQTT message for remote signals has been updated. The information about which shutter is controlled can be seen in the two variables `chBin` and `chDec`. `chBin` shows the used shutter as a 16-bit binary value, while `chDec` shows the same information as a decimal value for easier automation.
+
+```json
+topic:      ../status/remote/<serial-number>
+payload:    {
+              "name":   "<alias-name>", 
+              "cmd":    "<UP, DOWN, STOP, SHADE>",
+              "chBin":  "<channel-binary>",
+              "chDec":  "<channel-decimal>"
+            }
+```
 
 ## changelog
 
-- [UPDATE] dewenni/EspWebUI @ 0.0.2
-- [FIX] bugfix github ota asset check #40
-- [FEATURE] Timer: new option to set minimum or maximum time in combination with sunrise or sundown #41
+- [FIX] bugfix github ota asset check #40, #45
+- [FEATURE] service page with new service commands
+- [FEATURE] new "unlearn" command in shutter settings
+- [CHANGE] "set shade" was moved from settings to service page
+- [CHANGE] MQTT messages for remote signals have been updated
+- [CHANGE] internal redesign in JaroliftController-Lib
+- [UPDATE] dewenni/EspWebUI @ 0.0.4

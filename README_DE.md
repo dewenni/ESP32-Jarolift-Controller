@@ -546,18 +546,16 @@ payload:    {90}
 
 ### Remotes (Fernbedienungen)
 
-Sind in den Einstellungen auch originale Fernbedienungen über die Seriennummer hinterlegt, dann können auch Signale dieser Fernbedienungen erfasst und per MQTT ausgegeben werden.
+Sind in den Einstellungen auch originale Fernbedienungen über die Seriennummer hinterlegt, dann können auch Signale dieser Fernbedienungen erfasst und per MQTT ausgegeben werden. Die Information darüber, welcher Rollladen gesteuert wird, ist in den beiden Variablen `chBin` und `chDec` zu sehen. chBin“ zeigt den verwendeten Rollladen als 16-Bit-Binärwert an, während ‚chDec‘ dieselbe Information zur einfacheren Automatisierung als Dezimalwert anzeigt.
 
 ```json
-
-topic:      ../status/remote/<serial-number>
+topic:      "../status/remote/<serial-number>"
 payload:    {
-              "name": "<alias-name>", 
-              "ch":   "<channel>",
-              "cmd":  "<UP, DOWN, STOP, SHADE>",
-              "rssi": "<signal dbm>"
+              "name":   "<alias-name>", 
+              "cmd":    "<UP, DOWN, STOP, SHADE>",
+              "chBin":  "<channel-binary>",
+              "chDec":  "<channel-decimal>"
             }
-
 ```
 
 

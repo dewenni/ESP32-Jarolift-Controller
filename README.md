@@ -551,17 +551,16 @@ payload:    {90}
 ### Remotes
 
 If original remote controls are also stored in the settings via the serial number, signals from these remote controls can also be recorded and output via MQTT.
+The information about which shutter is controlled can be seen in the two variables `chBin` and `chDec`. `chBin` shows the used shutter as a 16-bit binary value, while `chDec` shows the same information as a decimal value for easier automation.
 
 ```json
-
-topic:      ../status/remote/<serial-number>
+topic:      "../status/remote/<serial-number>"
 payload:    {
-              "name": "<alias-name>", 
-              "ch":   "<channel>",
-              "cmd":  "<UP, DOWN, STOP, SHADE>",
-              "rssi": "<signal dbm>"
+              "name":   "<alias-name>", 
+              "cmd":    "<UP, DOWN, STOP, SHADE>",
+              "chBin":  "<channel-binary>",
+              "chDec":  "<channel-decimal>"
             }
-
 ```
 
 > [!NOTE]
