@@ -362,6 +362,7 @@ function restartFunction() {
 }
 
 function sendData(elementId, value) {
+  // check if the page is hosted on localhost or GitHub Pages
   if (isGitHubPages()) {
     console.log("localhost or github.io detected, skipping sendData");
     return;
@@ -564,7 +565,11 @@ function updateDialog(data) {
 function toggleElementVisibility(className, isVisible) {
   const elements = document.querySelectorAll(`.${className}`);
   elements.forEach((element) => {
-    element.style.display = isVisible ? "" : "none";
+    if (element.tagName.toLowerCase() === "option") {
+      element.disabled = !isVisible;
+    } else {
+      element.style.display = isVisible ? "" : "none";
+    }
   });
 }
 
@@ -1121,3 +1126,4 @@ const lib_translations = {
     en: "Check for GitHub OTA Update",
   },
 };
+
