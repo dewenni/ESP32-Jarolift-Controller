@@ -565,7 +565,11 @@ function updateDialog(data) {
 function toggleElementVisibility(className, isVisible) {
   const elements = document.querySelectorAll(`.${className}`);
   elements.forEach((element) => {
-    element.style.display = isVisible ? "" : "none";
+    if (element.tagName.toLowerCase() === "option") {
+      element.disabled = !isVisible;
+    } else {
+      element.style.display = isVisible ? "" : "none";
+    }
   });
 }
 

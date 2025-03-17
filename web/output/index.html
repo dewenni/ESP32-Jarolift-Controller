@@ -201,6 +201,7 @@
                 <li><a data-tab="tab1" href="#" data-i18n="channels"></a></li>
                 <li><a data-tab="tab2" href="#" data-i18n="groups"></a></li>
                 <li><a data-tab="tab3" href="#" data-i18n="timer"></a></li>
+                <li><a data-tab="tab4" href="#" data-i18n="service"></a></li>
                 <li>
                   <a data-tab="tab9" href="#" data-i18n="system"></a>
                 </li>
@@ -247,6 +248,12 @@
           <a href="#" data-tab="tab3">
             <i class="svg i_clock"></i>
             <span class="links_name" data-i18n="timer"></span>
+          </a>
+        </li>
+        <li>
+          <a href="#" data-tab="tab4">
+            <i class="svg i_service"></i>
+            <span class="links_name" data-i18n="service"></span>
           </a>
         </li>
         <li>
@@ -1684,6 +1691,85 @@
         </div>
         <!-- END Tab-Content -->
       </div>
+<!-- Logger-Inhalt hier -->
+      <div id="tab4" class="tab-content">
+        <div class="grid">
+          <!-- Grid 1 -->
+          <article class="dash">
+            <div class="dash-main" style="gap: 10px">
+              <div class="dash-header" data-i18n="service_cmds">
+                Service Commands
+              </div>
+              <label for="selected_shutter" data-i18n="shutter"></label>
+              <select id="p04_selected_shutter" name="selected_shutter">
+                <option class="CH1" value="0" id="p04_shutter_name_0"></option>
+                <option class="CH2" value="1" id="p04_shutter_name_1"></option>
+                <option class="CH3" value="2" id="p04_shutter_name_2"></option>
+                <option class="CH4" value="3" id="p04_shutter_name_3"></option>
+                <option class="CH5" value="4" id="p04_shutter_name_4"></option>
+                <option class="CH6" value="5" id="p04_shutter_name_5"></option>
+                <option class="CH7" value="6" id="p04_shutter_name_6"></option>
+                <option class="CH8" value="7" id="p04_shutter_name_7"></option>
+                <option class="CH9" value="8" id="p04_shutter_name_8"></option>
+                <option class="CH10" value="9" id="p04_shutter_name_9"></option>
+                <option
+                  class="CH11"
+                  value="10"
+                  id="p04_shutter_name_10"></option>
+                <option
+                  class="CH12"
+                  value="11"
+                  id="p04_shutter_name_11"></option>
+                <option
+                  class="CH13"
+                  value="12"
+                  id="p04_shutter_name_12"></option>
+                <option
+                  class="CH14"
+                  value="13"
+                  id="p04_shutter_name_13"></option>
+                <option
+                  class="CH15"
+                  value="14"
+                  id="p04_shutter_name_14"></option>
+                <option
+                  class="CH16"
+                  value="15"
+                  id="p04_shutter_name_15"></option>
+              </select>
+              <div class="dash-content">
+                <button id="p04_up" class="svgbtn i_up"></button>
+                <button id="p04_stop" class="svgbtn i_stop"></button>
+                <button id="p04_down" class="svgbtn i_down"></button>
+                <button id="p04_shade" class="svgbtn i_shade"></button>
+              </div>
+              <hr />
+              <button
+                id="p04_cmd_set_shade"
+                data-i18n="set_shade"
+                class="svgbtn2 i_shade"></button>
+              <hr />
+              <button
+                class="svgbtn2 i_end_up"
+                id="p04_cmd_end_up_set"
+                data-i18n="cmd_endpoint_up$ $set"></button>
+              <button
+                class="svgbtn2 i_end_down"
+                id="p04_cmd_end_down_set"
+                data-i18n="cmd_endpoint_down$ $set"></button>
+              <hr />
+              <button
+                class="svgbtn2 i_end_up_bin"
+                id="p04_cmd_end_up_delete"
+                data-i18n="cmd_endpoint_up$ $delete"></button>
+              <button
+                class="svgbtn2 i_end_down_bin"
+                id="p04_cmd_end_down_delete"
+                data-i18n="cmd_endpoint_down$ $delete"></button>
+            </div>
+          </article>
+        </div>
+      </div>
 <!-- System-Inhalt hier -->
       <div id="tab9" class="tab-content">
         <div class="grid">
@@ -2442,10 +2528,10 @@
                   name="shutter1"
                   type="text"
                   id="cfg_jaro_ch_name_0"
-                  data-sync="p01_jaro_ch_name_0, bitmask_dialog_ch_0"
+                  data-sync="p01_jaro_ch_name_0, bitmask_dialog_ch_0, p04_shutter_name_0"
                   placeholder="name" />
                 <div>
-                  <button id="p12_setshade_0" data-i18n="set_shade"></button>
+                  <button id="p12_unlearn_0" data-i18n="unlearn"></button>
                 </div>
                 <div>
                   <button id="p12_learn_0" data-i18n="learn"></button>
@@ -2464,10 +2550,10 @@
                   name="shutter2"
                   type="text"
                   id="cfg_jaro_ch_name_1"
-                  data-sync="p01_jaro_ch_name_1, bitmask_dialog_ch_1"
+                  data-sync="p01_jaro_ch_name_1, bitmask_dialog_ch_1, p04_shutter_name_1"
                   placeholder="name" />
                 <div>
-                  <button id="p12_setshade_1" data-i18n="set_shade"></button>
+                  <button id="p12_unlearn_1" data-i18n="unlearn"></button>
                 </div>
                 <div>
                   <button id="p12_learn_1" data-i18n="learn"></button>
@@ -2486,10 +2572,10 @@
                   name="shutter3"
                   type="text"
                   id="cfg_jaro_ch_name_2"
-                  data-sync="p01_jaro_ch_name_2, bitmask_dialog_ch_2"
+                  data-sync="p01_jaro_ch_name_2, bitmask_dialog_ch_2, p04_shutter_name_2"
                   placeholder="name" />
                 <div>
-                  <button id="p12_setshade_2" data-i18n="set_shade"></button>
+                  <button id="p12_unlearn_2" data-i18n="unlearn"></button>
                 </div>
                 <div>
                   <button id="p12_learn_2" data-i18n="learn"></button>
@@ -2508,10 +2594,10 @@
                   name="shutter4"
                   type="text"
                   id="cfg_jaro_ch_name_3"
-                  data-sync="p01_jaro_ch_name_3, bitmask_dialog_ch_3"
+                  data-sync="p01_jaro_ch_name_3, bitmask_dialog_ch_3, p04_shutter_name_3"
                   placeholder="name" />
                 <div>
-                  <button id="p12_setshade_3" data-i18n="set_shade"></button>
+                  <button id="p12_unlearn_3" data-i18n="unlearn"></button>
                 </div>
                 <div>
                   <button id="p12_learn_3" data-i18n="learn"></button>
@@ -2530,10 +2616,10 @@
                   name="shutter5"
                   type="text"
                   id="cfg_jaro_ch_name_4"
-                  data-sync="p01_jaro_ch_name_4, bitmask_dialog_ch_4"
+                  data-sync="p01_jaro_ch_name_4, bitmask_dialog_ch_4, p04_shutter_name_4"
                   placeholder="name" />
                 <div>
-                  <button id="p12_setshade_4" data-i18n="set_shade"></button>
+                  <button id="p12_unlearn_4" data-i18n="unlearn"></button>
                 </div>
                 <div>
                   <button id="p12_learn_4" data-i18n="learn"></button>
@@ -2552,10 +2638,10 @@
                   name="shutter6"
                   type="text"
                   id="cfg_jaro_ch_name_5"
-                  data-sync="p01_jaro_ch_name_5, bitmask_dialog_ch_5"
+                  data-sync="p01_jaro_ch_name_5, bitmask_dialog_ch_5, p04_shutter_name_5"
                   placeholder="name" />
                 <div>
-                  <button id="p12_setshade_5" data-i18n="set_shade"></button>
+                  <button id="p12_unlearn_5" data-i18n="unlearn"></button>
                 </div>
                 <div>
                   <button id="p12_learn_5" data-i18n="learn"></button>
@@ -2574,10 +2660,10 @@
                   name="shutter7"
                   type="text"
                   id="cfg_jaro_ch_name_6"
-                  data-sync="p01_jaro_ch_name_6, bitmask_dialog_ch_6"
+                  data-sync="p01_jaro_ch_name_6, bitmask_dialog_ch_6, p04_shutter_name_6"
                   placeholder="name" />
                 <div>
-                  <button id="p12_setshade_6" data-i18n="set_shade"></button>
+                  <button id="p12_unlearn_6" data-i18n="unlearn"></button>
                 </div>
                 <div>
                   <button id="p12_learn_6" data-i18n="learn"></button>
@@ -2596,10 +2682,10 @@
                   name="shutter8"
                   type="text"
                   id="cfg_jaro_ch_name_7"
-                  data-sync="p01_jaro_ch_name_7, bitmask_dialog_ch_7"
+                  data-sync="p01_jaro_ch_name_7, bitmask_dialog_ch_7, p04_shutter_name_7"
                   placeholder="name" />
                 <div>
-                  <button id="p12_setshade_7" data-i18n="set_shade"></button>
+                  <button id="p12_unlearn_7" data-i18n="unlearn"></button>
                 </div>
                 <div>
                   <button id="p12_learn_7" data-i18n="learn"></button>
@@ -2618,10 +2704,10 @@
                   name="shutter9"
                   type="text"
                   id="cfg_jaro_ch_name_8"
-                  data-sync="p01_jaro_ch_name_8, bitmask_dialog_ch_8"
+                  data-sync="p01_jaro_ch_name_8, bitmask_dialog_ch_8, p04_shutter_name_8"
                   placeholder="name" />
                 <div>
-                  <button id="p12_setshade_8" data-i18n="set_shade"></button>
+                  <button id="p12_unlearn_8" data-i18n="unlearn"></button>
                 </div>
                 <div>
                   <button id="p12_learn_8" data-i18n="learn"></button>
@@ -2640,10 +2726,10 @@
                   name="shutter10"
                   type="text"
                   id="cfg_jaro_ch_name_9"
-                  data-sync="p01_jaro_ch_name_9, bitmask_dialog_ch_9"
+                  data-sync="p01_jaro_ch_name_9, bitmask_dialog_ch_9, p04_shutter_name_9"
                   placeholder="name" />
                 <div>
-                  <button id="p12_setshade_9" data-i18n="set_shade"></button>
+                  <button id="p12_unlearn_9" data-i18n="unlearn"></button>
                 </div>
                 <div>
                   <button id="p12_learn_9" data-i18n="learn"></button>
@@ -2662,10 +2748,10 @@
                   name="shutter11"
                   type="text"
                   id="cfg_jaro_ch_name_10"
-                  data-sync="p01_jaro_ch_name_10, bitmask_dialog_ch_10"
+                  data-sync="p01_jaro_ch_name_10, bitmask_dialog_ch_10, p04_shutter_name_10"
                   placeholder="name" />
                 <div>
-                  <button id="p12_setshade_10" data-i18n="set_shade"></button>
+                  <button id="p12_unlearn_10" data-i18n="unlearn"></button>
                 </div>
                 <div>
                   <button id="p12_learn_10" data-i18n="learn"></button>
@@ -2684,10 +2770,10 @@
                   name="shutter12"
                   type="text"
                   id="cfg_jaro_ch_name_11"
-                  data-sync="p01_jaro_ch_name_11, bitmask_dialog_ch_11"
+                  data-sync="p01_jaro_ch_name_11, bitmask_dialog_ch_11, p04_shutter_name_11"
                   placeholder="name" />
                 <div>
-                  <button id="p12_setshade_11" data-i18n="set_shade"></button>
+                  <button id="p12_unlearn_11" data-i18n="unlearn"></button>
                 </div>
                 <div>
                   <button id="p12_learn_11" data-i18n="learn"></button>
@@ -2706,10 +2792,10 @@
                   name="shutter13"
                   type="text"
                   id="cfg_jaro_ch_name_12"
-                  data-sync="p01_jaro_ch_name_12, bitmask_dialog_ch_12"
+                  data-sync="p01_jaro_ch_name_12, bitmask_dialog_ch_12, p04_shutter_name_12"
                   placeholder="name" />
                 <div>
-                  <button id="p12_setshade_12" data-i18n="set_shade"></button>
+                  <button id="p12_unlearn_12" data-i18n="unlearn"></button>
                 </div>
                 <div>
                   <button id="p12_learn_12" data-i18n="learn"></button>
@@ -2728,10 +2814,10 @@
                   name="shutter14"
                   type="text"
                   id="cfg_jaro_ch_name_13"
-                  data-sync="p01_jaro_ch_name_13, bitmask_dialog_ch_13"
+                  data-sync="p01_jaro_ch_name_13, bitmask_dialog_ch_13, p04_shutter_name_13"
                   placeholder="name" />
                 <div>
-                  <button id="p12_setshade_13" data-i18n="set_shade"></button>
+                  <button id="p12_unlearn_13" data-i18n="unlearn"></button>
                 </div>
                 <div>
                   <button id="p12_learn_13" data-i18n="learn"></button>
@@ -2750,10 +2836,10 @@
                   name="shutter15"
                   type="text"
                   id="cfg_jaro_ch_name_14"
-                  data-sync="p01_jaro_ch_name_14, bitmask_dialog_ch_14"
+                  data-sync="p01_jaro_ch_name_14, bitmask_dialog_ch_14, p04_shutter_name_14"
                   placeholder="name" />
                 <div>
-                  <button id="p12_setshade_14" data-i18n="set_shade"></button>
+                  <button id="p12_unlearn_14" data-i18n="unlearn"></button>
                 </div>
                 <div>
                   <button id="p12_learn_14" data-i18n="learn"></button>
@@ -2772,10 +2858,10 @@
                   name="shutter16"
                   type="text"
                   id="cfg_jaro_ch_name_15"
-                  data-sync="p01_jaro_ch_name_15, bitmask_dialog_ch_15"
+                  data-sync="p01_jaro_ch_name_15, bitmask_dialog_ch_15, p04_shutter_name_15"
                   placeholder="name" />
                 <div>
-                  <button id="p12_setshade_15" data-i18n="set_shade"></button>
+                  <button id="p12_unlearn_15" data-i18n="unlearn"></button>
                 </div>
                 <div>
                   <button id="p12_learn_15" data-i18n="learn"></button>
