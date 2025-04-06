@@ -21,6 +21,8 @@
 ![GitHub watchers](https://img.shields.io/github/watchers/dewenni/ESP32-Jarolift-Controller?style=social)
 [![GitHub stars](https://img.shields.io/github/stars/dewenni/ESP32-Jarolift-Controller.svg?style=social&label=Star)](https://github.com/dewenni/ESP32-Jarolift-Controller/stargazers/)
 
+[![Stargazers over time](https://starchart.cc/dewenni/ESP32-Jarolift-Controller.svg?variant=adaptive)](https://github.com/dewenni/ESP32-Jarolift-Controller/stargazers)
+
 </div>
 
 -----
