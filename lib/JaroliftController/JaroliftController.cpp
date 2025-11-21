@@ -877,6 +877,7 @@ void JaroliftController::begin() {
   pinMode(gpio_.gdo0, OUTPUT);
   pinMode(gpio_.gdo2, INPUT_PULLUP);
   attachInterrupt(gpio_.gdo2, radioRxMeasureISR, CHANGE);
+  enterRx();
 
   initOK_ = true;
 }
