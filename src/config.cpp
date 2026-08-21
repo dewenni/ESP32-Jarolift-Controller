@@ -10,8 +10,10 @@
 /**
  * V1: Initial version of dewenni.
  * V2: Added min/max times for timers.
+ * V3: Added homee integration enable flag.
+ * V4: Added homee 3rd position (generic node profile) toggle.
  */
-const int CFG_VERSION = 2;
+const int CFG_VERSION = 4;
 
 char filename[24] = {"/config.json"};
 bool setupMode;
@@ -316,6 +318,9 @@ void configSaveToFile() {
   doc["mqtt"]["ha_topic"] = config.mqtt.ha_topic;
   doc["mqtt"]["ha_device"] = config.mqtt.ha_device;
 
+  doc["homee"]["enable"] = config.homee.enable;
+  doc["homee"]["thirdPosition"] = config.homee.thirdPosition;
+
   doc["ntp"]["enable"] = config.ntp.enable;
   doc["ntp"]["server"] = config.ntp.server;
   doc["ntp"]["tz"] = config.ntp.tz;
@@ -443,6 +448,10 @@ void configSaveToFile() {
  * @return  none
  * *******************************************************************/
 void configLoadFromFile() {
+
+  //delete existing config file to reset configuration; the line must be disabled by default!
+//  LittleFS.remove(filename);
+
   // Open file for reading
   File file = LittleFS.open(filename);
 
@@ -520,6 +529,9 @@ void configLoadFromFile() {
     config.mqtt.ha_enable = doc["mqtt"]["ha_enable"];
     EspStrUtil::readJSONstring(config.mqtt.ha_topic, sizeof(config.mqtt.ha_topic), doc["mqtt"]["ha_topic"]);
     EspStrUtil::readJSONstring(config.mqtt.ha_device, sizeof(config.mqtt.ha_device), doc["mqtt"]["ha_device"]);
+
+    config.homee.enable = doc["homee"]["enable"];
+    config.homee.thirdPosition = doc["homee"]["thirdPosition"];
 
     config.ntp.enable = doc["ntp"]["enable"];
     EspStrUtil::readJSONstring(config.ntp.server, sizeof(config.ntp.server), doc["ntp"]["server"]);

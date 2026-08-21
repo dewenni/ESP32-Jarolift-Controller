@@ -2,6 +2,7 @@
 #include <ArduinoOTA.h>
 #include <basics.h>
 #include <config.h>
+#include <homee.h>
 #include <jarolift.h>
 #include <message.h>
 #include <mqtt.h>
@@ -77,6 +78,7 @@ void setup() {
   // jarolift setup
   if (!setupMode) {
     jaroliftSetup();
+    homeeSetup();
   }
   // webUI Setup
   webUISetup();
@@ -119,6 +121,7 @@ void loop() {
   // jarolift code
   if (!setupMode) {
     jaroliftCyclic();
+    homeeCyclic();
   }
 
   // check WiFi - automatic reconnect

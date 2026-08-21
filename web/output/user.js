@@ -18,6 +18,22 @@ const user_translations = {
     de: "Rolladen",
     en: "Shutter",
   },
+  homee: {
+    de: "Homee",
+    en: "Homee",
+  },
+  homee_virtual_name: {
+    de: "virtueller homee Name",
+    en: "virtual homee name",
+  },
+  homee_third_position: {
+    de: "3. Position",
+    en: "3rd position",
+  },
+  info_homee_third_position: {
+    de: "Aktiv (3rd Position enabled): Node-Profil wird auf 'unbekannt' gesetzt, homee zeigt zusätzlich einen Taster für die 3. Position (Zwischenposition). Inaktiv (compatibility mode): Standard-Rolladenprofil wie bisher, ohne 3. Position.",
+    en: "Enabled (3rd Position enabled): the node profile is set to 'unknown', homee additionally shows a button for the 3rd (intermediate) position. Disabled (compatibility mode): standard shutter profile as before, without the 3rd position.",
+  },
   serial_nr: {
     de: "Seriennummer",
     en: "serial number",

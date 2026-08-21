@@ -177,6 +177,14 @@ void webCallback(const char *elementId, const char *value) {
     snprintf(config.mqtt.ha_device, sizeof(config.mqtt.ha_device), "%s", value);
   }
 
+  // Homee
+  if (strcmp(elementId, "cfg_homee_enable") == 0) {
+    config.homee.enable = EspStrUtil::stringToBool(value);
+  }
+  if (strcmp(elementId, "cfg_homee_third_position") == 0) {
+    config.homee.thirdPosition = EspStrUtil::stringToBool(value);
+  }
+
   // Hardware
   if (strcmp(elementId, "cfg_gpio_gdo0") == 0) {
     config.gpio.gdo0 = strtoul(value, NULL, 10);
