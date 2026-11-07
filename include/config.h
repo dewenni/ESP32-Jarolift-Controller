@@ -4,7 +4,7 @@
 /*-------------------------------------------------------------------------------
 General Configuration
 --------------------------------------------------------------------------------*/
-#define VERSION "v1.9.0" // internal program version
+#define VERSION "v1.10.0" // internal program version
 
 #define WIFI_RECONNECT 30000 // Delay between wifi reconnection tries
 #define MQTT_RECONNECT 10000 // Delay between mqtt reconnection tries
@@ -118,6 +118,11 @@ struct s_cfg_log {
   int order = 0;
 };
 
+struct s_cfg_homee {
+  bool enable;
+  bool thirdPosition;
+};
+
 struct s_config {
   int version;
   int lang;
@@ -131,6 +136,7 @@ struct s_config {
   s_cfg_jaro jaro;
   s_cfg_timer timer[6];
   s_cfg_geo geo;
+  s_cfg_homee homee;
 };
 
 extern s_config config;

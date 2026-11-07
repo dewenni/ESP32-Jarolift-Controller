@@ -174,6 +174,9 @@ void updateSystemInfoElementsStatic() {
 
   webUI.addJson(jsonDoc, "p12_jaro_devcnt", jaroGetDevCnt());
 
+  // Homee
+  webUI.addJson(jsonDoc, "p12_homee_name", config.wifi.hostname);
+
   // Sunrise, Sunset
   uint8_t sunriseHour, sunriseMinute;
   getSunriseOrSunset(TYPE_SUNRISE, 0, config.geo.latitude, config.geo.longitude, sunriseHour, sunriseMinute);
