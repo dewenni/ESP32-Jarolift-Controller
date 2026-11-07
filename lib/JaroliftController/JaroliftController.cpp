@@ -53,6 +53,9 @@ void JaroliftController::setGPIO(int sck, int miso, int mosi, int cs, int gdo0, 
  * @return  none
  * *******************************************************************/
 void JaroliftController::setBaseSerial(uint32_t serial) {
+  if (serial & 0xFFF00000UL)
+    ESP_LOGW(TAG, "[KQ-TX] base serial %08lx exceeds 20 bits; TX base=%05lx",
+             (unsigned long)serial, (unsigned long)(serial & 0x000FFFFFUL));
   config_.serial = serial;
   ESP_LOGI(TAG, "Set base serial: 0x%08lx", config_.serial);
 }
@@ -64,7 +67,8 @@ void JaroliftController::setBaseSerial(uint32_t serial) {
  * @return  none
  * *******************************************************************/
 uint32_t JaroliftController::getSerial(uint8_t channel) {
-  uint32_t serial = (config_.serial << 8) | channel;
+  // Only 28 serial bits fit between the hopcode and function nibble.
+  uint32_t serial = ((config_.serial & 0x000FFFFFUL) << 8) | channel;
   ESP_LOGD(TAG, "serial: 0x%08lx | channel: %d", serial, channel + 1);
   return serial;
 }
@@ -209,7 +213,7 @@ void JaroliftController::radioTxGroupH() {
  * @return  none
  * *******************************************************************/
 void JaroliftController::radioTx(int repetitions) {
-  pack_ = (button_ << 60) | (newSerial_ << 32) | encrypted_;
+  pack_ = ((button_ & 0xFULL) << 60) | ((newSerial_ & 0x0FFFFFFFULL) << 32) | encrypted_;
   for (int a = 0; a < repetitions; a++) {
     digitalWrite(gpio_.gdo0, LOW);
     delayMicroseconds(1150);
@@ -365,39 +369,67 @@ void IRAM_ATTR JaroliftController::radioRxMeasureISR() {
  * @param   none
  * @return  none
  * *******************************************************************/
-void JaroliftController::handleRadioRxMeasure() {
-  static unsigned long lineUp = 0;
-  static unsigned long lineDown = 0;
-  static unsigned long timeout = 0;
-  unsigned long currentMicros = micros();
-  int pinState = digitalRead(gpio_.gdo2);
-  if (currentMicros - timeout > 3500) {
+// Both ISR and loop use the same lock. A ready frame is immutable until
+// loop has decoded it; no logging, SPI, allocation or callbacks run in the ISR.
+void IRAM_ATTR JaroliftController::handleRadioRxMeasure() {
+  portENTER_CRITICAL_ISR(&rxMux_);
+  measureRxEdge();
+  portEXIT_CRITICAL_ISR(&rxMux_);
+}
+
+void IRAM_ATTR JaroliftController::finishRxFrame() {
+  if (rxCapturing_ && pbWrite_ >= 65 && pbWrite_ <= 75) {
+    rxDataReady_ = true;
+  } else {
     pbWrite_ = 0;
+    rxCapturing_ = false;
   }
-  if (pinState) { // Übergang zu HIGH
-    lineUp = currentMicros;
-    unsigned long lowVal = lineUp - lineDown;
-    if (lowVal < kDebounce)
+}
+
+void IRAM_ATTR JaroliftController::measureRxEdge() {
+  if (rxDataReady_)
+    return;
+  const unsigned long now = micros();
+  const int state = digitalRead(gpio_.gdo2);
+  if (rxCapturing_ && now - rxLastPulse_ > 3500) {
+    finishRxFrame();
+    if (rxDataReady_)
       return;
-    if (lowVal > 300 && lowVal < 4300) {
-      if (lowVal > 3650 && lowVal < 4300) {
-        timeout = currentMicros;
-        pbWrite_ = 0;
-        lowBuf_[pbWrite_] = lowVal;
-        pbWrite_++;
-      } else if (lowVal > 300 && lowVal < 1000) {
-        lowBuf_[pbWrite_] = lowVal;
-        pbWrite_++;
-        timeout = currentMicros;
+  }
+  if (state) {
+    lineUp_ = now;
+    const unsigned long width = now - lineDown_;
+    if (width > 3650 && width < 4300) {
+      // A new sync can also terminate the preceding candidate.
+      if (rxCapturing_ && pbWrite_ >= 65 && pbWrite_ <= 75) {
+        finishRxFrame();
+        return;
       }
+      rxCapturing_ = true;
+      pbWrite_ = 1;
+      lowBuf_[0] = width;
+      hiBuf_[1] = 0;
+      rxLastPulse_ = now;
+    } else if (width > 300 && width < 1000) {
+      if (!rxCapturing_)
+        return;
+      // 75 is the accepted frame limit, including sync. Never write past it.
+      if (pbWrite_ >= 75) {
+        pbWrite_ = 0;
+        rxCapturing_ = false;
+        return;
+      }
+      lowBuf_[pbWrite_++] = width;
+      hiBuf_[pbWrite_] = 0;
+      rxLastPulse_ = now;
     }
-  } else { // Übergang zu LOW
-    lineDown = currentMicros;
-    unsigned long highVal = lineDown - lineUp;
-    if (highVal < kDebounce)
-      return;
-    if (highVal > 300 && highVal < 1000) {
-      hiBuf_[pbWrite_] = highVal;
+  } else {
+    lineDown_ = now;
+    const unsigned long width = now - lineUp_;
+    if (width > 300 && width < 1000) {
+      // Preserve the existing preceding-HIGH / following-LOW pairing.
+      if (rxCapturing_ && pbWrite_ < 75)
+        hiBuf_[pbWrite_] = width;
     }
   }
 }
@@ -547,15 +579,32 @@ void JaroliftController::cmdGroup(commands cmd, uint16_t groupMask) {
 void JaroliftController::cmdLearn(uint8_t channel) {
   if (!initOK_)
     return;
+  if (channel >= 16) {
+    ESP_LOGE(TAG, "[KQ-TX] LEARN invalid channel=%u", (unsigned int)channel);
+    return;
+  }
   newSerial_ = getSerial(channel);
   devCount_ = getDeviceCounter();
-  ESP_LOGD(TAG, "learn | Device Counter: %d | Serial: 0x%08llx", devCount_, newSerial_);
   button_ = config_.learnMode ? 0xA : 0x1;
   discL_ = discLowArr_[channel];
   discH_ = discHighArr_[channel];
   disc_ = (discL_ << 8) | (newSerial_ & 0xFF);
   generateKey();
   generateEncrypted();
+  auto logLearn = [this, channel](const char *phase) {
+    ESP_LOGI(TAG, "[KQ-TX] LEARN %s serial=%08lx channel=%u mask=%04x disc=%04x counter=%u button=%x hop=%08lx learnMode=%u",
+             phase, (unsigned long)newSerial_, (unsigned int)(channel + 1),
+             (unsigned int)((discH_ << 8) | discL_), (unsigned int)disc_,
+             (unsigned int)devCount_, (unsigned int)button_, (unsigned long)encrypted_,
+             (unsigned int)config_.learnMode);
+#ifdef JAROLIFT_TX_KEY_DEBUG
+    // Explicit local-debug opt-in: these logs disclose cryptographic keys.
+    ESP_LOGD(TAG, "[KQ-TX] master=%08lx:%08lx devkey=%08lx:%08lx",
+             (unsigned long)config_.masterMSB, (unsigned long)config_.masterLSB,
+             (unsigned long)(uint32_t)deviceKeyMSB_, (unsigned long)(uint32_t)deviceKeyLSB_);
+#endif
+  };
+  logLearn("start");
   enterTx();
   radioTx(2);
   enterRx();
@@ -564,6 +613,7 @@ void JaroliftController::cmdLearn(uint8_t channel) {
     delay(1000);
     button_ = 0x4; // Stop
     generateEncrypted();
+    logLearn("stop");
     enterTx();
     radioTx(2);
     enterRx();
@@ -787,42 +837,60 @@ void JaroliftController::processRxData() {
 
   // check if RX-Buffer is full and start to decode
   if ((lowBuf_[0] > 3650 && lowBuf_[0] < 4300) && (pbWrite_ >= 65 && pbWrite_ <= 75)) {
-    rxDataReady_ = true;
-    pbWrite_ = 0;
+    const unsigned int count = pbWrite_;
+    unsigned int minLow = 4300, maxLow = 0, minHigh = 4300, maxHigh = 0;
+    unsigned int invalid = 0;
+    for (unsigned int i = 1; i < count; ++i) {
+      const unsigned int lo = lowBuf_[i], hi = hiBuf_[i];
+      if (lo < minLow) minLow = lo;
+      if (lo > maxLow) maxLow = lo;
+      if (hi < minHigh) minHigh = hi;
+      if (hi > maxHigh) maxHigh = hi;
+      if (lo <= 300 || lo >= 1000 || hi <= 300 || hi >= 1000)
+        invalid++;
+    }
+    if (rxLogFrame_)
+      ESP_LOGI(TAG, "[KQ-RX] FRAME CAPTURED entries=%u sync=%u low=%u..%u high=%u..%u invalid=%u tail=%u",
+               count, lowBuf_[0], minLow, maxLow, minHigh, maxHigh, invalid,
+               count > 65 ? (count - 65 > 8 ? 8 : count - 65) : 0);
+    if (invalid) {
+      if (rxLogFrame_) ESP_LOGW(TAG, "[KQ-RX] FRAME REJECTED: incomplete pulse pairs");
+      return;
+    }
 
     // extract Hopcode (32 Bit)
     rxHopCode_ = 0;
     for (int i = 0; i < 32; i++) {
       if (lowBuf_[i + 1] < hiBuf_[i + 1])
-        rxHopCode_ &= ~(1 << i);
+        rxHopCode_ &= ~(uint32_t(1) << i);
       else
-        rxHopCode_ |= (1 << i);
+        rxHopCode_ |= (uint32_t(1) << i);
     }
 
     // extract Serial (28 Bit)
     rxSerial_ = 0;
     for (int i = 0; i < 28; i++) {
       if (lowBuf_[i + 33] < hiBuf_[i + 33])
-        rxSerial_ &= ~(1 << i);
+        rxSerial_ &= ~(uint32_t(1) << i);
       else
-        rxSerial_ |= (1 << i);
+        rxSerial_ |= (uint32_t(1) << i);
     }
 
     // extract function code (4 Bit)
     rxFunction_ = 0;
     for (int i = 0; i < 4; i++) {
       if (lowBuf_[61 + i] < hiBuf_[61 + i])
-        rxFunction_ &= ~(1 << i);
+        rxFunction_ &= ~(uint32_t(1) << i);
       else
-        rxFunction_ |= (1 << i);
+        rxFunction_ |= (uint32_t(1) << i);
     }
     // extract high disc - group bits (9-16 Bit)
     rxDiscH_ = 0;
-    for (int i = 0; i < 8; i++) {
+    for (unsigned int i = 0; i < 8 && 65 + i < count; i++) {
       if (lowBuf_[65 + i] < hiBuf_[65 + i])
-        rxDiscH_ &= ~(1 << i);
+        rxDiscH_ &= ~(uint32_t(1) << i);
       else
-        rxDiscH_ |= (1 << i);
+        rxDiscH_ |= (uint32_t(1) << i);
     }
 
     rxKeyGen();
@@ -830,7 +898,7 @@ void JaroliftController::processRxData() {
     if (rxFunction_ == 0x4)
       steadyCount_++;
     else
-      steadyCount_--;
+      steadyCount_ = 0;
     if (steadyCount_ > 10 && steadyCount_ <= 40) {
       rxFunction_ = 0x3;
       steadyCount_ = 0;
@@ -842,14 +910,19 @@ void JaroliftController::processRxData() {
     uint16_t channel = (ch_high << 8) | ch_low;
 
     // callback function to receive information outside this library
-    remoteCallback(rxSerial_, rxFunction_, channel);
+    if (rxLogFrame_)
+      ESP_LOGI(TAG, "[KQ-RX] FRAME DECODED hop=%08lx serial=%07lx function=%x decrypted=%08lx disc=%04x channel=%04x callback=%s",
+               (unsigned long)rxHopCode_, (unsigned long)rxSerial_, rxFunction_,
+               (unsigned long)decoded, (unsigned int)(decoded >> 16), channel,
+               remoteCallback ? "registered" : "missing");
+    if (remoteCallback)
+      remoteCallback(rxSerial_, rxFunction_, channel);
 
     // reset variables
     rxDiscH_ = 0;
     rxHopCode_ = 0;
     rxFunction_ = 0;
-    memset((void *)lowBuf_, 0, sizeof(lowBuf_));
-    memset((void *)hiBuf_, 0, sizeof(hiBuf_));
+
   }
 }
 
@@ -878,6 +951,8 @@ void JaroliftController::begin() {
   pinMode(gpio_.gdo2, INPUT_PULLUP);
   attachInterrupt(gpio_.gdo2, radioRxMeasureISR, CHANGE);
 
+  enterRx();
+
   initOK_ = true;
 }
 
@@ -890,15 +965,26 @@ void JaroliftController::begin() {
 void JaroliftController::loop() {
   if (!initOK_)
     return;
-
-  if (rxDataReady_) {
-    cc1101_.cmdStrobe(CC1101_SCAL);
-    delay(50);
-    enterRx();
+  const unsigned long kqNow = millis();
+  // End a silent frame too: completion must not depend on a subsequent edge.
+  portENTER_CRITICAL(&rxMux_);
+  if (!rxDataReady_ && rxCapturing_ && micros() - rxLastPulse_ > 3500)
+    finishRxFrame();
+  const bool ready = rxDataReady_;
+  portEXIT_CRITICAL(&rxMux_);
+  if (ready) {
+    rxLogFrame_ = !rxLogStarted_ || kqNow - rxLogMs_ >= 1000;
+    if (rxLogFrame_) {
+      rxLogStarted_ = true;
+      rxLogMs_ = kqNow;
+    }
+    processRxData();
+    // Release on every decode outcome, including rejected frames.
+    portENTER_CRITICAL(&rxMux_);
+    pbWrite_ = 0;
+    rxCapturing_ = false;
+    lineUp_ = lineDown_ = rxLastPulse_ = 0;
     rxDataReady_ = false;
-    delay(200);
-    attachInterrupt(gpio_.gdo2, radioRxMeasureISR, CHANGE);
+    portEXIT_CRITICAL(&rxMux_);
   }
-
-  processRxData(); // process received data
 }

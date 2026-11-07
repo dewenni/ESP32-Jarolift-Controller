@@ -189,6 +189,7 @@ void jaroliftSetup() {
   jarolift.setGPIO(config.gpio.sck, config.gpio.miso, config.gpio.mosi, config.gpio.cs, config.gpio.gdo0, config.gpio.gdo2);
   jarolift.setKeys(config.jaro.masterMSB, config.jaro.masterLSB);
   jarolift.setBaseSerial(config.jaro.serial);
+  jarolift.setLegacyLearnMode(!config.jaro.learn_mode);
   jarolift.begin();
 
   if (jarolift.getCC1101State()) {

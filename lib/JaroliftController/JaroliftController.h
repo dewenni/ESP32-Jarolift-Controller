@@ -106,7 +106,15 @@ private:
   // Laufzeitzustand
   bool initOK_;
   unsigned int steadyCount_;
-  bool rxDataReady_;
+  volatile bool rxDataReady_;
+  portMUX_TYPE rxMux_ = portMUX_INITIALIZER_UNLOCKED;
+  unsigned long lineUp_ = 0;
+  unsigned long lineDown_ = 0;
+  unsigned long rxLastPulse_ = 0;
+  bool rxCapturing_ = false;
+  unsigned long rxLogMs_ = 0;
+  bool rxLogStarted_ = false;
+  bool rxLogFrame_ = false;
 
   // Hardware-Modul
   CC1101 cc1101_;
@@ -148,6 +156,8 @@ private:
   // Interrupt-Service-Routine (ISR) für RX-Messung
   static void IRAM_ATTR radioRxMeasureISR();
   void handleRadioRxMeasure();
+  void measureRxEdge();
+  void finishRxFrame();
 
   // Singleton-Zeiger für den ISR-Zugriff
   static JaroliftController *instance_;
