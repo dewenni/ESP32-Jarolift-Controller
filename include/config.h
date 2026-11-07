@@ -4,10 +4,10 @@
 /*-------------------------------------------------------------------------------
 General Configuration
 --------------------------------------------------------------------------------*/
-#define VERSION "v1.9.900" // internal program version
+#define VERSION "v1.10.0" // internal program version
 
-#define WIFI_RECONNECT 30000 // Delay between wifi reconnection tries
-#define MQTT_RECONNECT 10000 // Delay between mqtt reconnection tries
+#define WIFI_RECONNECT 30000     // Delay between wifi reconnection tries
+#define MQTT_RECONNECT 10000     // Delay between mqtt reconnection tries
 #define MQTT_RETRY_MAX 6         // cap reconnect backoff at 60 seconds
 #define WIFI_RETRY_HARD_RESET 10 // reset WiFi stack after ~5 minutes
 #define WIFI_RETRY_REBOOT 60     // reboot only after ~30 minutes offline

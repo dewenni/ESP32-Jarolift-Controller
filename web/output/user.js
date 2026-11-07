@@ -262,10 +262,6 @@ const user_translations = {
     de: "Service-Befehle",
     en: "Service-Commands",
   },
-  cmd_rotation: {
-    de: "Drehrichtung ändern",
-    en: "Change rotation",
-  },
   cmd_endpoint_up: {
     de: "Endlage oben",
     en: "Endpoint up",
