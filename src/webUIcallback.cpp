@@ -50,28 +50,28 @@ void webCallback(const char *elementId, const char *value) {
     config.wifi.enable = EspStrUtil::stringToBool(value);
   }
   if (strcmp(elementId, "cfg_wifi_hostname") == 0) {
-    snprintf(config.wifi.hostname, sizeof(config.wifi.hostname), value);
+    snprintf(config.wifi.hostname, sizeof(config.wifi.hostname), "%s", value);
   }
   if (strcmp(elementId, "cfg_wifi_ssid") == 0) {
-    snprintf(config.wifi.ssid, sizeof(config.wifi.ssid), value);
+    snprintf(config.wifi.ssid, sizeof(config.wifi.ssid), "%s", value);
   }
   if (strcmp(elementId, "cfg_wifi_password") == 0) {
-    snprintf(config.wifi.password, sizeof(config.wifi.password), value);
+    snprintf(config.wifi.password, sizeof(config.wifi.password), "%s", value);
   }
   if (strcmp(elementId, "cfg_wifi_static_ip") == 0) {
     config.wifi.static_ip = EspStrUtil::stringToBool(value);
   }
   if (strcmp(elementId, "cfg_wifi_ipaddress") == 0) {
-    snprintf(config.wifi.ipaddress, sizeof(config.wifi.ipaddress), value);
+    snprintf(config.wifi.ipaddress, sizeof(config.wifi.ipaddress), "%s", value);
   }
   if (strcmp(elementId, "cfg_wifi_subnet") == 0) {
-    snprintf(config.wifi.subnet, sizeof(config.wifi.subnet), value);
+    snprintf(config.wifi.subnet, sizeof(config.wifi.subnet), "%s", value);
   }
   if (strcmp(elementId, "cfg_wifi_gateway") == 0) {
-    snprintf(config.wifi.gateway, sizeof(config.wifi.gateway), value);
+    snprintf(config.wifi.gateway, sizeof(config.wifi.gateway), "%s", value);
   }
   if (strcmp(elementId, "cfg_wifi_dns") == 0) {
-    snprintf(config.wifi.dns, sizeof(config.wifi.dns), value);
+    snprintf(config.wifi.dns, sizeof(config.wifi.dns), "%s", value);
   }
 
   // Ethernet
@@ -79,7 +79,7 @@ void webCallback(const char *elementId, const char *value) {
     config.eth.enable = EspStrUtil::stringToBool(value);
   }
   if (strcmp(elementId, "cfg_eth_hostname") == 0) {
-    snprintf(config.eth.hostname, sizeof(config.eth.hostname), value);
+    snprintf(config.eth.hostname, sizeof(config.eth.hostname), "%s", value);
   }
   if (strcmp(elementId, "cfg_eth_gpio_sck") == 0) {
     config.eth.gpio_sck = strtoul(value, NULL, 10);
@@ -103,16 +103,16 @@ void webCallback(const char *elementId, const char *value) {
     config.eth.static_ip = EspStrUtil::stringToBool(value);
   }
   if (strcmp(elementId, "cfg_eth_ipaddress") == 0) {
-    snprintf(config.eth.ipaddress, sizeof(config.eth.ipaddress), value);
+    snprintf(config.eth.ipaddress, sizeof(config.eth.ipaddress), "%s", value);
   }
   if (strcmp(elementId, "cfg_eth_subnet") == 0) {
-    snprintf(config.eth.subnet, sizeof(config.eth.subnet), value);
+    snprintf(config.eth.subnet, sizeof(config.eth.subnet), "%s", value);
   }
   if (strcmp(elementId, "cfg_eth_gateway") == 0) {
-    snprintf(config.eth.gateway, sizeof(config.eth.gateway), value);
+    snprintf(config.eth.gateway, sizeof(config.eth.gateway), "%s", value);
   }
   if (strcmp(elementId, "cfg_eth_dns") == 0) {
-    snprintf(config.eth.dns, sizeof(config.eth.dns), value);
+    snprintf(config.eth.dns, sizeof(config.eth.dns), "%s", value);
   }
 
   // Authentication
