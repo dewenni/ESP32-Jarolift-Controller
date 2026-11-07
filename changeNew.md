@@ -1,35 +1,12 @@
-# v1.9.0
+# v1.9.1
 
 ## what's new
 
-### Service Commands
-
-there is a new WebUI Page with service commands like:
-
-- set shade
-- set/delete upper end point
-- set/delete lower end point
-
-### remote signals (update)
-
-The MQTT message for remote signals has been updated. The information about which shutter is controlled can be seen in the two variables `chBin` and `chDec`. `chBin` shows the used shutter as a 16-bit binary value, while `chDec` shows the same information as a decimal value for easier automation.
-
-```json
-topic:      ../status/remote/<serial-number>
-payload:    {
-              "name":   "<alias-name>", 
-              "cmd":    "<UP, DOWN, STOP, SHADE>",
-              "chBin":  "<channel-binary>",
-              "chDec":  "<channel-decimal>"
-            }
-```
-
 ## changelog
 
-- [FIX] bugfix github ota asset check #40, #45
-- [FEATURE] service page with new service commands
-- [FEATURE] new "unlearn" command in shutter settings
-- [CHANGE] "set shade" was moved from settings to service page
-- [CHANGE] MQTT messages for remote signals have been updated
-- [CHANGE] internal redesign in JaroliftController-Lib
-- [UPDATE] dewenni/EspWebUI @ 0.0.4
+- [UPDATE]  ESP32Async/ESPAsyncWebServer @ 3.7.6
+- [UPDATE]  ESP32Async/AsyncTCP @ 3.3.8
+- [UPDATE]  bblanchon/ArduinoJson @ 7.4.1
+- [UPDATE]  dewenni/EspWebUI @ 0.0.7
+- [IMPROVE] Automatically refresh Logger when the Logger Page is opened
+- [IMPROVE] Colorize logger messages depending on log level

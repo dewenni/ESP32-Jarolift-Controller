@@ -514,7 +514,7 @@ void webCallback(const char *elementId, const char *value) {
     clearLogBuffer();
     webUI.wsUpdateWebLog("", "clr_log"); // clear log
   }
-  if (strcmp(elementId, "p10_log_refresh_btn") == 0) {
+  if (strcmp(elementId, "refresh_log") == 0 || strcmp(elementId, "p10_log_refresh_btn") == 0) {
     webReadLogBuffer();
   }
 }

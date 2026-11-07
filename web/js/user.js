@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // call functions on refresh
   loadSimulatedData();
   setupBitmaskDialog();
+  autoRefreshLog();
 });
 
 // open bitmask help dialog
@@ -119,7 +120,6 @@ function updateUIcallbackSelect(elementId, value) {
 }
 
 function toggleTimeInputsMinMax(selectElement) {
-
   const matches = selectElement.id.match(/\d+/g);
   const timerId = matches[matches.length - 1];
   const minMaxTimeSettings = document.getElementById(
@@ -137,9 +137,8 @@ function toggleTimeInputsMinMax(selectElement) {
 }
 
 function toggleTimeInputs(selectElement) {
-  
   toggleTimeInputsMinMax(selectElement);
-  
+
   const matches = selectElement.id.match(/\d+/g);
   const timerId = matches[matches.length - 1];
   const timeInput = document.getElementById(`timeInput${timerId}`);
@@ -157,4 +156,15 @@ function toggleTimeInputs(selectElement) {
     timeInput.style.display = "none";
     offsetInput.style.display = "block";
   }
+}
+
+function autoRefreshLog() {
+  // refresh log when tab10 is clicked
+  document.querySelectorAll('a[data-tab="tab10"]').forEach(function (el) {
+    el.addEventListener("click", function (e) {
+      e.preventDefault();
+      console.log("refresh log");
+      sendData("refresh_log", "");
+    });
+  });
 }
