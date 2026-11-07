@@ -18,6 +18,26 @@ const user_translations = {
     de: "Rolladen",
     en: "Shutter",
   },
+  homee: {
+    de: "Homee-Integration",
+    en: "Homee-Integration",
+  },
+  homee_virtual_name: {
+    de: "virtueller homee Name",
+    en: "virtual homee name",
+  },
+  homee_third_position: {
+    de: "3. Position",
+    en: "3rd position",
+  },
+  info_homee_third_position: {
+    de: "Aktiv (3rd Position enabled): Node-Profil wird auf 'unbekannt' gesetzt, homee zeigt zusätzlich einen Taster für die 3. Position (Zwischenposition). Inaktiv (compatibility mode): Standard-Rolladenprofil wie bisher, ohne 3. Position.",
+    en: "Enabled (3rd Position enabled): the node profile is set to 'unknown', homee additionally shows a button for the 3rd (intermediate) position. Disabled (compatibility mode): standard shutter profile as before, without the 3rd position.",
+  },
+  info_homee_integration: {
+    de: "Hier können Sie die Integration in homee konfigurieren. Wenn Sie die homee-Integration aktivieren, kann der ESP32 über die homee-App gesteuert werden. ",
+    en: "Here you can configure the integration with homee. If you enable the homee integration, the ESP32 can be controlled via the homee app.",
+  },
   serial_nr: {
     de: "Seriennummer",
     en: "serial number",
@@ -45,6 +65,22 @@ const user_translations = {
   info_devcnt: {
     de: "Der Zähler wird zusammen mit jedem Datagramm über den Funk gesendet. Er beginnt bei null und wird bei jedem Datagramm inkrementiert. Jeder empfänger hört die empfangenen Datagramme ab und zeichnet den Zähler des Senders auf. Wenn der Zähler des Senders und des Empfängers zu sehr voneinander abweichen, müssen Sie den Empfänger neu anlernen. Um dies zu vermeiden, wenn Sie einen Dongle austauschen (oder wenn ein Update schief geht), können Sie hier einen Zähler ungleich null eingeben. ACHTUNG: lassen Sie die Finger davon, wenn Sie die Wirkung nicht verstehen, Sie riskieren, dass Sie alle Ihre Empfänger (wieder) neu anlernen müssen!",
     en: "the device counter is send together with every datagram over the radio. beginning with zero, it is incremented on every datagram. each receiver listens to received datagrams and records the sender's device counter. when the sender's and receiver's device counter differ too much, you must re-learn the receiver. to avoid this when replacing a dongle (or when an update goes wrong) you can enter a non-zero device counter here. ATTENTION: don't touch this if you don't understand the effect, you risk to re-learn all your receivers (again)!",
+  },
+  info_remotes: {
+    de: "Hier können OPTIONAL zusätzlich vorhandene Jarolift Fernbedienungen hinterlegt werden. Die Signale der Fernbedienungen können je nach Empfangsqualität und Entfernung zum ESP mitgelesen werden und damit der Status der Rolladen aktualisiert werden. Die Seriennummer kann im Logbuch im Mode Debug mitgelesen werden. Die Bitmaske gibt an, welche Motoren von der Fernbedienung gesteuert werden.",
+    en: "Here you can OPTIONALLY add existing Jarolift remotes. The signals from the remotes can be read depending on reception quality and distance to the ESP, and the status of the blinds can be updated. The serial number can be read in the logbook in debug mode. The bitmask indicates which motors are controlled by the remote.",
+  },
+  info_groups: {
+    de: "Hier können OPTIONAL zusätzlich Gruppen definiert werden. Eine Gruppe kann mehrere Rolladen gleichzeitig steuern. Über die Bitmaske wird festgelegt, welche Kanäle zu dieser Gruppe gehören.",
+    en: "Here you can OPTIONALLY define additional groups. A group can control multiple blinds at the same time. The bitmask determines which channels belong to this group.",
+  },
+  info_shutters: {
+    de: "Hier müssen die Rolladen angelernt und definiert werden, die mit dem ESP32 gesteuert werden sollen.",
+    en: "Here you must define the blinds that should be controlled by the ESP32.",
+  },
+  info_gpios: {
+    de: "Hier müssen die GPIOs definiert werden, an denen das CC1101 Funkmodul angeschlossen ist. Dies ist abhängig von Ihrem Hardware-Setup.",
+    en: "Here you must define the GPIOs to which the CC1101 radio module is connected. This depends on your hardware setup.",
   },
   help: {
     de: "Hilfe",
@@ -256,6 +292,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // call functions on refresh
   loadSimulatedData();
   setupBitmaskDialog();
+  autoRefreshLog();
 });
 
 // open bitmask help dialog
@@ -373,7 +410,6 @@ function updateUIcallbackSelect(elementId, value) {
 }
 
 function toggleTimeInputsMinMax(selectElement) {
-
   const matches = selectElement.id.match(/\d+/g);
   const timerId = matches[matches.length - 1];
   const minMaxTimeSettings = document.getElementById(
@@ -391,9 +427,8 @@ function toggleTimeInputsMinMax(selectElement) {
 }
 
 function toggleTimeInputs(selectElement) {
-  
   toggleTimeInputsMinMax(selectElement);
-  
+
   const matches = selectElement.id.match(/\d+/g);
   const timerId = matches[matches.length - 1];
   const timeInput = document.getElementById(`timeInput${timerId}`);
@@ -411,5 +446,16 @@ function toggleTimeInputs(selectElement) {
     timeInput.style.display = "none";
     offsetInput.style.display = "block";
   }
+}
+
+function autoRefreshLog() {
+  // refresh log when tab10 is clicked
+  document.querySelectorAll('a[data-tab="tab10"]').forEach(function (el) {
+    el.addEventListener("click", function (e) {
+      e.preventDefault();
+      console.log("refresh log");
+      sendData("refresh_log", "");
+    });
+  });
 }
 
