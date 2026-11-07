@@ -19,6 +19,40 @@ const int CFG_VERSION = 4;
 char filename[24] = {"/config.json"};
 bool setupMode;
 bool configInitDone = false;
+static bool configSavePending = false;
+static const char *configRecoveryFile = nullptr;
+static const char *CONFIG_TMP_FILENAME = "/config.json.tmp";
+
+// Close every handle before rename. Reject valid JSON scalars/arrays as config.
+static bool readConfigDocument(const char *path, JsonDocument &doc) {
+  doc.clear();
+  File file = LittleFS.open(path, FILE_READ);
+  if (!file)
+    return false;
+  const DeserializationError error = deserializeJson(doc, file);
+  file.close();
+  return !error && doc.is<JsonObject>();
+}
+
+static bool loadConfigDocument(JsonDocument &doc) {
+  if (readConfigDocument(filename, doc)) {
+    configRecoveryFile = nullptr;
+    return true;
+  }
+  // EspWebUI uses .upload; older firmware may leave .tmp after a failed save.
+  const char *recoveryFiles[] = {CONFIG_TMP_FILENAME, "/config.json.upload"};
+  for (const char *path : recoveryFiles) {
+    if (!readConfigDocument(path, doc))
+      continue;
+    ESP_LOGW("CFG", "recovering configuration from %s", path);
+    // LittleFS rename replaces the destination without deleting it first.
+    configRecoveryFile = LittleFS.rename(path, filename) ? nullptr : path;
+    if (configRecoveryFile != nullptr)
+      ESP_LOGE("CFG", "config recovery rename failed; keeping recovery file");
+    return true; // The parsed recovery document is usable even if rename fails.
+  }
+  return false;
+}
 unsigned long hashOld;
 s_config config;
 muTimer checkTimer = muTimer(); // timer to refresh other values
@@ -207,9 +241,8 @@ void configCyclic() {
 
   if (checkTimer.cycleTrigger(1000) && configInitDone) {
     unsigned long hashNew = EspStrUtil::hash(&config, sizeof(s_config));
-    if (hashNew != hashOld) {
-      hashOld = hashNew;
-      configSaveToFile();
+    if (hashNew != hashOld || configSavePending) {
+      configSaveToFile(); // The hash is committed only after a successful save.
     }
   }
 }
@@ -271,7 +304,17 @@ void configInitValue() {
  * @return  none
  * *******************************************************************/
 void configSaveToFile() {
+  configSavePending = true;
+  // Do not truncate the only surviving copy if recovery could not be committed.
+  if (configRecoveryFile != nullptr) {
+    if (!LittleFS.rename(configRecoveryFile, filename)) {
+      ESP_LOGE(TAG, "Failed to commit recovered configuration; keeping recovery file");
+      return;
+    }
+    configRecoveryFile = nullptr;
+  }
 
+  const unsigned long savedHash = EspStrUtil::hash(&config, sizeof(s_config));
   JsonDocument doc; // reserviert 2048 Bytes für das JSON-Objekt
 
   doc["version"] = CFG_VERSION;
@@ -423,25 +466,42 @@ void configSaveToFile() {
     timer["max_time_value"] = config.timer[i].max_time_value;
   }
 
-  // Delete existing file, otherwise the configuration is appended to the file
-  LittleFS.remove(filename);
-
-  // Open file for writing
-  File file = LittleFS.open(filename, FILE_WRITE);
+  if (doc.overflowed()) {
+    ESP_LOGE(TAG, "Config JSON allocation failed; keeping previous file");
+    return;
+  }
+  const size_t expected = measureJson(doc);
+  File file = LittleFS.open(CONFIG_TMP_FILENAME, FILE_WRITE);
   if (!file) {
-    ESP_LOGE(TAG, "Failed to create file");
+    ESP_LOGE(TAG, "Failed to create temporary config file");
+    return;
+  }
+  const size_t written = serializeJson(doc, file);
+  file.flush();
+  file.close();
+  if (written != expected || written == 0) {
+    ESP_LOGE(TAG, "Incomplete config write; keeping previous file");
+    LittleFS.remove(CONFIG_TMP_FILENAME);
     return;
   }
 
-  // Serialize JSON to file
-  if (serializeJson(doc, file) == 0) {
-    ESP_LOGE(TAG, "Failed to write to file");
-  } else {
-    ESP_LOGI(TAG, "config successfully saved to file: %s - Version: %i", filename, CFG_VERSION);
+  // Re-read after close to catch truncated or invalid data before replacement.
+  File check = LittleFS.open(CONFIG_TMP_FILENAME, FILE_READ);
+  const bool complete = check && check.size() == expected;
+  check.close();
+  if (!complete || !readConfigDocument(CONFIG_TMP_FILENAME, doc)) {
+    ESP_LOGE(TAG, "Temporary config verification failed; keeping previous file");
+    LittleFS.remove(CONFIG_TMP_FILENAME);
+    return;
+  }
+  if (!LittleFS.rename(CONFIG_TMP_FILENAME, filename)) {
+    ESP_LOGE(TAG, "Failed to replace config; keeping previous and temporary files");
+    return;
   }
 
-  // Close the file
-  file.close();
+  configSavePending = false;
+  hashOld = savedHash;
+  ESP_LOGI(TAG, "config successfully saved to file: %s - Version: %i", filename, CFG_VERSION);
 }
 
 /**
@@ -451,19 +511,8 @@ void configSaveToFile() {
  * @return  none
  * *******************************************************************/
 void configLoadFromFile() {
-
-  //delete existing config file to reset configuration; the line must be disabled by default!
-//  LittleFS.remove(filename);
-
-  // Open file for reading
-  File file = LittleFS.open(filename);
-
-  // Allocate a temporary JsonDocument
   JsonDocument doc;
-
-  // Deserialize the JSON document
-  DeserializationError error = deserializeJson(doc, file);
-  if (error) {
+  if (!loadConfigDocument(doc)) {
     ESP_LOGE(TAG, "SETUP-MODE-REASON: Failed to read file, using default configuration");
     configInitValue();
     setupMode = true;
@@ -624,13 +673,15 @@ void configLoadFromFile() {
     }
   }
 
-  file.close();     // Close the file (Curiously, File's destructor doesn't close the file)
   configHashInit(); // init hash value
+  if (configRecoveryFile != nullptr)
+    configSavePending = true;
 
   // save config if version is different
   if (config.version != CFG_VERSION) {
     configSaveToFile();
-    ESP_LOGI(TAG, "config file was updated from version %i to version: %i", config.version, CFG_VERSION);
+    if (!configSavePending)
+      ESP_LOGI(TAG, "config file was updated from version %i to version: %i", config.version, CFG_VERSION);
   } else {
     ESP_LOGD(TAG, "config file version %i was successfully loaded", config.version);
   }
