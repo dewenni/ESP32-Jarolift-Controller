@@ -6,6 +6,7 @@
 #include <mqtt.h>
 #include <mqttDiscovery.h>
 #include <queue>
+#include <atomic>
 
 #define MAX_MQTT_CMD 20
 
@@ -23,7 +24,8 @@ static AsyncMqttClient mqtt_client;
 static bool bootUpMsgDone, setupDone = false;
 static const char *TAG = "MQTT"; // LOG TAG
 static char lastError[64] = "---";
-static int mqtt_retry = 0;
+static std::atomic<unsigned int> mqtt_retry{0};
+static auto &ota = EspSysUtil::OTA::getInstance();
 static muTimer mqttReconnectTimer;
 
 /**
@@ -90,22 +92,18 @@ const char *addCfgCmdTopic(const char *suffix) {
  * *******************************************************************/
 void onMqttMessage(char *topic, char *payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) {
 
-  s_MqttMessage msgCpy;
-
+  // Fragmented or oversized commands must never become truncated commands.
+  if (topic == nullptr || total >= PAYLOAD_LEN || index != 0 || len != total ||
+      (len > 0 && payload == nullptr)) {
+    ESP_LOGW(TAG, "invalid, oversized or fragmented MQTT command dropped");
+    return;
+  }
+  s_MqttMessage msgCpy{};
   msgCpy.len = len;
-
-  if (topic == NULL) {
-    msgCpy.topic[0] = '\0';
-  } else {
-    strncpy(msgCpy.topic, topic, sizeof(msgCpy.topic) - 1);
-    msgCpy.topic[sizeof(msgCpy.topic) - 1] = '\0';
-  }
-  if (payload == NULL) {
-    msgCpy.payload[0] = '\0';
-  } else if (len > 0 && len < PAYLOAD_LEN) {
+  snprintf(msgCpy.topic, sizeof(msgCpy.topic), "%s", topic);
+  if (len > 0)
     memcpy(msgCpy.payload, payload, len);
-    msgCpy.payload[len] = '\0';
-  }
+  msgCpy.payload[len] = '\0';
 
   addMqttCmd(msgCpy.topic, msgCpy.payload, msgCpy.len);
 
@@ -203,6 +201,10 @@ void mqttSetup() {
  * @return  none
  * *******************************************************************/
 void mqttCyclic() {
+  if (ota.isActive()) {
+    mqttReconnectTimer.delayReset();
+    return;
+  }
 
   // process incoming messages
   if (!mqttCmdQueue.empty()) {
@@ -215,26 +217,22 @@ void mqttCyclic() {
     setupDone = true;
   }
 
-  // automatic reconnect to mqtt broker if connection is lost - try 5 times, then reboot
-  if (!mqtt_client.connected() && (wifi.connected || eth.connected)) {
-    if (mqtt_retry == 0) {
-      mqtt_retry++;
-      mqtt_client.connect();
-      ESP_LOGI(TAG, "MQTT - connection attempt: 1/5");
-    } else if (mqttReconnectTimer.delayOnTrigger(true, MQTT_RECONNECT)) {
+  // A broker outage never justifies rebooting the controller.
+  if (mqtt_client.connected() || !(wifi.connected || eth.connected)) {
+    mqttReconnectTimer.delayReset();
+  } else {
+    const unsigned int retry = mqtt_retry.load();
+    if (retry == 0) {
+      mqtt_retry = 1;
       mqttReconnectTimer.delayReset();
-      if (mqtt_retry < 5) {
-        mqtt_retry++;
-        mqtt_client.connect();
-        ESP_LOGI(TAG, "MQTT - connection attempt: %i/5", mqtt_retry);
-      } else {
-        ESP_LOGI(TAG, "MQTT connection not possible, esp rebooting...");
-        EspSysUtil::RestartReason::saveLocal("no mqtt connection");
-        yield();
-        delay(1000);
-        yield();
-        ESP.restart();
-      }
+      mqtt_client.connect();
+      ESP_LOGI(TAG, "MQTT - connection attempt, backoff level: 1");
+    } else if (mqttReconnectTimer.delayOnTrigger(true, MQTT_RECONNECT * retry)) {
+      mqttReconnectTimer.delayReset();
+      if (retry < MQTT_RETRY_MAX)
+        mqtt_retry = retry + 1;
+      mqtt_client.connect();
+      ESP_LOGI(TAG, "MQTT - connection attempt, backoff level: %u", mqtt_retry.load());
     }
   }
 

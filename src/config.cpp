@@ -23,6 +23,10 @@ unsigned long hashOld;
 s_config config;
 muTimer checkTimer = muTimer(); // timer to refresh other values
 static const char *TAG = "CFG"; // LOG TAG
+// Public fallback only until a password is configured in WebUI Auth settings.
+static const char *DEFAULT_PASSWORD = "jarolift-2026!";
+
+const char *devicePassword() { return config.auth.password[0] ? config.auth.password : DEFAULT_PASSWORD; }
 char encrypted[256] = {0};
 char decrypted[128] = {0};
 const unsigned char key[16] = {0x6d, 0x79, 0x5f, 0x73, 0x65, 0x63, 0x75, 0x72, 0x65, 0x5f, 0x6b, 0x65, 0x79, 0x31, 0x32, 0x33};
@@ -218,7 +222,8 @@ void configCyclic() {
  * *******************************************************************/
 void configInitValue() {
 
-  memset((void *)&config, 0, sizeof(config));
+  // Preserve in-class defaults, including auth.enable and log.enable.
+  config = s_config{};
 
   // Logger
   config.log.level = 4;

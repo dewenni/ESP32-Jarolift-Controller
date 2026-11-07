@@ -25,6 +25,7 @@ s_espInfo espInfo;
 static muTimer wifiReconnectTimer = muTimer(); // timer for reconnect delay
 static int wifi_retry = 0;
 static const char *TAG = "SETUP"; // LOG TAG
+static auto &ota = EspSysUtil::OTA::getInstance();
 
 /**
  * *******************************************************************
@@ -47,7 +48,6 @@ void ntpSetup() {
  * @return  none
  * *******************************************************************/
 void onWiFiStationConnected(WiFiEvent_t event, WiFiEventInfo_t info) {
-  wifi_retry = 0;
   ESP_LOGI(TAG, "Connected to AP successfully!");
 }
 
@@ -82,28 +82,43 @@ void onWiFiGotIP(WiFiEvent_t event, WiFiEventInfo_t info) {
  * @return  none
  * *******************************************************************/
 void checkWiFi() {
-
-  // Ethernet is also not connected - so we need to establish WiFi
-  if (wifiReconnectTimer.delayOnTrigger((!wifi.connected && !eth.connected), WIFI_RECONNECT)) {
+  if (ota.isActive()) {
     wifiReconnectTimer.delayReset();
-
-    if (wifi_retry < 5) {
-      wifi_retry++;
-      WiFi.mode(WIFI_STA);
-      WiFi.begin(config.wifi.ssid, config.wifi.password);
-      WiFi.hostname(config.wifi.hostname);
-      MDNS.begin(config.wifi.hostname);
-      ESP_LOGI(TAG, "WiFi Mode STA - Trying connect to: %s", config.wifi.ssid);
-      ESP_LOGI(TAG, "WiFi connection - attempt: %i/5", wifi_retry);
-    } else {
-      ESP_LOGW(TAG, "Wifi connection not possible, esp rebooting...");
-      EspSysUtil::RestartReason::saveLocal("no wifi connection");
-      yield();
-      delay(1000);
-      yield();
-      ESP.restart();
-    }
+    return; // Never reset the network or reboot during an update.
   }
+  if (!config.wifi.enable || wifi.connected || eth.connected) {
+    wifi_retry = 0;
+    wifiReconnectTimer.delayReset();
+    return;
+  }
+  if (!wifiReconnectTimer.delayOnTrigger(true, WIFI_RECONNECT))
+    return;
+  wifiReconnectTimer.delayReset();
+  if (wifi_retry < WIFI_RETRY_REBOOT)
+    ++wifi_retry;
+  if (wifi_retry >= WIFI_RETRY_REBOOT) {
+    ESP_LOGW(TAG, "no network after %i WiFi attempts - rebooting as a last resort", wifi_retry);
+    EspSysUtil::RestartReason::saveLocal("no wifi connection");
+    yield();
+    delay(1000);
+    yield();
+    ESP.restart();
+    return;
+  }
+  if ((wifi_retry % WIFI_RETRY_HARD_RESET) == 0) {
+    ESP_LOGI(TAG, "WiFi - resetting the stack before retry %i", wifi_retry);
+    WiFi.disconnect(true);
+    WiFi.mode(WIFI_OFF);
+    delay(100);
+  }
+  WiFi.mode(WIFI_STA);
+  WiFi.setHostname(config.wifi.hostname);
+  if (config.wifi.static_ip)
+    WiFi.config(IPAddress(config.wifi.ipaddress), IPAddress(config.wifi.gateway),
+                IPAddress(config.wifi.subnet), IPAddress(config.wifi.dns));
+  WiFi.begin(config.wifi.ssid, config.wifi.password);
+  MDNS.begin(config.wifi.hostname);
+  ESP_LOGI(TAG, "WiFi connection - attempt: %i", wifi_retry);
 }
 
 /**
@@ -124,6 +139,7 @@ void setupWiFi() {
     // setup callback function
     WiFi.onEvent(onWiFiStationConnected, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_CONNECTED);
     WiFi.onEvent(onWiFiGotIP, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_GOT_IP);
+    WiFi.onEvent(onWiFiStationDisconnected, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_DISCONNECTED);
 
     // manual IP-Settings
     if (config.wifi.static_ip) {

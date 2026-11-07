@@ -1,5 +1,6 @@
 #include <LittleFS.h>
 #include <Update.h>
+#include <atomic>
 #include <basics.h>
 #include <language.h>
 #include <message.h>
@@ -23,12 +24,109 @@ static bool webInitDone = false;
 static const size_t BUFFER_SIZE = 512;
 static bool onLoadRequest = false;
 
-static char webCallbackElementID[32];
-static char webCallbackValue[256];
-static bool webCallbackAvailable = false;
+// AsyncTCP produces commands; loop consumes complete copies under one lock.
+struct WebCallbackMessage {
+  char elementID[32];
+  char value[256];
+};
+static constexpr uint8_t WEB_CALLBACK_QUEUE_LEN = 8;
+static WebCallbackMessage webCallbackQueue[WEB_CALLBACK_QUEUE_LEN];
+static uint8_t webCallbackHead = 0, webCallbackTail = 0;
+static portMUX_TYPE webCallbackMux = portMUX_INITIALIZER_UNLOCKED;
+
+static bool enqueueWebCallback(const char *elementID, const char *value) {
+  if (elementID == nullptr || value == nullptr)
+    return false;
+  WebCallbackMessage msg{};
+  snprintf(msg.elementID, sizeof(msg.elementID), "%s", elementID);
+  snprintf(msg.value, sizeof(msg.value), "%s", value);
+  portENTER_CRITICAL(&webCallbackMux);
+  const uint8_t next = (webCallbackHead + 1) % WEB_CALLBACK_QUEUE_LEN;
+  const bool full = next == webCallbackTail;
+  if (!full) {
+    webCallbackQueue[webCallbackHead] = msg;
+    webCallbackHead = next;
+  }
+  portEXIT_CRITICAL(&webCallbackMux);
+  return !full;
+}
+
+static bool dequeueWebCallback(WebCallbackMessage &msg) {
+  portENTER_CRITICAL(&webCallbackMux);
+  const bool available = webCallbackTail != webCallbackHead;
+  if (available) {
+    msg = webCallbackQueue[webCallbackTail];
+    webCallbackTail = (webCallbackTail + 1) % WEB_CALLBACK_QUEUE_LEN;
+  }
+  portEXIT_CRITICAL(&webCallbackMux);
+  return available;
+}
+
+// Only browser uploads participate in this timeout, never other OTA paths.
+static constexpr uint32_t OTA_STALL_TIMEOUT = 60000;
+static std::atomic<bool> webOtaActive{false};
+static std::atomic<bool> webOtaRestoreWdt{false};
+static std::atomic<uint32_t> webOtaLastActivity{0};
+static size_t webOtaLastProgress = 0;
 
 static auto &wdt = EspSysUtil::Wdt::getInstance();
 static auto &ota = EspSysUtil::OTA::getInstance();
+
+static void handleWebOta(EspWebUI::otaStatus otaState, const char *msg) {
+  switch (otaState) {
+  case EspWebUI::OTA_BEGIN:
+    webOtaRestoreWdt = wdt.isActive();
+    webOtaLastActivity = millis();
+    ota.setActive(true);
+    wdt.disable();
+    webOtaActive = true;
+    break;
+  case EspWebUI::OTA_PROGRESS:
+    webOtaLastActivity = millis();
+    webUI.wsUpdateOTAprogress(msg);
+    break;
+  case EspWebUI::OTA_FINISH:
+    webOtaActive = false;
+    ota.setActive(false);
+    if (webOtaRestoreWdt.exchange(false))
+      wdt.enable();
+    webUI.wsUpdateOTAprogress("100");
+    webUI.wsUpdateWebDialog("ota_update_done_dialog", "open");
+    break;
+  case EspWebUI::OTA_ERROR:
+    webOtaActive = false;
+    ota.setActive(false);
+    if (webOtaRestoreWdt.exchange(false))
+      wdt.enable();
+    webUI.wsUpdateWebText("p00_ota_upd_err", msg, false);
+    webUI.wsUpdateWebDialog("ota_update_failed_dialog", "open");
+    break;
+  }
+}
+
+static void checkWebOtaTimeout() {
+  if (webOtaActive) {
+    // EspWebUI reports whole-percent progress only. Observe bytes as well so
+    // a slow upload that is still making progress is not mistaken for a stall.
+    const size_t progress = Update.progress();
+    if (progress != webOtaLastProgress) {
+      webOtaLastProgress = progress;
+      webOtaLastActivity = millis();
+    }
+    if (static_cast<uint32_t>(millis() - webOtaLastActivity.load()) > OTA_STALL_TIMEOUT &&
+        webOtaActive.exchange(false)) {
+      ESP_LOGE(TAG, "Web OTA stalled - aborting upload");
+      Update.abort();
+      ota.setActive(false);
+      if (webOtaRestoreWdt.exchange(false))
+        wdt.enable();
+      webUI.wsUpdateWebText("p00_ota_upd_err", "upload aborted (timeout)", false);
+      webUI.wsUpdateWebDialog("ota_update_failed_dialog", "open");
+    }
+  } else {
+    webOtaLastProgress = 0;
+  }
+}
 
 /**
  * *******************************************************************
@@ -38,29 +136,7 @@ static auto &ota = EspSysUtil::OTA::getInstance();
  * *******************************************************************/
 void webUISetup() {
 
-  webUI.setCallbackOta([](EspWebUI::otaStatus otaState, const char *msg) {
-    switch (otaState) {
-    case EspWebUI::OTA_BEGIN:
-      ota.setActive(true);
-      wdt.disable();
-      break;
-    case EspWebUI::OTA_PROGRESS:
-      webUI.wsUpdateOTAprogress(msg);
-      break;
-    case EspWebUI::OTA_FINISH:
-      ota.setActive(false);
-      wdt.enable();
-      webUI.wsUpdateOTAprogress("100");
-      webUI.wsUpdateWebDialog("ota_update_done_dialog", "open");
-      break;
-    case EspWebUI::OTA_ERROR:
-      ota.setActive(false);
-      wdt.enable();
-      webUI.wsUpdateWebText("p00_ota_upd_err", msg, false);
-      webUI.wsUpdateWebDialog("ota_update_failed_dialog", "open");
-      break;
-    }
-  });
+  webUI.setCallbackOta(handleWebOta);
 
   webUI.setCallbackUpload([](EspWebUI::uploadStatus uploadState, const char *msg) {
     switch (uploadState) {
@@ -70,6 +146,8 @@ void webUISetup() {
     case EspWebUI::UPLOAD_FINISH:
       webUI.wsUpdateWebText("upload_status_txt", msg, false);
       configLoadFromFile(); // load configuration
+      webUI.setCredentials(config.auth.user, devicePassword());
+      webUI.setAuthentication(config.auth.enable);
       webUI.wsUpdateWebLanguage(LANG::CODE[config.lang]);
       webUI.wsLoadConfigWebUI(); // update webUI settings
       break;
@@ -82,14 +160,12 @@ void webUISetup() {
   // callback for reload
   webUI.setCallbackReload([]() { onLoadRequest = true; });
 
-  // callback for web elements - copy elementID and value and call webCallback in cyclic loop
   webUI.setCallbackWebElement([](const char *elementID, const char *elementValue) {
-    snprintf(webCallbackElementID, sizeof(webCallbackElementID), "%s", elementID);
-    snprintf(webCallbackValue, sizeof(webCallbackValue), "%s", elementValue);
-    webCallbackAvailable = true;
+    if (!enqueueWebCallback(elementID, elementValue))
+      ESP_LOGE(TAG, "web callback queue full or invalid input - command dropped");
   });
 
-  webUI.setCredentials(config.auth.user, config.auth.password);
+  webUI.setCredentials(config.auth.user, devicePassword());
   webUI.setAuthentication(config.auth.enable);
 
   webUI.begin();
@@ -115,11 +191,12 @@ void webUICyclic() {
   // handling of update webUI elements
   webUIupdates();
 
-  // handling of callback infomation
-  if (webCallbackAvailable) {
-    webCallback(webCallbackElementID, webCallbackValue);
-    webCallbackAvailable = false;
-  }
+  // Bound work per iteration so other services still run during command bursts.
+  WebCallbackMessage msg;
+  for (uint8_t i = 0; i < WEB_CALLBACK_QUEUE_LEN && !ota.isActive() && dequeueWebCallback(msg); ++i)
+    webCallback(msg.elementID, msg.value);
+
+  checkWebOtaTimeout();
 
   webInitDone = true; // init done
 }

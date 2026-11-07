@@ -122,11 +122,11 @@ void webCallback(const char *elementId, const char *value) {
   }
   if (strcmp(elementId, "cfg_auth_user") == 0) {
     snprintf(config.auth.user, sizeof(config.auth.user), "%s", value);
-    webUI.setCredentials(config.auth.user, config.auth.password);
+    webUI.setCredentials(config.auth.user, devicePassword());
   }
   if (strcmp(elementId, "cfg_auth_password") == 0) {
     snprintf(config.auth.password, sizeof(config.auth.password), "%s", value);
-    webUI.setCredentials(config.auth.user, config.auth.password);
+    webUI.setCredentials(config.auth.user, devicePassword());
   }
 
   // NTP-Server

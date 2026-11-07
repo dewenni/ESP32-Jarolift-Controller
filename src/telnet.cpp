@@ -14,9 +14,7 @@ static EscapeCodes ansi;
 static char param[MAX_PAR][MAX_CHAR];
 static bool msgAvailable = false;
 static const char *TAG = "TELNET"; // LOG TAG
-// Used only when no WebUI password is configured. Set your own password in
-// the WebUI Auth settings; Telnet requires it even when web auth is disabled.
-static const char *TELNET_DEFAULT_PASSWORD = "jarolift-2026!";
+// Telnet requires the shared device password even when web auth is disabled.
 static bool telnetAuthenticated = false;
 
 /* P R O T O T Y P E S ********************************************************/
@@ -89,8 +87,7 @@ void onTelnetConnectionAttempt(String ip) { ESP_LOGI(TAG, "Telnet: %s tried to c
 
 void onTelnetInput(String str) {
   if (!telnetAuthenticated) {
-    const char *password = config.auth.password[0] ? config.auth.password : TELNET_DEFAULT_PASSWORD;
-    if (str == password) {
+    if (str == devicePassword()) {
       telnetAuthenticated = true;
       ESP_LOGI(TAG, "Telnet: %s authenticated", telnet.getIP().c_str());
       telnet.println("\nAccess granted.");

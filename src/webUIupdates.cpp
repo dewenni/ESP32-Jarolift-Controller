@@ -333,7 +333,7 @@ void processGitHubVersion() {
 bool startGitHubUpdate;
 void requestGitHubUpdate() { startGitHubUpdate = true; }
 void processGitHubUpdate() {
-  if (startGitHubUpdate) {
+  if (startGitHubUpdate && !ota.isActive()) {
     startGitHubUpdate = false;
     ghSetProgressCallback(otaProgressCallback);
     webUI.wsUpdateWebText("p00_update_btn", "updating: 0%", false);
@@ -374,7 +374,8 @@ void processGitHubUpdate() {
       ESP_LOGE(TAG, "GitHub OTA-Update failed: %s", errMsg);
     }
     ota.setActive(false);
-    wdt.enable();
+    if (!setupMode)
+      wdt.enable();
   }
 }
 

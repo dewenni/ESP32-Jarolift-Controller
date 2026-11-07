@@ -242,7 +242,9 @@ Wenn man auf die Versionsinfo unten links klickt, öffnet sich ein Dialog. Wenn 
 ### PlatformIO OTA-Update
 
 Aber es ist auch möglich, die Software drahtlos mit Platformio herunterzuladen.
-Du musst nur die `upload_port` Einstellungen in der `platformio.ini` ändern.
+Setze `upload_port` in der `platformio.ini` und ergänze für drahtlose Uploads `upload_flags = --auth=<Passwort>`. ArduinoOTA verwendet das Passwort der WebUI-Auth-Einstellungen, auch bei deaktivierter Web-Authentifizierung. Ohne gesetztes Passwort gilt `jarolift-2026!`.
+
+Unterbrochene Browser-Uploads werden nach 60 Sekunden ohne Fortschritt abgebrochen; der vorherige Watchdog-Zustand wird wiederhergestellt. Neue OTA-Firmware wird nach zwei Minuten Laufzeit mit Netzwerkverbindung bestätigt, ohne Netzwerk nach zehn Minuten. Ein Neustart vor dieser Bestätigung kann den Bootloader-Rollback zur vorherigen Firmware auslösen.
 
 Es gibt zwei vordefinierte Optionen:
 

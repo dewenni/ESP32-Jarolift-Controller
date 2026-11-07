@@ -1,5 +1,6 @@
 // includes
 #include <ArduinoOTA.h>
+#include <esp_ota_ops.h>
 #include <basics.h>
 #include <config.h>
 #include <homee.h>
@@ -22,6 +23,44 @@ static const char *TAG = "MAIN"; // LOG TAG
 
 static auto &wdt = EspSysUtil::Wdt::getInstance();
 static auto &ota = EspSysUtil::OTA::getInstance();
+
+// The core otherwise confirms a pending image before setup() runs.
+extern "C" bool verifyRollbackLater() { return true; }
+
+static constexpr uint32_t OTA_VALIDATE_MIN_UPTIME = 120000;
+static constexpr uint32_t OTA_VALIDATE_MAX_UPTIME = 600000;
+static bool otaImageValidated = false;
+
+static void markAppValid() {
+  if (otaImageValidated || ota.isActive())
+    return;
+  const uint32_t uptime = millis();
+  if (uptime < OTA_VALIDATE_MAX_UPTIME &&
+      (uptime < OTA_VALIDATE_MIN_UPTIME || !(wifi.connected || eth.connected)))
+    return;
+
+  static uint32_t lastAttempt = 0;
+  if (uptime - lastAttempt < 10000)
+    return;
+  lastAttempt = uptime;
+  const esp_partition_t *running = esp_ota_get_running_partition();
+  esp_ota_img_states_t state;
+  if (running == nullptr)
+    return;
+  const esp_err_t result = esp_ota_get_state_partition(running, &state);
+  if (result == ESP_ERR_NOT_FOUND || result == ESP_ERR_NOT_SUPPORTED) {
+    otaImageValidated = true; // No rollback state on this installation.
+  } else if (result == ESP_OK) {
+    if (state != ESP_OTA_IMG_PENDING_VERIFY) {
+      otaImageValidated = true;
+    } else if (esp_ota_mark_app_valid_cancel_rollback() == ESP_OK) {
+      otaImageValidated = true;
+      ESP_LOGI(TAG, "OTA image confirmed - rollback cancelled");
+    } else {
+      ESP_LOGE(TAG, "failed to confirm OTA image; will retry");
+    }
+  }
+}
 
 /**
  * *******************************************************************
@@ -73,6 +112,7 @@ void setup() {
     ota.setActive(false);
   });
   ArduinoOTA.setHostname(config.wifi.hostname);
+  ArduinoOTA.setPassword(devicePassword());
   ArduinoOTA.begin();
 
   // jarolift setup
@@ -100,11 +140,20 @@ void loop() {
     esp_task_wdt_reset();
   }
 
+  // Keep ArduinoOTA in sync with WebUI password changes and config imports.
+  static String otaPassword;
+  if (!ota.isActive() && otaPassword != devicePassword()) {
+    otaPassword = devicePassword();
+    ArduinoOTA.setPassword(otaPassword.c_str());
+  }
   // OTA Update
-  ArduinoOTA.handle();
+  if (!ota.isActive())
+    ArduinoOTA.handle();
 
   // double reset detector
   mrd->loop();
+
+  markAppValid();
 
   // webUI Cyclic
   webUICyclic();

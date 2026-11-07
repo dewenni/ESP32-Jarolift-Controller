@@ -3,6 +3,8 @@
 #include <github.h>
 #include <message.h>
 
+// Without setCa() the library does not verify the download server certificate.
+// Images are unsigned; the UI offers any different release tag, including older ones.
 #define GITHUB_OWNER "dewenni"
 #define GITHUB_REPO "ESP32-Jarolift-Controller"
 

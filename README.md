@@ -245,7 +245,9 @@ If you click on the Version info on the bottom left, a dialog will open. If ther
 ### PlatformIO OTA-Update
 
 But it is also possible to download the software wireless with platformio.
-You only have to change the `upload_port` settings in `platformio.ini`
+Set `upload_port` in `platformio.ini` and supply `upload_flags = --auth=<password>` for wireless uploads. ArduinoOTA uses the WebUI Auth password even when web authentication is disabled; without a configured password it uses `jarolift-2026!`.
+
+Interrupted browser uploads are aborted after 60 seconds without progress, restoring the previous watchdog state. New OTA firmware is confirmed after two minutes of uptime with a network connection, or after ten minutes offline. Before confirmation, a reboot can trigger the bootloader rollback to the previous firmware.
 
 There are two predefined Options:
 
