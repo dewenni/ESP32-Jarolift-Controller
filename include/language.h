@@ -3,6 +3,10 @@
 
 #define MAX_LANG 2 // increase if you add more languages
 
+constexpr int clampLanguageIndex(long index) {
+  return index < 0 ? 0 : (index >= MAX_LANG ? MAX_LANG - 1 : static_cast<int>(index));
+}
+
 #ifndef MYLOG_LEVEL
 #define MYLOG_LEVEL = ESP_LOG_INFO
 #endif

@@ -3,6 +3,7 @@
 #include <LittleFS.h>
 #include <basics.h>
 #include <config.h>
+#include <language.h>
 #include <message.h>
 
 /* D E C L A R A T I O N S ****************************************************/
@@ -466,7 +467,7 @@ void configLoadFromFile() {
 
     config.version = doc["version"];
 
-    config.lang = doc["lang"];
+    config.lang = clampLanguageIndex(doc["lang"].as<long>());
 
     config.wifi.enable = doc["wifi"]["enable"];
     EspStrUtil::readJSONstring(config.wifi.ssid, sizeof(config.wifi.ssid), doc["wifi"]["ssid"]);

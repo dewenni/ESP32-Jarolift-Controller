@@ -491,7 +491,7 @@ void webCallback(const char *elementId, const char *value) {
 
   // Language
   if (strcmp(elementId, "cfg_lang") == 0) {
-    config.lang = strtoul(value, NULL, 10);
+    config.lang = clampLanguageIndex(strtol(value, nullptr, 10));
     updateAllElements();
   }
 

@@ -613,6 +613,8 @@ The interface offers several commands to read out information and send commands.
 An overview of the commands can be called up using the "help" command.
 To connect, a simple Telnet connection can be started via the corresponding IP address of the ESP.
 
+Every connection requires the password configured in the WebUI Auth settings, even if web authentication is disabled. If no password is configured, the fallback is `jarolift-2026!`. Set your own password in the WebUI. A wrong password disconnects the client; reconnecting requires authentication again.
+
 Example:
 
 `> telnet 192.168.178.193`

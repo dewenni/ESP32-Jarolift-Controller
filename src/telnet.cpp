@@ -14,6 +14,10 @@ static EscapeCodes ansi;
 static char param[MAX_PAR][MAX_CHAR];
 static bool msgAvailable = false;
 static const char *TAG = "TELNET"; // LOG TAG
+// Used only when no WebUI password is configured. Set your own password in
+// the WebUI Auth settings; Telnet requires it even when web auth is disabled.
+static const char *TELNET_DEFAULT_PASSWORD = "jarolift-2026!";
+static bool telnetAuthenticated = false;
 
 /* P R O T O T Y P E S ********************************************************/
 void readLogger();
@@ -49,30 +53,55 @@ const int commandsCount = sizeof(commands) / sizeof(commands[0]);
 
 // print telnet shell
 void telnetShell() {
+  if (!telnetAuthenticated)
+    return;
   telnet.print(ansi.setFG(ANSI_BRIGHT_GREEN));
   telnet.print("$ >");
   telnet.print(ansi.reset());
 }
 
+void resetTelnetSession() {
+  telnetAuthenticated = false;
+  msgAvailable = false;
+  telnetIF.serialStream = false;
+}
+
 void onTelnetConnect(String ip) {
+  resetTelnetSession();
   ESP_LOGI(TAG, "Telnet: %s connected", ip.c_str());
   telnet.println(ansi.setFG(ANSI_BRIGHT_GREEN));
   telnet.println("\n----------------------------------------------------------------------");
   telnet.println("\nESP32-Jarolift-MQTT");
-  telnet.println("\nWelcome " + telnet.getIP());
-  telnet.println("use command: \"help\" for further information");
   telnet.println("\n----------------------------------------------------------------------\n");
   telnet.println(ansi.reset());
-  telnetShell();
+  telnet.print("Password: ");
 }
 
-void onTelnetDisconnect(String ip) { ESP_LOGI(TAG, "Telnet: %s disconnected", ip.c_str()); }
+void onTelnetDisconnect(String ip) {
+  resetTelnetSession();
+  ESP_LOGI(TAG, "Telnet: %s disconnected", ip.c_str());
+}
 
-void onTelnetReconnect(String ip) { ESP_LOGI(TAG, "Telnet: %s reconnected", ip.c_str()); }
+// The library replaces same-IP connections without connect/disconnect events.
+void onTelnetReconnect(String ip) { onTelnetConnect(ip); }
 
 void onTelnetConnectionAttempt(String ip) { ESP_LOGI(TAG, "Telnet: %s tried to connect", ip.c_str()); }
 
 void onTelnetInput(String str) {
+  if (!telnetAuthenticated) {
+    const char *password = config.auth.password[0] ? config.auth.password : TELNET_DEFAULT_PASSWORD;
+    if (str == password) {
+      telnetAuthenticated = true;
+      ESP_LOGI(TAG, "Telnet: %s authenticated", telnet.getIP().c_str());
+      telnet.println("\nAccess granted.");
+      telnet.println("use command: \"help\" for further information");
+      telnetShell();
+    } else {
+      telnet.println("\nAccess denied.");
+      telnet.disconnectClient();
+    }
+    return;
+  }
   if (!extractMessage(str, param)) {
     telnet.println("Syntax error");
   } else {
@@ -113,7 +142,7 @@ void cyclicTelnet() {
   telnet.loop();
 
   // process incoming messages
-  if (msgAvailable) {
+  if (msgAvailable && telnetAuthenticated) {
     dispatchCommand(param);
     msgAvailable = false;
   }

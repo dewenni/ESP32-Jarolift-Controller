@@ -611,6 +611,8 @@ Die Schnittstelle bietet mehrere Befehle, um Informationen auszulesen und Befehl
 Eine Übersicht über die Befehle kann mit dem Befehl „help“ aufgerufen werden.
 Um eine Verbindung herzustellen, kann eine einfache Telnet-Verbindung über die entsprechende IP-Adresse des ESP gestartet werden.
 
+Jede Verbindung erfordert das in den Auth-Einstellungen der WebUI konfigurierte Passwort, auch bei deaktivierter Web-Authentifizierung. Ist kein Passwort gesetzt, gilt das Ersatzpasswort `jarolift-2026!`. Bitte ein eigenes Passwort in der WebUI setzen. Bei falschem Passwort wird die Verbindung getrennt; beim erneuten Verbinden ist eine neue Anmeldung erforderlich.
+
 Beispiel:
 
 `> telnet 192.168.178.193`
