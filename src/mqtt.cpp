@@ -27,6 +27,12 @@ static char lastError[64] = "---";
 static std::atomic<unsigned int> mqtt_retry{0};
 static auto &ota = EspSysUtil::OTA::getInstance();
 static muTimer mqttReconnectTimer;
+static std::atomic<bool> mqttTransportDisconnected{true};
+static bool mqttReconnectRequested = false;
+static bool mqttDisconnectStarted = false;
+static s_cfg_mqtt mqttConnectionConfig;
+static char mqttClientId[sizeof(config.wifi.hostname)];
+static char mqttWillTopic[256];
 
 /**
  * *******************************************************************
@@ -161,6 +167,7 @@ void onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
     snprintf(lastError, sizeof(lastError), "UNKNOWN ERROR");
     break;
   }
+  mqttTransportDisconnected.store(true);
 }
 
 /**
@@ -173,6 +180,39 @@ bool mqttIsConnected() { return mqtt_client.connected(); }
 
 const char *mqttGetLastError() { return lastError; }
 
+void mqttReconnect() {
+  if (config.mqtt.enable && !setupMode) {
+    mqttReconnectRequested = true;
+  }
+}
+
+bool mqttIsReconnecting() { return mqttReconnectRequested; }
+
+bool mqttIsConnecting() {
+  return mqttReconnectRequested || (!mqttTransportDisconnected.load() && !mqttIsConnected());
+}
+
+static void mqttApplySettings() {
+  // AsyncMqttClient retains pointers: keep this connection's parameters alive
+  // and unchanged while the settings form is being edited.
+  mqttConnectionConfig = config.mqtt;
+  snprintf(mqttClientId, sizeof(mqttClientId), "%s", config.wifi.hostname);
+  snprintf(mqttWillTopic, sizeof(mqttWillTopic), "%s/status", mqttConnectionConfig.topic);
+  mqtt_client.setServer(mqttConnectionConfig.server, mqttConnectionConfig.port);
+  mqtt_client.setClientId(mqttClientId);
+  mqtt_client.setCredentials(mqttConnectionConfig.user[0] ? mqttConnectionConfig.user : nullptr,
+                             mqttConnectionConfig.user[0] ? mqttConnectionConfig.password : nullptr);
+  mqtt_client.setWill(mqttWillTopic, 0, true, "offline");
+}
+
+static void mqttConnect() {
+  if (mqttTransportDisconnected.load()) {
+    mqttApplySettings();
+    mqttTransportDisconnected.store(false);
+    mqtt_client.connect();
+  }
+}
+
 /**
  * *******************************************************************
  * @brief   Basic MQTT setup
@@ -184,12 +224,8 @@ void mqttSetup() {
   mqtt_client.onConnect(onMqttConnect);
   mqtt_client.onDisconnect(onMqttDisconnect);
   mqtt_client.onMessage(onMqttMessage);
-  mqtt_client.setServer(config.mqtt.server, config.mqtt.port);
-  mqtt_client.setClientId(config.wifi.hostname);
-  mqtt_client.setCredentials(config.mqtt.user, config.mqtt.password);
-  mqtt_client.setWill(addTopic("/status"), 0, true, "offline");
+  mqttApplySettings();
   mqtt_client.setKeepAlive(10);
-  mqtt_client.connected();
 
   ESP_LOGI(TAG, "MQTT setup done!");
 }
@@ -217,6 +253,26 @@ void mqttCyclic() {
     setupDone = true;
   }
 
+  if (mqttReconnectRequested) {
+    if (!mqttDisconnectStarted) {
+      mqttDisconnectStarted = true;
+      if (!mqttTransportDisconnected.load()) {
+        mqtt_client.disconnect(true);
+      }
+    }
+    // connected() becomes false before the TCP disconnect callback completes.
+    // Wait for that callback before reconfiguring or starting another attempt.
+    if (!mqttTransportDisconnected.load()) {
+      return;
+    }
+    mqttReconnectRequested = false;
+    mqttDisconnectStarted = false;
+    mqtt_retry = 0;
+    mqttReconnectTimer.delayReset();
+    snprintf(lastError, sizeof(lastError), "---");
+    ESP_LOGI(TAG, "MQTT connection test requested");
+  }
+
   // A broker outage never justifies rebooting the controller.
   if (mqtt_client.connected() || !(wifi.connected || eth.connected)) {
     mqttReconnectTimer.delayReset();
@@ -225,13 +281,13 @@ void mqttCyclic() {
     if (retry == 0) {
       mqtt_retry = 1;
       mqttReconnectTimer.delayReset();
-      mqtt_client.connect();
+      mqttConnect();
       ESP_LOGI(TAG, "MQTT - connection attempt, backoff level: 1");
     } else if (mqttReconnectTimer.delayOnTrigger(true, MQTT_RECONNECT * retry)) {
       mqttReconnectTimer.delayReset();
       if (retry < MQTT_RETRY_MAX)
         mqtt_retry = retry + 1;
-      mqtt_client.connect();
+      mqttConnect();
       ESP_LOGI(TAG, "MQTT - connection attempt, backoff level: %u", mqtt_retry.load());
     }
   }

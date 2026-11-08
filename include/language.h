@@ -27,6 +27,7 @@ constexpr const char *ACTIVE[] = {"aktiv", "active"};
 constexpr const char *INACTIVE[] = {"inaktiv", "inactive"};
 constexpr const char *FULL_DUPLEX[] = {"Vollduplex", "Full-Duplex"};
 constexpr const char *CONNECTED[] = {"verbunden", "connected"};
+constexpr const char *CONNECTING[] = {"Verbinde...", "Connecting..."};
 constexpr const char *NOT_CONNECTED[] = {"nicht verbunden", "not connected"};
 constexpr const char *CC1101_NOT_FOUND[] = {"Fehler: CC1101 Modul ist nicht verbunden!", "Error: CC1101 Modul not connected!"};
 constexpr const char *JARO_KEYS_INVALID[] = {"Fehler: Jarolift Keys ungültig!", "Error: Jarolift keys invalid!"};

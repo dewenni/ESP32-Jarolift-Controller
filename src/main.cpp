@@ -173,10 +173,8 @@ void loop() {
     homeeCyclic();
   }
 
-  // check WiFi - automatic reconnect
-  if (!setupMode) {
-    checkWiFi();
-  }
+  // WiFi scans also run in setup mode; reconnect is handled internally.
+  wifiCyclic();
 
   // check MQTT - automatic reconnect
   if (config.mqtt.enable && !setupMode) {

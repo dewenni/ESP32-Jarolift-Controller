@@ -1,3 +1,7 @@
+:root {
+  --pico-font-size-override: 0%;
+}
+
 .settings-container {
   display: flex;
   grid-template-columns: 1fr 1fr;

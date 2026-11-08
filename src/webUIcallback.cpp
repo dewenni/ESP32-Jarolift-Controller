@@ -46,6 +46,17 @@ void webCallback(const char *elementId, const char *value) {
   // ------------------------------------------------------------------
 
   // WiFi
+  if (strcmp(elementId, "p12_wifi_ssid_scan_cmd") == 0) {
+    requestWiFiSsidScan();
+  }
+  if (strcmp(elementId, "p12_wifi_ap_scan_cmd") == 0) {
+    requestWiFiApScan(value);
+  }
+  if (strcmp(elementId, "cfg_wifi_bssid") == 0) {
+    if (!setWiFiBssid(value)) {
+      webUI.wsUpdateWebText("cfg_wifi_bssid", config.wifi.bssid, true);
+    }
+  }
   if (strcmp(elementId, "cfg_wifi_enable") == 0) {
     config.wifi.enable = EspStrUtil::stringToBool(value);
   }
@@ -53,6 +64,10 @@ void webCallback(const char *elementId, const char *value) {
     snprintf(config.wifi.hostname, sizeof(config.wifi.hostname), "%s", value);
   }
   if (strcmp(elementId, "cfg_wifi_ssid") == 0) {
+    if (strcmp(config.wifi.ssid, value) != 0) {
+      setWiFiBssid("");
+      webUI.wsUpdateWebText("cfg_wifi_bssid", "", true);
+    }
     snprintf(config.wifi.ssid, sizeof(config.wifi.ssid), "%s", value);
   }
   if (strcmp(elementId, "cfg_wifi_password") == 0) {
@@ -149,6 +164,14 @@ void webCallback(const char *elementId, const char *value) {
   }
 
   // MQTT
+  if (strcmp(elementId, "p12_mqtt_test_btn") == 0) {
+    mqttReconnect();
+    if (mqttIsReconnecting()) {
+      webUI.wsUpdateWebText("p12_mqtt_connection", WEB_TXT::CONNECTING[config.lang], true);
+      webUI.wsUpdateWebText("p12_mqtt_connection_state", "connecting", false);
+      webUI.wsUpdateWebText("p09_mqtt_connection", WEB_TXT::CONNECTING[config.lang], false);
+    }
+  }
   if (strcmp(elementId, "cfg_mqtt_enable") == 0) {
     config.mqtt.enable = EspStrUtil::stringToBool(value);
   }

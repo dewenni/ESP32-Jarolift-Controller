@@ -4,6 +4,7 @@
 
 // include intern
 #include <config.h>
+#include <WiFiMgn.h>
 #include <message.h>
 #include <mqtt.h>
 
@@ -22,14 +23,6 @@
 #include <stdlib.h>
 
 /* D E C L A R A T I O N S ****************************************************/
-struct s_wifi {
-  bool connected = false;
-  long rssi = 0;
-  int signal = 0;
-  char ipAddress[20] = {0};
-};
-extern s_wifi wifi;
-
 struct s_eth {
   bool connected = false;
   char ipAddress[20];
@@ -50,9 +43,7 @@ struct s_espInfo {
 extern s_espInfo espInfo;
 
 /* P R O T O T Y P E S ********************************************************/
-void checkWiFi();
 void basicSetup();
-void sendWiFiInfo();
 void sendETHInfo();
 void getUptime(char *buffer, size_t bufferSize);
 void sendSysInfo();

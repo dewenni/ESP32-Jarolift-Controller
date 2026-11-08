@@ -1,5 +1,40 @@
+function initMqttConnectionStatus() {
+  const input = document.getElementById("p12_mqtt_connection");
+  const state = document.getElementById("p12_mqtt_connection_state");
+  const update = () => {
+    if (state.textContent === "connected") {
+      input.setAttribute("aria-invalid", "false");
+    } else if (state.textContent === "disconnected") {
+      input.setAttribute("aria-invalid", "true");
+    } else {
+      input.removeAttribute("aria-invalid");
+    }
+  };
+  new MutationObserver(update).observe(state, { childList: true, characterData: true, subtree: true });
+  update();
+}
+
+function validateHost(input) {
+  input.value = input.value.trim();
+  if (/^[\d.]+$/.test(input.value)) {
+    validateIP(input);
+    return;
+  }
+  const hostPattern =
+    /^[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?)*$/;
+  if (!hostPattern.test(input.value)) {
+    input.setAttribute("aria-invalid", "true");
+  } else {
+    input.setAttribute("aria-invalid", "false");
+    sendData(input.id, input.value);
+  }
+}
+
 document.addEventListener("DOMContentLoaded", function () {
   // call functions on refresh
+  initMqttConnectionStatus();
+  initWiFiApDialog();
+  initWiFiSsidDialog();
   loadSimulatedData();
   setupBitmaskDialog();
   autoRefreshLog();

@@ -56,6 +56,7 @@ struct s_cfg_geo {
 struct s_cfg_wifi {
   bool enable = false;
   char ssid[128];
+  char bssid[18] = {}; // Empty = automatic access point selection
   char password[128];
   char hostname[128];
   bool static_ip = false;

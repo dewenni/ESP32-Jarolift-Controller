@@ -323,6 +323,7 @@ void configSaveToFile() {
 
   doc["wifi"]["enable"] = config.wifi.enable;
   doc["wifi"]["ssid"] = config.wifi.ssid;
+  doc["wifi"]["bssid"] = config.wifi.bssid;
 
   if (EspStrUtil::encryptPassword(config.wifi.password, key, encrypted, sizeof(encrypted))) {
     doc["wifi"]["password"] = encrypted;
@@ -525,6 +526,7 @@ void configLoadFromFile() {
 
     config.wifi.enable = doc["wifi"]["enable"];
     EspStrUtil::readJSONstring(config.wifi.ssid, sizeof(config.wifi.ssid), doc["wifi"]["ssid"]);
+    EspStrUtil::readJSONstring(config.wifi.bssid, sizeof(config.wifi.bssid), doc["wifi"]["bssid"] | "");
 
     if (config.version == 0) {
       EspStrUtil::readJSONstring(config.wifi.password, sizeof(config.wifi.password), doc["wifi"]["password"]);
