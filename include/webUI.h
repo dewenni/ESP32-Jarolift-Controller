@@ -11,6 +11,7 @@
 extern EspWebUI webUI;
 
 /* P R O T O T Y P E S ********************************************************/
+void applyWebAccessSettings();
 void webUISetup();
 void webUICyclic();
 void webReadLogBuffer();

@@ -14,7 +14,9 @@ static EscapeCodes ansi;
 static char param[MAX_PAR][MAX_CHAR];
 static bool msgAvailable = false;
 static const char *TAG = "TELNET"; // LOG TAG
-// Telnet requires the shared device password even when web auth is disabled.
+// Telnet is opt-in and always uses the independent service password.
+static bool telnetRunning = false;
+static char telnetPassword[sizeof(config.service.password)] = {};
 static bool telnetAuthenticated = false;
 
 /* P R O T O T Y P E S ********************************************************/
@@ -58,25 +60,31 @@ void telnetShell() {
   telnet.print(ansi.reset());
 }
 
-void resetTelnetSession() {
-  telnetAuthenticated = false;
-  msgAvailable = false;
-  telnetIF.serialStream = false;
+void telnetPasswordPrompt() {
+  telnet.print(ansi.setFG(ANSI_BRIGHT_YELLOW));
+  telnet.print("Password: ");
+  telnet.print(ansi.reset());
 }
 
 void onTelnetConnect(String ip) {
-  resetTelnetSession();
+  if (!config.service.telnet_enable || !serviceAccessEnabled()) {
+    telnet.disconnectClient();
+    return;
+  }
   ESP_LOGI(TAG, "Telnet: %s connected", ip.c_str());
+  telnetAuthenticated = msgAvailable = false;
+  telnetIF = s_telnetIF{};
   telnet.println(ansi.setFG(ANSI_BRIGHT_GREEN));
   telnet.println("\n----------------------------------------------------------------------");
   telnet.println("\nESP32-Jarolift-MQTT");
   telnet.println("\n----------------------------------------------------------------------\n");
   telnet.println(ansi.reset());
-  telnet.print("Password: ");
+  telnetPasswordPrompt();
 }
 
 void onTelnetDisconnect(String ip) {
-  resetTelnetSession();
+  telnetAuthenticated = msgAvailable = false;
+  telnetIF = s_telnetIF{};
   ESP_LOGI(TAG, "Telnet: %s disconnected", ip.c_str());
 }
 
@@ -86,14 +94,23 @@ void onTelnetReconnect(String ip) { onTelnetConnect(ip); }
 void onTelnetConnectionAttempt(String ip) { ESP_LOGI(TAG, "Telnet: %s tried to connect", ip.c_str()); }
 
 void onTelnetInput(String str) {
+  if (!config.service.telnet_enable || !serviceAccessEnabled() || strcmp(telnetPassword, servicePassword())) {
+    telnet.disconnectClient();
+    return;
+  }
   if (!telnetAuthenticated) {
-    if (str == devicePassword()) {
+    // password check happens before any command parsing - a wrong password
+    // disconnects the client immediately instead of re-prompting, so a
+    // scripted brute-force has to pay the cost of a full reconnect per
+    // attempt rather than free-running in one session.
+    if (str == servicePassword()) {
       telnetAuthenticated = true;
       ESP_LOGI(TAG, "Telnet: %s authenticated", telnet.getIP().c_str());
       telnet.println("\nAccess granted.");
-      telnet.println("use command: \"help\" for further information");
+      telnet.println("use command: \"help\" for further information\n");
       telnetShell();
     } else {
+      ESP_LOGI(TAG, "Telnet: %s failed authentication", telnet.getIP().c_str());
       telnet.println("\nAccess denied.");
       telnet.disconnectClient();
     }
@@ -121,11 +138,7 @@ void setupTelnet() {
   telnet.onDisconnect(onTelnetDisconnect);
   telnet.onInputReceived(onTelnetInput);
 
-  if (telnet.begin(23, false)) {
-    ESP_LOGI(TAG, "Telnet Server running!");
-  } else {
-    ESP_LOGI(TAG, "Telnet Server error!");
-  }
+
 }
 
 /**
@@ -136,10 +149,24 @@ void setupTelnet() {
  * *******************************************************************/
 void cyclicTelnet() {
 
+  bool enabled = config.service.telnet_enable && serviceAccessEnabled();
+  if (telnetRunning && (!enabled || strcmp(telnetPassword, servicePassword()))) {
+    telnet.disconnectClient();
+    telnet.stop();
+    telnetRunning = telnetAuthenticated = msgAvailable = false;
+    telnetIF = s_telnetIF{};
+  }
+  if (!enabled) return;
+  if (!telnetRunning) {
+    snprintf(telnetPassword, sizeof(telnetPassword), "%s", servicePassword());
+    telnetRunning = telnet.begin(23, false);
+    if (!telnetRunning) return;
+    ESP_LOGI(TAG, "Telnet server running (service password required)");
+  }
   telnet.loop();
 
   // process incoming messages
-  if (msgAvailable && telnetAuthenticated) {
+  if (msgAvailable) {
     dispatchCommand(param);
     msgAvailable = false;
   }

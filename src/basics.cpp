@@ -76,7 +76,7 @@ void onEthEvent(arduino_event_id_t event, arduino_event_info_t info) {
  * *******************************************************************/
 void setupETH() {
 
-  pinMode(config.eth.gpio_irq, OUTPUT);
+  pinMode(config.eth.gpio_irq, INPUT_PULLUP);
   pinMode(config.eth.gpio_rst, OUTPUT);
 
   Network.onEvent(onEthEvent);

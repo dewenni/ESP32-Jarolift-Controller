@@ -2,6 +2,13 @@
 // localization texts
 // --------------------------------------
 const user_translations = {
+  service_access: { de: "Service-Zugänge", en: "Service access" },
+  service_password: { de: "Service-Passwort", en: "Service password" },
+  service_telnet: { de: "Telnet aktivieren", en: "Enable Telnet" },
+  service_hint: {
+    de: "Zentrales Passwort für Service Zugänge wie z.B. Telnet und Remote-OTA (ArduinoOTA). Ohne Passwort bleiben beide gesperrt. Im Setup-Modus gilt admin / jarolift-2026!.",
+    en: "Central password for service access such as Telnet and Remote-OTA (ArduinoOTA). Without a password, both remain locked. In setup mode, admin / jarolift-2026! applies.",
+  },
   wifi_ssid_search: { de: "Suche WLAN", en: "Find Wi-Fi" },
   wifi_ssid_title: { de: "WLAN auswählen", en: "Select Wi-Fi network" },
   wifi_ssid_select: { de: "Verfügbare WLAN-Netze", en: "Available Wi-Fi networks" },

@@ -31,6 +31,31 @@ static constexpr uint32_t OTA_VALIDATE_MIN_UPTIME = 120000;
 static constexpr uint32_t OTA_VALIDATE_MAX_UPTIME = 600000;
 static bool otaImageValidated = false;
 
+static void handleArduinoOTA() {
+  static bool running = false;
+  static char password[sizeof(config.service.password)] = {};
+  static char hostname[sizeof(config.wifi.hostname)] = {};
+  if (ota.isActive()) {
+    if (running) ArduinoOTA.handle();
+    return;
+  }
+  bool allowed = serviceAccessEnabled();
+  const char *desiredHostname = config.wifi.hostname[0] ? config.wifi.hostname : "ESP32-Jarolift-Controller";
+  if (running && (!allowed || strcmp(password, servicePassword()) || strcmp(hostname, desiredHostname))) {
+    ArduinoOTA.end();
+    running = false;
+  }
+  if (allowed && !running) {
+    snprintf(password, sizeof(password), "%s", servicePassword());
+    snprintf(hostname, sizeof(hostname), "%s", desiredHostname);
+    ArduinoOTA.setHostname(hostname);
+    ArduinoOTA.setPassword(password);
+    ArduinoOTA.begin();
+    running = true;
+  }
+  if (running) ArduinoOTA.handle();
+}
+
 static void markAppValid() {
   if (otaImageValidated || ota.isActive())
     return;
@@ -111,9 +136,7 @@ void setup() {
     }
     ota.setActive(false);
   });
-  ArduinoOTA.setHostname(config.wifi.hostname);
-  ArduinoOTA.setPassword(devicePassword());
-  ArduinoOTA.begin();
+  handleArduinoOTA();
 
   // jarolift setup
   if (!setupMode) {
@@ -125,6 +148,7 @@ void setup() {
 
   // telnet Setup
   setupTelnet();
+
 }
 
 /**
@@ -140,15 +164,8 @@ void loop() {
     esp_task_wdt_reset();
   }
 
-  // Keep ArduinoOTA in sync with WebUI password changes and config imports.
-  static String otaPassword;
-  if (!ota.isActive() && otaPassword != devicePassword()) {
-    otaPassword = devicePassword();
-    ArduinoOTA.setPassword(otaPassword.c_str());
-  }
-  // OTA Update
-  if (!ota.isActive())
-    ArduinoOTA.handle();
+  // Remote OTA uses the independent service password.
+  handleArduinoOTA();
 
   // double reset detector
   mrd->loop();

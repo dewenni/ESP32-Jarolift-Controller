@@ -34,21 +34,19 @@ static WebCallbackMessage webCallbackQueue[WEB_CALLBACK_QUEUE_LEN];
 static uint8_t webCallbackHead = 0, webCallbackTail = 0;
 static portMUX_TYPE webCallbackMux = portMUX_INITIALIZER_UNLOCKED;
 
-static bool enqueueWebCallback(const char *elementID, const char *value) {
-  if (elementID == nullptr || value == nullptr)
-    return false;
-  WebCallbackMessage msg{};
-  snprintf(msg.elementID, sizeof(msg.elementID), "%s", elementID);
-  snprintf(msg.value, sizeof(msg.value), "%s", value);
+static bool queueWebCommand(const char *elementID, const char *elementValue) {
+  if (!elementID || !elementValue || strlen(elementID) >= sizeof(webCallbackQueue[0].elementID) ||
+      strlen(elementValue) >= sizeof(webCallbackQueue[0].value)) return false;
   portENTER_CRITICAL(&webCallbackMux);
-  const uint8_t next = (webCallbackHead + 1) % WEB_CALLBACK_QUEUE_LEN;
-  const bool full = next == webCallbackTail;
-  if (!full) {
-    webCallbackQueue[webCallbackHead] = msg;
+  uint8_t next = (webCallbackHead + 1) % WEB_CALLBACK_QUEUE_LEN;
+  bool available = next != webCallbackTail;
+  if (available) {
+    snprintf(webCallbackQueue[webCallbackHead].elementID, sizeof(webCallbackQueue[0].elementID), "%s", elementID);
+    snprintf(webCallbackQueue[webCallbackHead].value, sizeof(webCallbackQueue[0].value), "%s", elementValue);
     webCallbackHead = next;
   }
   portEXIT_CRITICAL(&webCallbackMux);
-  return !full;
+  return available;
 }
 
 static bool dequeueWebCallback(WebCallbackMessage &msg) {
@@ -71,6 +69,11 @@ static size_t webOtaLastProgress = 0;
 
 static auto &wdt = EspSysUtil::Wdt::getInstance();
 static auto &ota = EspSysUtil::OTA::getInstance();
+
+void applyWebAccessSettings() {
+  webUI.setCredentials(deviceUsername(), devicePassword());
+  webUI.setAuthentication(setupMode || config.auth.enable);
+}
 
 static void handleWebOta(EspWebUI::otaStatus otaState, const char *msg) {
   switch (otaState) {
@@ -146,8 +149,7 @@ void webUISetup() {
     case EspWebUI::UPLOAD_FINISH:
       webUI.wsUpdateWebText("upload_status_txt", msg, false);
       configLoadFromFile(); // load configuration
-      webUI.setCredentials(config.auth.user, devicePassword());
-      webUI.setAuthentication(config.auth.enable);
+      applyWebAccessSettings();
       webUI.wsUpdateWebLanguage(LANG::CODE[config.lang]);
       webUI.wsLoadConfigWebUI(); // update webUI settings
       break;
@@ -161,12 +163,11 @@ void webUISetup() {
   webUI.setCallbackReload([]() { onLoadRequest = true; });
 
   webUI.setCallbackWebElement([](const char *elementID, const char *elementValue) {
-    if (!enqueueWebCallback(elementID, elementValue))
+    if (!queueWebCommand(elementID, elementValue))
       ESP_LOGE(TAG, "web callback queue full or invalid input - command dropped");
   });
 
-  webUI.setCredentials(config.auth.user, devicePassword());
-  webUI.setAuthentication(config.auth.enable);
+  applyWebAccessSettings();
 
   webUI.begin();
 } // END SETUP

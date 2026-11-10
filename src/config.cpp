@@ -57,10 +57,15 @@ unsigned long hashOld;
 s_config config;
 muTimer checkTimer = muTimer(); // timer to refresh other values
 static const char *TAG = "CFG"; // LOG TAG
-// Public fallback only until a password is configured in WebUI Auth settings.
+// Fixed recovery credentials, used exclusively in SetupMode.
 static const char *DEFAULT_PASSWORD = "jarolift-2026!";
 
-const char *devicePassword() { return config.auth.password[0] ? config.auth.password : DEFAULT_PASSWORD; }
+static const char *DEFAULT_USERNAME = "admin";
+
+const char *devicePassword() { return setupMode ? DEFAULT_PASSWORD : config.auth.password; }
+const char *deviceUsername() { return setupMode ? DEFAULT_USERNAME : config.auth.user; }
+const char *servicePassword() { return setupMode ? DEFAULT_PASSWORD : config.service.password; }
+bool serviceAccessEnabled() { return servicePassword()[0] != '\0'; }
 char encrypted[256] = {0};
 char decrypted[128] = {0};
 const unsigned char key[16] = {0x6d, 0x79, 0x5f, 0x73, 0x65, 0x63, 0x75, 0x72, 0x65, 0x5f, 0x6b, 0x65, 0x79, 0x31, 0x32, 0x33};
@@ -386,6 +391,16 @@ void configSaveToFile() {
   doc["gpio"]["cs"] = config.gpio.cs;
   doc["gpio"]["led_setup"] = config.gpio.led_setup;
 
+  doc["service"]["telnet_enable"] = config.service.telnet_enable;
+  if (config.service.password[0] == '\0') {
+    doc["service"]["password"] = "";
+  } else if (EspStrUtil::encryptPassword(config.service.password, key, encrypted, sizeof(encrypted))) {
+    doc["service"]["password"] = encrypted;
+  } else {
+    ESP_LOGE(TAG, "Cannot encrypt service password; keeping previous config file");
+    return;
+  }
+
   doc["auth"]["enable"] = config.auth.enable;
   doc["auth"]["user"] = config.auth.user;
   doc["auth"]["password"] = config.auth.password;
@@ -512,6 +527,8 @@ void configSaveToFile() {
  * @return  none
  * *******************************************************************/
 void configLoadFromFile() {
+  // Old configurations have no service section: keep these access paths off.
+  config.service = s_cfg_service{};
   JsonDocument doc;
   if (!loadConfigDocument(doc)) {
     ESP_LOGE(TAG, "SETUP-MODE-REASON: Failed to read file, using default configuration");
@@ -602,7 +619,17 @@ void configLoadFromFile() {
     config.gpio.mosi = doc["gpio"]["mosi"];
     config.gpio.cs = doc["gpio"]["cs"];
 
+    config.service.telnet_enable = doc["service"]["telnet_enable"] | false;
+    const char *serviceCipher = doc["service"]["password"] | "";
+    if (serviceCipher[0] != '\0' &&
+        !EspStrUtil::decryptPassword(serviceCipher, key, config.service.password, sizeof(config.service.password))) {
+      config.service.password[0] = '\0';
+      ESP_LOGE(TAG, "Cannot decrypt service password; service access disabled");
+    }
+
     config.auth.enable = doc["auth"]["enable"];
+    config.auth.user[0] = '\0';
+    config.auth.password[0] = '\0';
     EspStrUtil::readJSONstring(config.auth.user, sizeof(config.auth.user), doc["auth"]["user"]);
     EspStrUtil::readJSONstring(config.auth.password, sizeof(config.auth.password), doc["auth"]["password"]);
 
@@ -673,6 +700,11 @@ void configLoadFromFile() {
       EspStrUtil::readJSONstring(config.timer[i].min_time_value, sizeof(config.timer[i].min_time_value), timer["min_time_value"]);
       EspStrUtil::readJSONstring(config.timer[i].max_time_value, sizeof(config.timer[i].max_time_value), timer["max_time_value"]);
     }
+  }
+
+  if (config.auth.enable && (!config.auth.user[0] || !config.auth.password[0])) {
+    ESP_LOGW(TAG, "Incomplete WebUI credentials: entering SetupMode for recovery");
+    setupMode = true;
   }
 
   configHashInit(); // init hash value

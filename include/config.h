@@ -116,6 +116,11 @@ struct s_cfg_auth {
   char password[64];
 };
 
+struct s_cfg_service {
+  bool telnet_enable = false;
+  char password[64] = {};
+};
+
 struct s_cfg_log {
   bool enable = true;
   int level = 3;
@@ -136,6 +141,7 @@ struct s_config {
   s_cfg_ntp ntp;
   s_cfg_gpio gpio;
   s_cfg_auth auth;
+  s_cfg_service service;
   s_cfg_log log;
   s_cfg_jaro jaro;
   s_cfg_timer timer[6];
@@ -146,8 +152,12 @@ struct s_config {
 extern s_config config;
 extern bool setupMode;
 
-// Shared credential for WebUI, Telnet and ArduinoOTA.
+// Setup credentials are independent of config.json; normal WebUI credentials
+// and the separately stored service password have no shared fallback.
 const char *devicePassword();
+const char *deviceUsername();
+const char *servicePassword();
+bool serviceAccessEnabled();
 void configSetup();
 void configCyclic();
 void configSaveToFile();
