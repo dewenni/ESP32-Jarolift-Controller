@@ -31,15 +31,16 @@
     <main class="container">
       <!--SECTION-START-->
       <!-- Logger-Inhalt hier -->
-      <div id="tab4" class="tab-content">
-        <div class="grid">
+      <div id="tab4" class="tab-content jarolift-page jarolift-service" data-connection-required><header class="page-heading"><h1 data-i18n="service"></h1><p data-i18n="jaro_service_subtitle"></p></header>
+
+        <div class="jarolift-service-grid">
           <!-- Grid 1 -->
-          <article class="dash">
+          <article class="dash service-card">
             <div class="dash-main" style="gap: 10px">
               <div class="dash-header" data-i18n="service_cmds">
                 Service Commands
               </div>
-              <label for="selected_shutter" data-i18n="shutter"></label>
+              <label for="p04_selected_shutter" data-i18n="shutter"></label>
               <select id="p04_selected_shutter" name="selected_shutter">
                 <option class="CH1" value="0" id="p04_shutter_name_0"></option>
                 <option class="CH2" value="1" id="p04_shutter_name_1"></option>

@@ -31,14 +31,69 @@
     <!-- Tab-Content -->
     <main class="container">
       <!--SECTION-START-->
-      <div id="tab12" class="tab-content">
-        <div class="grid" style="max-width: 1024px">
-          <div style="width: 100%">
-            <!-- WLAN -->
-            <details>
+<div id="tab12" class="tab-content"><header class="page-heading"><h1 data-i18n="settings"></h1><p data-i18n="settings_subtitle"></p></header>
+<div class="settings-layout" data-settings data-settings-layout="tabs">
+    <div class="settings-body">
+      <aside class="settings-category-nav" aria-labelledby="p12_settings_area_label">
+        <label class="settings-category-picker">
+          <span id="p12_settings_area_label" data-i18n="settings_area"></span>
+          <select id="p12_settings_area" data-settings-select data-ui-local></select>
+        </label>
+        <div class="settings-category-list" data-settings-list></div>
+      </aside>
+      <div class="settings-panels" data-connection-required>
+        <section id="p12_settings_general" class="settings-panel" data-settings-group="general" data-settings-label="settings_general"><h2 data-i18n="settings_general"></h2>
+<details name="settings-general">
+              <summary data-i18n="language"></summary>
+              <select id="cfg_lang">
+                <option value="0" data-i18n="german"></option>
+                <option value="1" data-i18n="english"></option>
+              </select>
+            </details>
+<details name="settings-general">
+              <summary data-i18n="ntp"></summary>
+              <div class="section-header">
+                <label for="cfg_ntp_enable" data-i18n="activate"></label>
+                <div class="switch-container">
+                  <input
+                    name="ntp_enable"
+                    type="checkbox"
+                    role="switch"
+                    id="cfg_ntp_enable" />
+                </div>
+              </div>
+              <br />
+              <label for="cfg_ntp_server" data-i18n="server"></label>
+              <input type="text" id="cfg_ntp_server" name="ntp_server" />
+              <div class="leftright">
+                <label for="cfg_ntp_tz" data-i18n="ntp_tz"></label>
+                <button
+                  id="p12_ntp_open_dialog_btn"
+                  class="i_help"
+                  style="
+                    height: 20px;
+                    background-color: transparent;
+                    border: none;
+                  "></button>
+              </div>
+              <input type="text" id="cfg_ntp_tz" name="time_zone" />
+            </details>
+<details name="settings-general">
+              <summary data-i18n="geo_location"></summary>
+              <br />
+              <div class="settings-fields"><div class="settings-field settings-field--medium"><label for="cfg_geo_latitude" data-i18n="latitude"></label><input type="number" id="cfg_geo_latitude" name="latitude" /></div>
+              <div class="settings-field settings-field--medium"><label for="cfg_geo_longitude" data-i18n="longitude"></label><input type="number" id="cfg_geo_longitude" name="longitude" /></div>
+              </div><div class="info-box">
+                <div class="info-icon">&#9432;</div>
+                <div class="info-text" data-i18n="geo_info"></div>
+              </div>
+            </details>
+</section>
+<section id="p12_settings_network" class="settings-panel" data-settings-group="network" data-settings-label="settings_network"><h2 data-i18n="settings_network"></h2>
+<details name="settings-network">
               <summary data-i18n="wifi"></summary>
               <div class="section-header">
-                <label for="wifi_enable" data-i18n="activate"></label>
+                <label for="cfg_wifi_enable" data-i18n="activate"></label>
                 <div class="switch-container">
                   <input
                     name="wifi_enable"
@@ -48,9 +103,9 @@
                 </div>
               </div>
               <br />
-              <label for="wifi_hostname" data-i18n="hostname"></label>
+              <label for="cfg_wifi_hostname" data-i18n="hostname"></label>
               <input type="text" id="cfg_wifi_hostname" name="wifi_hostname" />
-              <label for="wifi_ssid" data-i18n="ssid"></label>
+              <label for="cfg_wifi_ssid" data-i18n="ssid"></label>
               <fieldset role="group">
                 <input
                   type="text"
@@ -100,7 +155,7 @@
                   </footer>
                 </article>
               </dialog>
-              <label for="wifi_password">Passwort</label>
+              <label for="cfg_wifi_password">Passwort</label>
               <input
                 type="password"
                 id="cfg_wifi_password"
@@ -167,7 +222,7 @@
               </dialog>
 
               <div class="section-header">
-                <label for="man_ip_enable" data-i18n="static_ip"></label>
+                <label for="cfg_wifi_static_ip" data-i18n="static_ip"></label>
                 <div class="switch-container">
                   <input
                     name="man_ip_enable"
@@ -179,28 +234,28 @@
               </div>
               <br />
               <div class="WIFI_STATIC_IP">
-                <label for="ip_adr" data-i18n="ip_adr"></label>
+                <label for="cfg_wifi_ipaddress" data-i18n="ip_adr"></label>
                 <input
                   type="url"
                   data-type="ip"
                   oninput="validateIP(this)"
                   id="cfg_wifi_ipaddress"
                   name="ip_adr" />
-                <label for="ip_subnet" data-i18n="ip_subnet"></label>
+                <label for="cfg_wifi_subnet" data-i18n="ip_subnet"></label>
                 <input
                   type="url"
                   data-type="ip"
                   oninput="validateIP(this)"
                   id="cfg_wifi_subnet"
                   name="ip_subnet" />
-                <label for="ip_gateway" data-i18n="ip_gateway"></label>
+                <label for="cfg_wifi_gateway" data-i18n="ip_gateway"></label>
                 <input
                   type="url"
                   data-type="ip"
                   oninput="validateIP(this)"
                   id="cfg_wifi_gateway"
                   name="ip_gateway" />
-                <label for="ip_dns" data-i18n="ip_dns"></label>
+                <label for="cfg_wifi_dns" data-i18n="ip_dns"></label>
                 <input
                   type="url"
                   data-type="ip"
@@ -209,12 +264,10 @@
                   name="ip_dns" />
               </div>
             </details>
-            <hr />
-            <!-- ETHERNET -->
-            <details>
+<details name="settings-network">
               <summary>Ethernet (W5500)</summary>
               <div class="section-header">
-                <label for="eth_enable" data-i18n="activate"></label>
+                <label for="cfg_eth_enable" data-i18n="activate"></label>
                 <div class="switch-container">
                   <input
                     name="eth_enable"
@@ -224,28 +277,22 @@
                 </div>
               </div>
               <br />
-              <label for="eth_hostname" data-i18n="hostname"></label>
+              <label for="cfg_eth_hostname" data-i18n="hostname"></label>
               <input type="text" id="cfg_eth_hostname" name="eth_hostname" />
-              <label for="eth_gpio_sck">GPIO CLK</label>
-              <input type="number" id="cfg_eth_gpio_sck" name="eth_gpio_sck" />
-              <label for="eth_gpio_mosi">GPIO MOSI</label>
-              <input
+              <div class="settings-fields"><div class="settings-field settings-field--compact"><label for="cfg_eth_gpio_sck">GPIO CLK</label><input type="number" id="cfg_eth_gpio_sck" name="eth_gpio_sck" /></div>
+              <div class="settings-field settings-field--compact"><label for="cfg_eth_gpio_mosi">GPIO MOSI</label><input
                 type="number"
                 id="cfg_eth_gpio_mosi"
-                name="eth_gpio_mosi" />
-              <label for="eth_gpio_miso">GPIO MISO</label>
-              <input
+                name="eth_gpio_mosi" /></div>
+              <div class="settings-field settings-field--compact"><label for="cfg_eth_gpio_miso">GPIO MISO</label><input
                 type="number"
                 id="cfg_eth_gpio_miso"
-                name="eth_gpio_miso" />
-              <label for="eth_gpio_cs">GPIO CS</label>
-              <input type="number" id="cfg_eth_gpio_cs" name="eth_gpio_cs" />
-              <label for="eth_gpio_irq">GPIO INT</label>
-              <input type="number" id="cfg_eth_gpio_irq" name="eth_gpio_irq" />
-              <label for="eth_gpio_rst">GPIO RST</label>
-              <input type="number" id="cfg_eth_gpio_rst" name="eth_gpio_rst" />
-              <div class="section-header">
-                <label for="man_ip_enable" data-i18n="static_ip"></label>
+                name="eth_gpio_miso" /></div>
+              <div class="settings-field settings-field--compact"><label for="cfg_eth_gpio_cs">GPIO CS</label><input type="number" id="cfg_eth_gpio_cs" name="eth_gpio_cs" /></div>
+              <div class="settings-field settings-field--compact"><label for="cfg_eth_gpio_irq">GPIO INT</label><input type="number" id="cfg_eth_gpio_irq" name="eth_gpio_irq" /></div>
+              <div class="settings-field settings-field--compact"><label for="cfg_eth_gpio_rst">GPIO RST</label><input type="number" id="cfg_eth_gpio_rst" name="eth_gpio_rst" /></div>
+              </div><div class="section-header">
+                <label for="cfg_wifi_static_ip" data-i18n="static_ip"></label>
                 <div class="switch-container">
                   <input
                     name="man_ip_enable"
@@ -257,28 +304,28 @@
               </div>
               <br />
               <div class="ETH_STATIC_IP">
-                <label for="ip_adr" data-i18n="ip_adr"></label>
+                <label for="cfg_wifi_ipaddress" data-i18n="ip_adr"></label>
                 <input
                   type="url"
                   data-type="ip"
                   oninput="validateIP(this)"
                   id="cfg_eth_ipaddress"
                   name="ip_adr" />
-                <label for="ip_subnet" data-i18n="ip_subnet"></label>
+                <label for="cfg_wifi_subnet" data-i18n="ip_subnet"></label>
                 <input
                   type="url"
                   data-type="ip"
                   oninput="validateIP(this)"
                   id="cfg_eth_subnet"
                   name="ip_subnet" />
-                <label for="ip_gateway" data-i18n="ip_gateway"></label>
+                <label for="cfg_wifi_gateway" data-i18n="ip_gateway"></label>
                 <input
                   type="url"
                   data-type="ip"
                   oninput="validateIP(this)"
                   id="cfg_eth_gateway"
                   name="ip_gateway" />
-                <label for="ip_dns" data-i18n="ip_dns"></label>
+                <label for="cfg_wifi_dns" data-i18n="ip_dns"></label>
                 <input
                   type="url"
                   data-type="ip"
@@ -287,103 +334,12 @@
                   name="ip_dns" />
               </div>
             </details>
-            <hr />
-            <!-- Authentication -->
-            <details>
-              <summary data-i18n="access"></summary>
-              <div class="section-header">
-                <label for="auth_enable" data-i18n="activate"></label>
-                <div class="switch-container">
-                  <input
-                    name="auth_enable"
-                    type="checkbox"
-                    role="switch"
-                    hideOpt="OPT_AUTH"
-                    id="cfg_auth_enable" />
-                </div>
-              </div>
-              <br />
-              <label for="auth_user" data-i18n="user"></label>
-              <input type="text" id="cfg_auth_user" name="auth_user" maxlength="63" />
-              <label for="auth_passw" data-i18n="password"></label>
-              <input type="password" id="cfg_auth_password" name="auth_passw" maxlength="63" />
-            </details>
-            <hr />
-            <!-- Independent service access -->
-            <details>
-              <summary data-i18n="service_access"></summary>
-              <label for="cfg_service_password" data-i18n="service_password"></label>
-              <input type="password" id="cfg_service_password" name="service_password" maxlength="63" autocomplete="new-password" />
-              <p><small data-i18n="service_hint"></small></p>
-              <div class="section-header">
-                <label for="cfg_service_telnet_enable" data-i18n="service_telnet"></label>
-                <div class="switch-container">
-                  <input id="cfg_service_telnet_enable" name="service_telnet_enable" type="checkbox" role="switch" />
-                </div>
-              </div>
-            </details>
-            <hr />
-            <!-- NTP-Server -->
-            <details>
-              <summary data-i18n="ntp"></summary>
-              <div class="section-header">
-                <label for="ntp_enable" data-i18n="activate"></label>
-                <div class="switch-container">
-                  <input
-                    name="ntp_enable"
-                    type="checkbox"
-                    role="switch"
-                    id="cfg_ntp_enable" />
-                </div>
-              </div>
-              <br />
-              <label for="ntp_server" data-i18n="server"></label>
-              <input type="text" id="cfg_ntp_server" name="ntp_server" />
-              <div class="leftright">
-                <label for="time_zone" data-i18n="ntp_tz"></label>
-                <button
-                  id="p12_ntp_open_dialog_btn"
-                  class="i_help"
-                  style="
-                    height: 20px;
-                    background-color: transparent;
-                    border: none;
-                  "></button>
-              </div>
-              <input type="text" id="cfg_ntp_tz" name="time_zone" />
-            </details>
-            <!-- Dialog OPEN-NTP-HELP -->
-            <dialog id="p12_ntp_dialog">
-              <article>
-                <div id="p12_ntp_help_output"></div>
-                <div class="dash-footer">
-                  <button
-                    id="p12_ntp_close_dialog_btn"
-                    data-i18n="close"
-                    style="width: 75%"></button>
-                </div>
-              </article>
-            </dialog>
-            <hr />
-            <!-- Geo Location -->
-            <details>
-              <summary data-i18n="geo_location"></summary>
-              <br />
-              <label for="latitude" data-i18n="latitude"></label>
-              <input type="number" id="cfg_geo_latitude" name="latitude" />
-              <label for="longitude" data-i18n="longitude"></label>
-              <input type="number" id="cfg_geo_longitude" name="longitude" />
-              <div class="info-box">
-                <div class="info-icon">&#9432;</div>
-                <div class="info-text" data-i18n="geo_info"></div>
-              </div>
-            </details>
-            <hr />
-            <!-- MQTT -->
-            <details>
+</section>
+<section id="p12_settings_integrations" class="settings-panel" data-settings-group="integrations" data-settings-label="settings_integrations"><h2 data-i18n="settings_integrations"></h2>
+<details id="p12_mqtt_settings" name="settings-integrations">
               <summary data-i18n="mqtt"></summary>
               <div class="section-header">
-                <label for="mqtt_enable" data-i18n="activate"></label>
+                <label for="cfg_mqtt_enable" data-i18n="activate"></label>
                 <div class="switch-container">
                   <input
                     name="mqtt_enable"
@@ -392,14 +348,7 @@
                     id="cfg_mqtt_enable" />
                 </div>
               </div>
-              <div class="section-header">
-                <label for="mqtt_ha_enable">Home Assistant</label>
-                <input
-                  name="mqtt_ha_enable"
-                  type="checkbox"
-                  role="switch"
-                  id="cfg_mqtt_ha_enable" />
-              </div>
+
               <br />
               <div role="group">
                 <button
@@ -416,42 +365,55 @@
                   disabled />
               </div>
               <span id="p12_mqtt_connection_state" hidden></span>
-              <label for="mqtt_server" data-i18n="server"></label>
+              <label for="cfg_mqtt_server" data-i18n="server"></label>
               <input
                 type="text"
                 oninput="validateHost(this)"
                 id="cfg_mqtt_server"
                 name="mqtt_server" />
-              <label for="mqtt_port" data-i18n="port"></label>
+              <label for="cfg_mqtt_port" data-i18n="port"></label>
               <input type="text" id="cfg_mqtt_port" name="mqtt_port" />
-              <label for="mqtt_topic" data-i18n="topic"></label>
+              <label for="cfg_mqtt_topic" data-i18n="topic"></label>
               <input type="text" id="cfg_mqtt_topic" name="mqtt_topic" />
-              <label for="mqtt_user" data-i18n="user"></label>
+              <label for="cfg_mqtt_user" data-i18n="user"></label>
               <input type="text" id="cfg_mqtt_user" name="mqtt_user" />
-              <label for="mqtt_password" data-i18n="password"></label>
+              <label for="cfg_mqtt_password" data-i18n="password"></label>
               <input
                 type="password"
                 id="cfg_mqtt_password"
                 name="mqtt_password" />
-              <label for="mqtt_ha_topic">Home Assistant Topic</label>
+</details>
+<details id="p12_ha_settings" name="settings-integrations">
+              <summary>Home Assistant</summary>
+              <div class="section-header">
+                <label for="cfg_mqtt_ha_enable" data-i18n="activate"></label>
+                <input
+                  name="mqtt_ha_enable"
+                  type="checkbox"
+                  role="switch"
+                  id="cfg_mqtt_ha_enable" />
+              </div>
+              <p><small data-i18n="ha_mqtt_hint"></small></p>
+              <p id="p12_ha_mqtt_warning" hidden>
+                <small><span data-i18n="ha_mqtt_disabled"></span> <a href="#p12_mqtt_settings" id="p12_ha_mqtt_link" data-i18n="ha_mqtt_open"></a></small>
+              </p>
+              <label for="cfg_mqtt_ha_topic">Home Assistant Topic</label>
               <input
                 type="text"
                 id="cfg_mqtt_ha_topic"
                 placeholder="homeassistant"
                 name="mqtt_ha_topic" />
-              <label for="mqtt_ha_device">Home Assistant Device Name</label>
+              <label for="cfg_mqtt_ha_device">Home Assistant Device Name</label>
               <input
                 type="text"
                 id="cfg_mqtt_ha_device"
                 placeholder="jarolift"
                 name="mqtt_ha_device" />
             </details>
-            <hr />
-            <!-- Homee -->
-            <details>
+<details name="settings-integrations">
               <summary data-i18n="homee"></summary>
               <div class="section-header">
-                <label for="homee_enable" data-i18n="activate"></label>
+                <label for="cfg_homee_enable" data-i18n="activate"></label>
                 <div class="switch-container">
                   <input
                     name="homee_enable"
@@ -467,7 +429,7 @@
               <br />
               <div class="section-header">
                 <label
-                  for="homee_third_position"
+                  for="cfg_homee_third_position"
                   data-i18n="homee_third_position"></label>
                 <div class="switch-container">
                   <input
@@ -484,76 +446,16 @@
                   data-i18n="info_homee_third_position"></div>
               </div>
               <br />
-              <label for="homee_name" data-i18n="homee_virtual_name"></label>
+              <label for="p12_homee_name" data-i18n="homee_virtual_name"></label>
               <input
                 type="text"
                 id="p12_homee_name"
                 name="homee_name"
                 disabled />
             </details>
-            <hr />
-            <!-- Hardware -->
-            <details>
-              <summary data-i18n="gpio"></summary>
-              <br />
-              <div class="info-box">
-                <div class="info-icon">&#9432;</div>
-                <div class="info-text" data-i18n="info_gpios"></div>
-              </div>
-              <br />
-              <label for="gdo0">GDO0</label>
-              <input
-                class="num-input"
-                name="gdo0"
-                type="number"
-                id="cfg_gpio_gdo0"
-                placeholder="-1 to disable" />
-              <label for="gdo2">GDO2</label>
-              <input
-                class="num-input"
-                name="gdo2"
-                type="number"
-                id="cfg_gpio_gdo2"
-                placeholder="-1 to disable" />
-              <label for="sck">SCK</label>
-              <input
-                class="num-input"
-                name="sck"
-                type="number"
-                id="cfg_gpio_sck"
-                placeholder="-1 to disable" />
-              <label for="miso">MISO</label>
-              <input
-                class="num-input"
-                name="miso"
-                type="number"
-                id="cfg_gpio_miso"
-                placeholder="-1 to disable" />
-              <label for="mosi">MOSI</label>
-              <input
-                class="num-input"
-                name="mosi"
-                type="number"
-                id="cfg_gpio_mosi"
-                placeholder="-1 to disable" />
-              <label for="cs">CS</label>
-              <input
-                class="num-input"
-                name="cs"
-                type="number"
-                id="cfg_gpio_cs"
-                placeholder="-1 to disable" />
-              <label for="led_setup" data-i18n="led_setup"></label>
-              <input
-                class="num-input"
-                name="led_setup"
-                type="number"
-                id="cfg_gpio_led_setup"
-                placeholder="-1 to disable" />
-            </details>
-            <hr />
-            <!-- JAROLIFT -->
-            <details>
+</section>
+<section id="p12_settings_device" class="settings-panel" data-settings-group="device" data-settings-label="settings_device"><h2 data-i18n="settings_device"></h2>
+<details name="settings-device">
               <summary>JAROLIFT</summary>
               <div class="section-header">
                 <label for="learn_mode" data-i18n="learn_mode"></label>
@@ -569,7 +471,7 @@
                 <div class="info-text" data-i18n="info_leanmode"></div>
               </div>
               <br />
-              <label for="master_MSB">master MSB (HEX-Format)</label>
+              <label for="cfg_jaro_masterMSB">master MSB (HEX-Format)</label>
               <div class="row">
                 <input
                   name="master_MSB"
@@ -589,7 +491,7 @@
                   Edit
                 </button>
               </div>
-              <label for="master_LSB">master LSB (HEX-Format)</label>
+              <label for="cfg_jaro_masterLSB">master LSB (HEX-Format)</label>
               <div class="row">
                 <input
                   name="master_LSB"
@@ -610,7 +512,7 @@
                 </button>
               </div>
               <br />
-              <label for="serial" data-i18n="serial_nr++ (HEX-Format)"></label>
+              <label for="cfg_jaro_serial" data-i18n="serial_nr++ (HEX-Format)"></label>
               <div class="row">
                 <input
                   name="serial"
@@ -635,7 +537,7 @@
                 <div class="info-text" data-i18n="info_serial"></div>
               </div>
               <br />
-              <label for="devcnt">Device Counter</label>
+              <label for="p12_jaro_devcnt">Device Counter</label>
               <div class="row">
                 <input
                   name="devcnt"
@@ -654,9 +556,7 @@
               </div>
               <br />
             </details>
-            <hr />
-            <!-- Shutter 1-16 -->
-            <details>
+<details name="settings-device">
               <summary data-i18n="shutter"></summary>
               <br />
               <div class="info-box">
@@ -665,7 +565,7 @@
               </div>
               <br />
               <div class="row">
-                <label for="shutter1" data-i18n="channel++ 1"></label>
+                <label for="cfg_jaro_ch_name_0" data-i18n="channel++ 1"></label>
                 <input
                   name="shutter1"
                   type="text"
@@ -687,7 +587,7 @@
                 </div>
               </div>
               <div class="row">
-                <label for="shutter2" data-i18n="channel++ 2"></label>
+                <label for="cfg_jaro_ch_name_1" data-i18n="channel++ 2"></label>
                 <input
                   name="shutter2"
                   type="text"
@@ -709,7 +609,7 @@
                 </div>
               </div>
               <div class="row">
-                <label for="shutter3" data-i18n="channel++ 3"></label>
+                <label for="cfg_jaro_ch_name_2" data-i18n="channel++ 3"></label>
                 <input
                   name="shutter3"
                   type="text"
@@ -731,7 +631,7 @@
                 </div>
               </div>
               <div class="row">
-                <label for="shutter4" data-i18n="channel++ 4"></label>
+                <label for="cfg_jaro_ch_name_3" data-i18n="channel++ 4"></label>
                 <input
                   name="shutter4"
                   type="text"
@@ -753,7 +653,7 @@
                 </div>
               </div>
               <div class="row">
-                <label for="shutter5" data-i18n="channel++ 5"></label>
+                <label for="cfg_jaro_ch_name_4" data-i18n="channel++ 5"></label>
                 <input
                   name="shutter5"
                   type="text"
@@ -775,7 +675,7 @@
                 </div>
               </div>
               <div class="row">
-                <label for="shutter6" data-i18n="channel++ 6"></label>
+                <label for="cfg_jaro_ch_name_5" data-i18n="channel++ 6"></label>
                 <input
                   name="shutter6"
                   type="text"
@@ -797,7 +697,7 @@
                 </div>
               </div>
               <div class="row">
-                <label for="shutter7" data-i18n="channel++ 7"></label>
+                <label for="cfg_jaro_ch_name_6" data-i18n="channel++ 7"></label>
                 <input
                   name="shutter7"
                   type="text"
@@ -819,7 +719,7 @@
                 </div>
               </div>
               <div class="row">
-                <label for="shutter8" data-i18n="channel++ 8"></label>
+                <label for="cfg_jaro_ch_name_7" data-i18n="channel++ 8"></label>
                 <input
                   name="shutter8"
                   type="text"
@@ -841,7 +741,7 @@
                 </div>
               </div>
               <div class="row">
-                <label for="shutter9" data-i18n="channel++ 9"></label>
+                <label for="cfg_jaro_ch_name_8" data-i18n="channel++ 9"></label>
                 <input
                   name="shutter9"
                   type="text"
@@ -863,7 +763,7 @@
                 </div>
               </div>
               <div class="row">
-                <label for="shutter10" data-i18n="channel++ 10"></label>
+                <label for="cfg_jaro_ch_name_9" data-i18n="channel++ 10"></label>
                 <input
                   name="shutter10"
                   type="text"
@@ -885,7 +785,7 @@
                 </div>
               </div>
               <div class="row">
-                <label for="shutter11" data-i18n="channel++ 11"></label>
+                <label for="cfg_jaro_ch_name_10" data-i18n="channel++ 11"></label>
                 <input
                   name="shutter11"
                   type="text"
@@ -907,7 +807,7 @@
                 </div>
               </div>
               <div class="row">
-                <label for="shutter12" data-i18n="channel++ 12"></label>
+                <label for="cfg_jaro_ch_name_11" data-i18n="channel++ 12"></label>
                 <input
                   name="shutter12"
                   type="text"
@@ -929,7 +829,7 @@
                 </div>
               </div>
               <div class="row">
-                <label for="shutter13" data-i18n="channel++ 13"></label>
+                <label for="cfg_jaro_ch_name_12" data-i18n="channel++ 13"></label>
                 <input
                   name="shutter13"
                   type="text"
@@ -951,7 +851,7 @@
                 </div>
               </div>
               <div class="row">
-                <label for="shutter14" data-i18n="channel++ 14"></label>
+                <label for="cfg_jaro_ch_name_13" data-i18n="channel++ 14"></label>
                 <input
                   name="shutter14"
                   type="text"
@@ -973,7 +873,7 @@
                 </div>
               </div>
               <div class="row">
-                <label for="shutter15" data-i18n="channel++ 15"></label>
+                <label for="cfg_jaro_ch_name_14" data-i18n="channel++ 15"></label>
                 <input
                   name="shutter15"
                   type="text"
@@ -995,7 +895,7 @@
                 </div>
               </div>
               <div class="row">
-                <label for="shutter16" data-i18n="channel++ 16"></label>
+                <label for="cfg_jaro_ch_name_15" data-i18n="channel++ 16"></label>
                 <input
                   name="shutter16"
                   type="text"
@@ -1017,22 +917,7 @@
                 </div>
               </div>
             </details>
-            <hr />
-            <!-- Dialog OPEN-BITMASK-HELP -->
-            <dialog id="p12_bitmask_dialog">
-              <article>
-                <h3 data-i18n="help"></h3>
-                <div data-i18n="mask_help"></div>
-                <div class="dash-footer">
-                  <button
-                    onclick="closeGrpMaskHelp(this)"
-                    data-i18n="close"
-                    style="width: 75%"></button>
-                </div>
-              </article>
-            </dialog>
-            <!-- Group 1-6 -->
-            <details>
+<details name="settings-device">
               <summary data-i18n="groups"></summary>
               <div class="info-box">
                 <div class="info-icon">&#9432;</div>
@@ -1054,7 +939,7 @@
               <br />
               <div class="details-container">
                 <div>
-                  <label for="name_grp_0" data-i18n="name"></label>
+                  <label for="cfg_jaro_grp_name_0" data-i18n="name"></label>
                   <input
                     name="name_grp_0"
                     type="text"
@@ -1064,7 +949,7 @@
                 </div>
                 <div>
                   <div class="label-with-button">
-                    <label for="mask_grp_0" data-i18n="mask"></label>
+                    <label for="cfg_jaro_grp_mask_0" data-i18n="mask"></label>
                     <button
                       onclick="openGrpMaskHelp(this)"
                       class="i_help"
@@ -1103,7 +988,7 @@
               <br />
               <div class="details-container">
                 <div>
-                  <label for="name_grp_1" data-i18n="name"></label>
+                  <label for="cfg_jaro_grp_name_1" data-i18n="name"></label>
                   <input
                     name="name_grp_1"
                     type="text"
@@ -1113,7 +998,7 @@
                 </div>
                 <div>
                   <div class="label-with-button">
-                    <label for="mask_grp_1" data-i18n="mask"></label>
+                    <label for="cfg_jaro_grp_mask_1" data-i18n="mask"></label>
                     <button
                       onclick="openGrpMaskHelp(this)"
                       class="i_help"
@@ -1152,7 +1037,7 @@
               <br />
               <div class="details-container">
                 <div>
-                  <label for="name_grp_2" data-i18n="name"></label>
+                  <label for="cfg_jaro_grp_name_2" data-i18n="name"></label>
                   <input
                     name="name_grp_2"
                     type="text"
@@ -1162,7 +1047,7 @@
                 </div>
                 <div>
                   <div class="label-with-button">
-                    <label for="mask_grp_2" data-i18n="mask"></label>
+                    <label for="cfg_jaro_grp_mask_2" data-i18n="mask"></label>
                     <button
                       onclick="openGrpMaskHelp(this)"
                       class="i_help"
@@ -1201,7 +1086,7 @@
               <br />
               <div class="details-container">
                 <div>
-                  <label for="name_grp_3" data-i18n="name"></label>
+                  <label for="cfg_jaro_grp_name_3" data-i18n="name"></label>
                   <input
                     name="name_grp_3"
                     type="text"
@@ -1211,7 +1096,7 @@
                 </div>
                 <div>
                   <div class="label-with-button">
-                    <label for="mask_grp_3" data-i18n="mask"></label>
+                    <label for="cfg_jaro_grp_mask_3" data-i18n="mask"></label>
                     <button
                       onclick="openGrpMaskHelp(this)"
                       class="i_help"
@@ -1250,7 +1135,7 @@
               <br />
               <div class="details-container">
                 <div>
-                  <label for="name_grp_4" data-i18n="name"></label>
+                  <label for="cfg_jaro_grp_name_4" data-i18n="name"></label>
                   <input
                     name="name_grp_4"
                     type="text"
@@ -1260,7 +1145,7 @@
                 </div>
                 <div>
                   <div class="label-with-button">
-                    <label for="mask_grp_4" data-i18n="mask"></label>
+                    <label for="cfg_jaro_grp_mask_4" data-i18n="mask"></label>
                     <button
                       onclick="openGrpMaskHelp(this)"
                       class="i_help"
@@ -1299,7 +1184,7 @@
               <br />
               <div class="details-container">
                 <div>
-                  <label for="name_grp_5" data-i18n="name"></label>
+                  <label for="cfg_jaro_grp_name_5" data-i18n="name"></label>
                   <input
                     name="name_grp_5"
                     type="text"
@@ -1309,7 +1194,7 @@
                 </div>
                 <div>
                   <div class="label-with-button">
-                    <label for="mask_grp_5" data-i18n="mask"></label>
+                    <label for="cfg_jaro_grp_mask_5" data-i18n="mask"></label>
                     <button
                       onclick="openGrpMaskHelp(this)"
                       class="i_help"
@@ -1334,9 +1219,7 @@
               </div>
               <br />
             </details>
-            <hr />
-            <!-- Remotes 1-16 -->
-            <details>
+<details name="settings-device">
               <summary data-i18n="remotes"></summary>
               <div class="info-box">
                 <div class="info-icon">&#9432;</div>
@@ -1357,7 +1240,7 @@
               <br />
               <div class="settings-container">
                 <div>
-                  <label for="name_remote_0" data-i18n="name"></label>
+                  <label for="cfg_jaro_remote_name_0" data-i18n="name"></label>
                   <input
                     name="name_remote_0"
                     type="text"
@@ -1365,7 +1248,7 @@
                     placeholder="name" />
                 </div>
                 <div>
-                  <label for="serial_remote_0" data-i18n="serial_nr"></label>
+                  <label for="cfg_jaro_remote_serial_0" data-i18n="serial_nr"></label>
                   <input
                     name="serial_remote_0"
                     id="cfg_jaro_remote_serial_0"
@@ -1380,7 +1263,7 @@
                     placeholder="serial" />
                 </div>
                 <div>
-                  <label for="mask_remote_0" data-i18n="mask"></label>
+                  <label for="cfg_jaro_remote_mask_0" data-i18n="mask"></label>
                   <input
                     class="bitmask-input"
                     name="mask_remote_0"
@@ -1409,7 +1292,7 @@
               <br />
               <div class="settings-container">
                 <div>
-                  <label for="name_remote_1" data-i18n="name"></label>
+                  <label for="cfg_jaro_remote_name_1" data-i18n="name"></label>
                   <input
                     name="name_remote_1"
                     type="text"
@@ -1417,7 +1300,7 @@
                     placeholder="name" />
                 </div>
                 <div>
-                  <label for="serial_remote_1" data-i18n="serial_nr"></label>
+                  <label for="cfg_jaro_remote_serial_1" data-i18n="serial_nr"></label>
                   <input
                     name="serial_remote_1"
                     id="cfg_jaro_remote_serial_1"
@@ -1432,7 +1315,7 @@
                     placeholder="serial" />
                 </div>
                 <div>
-                  <label for="mask_remote_1" data-i18n="mask"></label>
+                  <label for="cfg_jaro_remote_mask_1" data-i18n="mask"></label>
                   <input
                     class="bitmask-input"
                     name="mask_remote_1"
@@ -1461,7 +1344,7 @@
               <br />
               <div class="settings-container">
                 <div>
-                  <label for="name_remote_2" data-i18n="name"></label>
+                  <label for="cfg_jaro_remote_name_2" data-i18n="name"></label>
                   <input
                     name="name_remote_2"
                     type="text"
@@ -1469,7 +1352,7 @@
                     placeholder="name" />
                 </div>
                 <div>
-                  <label for="serial_remote_2" data-i18n="serial_nr"></label>
+                  <label for="cfg_jaro_remote_serial_2" data-i18n="serial_nr"></label>
                   <input
                     name="serial_remote_2"
                     id="cfg_jaro_remote_serial_2"
@@ -1484,7 +1367,7 @@
                     placeholder="serial" />
                 </div>
                 <div>
-                  <label for="mask_remote_2" data-i18n="mask"></label>
+                  <label for="cfg_jaro_remote_mask_2" data-i18n="mask"></label>
                   <input
                     class="bitmask-input"
                     name="mask_remote_2"
@@ -1513,7 +1396,7 @@
               <br />
               <div class="settings-container">
                 <div>
-                  <label for="name_remote_3" data-i18n="name"></label>
+                  <label for="cfg_jaro_remote_name_3" data-i18n="name"></label>
                   <input
                     name="name_remote_3"
                     type="text"
@@ -1521,7 +1404,7 @@
                     placeholder="name" />
                 </div>
                 <div>
-                  <label for="serial_remote_3" data-i18n="serial_nr"></label>
+                  <label for="cfg_jaro_remote_serial_3" data-i18n="serial_nr"></label>
                   <input
                     name="serial_remote_3"
                     id="cfg_jaro_remote_serial_3"
@@ -1536,7 +1419,7 @@
                     placeholder="serial" />
                 </div>
                 <div>
-                  <label for="mask_remote_3" data-i18n="mask"></label>
+                  <label for="cfg_jaro_remote_mask_3" data-i18n="mask"></label>
                   <input
                     class="bitmask-input"
                     name="mask_remote_3"
@@ -1565,7 +1448,7 @@
               <br />
               <div class="settings-container">
                 <div>
-                  <label for="name_remote_4" data-i18n="name"></label>
+                  <label for="cfg_jaro_remote_name_4" data-i18n="name"></label>
                   <input
                     name="name_remote_4"
                     type="text"
@@ -1573,7 +1456,7 @@
                     placeholder="name" />
                 </div>
                 <div>
-                  <label for="serial_remote_4" data-i18n="serial_nr"></label>
+                  <label for="cfg_jaro_remote_serial_4" data-i18n="serial_nr"></label>
                   <input
                     name="serial_remote_4"
                     id="cfg_jaro_remote_serial_4"
@@ -1588,7 +1471,7 @@
                     placeholder="serial" />
                 </div>
                 <div>
-                  <label for="mask_remote_4" data-i18n="mask"></label>
+                  <label for="cfg_jaro_remote_mask_4" data-i18n="mask"></label>
                   <input
                     class="bitmask-input"
                     name="mask_remote_4"
@@ -1617,7 +1500,7 @@
               <br />
               <div class="settings-container">
                 <div>
-                  <label for="name_remote_5" data-i18n="name"></label>
+                  <label for="cfg_jaro_remote_name_5" data-i18n="name"></label>
                   <input
                     name="name_remote_5"
                     type="text"
@@ -1625,7 +1508,7 @@
                     placeholder="name" />
                 </div>
                 <div>
-                  <label for="serial_remote_5" data-i18n="serial_nr"></label>
+                  <label for="cfg_jaro_remote_serial_5" data-i18n="serial_nr"></label>
                   <input
                     name="serial_remote_5"
                     id="cfg_jaro_remote_serial_5"
@@ -1640,7 +1523,7 @@
                     placeholder="serial" />
                 </div>
                 <div>
-                  <label for="mask_remote_5" data-i18n="mask"></label>
+                  <label for="cfg_jaro_remote_mask_5" data-i18n="mask"></label>
                   <input
                     class="bitmask-input"
                     name="mask_remote_5"
@@ -1669,7 +1552,7 @@
               <br />
               <div class="settings-container">
                 <div>
-                  <label for="name_remote_6" data-i18n="name"></label>
+                  <label for="cfg_jaro_remote_name_6" data-i18n="name"></label>
                   <input
                     name="name_remote_6"
                     type="text"
@@ -1677,7 +1560,7 @@
                     placeholder="name" />
                 </div>
                 <div>
-                  <label for="serial_remote_6" data-i18n="serial_nr"></label>
+                  <label for="cfg_jaro_remote_serial_6" data-i18n="serial_nr"></label>
                   <input
                     name="serial_remote_6"
                     id="cfg_jaro_remote_serial_6"
@@ -1692,7 +1575,7 @@
                     placeholder="serial" />
                 </div>
                 <div>
-                  <label for="mask_remote_6" data-i18n="mask"></label>
+                  <label for="cfg_jaro_remote_mask_6" data-i18n="mask"></label>
                   <input
                     class="bitmask-input"
                     name="mask_remote_6"
@@ -1721,7 +1604,7 @@
               <br />
               <div class="settings-container">
                 <div>
-                  <label for="name_remote_7" data-i18n="name"></label>
+                  <label for="cfg_jaro_remote_name_7" data-i18n="name"></label>
                   <input
                     name="name_remote_7"
                     type="text"
@@ -1729,7 +1612,7 @@
                     placeholder="name" />
                 </div>
                 <div>
-                  <label for="serial_remote_7" data-i18n="serial_nr"></label>
+                  <label for="cfg_jaro_remote_serial_7" data-i18n="serial_nr"></label>
                   <input
                     name="serial_remote_7"
                     id="cfg_jaro_remote_serial_7"
@@ -1744,7 +1627,7 @@
                     placeholder="serial" />
                 </div>
                 <div>
-                  <label for="mask_remote_7" data-i18n="mask"></label>
+                  <label for="cfg_jaro_remote_mask_7" data-i18n="mask"></label>
                   <input
                     class="bitmask-input"
                     name="mask_remote_7"
@@ -1773,7 +1656,7 @@
               <br />
               <div class="settings-container">
                 <div>
-                  <label for="name_remote_8" data-i18n="name"></label>
+                  <label for="cfg_jaro_remote_name_8" data-i18n="name"></label>
                   <input
                     name="name_remote_8"
                     type="text"
@@ -1781,7 +1664,7 @@
                     placeholder="name" />
                 </div>
                 <div>
-                  <label for="serial_remote_8" data-i18n="serial_nr"></label>
+                  <label for="cfg_jaro_remote_serial_8" data-i18n="serial_nr"></label>
                   <input
                     name="serial_remote_8"
                     id="cfg_jaro_remote_serial_8"
@@ -1796,7 +1679,7 @@
                     placeholder="serial" />
                 </div>
                 <div>
-                  <label for="mask_remote_8" data-i18n="mask"></label>
+                  <label for="cfg_jaro_remote_mask_8" data-i18n="mask"></label>
                   <input
                     class="bitmask-input"
                     name="mask_remote_8"
@@ -1825,7 +1708,7 @@
               <br />
               <div class="settings-container">
                 <div>
-                  <label for="name_remote_9" data-i18n="name"></label>
+                  <label for="cfg_jaro_remote_name_9" data-i18n="name"></label>
                   <input
                     name="name_remote_9"
                     type="text"
@@ -1833,7 +1716,7 @@
                     placeholder="name" />
                 </div>
                 <div>
-                  <label for="serial_remote_9" data-i18n="serial_nr"></label>
+                  <label for="cfg_jaro_remote_serial_9" data-i18n="serial_nr"></label>
                   <input
                     name="serial_remote_9"
                     id="cfg_jaro_remote_serial_9"
@@ -1848,7 +1731,7 @@
                     placeholder="serial" />
                 </div>
                 <div>
-                  <label for="mask_remote_9" data-i18n="mask"></label>
+                  <label for="cfg_jaro_remote_mask_9" data-i18n="mask"></label>
                   <input
                     class="bitmask-input"
                     name="mask_remote_9"
@@ -1877,7 +1760,7 @@
               <br />
               <div class="settings-container">
                 <div>
-                  <label for="name_remote_10" data-i18n="name"></label>
+                  <label for="cfg_jaro_remote_name_10" data-i18n="name"></label>
                   <input
                     name="name_remote_10"
                     type="text"
@@ -1885,7 +1768,7 @@
                     placeholder="name" />
                 </div>
                 <div>
-                  <label for="serial_remote_10" data-i18n="serial_nr"></label>
+                  <label for="cfg_jaro_remote_serial_10" data-i18n="serial_nr"></label>
                   <input
                     name="serial_remote_10"
                     id="cfg_jaro_remote_serial_10"
@@ -1900,7 +1783,7 @@
                     placeholder="serial" />
                 </div>
                 <div>
-                  <label for="mask_remote_10" data-i18n="mask"></label>
+                  <label for="cfg_jaro_remote_mask_10" data-i18n="mask"></label>
                   <input
                     class="bitmask-input"
                     name="mask_remote_10"
@@ -1929,7 +1812,7 @@
               <br />
               <div class="settings-container">
                 <div>
-                  <label for="name_remote_11" data-i18n="name"></label>
+                  <label for="cfg_jaro_remote_name_11" data-i18n="name"></label>
                   <input
                     name="name_remote_11"
                     type="text"
@@ -1937,7 +1820,7 @@
                     placeholder="name" />
                 </div>
                 <div>
-                  <label for="serial_remote_11" data-i18n="serial_nr"></label>
+                  <label for="cfg_jaro_remote_serial_11" data-i18n="serial_nr"></label>
                   <input
                     name="serial_remote_11"
                     id="cfg_jaro_remote_serial_11"
@@ -1952,7 +1835,7 @@
                     placeholder="serial" />
                 </div>
                 <div>
-                  <label for="mask_remote_11" data-i18n="mask"></label>
+                  <label for="cfg_jaro_remote_mask_11" data-i18n="mask"></label>
                   <input
                     class="bitmask-input"
                     name="mask_remote_11"
@@ -1981,7 +1864,7 @@
               <br />
               <div class="settings-container">
                 <div>
-                  <label for="name_remote_12" data-i18n="name"></label>
+                  <label for="cfg_jaro_remote_name_12" data-i18n="name"></label>
                   <input
                     name="name_remote_12"
                     type="text"
@@ -1989,7 +1872,7 @@
                     placeholder="name" />
                 </div>
                 <div>
-                  <label for="serial_remote_12" data-i18n="serial_nr"></label>
+                  <label for="cfg_jaro_remote_serial_12" data-i18n="serial_nr"></label>
                   <input
                     name="serial_remote_12"
                     id="cfg_jaro_remote_serial_12"
@@ -2004,7 +1887,7 @@
                     placeholder="serial" />
                 </div>
                 <div>
-                  <label for="mask_remote_12" data-i18n="mask"></label>
+                  <label for="cfg_jaro_remote_mask_12" data-i18n="mask"></label>
                   <input
                     class="bitmask-input"
                     name="mask_remote_12"
@@ -2033,7 +1916,7 @@
               <br />
               <div class="settings-container">
                 <div>
-                  <label for="name_remote_13" data-i18n="name"></label>
+                  <label for="cfg_jaro_remote_name_13" data-i18n="name"></label>
                   <input
                     name="name_remote_13"
                     type="text"
@@ -2041,7 +1924,7 @@
                     placeholder="name" />
                 </div>
                 <div>
-                  <label for="serial_remote_13" data-i18n="serial_nr"></label>
+                  <label for="cfg_jaro_remote_serial_13" data-i18n="serial_nr"></label>
                   <input
                     name="serial_remote_13"
                     id="cfg_jaro_remote_serial_13"
@@ -2056,7 +1939,7 @@
                     placeholder="serial" />
                 </div>
                 <div>
-                  <label for="mask_remote_13" data-i18n="mask"></label>
+                  <label for="cfg_jaro_remote_mask_13" data-i18n="mask"></label>
                   <input
                     class="bitmask-input"
                     name="mask_remote_13"
@@ -2085,7 +1968,7 @@
               <br />
               <div class="settings-container">
                 <div>
-                  <label for="name_remote_14" data-i18n="name"></label>
+                  <label for="cfg_jaro_remote_name_14" data-i18n="name"></label>
                   <input
                     name="name_remote_14"
                     type="text"
@@ -2093,7 +1976,7 @@
                     placeholder="name" />
                 </div>
                 <div>
-                  <label for="serial_remote_14" data-i18n="serial_nr"></label>
+                  <label for="cfg_jaro_remote_serial_14" data-i18n="serial_nr"></label>
                   <input
                     name="serial_remote_14"
                     id="cfg_jaro_remote_serial_14"
@@ -2108,7 +1991,7 @@
                     placeholder="serial" />
                 </div>
                 <div>
-                  <label for="mask_remote_14" data-i18n="mask"></label>
+                  <label for="cfg_jaro_remote_mask_14" data-i18n="mask"></label>
                   <input
                     class="bitmask-input"
                     name="mask_remote_14"
@@ -2137,7 +2020,7 @@
               <br />
               <div class="settings-container">
                 <div>
-                  <label for="name_remote_15" data-i18n="name"></label>
+                  <label for="cfg_jaro_remote_name_15" data-i18n="name"></label>
                   <input
                     name="name_remote_15"
                     type="text"
@@ -2145,7 +2028,7 @@
                     placeholder="name" />
                 </div>
                 <div>
-                  <label for="serial_remote_15" data-i18n="serial_nr"></label>
+                  <label for="cfg_jaro_remote_serial_15" data-i18n="serial_nr"></label>
                   <input
                     name="serial_remote_15"
                     id="cfg_jaro_remote_serial_15"
@@ -2160,7 +2043,7 @@
                     placeholder="serial" />
                 </div>
                 <div>
-                  <label for="mask_remote_15" data-i18n="mask"></label>
+                  <label for="cfg_jaro_remote_mask_15" data-i18n="mask"></label>
                   <input
                     class="bitmask-input"
                     name="mask_remote_15"
@@ -2175,28 +2058,125 @@
                 </div>
               </div>
             </details>
-            <hr />
-            <!-- Language -->
-            <details>
-              <summary data-i18n="language"></summary>
-              <select id="cfg_lang">
-                <option value="0" data-i18n="german"></option>
-                <option value="1" data-i18n="english"></option>
-              </select>
+<details name="settings-device">
+              <summary data-i18n="gpio"></summary>
+              <br />
+              <div class="info-box">
+                <div class="info-icon">&#9432;</div>
+                <div class="info-text" data-i18n="info_gpios"></div>
+              </div>
+              <br />
+              <div class="settings-fields"><div class="settings-field settings-field--compact"><label for="cfg_gpio_gdo0">GDO0</label><input
+                class="num-input"
+                name="gdo0"
+                type="number"
+                id="cfg_gpio_gdo0"
+                placeholder="-1 to disable" /></div>
+              <div class="settings-field settings-field--compact"><label for="cfg_gpio_gdo2">GDO2</label><input
+                class="num-input"
+                name="gdo2"
+                type="number"
+                id="cfg_gpio_gdo2"
+                placeholder="-1 to disable" /></div>
+              <div class="settings-field settings-field--compact"><label for="cfg_gpio_sck">SCK</label><input
+                class="num-input"
+                name="sck"
+                type="number"
+                id="cfg_gpio_sck"
+                placeholder="-1 to disable" /></div>
+              <div class="settings-field settings-field--compact"><label for="cfg_gpio_miso">MISO</label><input
+                class="num-input"
+                name="miso"
+                type="number"
+                id="cfg_gpio_miso"
+                placeholder="-1 to disable" /></div>
+              <div class="settings-field settings-field--compact"><label for="cfg_gpio_mosi">MOSI</label><input
+                class="num-input"
+                name="mosi"
+                type="number"
+                id="cfg_gpio_mosi"
+                placeholder="-1 to disable" /></div>
+              <div class="settings-field settings-field--compact"><label for="cfg_gpio_cs">CS</label><input
+                class="num-input"
+                name="cs"
+                type="number"
+                id="cfg_gpio_cs"
+                placeholder="-1 to disable" /></div>
+              <div class="settings-field settings-field--compact"><label for="cfg_gpio_led_setup" data-i18n="led_setup"></label><input
+                class="num-input"
+                name="led_setup"
+                type="number"
+                id="cfg_gpio_led_setup"
+                placeholder="-1 to disable" /></div>
+            </div></details>
+</section>
+<section id="p12_settings_maintenance" class="settings-panel" data-settings-group="maintenance" data-settings-label="settings_maintenance"><h2 data-i18n="settings_maintenance"></h2>
+<details name="settings-maintenance">
+              <summary data-i18n="access"></summary>
+              <div class="section-header">
+                <label for="cfg_auth_enable" data-i18n="activate"></label>
+                <div class="switch-container">
+                  <input
+                    name="auth_enable"
+                    type="checkbox"
+                    role="switch"
+                    hideOpt="OPT_AUTH"
+                    id="cfg_auth_enable" />
+                </div>
+              </div>
+              <br />
+              <label for="cfg_auth_user" data-i18n="user"></label>
+              <input type="text" id="cfg_auth_user" name="auth_user" maxlength="63" />
+              <label for="cfg_auth_password" data-i18n="password"></label>
+              <input type="password" id="cfg_auth_password" name="auth_passw" maxlength="63" />
             </details>
-            <hr />
-            <!-- Buttons -->
-            <button
+<details name="settings-maintenance">
+              <summary data-i18n="service_access"></summary>
+              <label for="cfg_service_password" data-i18n="service_password"></label>
+              <input type="password" id="cfg_service_password" name="service_password" maxlength="63" autocomplete="new-password" />
+              <p><small data-i18n="service_hint"></small></p>
+              <div class="section-header">
+                <label for="cfg_service_telnet_enable" data-i18n="service_telnet"></label>
+                <div class="switch-container">
+                  <input id="cfg_service_telnet_enable" name="service_telnet_enable" type="checkbox" role="switch" />
+                </div>
+              </div>
+            </details>
+</section>
+<div class="settings-actions">
+<button
               id="p12_btn_restart"
               data-i18n="restart"
               onclick="restartFunction()"
               style="width: 100%; margin-bottom: 10px"></button>
-            <br />
-            <br />
-          </div>
-        </div>
-      </div>
-      <!--SECTION-END-->
+</div>
+</div></div></div>
+
+
+<dialog id="p12_ntp_dialog">
+              <article>
+                <div id="p12_ntp_help_output"></div>
+                <div class="dash-footer">
+                  <button
+                    id="p12_ntp_close_dialog_btn"
+                    data-i18n="close"
+                    style="width: 75%"></button>
+                </div>
+              </article>
+            </dialog>
+<dialog id="p12_bitmask_dialog">
+              <article>
+                <h3 data-i18n="help"></h3>
+                <div data-i18n="mask_help"></div>
+                <div class="dash-footer">
+                  <button
+                    onclick="closeGrpMaskHelp(this)"
+                    data-i18n="close"
+                    style="width: 75%"></button>
+                </div>
+              </article>
+            </dialog></div>
+<!--SECTION-END-->
     </main>
     <!-- Footer -->
     <footer

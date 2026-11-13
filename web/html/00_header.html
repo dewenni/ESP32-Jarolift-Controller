@@ -13,6 +13,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   </head>
   <body>
+    <header class="app-header">
+      <strong class="app-brand">Jarolift-Controller</strong>
+      <div class="app-modes">
+        <span class="simModeBar">SIMULATION</span>
+        <span class="setupModeBar">SETUP-MODE</span>
+        <span id="errorBar" class="app-error" role="status" style="display: none"><span id="errorBarText"></span></span>
+      </div>
+      <div class="app-connection-actions">
+      <span id="p00_web_connection" class="app-connection" role="status" aria-live="polite">
+        <span id="p00_web_connection_text" data-i18n="ui_disconnected"></span>
+      </span>
+        <button id="p99_reloadButton" type="button" class="app-reload svg i_auto" data-ui-local aria-label="Reload" hidden></button>
+      </div>
+    </header>
     <dialog id="bitmask_dialog">
       <article class="dash">
         <div class="dash-main">
@@ -189,36 +203,28 @@
       <div class="topMenu">
         <ul>
           <li>
-            <strong style="margin-right: 10px">Jarolift-Controller</strong>
-            <span class="simModeBar">SIM</span>
-            <span class="setupModeBar">SETUP</span>
+            <strong class="app-brand">Jarolift-Controller</strong>
           </li>
         </ul>
+        <div class="app-modes">
+          <span class="simModeBar">SIM</span>
+          <span class="setupModeBar">SETUP</span>
+        </div>
         <ul>
           <li>
             <details class="dropdown">
-              <summary id="topMenuDropdown" class="i_menu"></summary>
-              <ul class="nav-list" dir="rtl">
-                <li><a data-tab="tab1" href="#" data-i18n="channels"></a></li>
-                <li><a data-tab="tab2" href="#" data-i18n="groups"></a></li>
-                <li><a data-tab="tab3" href="#" data-i18n="timer"></a></li>
-                <li><a data-tab="tab4" href="#" data-i18n="service"></a></li>
-                <li>
-                  <a data-tab="tab9" href="#" data-i18n="system"></a>
-                </li>
-                <li>
-                  <a data-tab="tab10" href="#" data-i18n="logger"></a>
-                </li>
-                <li>
-                  <a data-tab="tab11" href="#" data-i18n="tools"></a>
-                </li>
-                <li>
-                  <a data-tab="tab12" href="#" data-i18n="settings"></a>
-                </li>
-                <li>
-                  <a data-tab="tab13" href="#" data-i18n="help"></a>
-                </li>
-              </ul>
+              <summary id="topMenuDropdown" aria-label="Navigation">
+                <i class="svg i_menu" aria-hidden="true"></i>
+              </summary>
+              <ul class="nav-list"><li><a data-tab="tab1" href="#" data-i18n="channels"></a></li>
+<li><a data-tab="tab2" href="#" data-i18n="groups"></a></li>
+<li><a data-tab="tab3" href="#" data-i18n="timer"></a></li>
+<li><a data-tab="tab4" href="#" data-i18n="service"></a></li>
+<li><a data-tab="tab9" href="#" data-i18n="system"></a></li>
+<li><a data-tab="tab10" href="#" data-i18n="logger"></a></li>
+<li><a data-tab="tab11" href="#" data-i18n="tools"></a></li>
+<li><a data-tab="tab12" href="#" data-i18n="settings"></a></li>
+<li><a data-tab="tab13" href="#" data-i18n="help"></a></li></ul>
             </details>
           </li>
         </ul>
@@ -227,68 +233,16 @@
     <!--TOP-MENU-END-->
     <!--SIDEBAR-->
     <div class="sidebar">
-      <div>
-        <div>Jarolift-Controller</div>
-      </div>
-      <div class="simModeBar">SIMULATION-MODE</div>
-      <div class="setupModeBar">SETUP-MODE</div>
-      <ul class="nav-list">
-        <li>
-          <a href="#" data-tab="tab1" class="active">
-            <i class="svg i_updown"></i>
-            <span class="links_name" data-i18n="channels"></span>
-          </a>
-        </li>
-        <li>
-          <a href="#" data-tab="tab2">
-            <i class="svg i_updown2"></i>
-            <span class="links_name" data-i18n="groups"></span>
-          </a>
-        </li>
-        <li>
-          <a href="#" data-tab="tab3">
-            <i class="svg i_clock"></i>
-            <span class="links_name" data-i18n="timer"></span>
-          </a>
-        </li>
-        <li>
-          <a href="#" data-tab="tab4">
-            <i class="svg i_service"></i>
-            <span class="links_name" data-i18n="service"></span>
-          </a>
-        </li>
-        <li>
-          <a href="#" data-tab="tab9">
-            <i class="svg i_info"></i>
-            <span class="links_name" data-i18n="system"></span>
-          </a>
-        </li>
-        <li>
-          <a href="#" data-tab="tab10">
-            <i class="svg i_log"></i>
-            <span class="links_name" data-i18n="logger"></span>
-          </a>
-        </li>
-        <li>
-          <a href="#" data-tab="tab11">
-            <i class="svg i_upload"></i>
-            <span class="links_name" data-i18n="tools"></span>
-          </a>
-        </li>
-        <li>
-          <a href="#" data-tab="tab12">
-            <i class="svg i_settings"></i>
-            <span class="links_name" data-i18n="settings"></span>
-          </a>
-        </li>
-        <li>
-          <a href="#" data-tab="tab13">
-            <i class="svg i_help"></i>
-            <span class="links_name" data-i18n="help"></span>
-          </a>
-        </li>
-      </ul>
-      <div style="display: inline-flex; margin-top: auto; margin-bottom: 5px">
+      <ul class="nav-list"><li><a href="#" data-tab="tab1" class="active"><span class="links_name" data-i18n="channels"></span></a></li>
+<li><a href="#" data-tab="tab2"><span class="links_name" data-i18n="groups"></span></a></li>
+<li><a href="#" data-tab="tab3"><span class="links_name" data-i18n="timer"></span></a></li>
+<li><a href="#" data-tab="tab4"><span class="links_name" data-i18n="service"></span></a></li>
+<li><a href="#" data-tab="tab9"><span class="links_name" data-i18n="system"></span></a></li>
+<li><a href="#" data-tab="tab10"><span class="links_name" data-i18n="logger"></span></a></li>
+<li><a href="#" data-tab="tab11"><span class="links_name" data-i18n="tools"></span></a></li>
+<li><a href="#" data-tab="tab12"><span class="links_name" data-i18n="settings"></span></a></li>
+<li><a href="#" data-tab="tab13"><span class="links_name" data-i18n="help"></span></a></li></ul>
+      <div class="sidebar-status" style="display: inline-flex; margin-top: auto; margin-bottom: 5px">
         <a id="p00_version" style="margin-right: auto; margin-top: auto"></a>
         <i id="p00_wifi_icon" style="width: 28px; height: 28px"></i>
         <i id="p00_eth_icon" style="width: 28px; height: 28px"></i>

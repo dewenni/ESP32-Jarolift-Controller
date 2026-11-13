@@ -32,13 +32,14 @@
     <main class="container">
       <!--SECTION-START-->
       <!-- Tab-3 -->
-      <div id="tab3" class="tab-content">
-        <div class="grid" id="timers-container">
-          <article>
+      <div id="tab3" class="tab-content jarolift-page jarolift-timers" data-connection-required><header class="page-heading"><h1 data-i18n="timer"></h1><p data-i18n="jaro_timers_subtitle"></p></header>
+
+        <div class="jarolift-timer-grid" id="timers-container">
+          <article class="jarolift-timer">
             <div class="dash-main">
               <div class="dash-header">Timer 1</div>
               <div class="section-header">
-                <label for="timer0_enable" data-i18n="activate"></label>
+                <label for="cfg_timer_0_enable" data-i18n="activate"></label>
                 <div class="switch-container">
                   <input
                     name="timer0_enable"
@@ -51,7 +52,7 @@
               <br />
               <form id="timerForm0" class="OPT_TIMER0">
                 <fieldset>
-                  <label for="timeType0" data-i18n="timer_type"></label>
+                  <label for="cfg_timer_0_type" data-i18n="timer_type"></label>
                   <select
                     id="cfg_timer_0_type"
                     name="timeType0"
@@ -63,7 +64,7 @@
                   </select>
 
                   <div class="time-input" id="timeInput0">
-                    <label for="timeValue0" data-i18n="time_HH_MM"></label>
+                    <label for="cfg_timer_0_time_value" data-i18n="time_HH_MM"></label>
                     <input
                       type="time"
                       id="cfg_timer_0_time_value"
@@ -74,7 +75,7 @@
                     class="time-input"
                     id="offsetInput0"
                     style="display: none">
-                    <label for="offsetValue0" data-i18n="offset_desc"></label>
+                    <label for="cfg_timer_0_offset_value" data-i18n="offset_desc"></label>
                     <input
                       type="number"
                       id="cfg_timer_0_offset_value"
@@ -95,7 +96,7 @@
                         id="cfg_timer_0_use_min_time" />
 
                       <label
-                        for="timer0_use_min_time"
+                        for="cfg_timer_0_use_min_time"
                         data-i18n="use_min_time"></label>
                     </div>
 
@@ -116,7 +117,7 @@
                         id="cfg_timer_0_use_max_time" />
 
                       <label
-                        for="timer0_use_max_time"
+                        for="cfg_timer_0_use_max_time"
                         data-i18n="use_max_time"></label>
                     </div>
 
@@ -129,7 +130,7 @@
                   </div>
 
                   <!-- Dropdown for shutter cmd -->
-                  <label for="command0" data-i18n="command"></label>
+                  <label for="cfg_timer_0_cmd" data-i18n="command"></label>
                   <select id="cfg_timer_0_cmd" name="command0">
                     <option value="0" data-i18n="cmd_up"></option>
                     <option value="1" data-i18n="cmd_down"></option>
@@ -138,41 +139,41 @@
 
                   <!-- Checkbox for wekdays -->
                   <label data-i18n="weekdays"></label>
-                  <div class="grid">
+                  <div class="timer-weekdays">
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_0_monday"
                         name="days0" />
-                      <label for="monday0" data-i18n="day_mo"></label>
+                      <label for="cfg_timer_0_monday" data-i18n="day_mo"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_0_tuesday"
                         name="days0" />
-                      <label for="tuesday0" data-i18n="day_tu"></label>
+                      <label for="cfg_timer_0_tuesday" data-i18n="day_tu"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_0_wednesday"
                         name="days0" />
-                      <label for="wednesday0" data-i18n="day_we"></label>
+                      <label for="cfg_timer_0_wednesday" data-i18n="day_we"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_0_thursday"
                         name="days0" />
-                      <label for="thursday0" data-i18n="day_th"></label>
+                      <label for="cfg_timer_0_thursday" data-i18n="day_th"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_0_friday"
                         name="days0" />
-                      <label for="friday0" data-i18n="day_fr"></label>
+                      <label for="cfg_timer_0_friday" data-i18n="day_fr"></label>
                     </div>
                     <br />
                     <div>
@@ -180,20 +181,20 @@
                         type="checkbox"
                         id="cfg_timer_0_saturday"
                         name="days0" />
-                      <label for="saturday0" data-i18n="day_sa"></label>
+                      <label for="cfg_timer_0_saturday" data-i18n="day_sa"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_0_sunday"
                         name="days0" />
-                      <label for="sunday0" data-i18n="day_su"></label>
+                      <label for="cfg_timer_0_sunday" data-i18n="day_su"></label>
                     </div>
                   </div>
                   <!-- selection of shutter -->
                   <div>
                     <div class="leftright">
-                      <label for="mask_timer0" data-i18n="mask"></label>
+                      <label for="cfg_timer_0_grp_mask" data-i18n="mask"></label>
                       <button
                         onclick="openGrpMaskHelp(this)"
                         class="i_help"
@@ -220,11 +221,11 @@
               </form>
             </div>
           </article>
-          <article>
+          <article class="jarolift-timer">
             <div class="dash-main">
               <div class="dash-header">Timer 2</div>
               <div class="section-header">
-                <label for="timer1_enable" data-i18n="activate"></label>
+                <label for="cfg_timer_1_enable" data-i18n="activate"></label>
                 <div class="switch-container">
                   <input
                     name="timer1_enable"
@@ -237,7 +238,7 @@
               <br />
               <form id="timerForm1" class="OPT_TIMER1">
                 <fieldset>
-                  <label for="timeType1" data-i18n="timer_type"></label>
+                  <label for="cfg_timer_1_type" data-i18n="timer_type"></label>
                   <select
                     id="cfg_timer_1_type"
                     name="timeType1"
@@ -249,7 +250,7 @@
                   </select>
 
                   <div class="time-input" id="timeInput1">
-                    <label for="timeValue1" data-i18n="time_HH_MM"></label>
+                    <label for="cfg_timer_1_time_value" data-i18n="time_HH_MM"></label>
                     <input
                       type="time"
                       id="cfg_timer_1_time_value"
@@ -260,7 +261,7 @@
                     class="time-input"
                     id="offsetInput1"
                     style="display: none">
-                    <label for="offsetValue1" data-i18n="offset_desc"></label>
+                    <label for="cfg_timer_1_offset_value" data-i18n="offset_desc"></label>
                     <input
                       type="number"
                       id="cfg_timer_1_offset_value"
@@ -281,7 +282,7 @@
                         id="cfg_timer_1_use_min_time" />
 
                       <label
-                        for="timer1_use_min_time"
+                        for="cfg_timer_1_use_min_time"
                         data-i18n="use_min_time"></label>
                     </div>
 
@@ -302,7 +303,7 @@
                         id="cfg_timer_1_use_max_time" />
 
                       <label
-                        for="timer1_use_max_time"
+                        for="cfg_timer_1_use_max_time"
                         data-i18n="use_max_time"></label>
                     </div>
 
@@ -315,7 +316,7 @@
                   </div>
 
                   <!-- Dropdown for shutter cmd -->
-                  <label for="command1" data-i18n="command"></label>
+                  <label for="cfg_timer_1_cmd" data-i18n="command"></label>
                   <select id="cfg_timer_1_cmd" name="command1">
                     <option value="0" data-i18n="cmd_up"></option>
                     <option value="1" data-i18n="cmd_down"></option>
@@ -324,41 +325,41 @@
 
                   <!-- Checkbox for wekdays -->
                   <label data-i18n="weekdays"></label>
-                  <div class="grid">
+                  <div class="timer-weekdays">
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_1_monday"
                         name="days1" />
-                      <label for="monday1" data-i18n="day_mo"></label>
+                      <label for="cfg_timer_1_monday" data-i18n="day_mo"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_1_tuesday"
                         name="days1" />
-                      <label for="tuesday1" data-i18n="day_tu"></label>
+                      <label for="cfg_timer_1_tuesday" data-i18n="day_tu"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_1_wednesday"
                         name="days1" />
-                      <label for="wednesday1" data-i18n="day_we"></label>
+                      <label for="cfg_timer_1_wednesday" data-i18n="day_we"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_1_thursday"
                         name="days1" />
-                      <label for="thursday1" data-i18n="day_th"></label>
+                      <label for="cfg_timer_1_thursday" data-i18n="day_th"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_1_friday"
                         name="days1" />
-                      <label for="friday1" data-i18n="day_fr"></label>
+                      <label for="cfg_timer_1_friday" data-i18n="day_fr"></label>
                     </div>
                     <br />
                     <div>
@@ -366,20 +367,20 @@
                         type="checkbox"
                         id="cfg_timer_1_saturday"
                         name="days1" />
-                      <label for="saturday1" data-i18n="day_sa"></label>
+                      <label for="cfg_timer_1_saturday" data-i18n="day_sa"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_1_sunday"
                         name="days1" />
-                      <label for="sunday1" data-i18n="day_su"></label>
+                      <label for="cfg_timer_1_sunday" data-i18n="day_su"></label>
                     </div>
                   </div>
                   <!-- selection of shutter -->
                   <div>
                     <div class="leftright">
-                      <label for="mask_timer0" data-i18n="mask"></label>
+                      <label for="cfg_timer_0_grp_mask" data-i18n="mask"></label>
                       <button
                         onclick="openGrpMaskHelp(this)"
                         class="i_help"
@@ -406,11 +407,11 @@
               </form>
             </div>
           </article>
-          <article>
+          <article class="jarolift-timer">
             <div class="dash-main">
               <div class="dash-header">Timer 3</div>
               <div class="section-header">
-                <label for="timer2_enable" data-i18n="activate"></label>
+                <label for="cfg_timer_2_enable" data-i18n="activate"></label>
                 <div class="switch-container">
                   <input
                     name="timer2_enable"
@@ -423,7 +424,7 @@
               <br />
               <form id="timerForm2" class="OPT_TIMER2">
                 <fieldset>
-                  <label for="timeType2" data-i18n="timer_type"></label>
+                  <label for="cfg_timer_2_type" data-i18n="timer_type"></label>
                   <select
                     id="cfg_timer_2_type"
                     name="timeType2"
@@ -435,7 +436,7 @@
                   </select>
 
                   <div class="time-input" id="timeInput2">
-                    <label for="timeValue2" data-i18n="time_HH_MM"></label>
+                    <label for="cfg_timer_2_time_value" data-i18n="time_HH_MM"></label>
                     <input
                       type="time"
                       id="cfg_timer_2_time_value"
@@ -453,7 +454,7 @@
                         id="cfg_timer_2_use_min_time" />
 
                       <label
-                        for="timer2_use_min_time"
+                        for="cfg_timer_2_use_min_time"
                         data-i18n="use_min_time"></label>
                     </div>
 
@@ -473,7 +474,7 @@
                         id="cfg_timer_2_use_max_time" />
 
                       <label
-                        for="timer2_use_max_time"
+                        for="cfg_timer_2_use_max_time"
                         data-i18n="use_max_time"></label>
                     </div>
 
@@ -489,7 +490,7 @@
                     class="time-input"
                     id="offsetInput2"
                     style="display: none">
-                    <label for="offsetValue2" data-i18n="offset_desc"></label>
+                    <label for="cfg_timer_2_offset_value" data-i18n="offset_desc"></label>
                     <input
                       type="number"
                       id="cfg_timer_2_offset_value"
@@ -499,7 +500,7 @@
                   </div>
 
                   <!-- Dropdown for shutter cmd -->
-                  <label for="command2" data-i18n="command"></label>
+                  <label for="cfg_timer_2_cmd" data-i18n="command"></label>
                   <select id="cfg_timer_2_cmd" name="command2">
                     <option value="0" data-i18n="cmd_up"></option>
                     <option value="1" data-i18n="cmd_down"></option>
@@ -508,41 +509,41 @@
 
                   <!-- Checkbox for wekdays -->
                   <label data-i18n="weekdays"></label>
-                  <div class="grid">
+                  <div class="timer-weekdays">
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_2_monday"
                         name="days2" />
-                      <label for="monday2" data-i18n="day_mo"></label>
+                      <label for="cfg_timer_2_monday" data-i18n="day_mo"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_2_tuesday"
                         name="days2" />
-                      <label for="tuesday2" data-i18n="day_tu"></label>
+                      <label for="cfg_timer_2_tuesday" data-i18n="day_tu"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_2_wednesday"
                         name="days2" />
-                      <label for="wednesday2" data-i18n="day_we"></label>
+                      <label for="cfg_timer_2_wednesday" data-i18n="day_we"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_2_thursday"
                         name="days2" />
-                      <label for="thursday2" data-i18n="day_th"></label>
+                      <label for="cfg_timer_2_thursday" data-i18n="day_th"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_2_friday"
                         name="days2" />
-                      <label for="friday2" data-i18n="day_fr"></label>
+                      <label for="cfg_timer_2_friday" data-i18n="day_fr"></label>
                     </div>
                     <br />
                     <div>
@@ -550,20 +551,20 @@
                         type="checkbox"
                         id="cfg_timer_2_saturday"
                         name="days2" />
-                      <label for="saturday2" data-i18n="day_sa"></label>
+                      <label for="cfg_timer_2_saturday" data-i18n="day_sa"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_2_sunday"
                         name="days2" />
-                      <label for="sunday2" data-i18n="day_su"></label>
+                      <label for="cfg_timer_2_sunday" data-i18n="day_su"></label>
                     </div>
                   </div>
                   <!-- selection of shutter -->
                   <div>
                     <div class="leftright">
-                      <label for="mask_timer2" data-i18n="mask"></label>
+                      <label for="cfg_timer_2_grp_mask" data-i18n="mask"></label>
                       <button
                         onclick="openGrpMaskHelp(this)"
                         class="i_help"
@@ -590,11 +591,11 @@
               </form>
             </div>
           </article>
-          <article>
+          <article class="jarolift-timer">
             <div class="dash-main">
               <div class="dash-header">Timer 4</div>
               <div class="section-header">
-                <label for="timer3_enable" data-i18n="activate"></label>
+                <label for="cfg_timer_3_enable" data-i18n="activate"></label>
                 <div class="switch-container">
                   <input
                     name="timer3_enable"
@@ -607,7 +608,7 @@
               <br />
               <form id="timerForm3" class="OPT_TIMER3">
                 <fieldset>
-                  <label for="timeType3" data-i18n="timer_type"></label>
+                  <label for="cfg_timer_3_type" data-i18n="timer_type"></label>
                   <select
                     id="cfg_timer_3_type"
                     name="timeType3"
@@ -619,7 +620,7 @@
                   </select>
 
                   <div class="time-input" id="timeInput3">
-                    <label for="timeValue3" data-i18n="time_HH_MM"></label>
+                    <label for="cfg_timer_3_time_value" data-i18n="time_HH_MM"></label>
                     <input
                       type="time"
                       id="cfg_timer_3_time_value"
@@ -637,7 +638,7 @@
                         id="cfg_timer_3_use_min_time" />
 
                       <label
-                        for="timer3_use_min_time"
+                        for="cfg_timer_3_use_min_time"
                         data-i18n="use_min_time"></label>
                     </div>
 
@@ -657,7 +658,7 @@
                         id="cfg_timer_3_use_max_time" />
 
                       <label
-                        for="timer3_use_max_time"
+                        for="cfg_timer_3_use_max_time"
                         data-i18n="use_max_time"></label>
                     </div>
 
@@ -673,7 +674,7 @@
                     class="time-input"
                     id="offsetInput3"
                     style="display: none">
-                    <label for="offsetValue3" data-i18n="offset_desc"></label>
+                    <label for="cfg_timer_3_offset_value" data-i18n="offset_desc"></label>
                     <input
                       type="number"
                       id="cfg_timer_3_offset_value"
@@ -683,7 +684,7 @@
                   </div>
 
                   <!-- Dropdown for shutter cmd -->
-                  <label for="command3" data-i18n="command"></label>
+                  <label for="cfg_timer_3_cmd" data-i18n="command"></label>
                   <select id="cfg_timer_3_cmd" name="command3">
                     <option value="0" data-i18n="cmd_up"></option>
                     <option value="1" data-i18n="cmd_down"></option>
@@ -692,41 +693,41 @@
 
                   <!-- Checkbox for wekdays -->
                   <label data-i18n="weekdays"></label>
-                  <div class="grid">
+                  <div class="timer-weekdays">
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_3_monday"
                         name="days3" />
-                      <label for="monday3" data-i18n="day_mo"></label>
+                      <label for="cfg_timer_3_monday" data-i18n="day_mo"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_3_tuesday"
                         name="days3" />
-                      <label for="tuesday3" data-i18n="day_tu"></label>
+                      <label for="cfg_timer_3_tuesday" data-i18n="day_tu"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_3_wednesday"
                         name="days3" />
-                      <label for="wednesday3" data-i18n="day_we"></label>
+                      <label for="cfg_timer_3_wednesday" data-i18n="day_we"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_3_thursday"
                         name="days3" />
-                      <label for="thursday3" data-i18n="day_th"></label>
+                      <label for="cfg_timer_3_thursday" data-i18n="day_th"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_3_friday"
                         name="days3" />
-                      <label for="friday3" data-i18n="day_fr"></label>
+                      <label for="cfg_timer_3_friday" data-i18n="day_fr"></label>
                     </div>
                     <br />
                     <div>
@@ -734,20 +735,20 @@
                         type="checkbox"
                         id="cfg_timer_3_saturday"
                         name="days3" />
-                      <label for="saturday3" data-i18n="day_sa"></label>
+                      <label for="cfg_timer_3_saturday" data-i18n="day_sa"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_3_sunday"
                         name="days3" />
-                      <label for="sunday3" data-i18n="day_su"></label>
+                      <label for="cfg_timer_3_sunday" data-i18n="day_su"></label>
                     </div>
                   </div>
                   <!-- selection of shutter -->
                   <div>
                     <div class="leftright">
-                      <label for="mask_timer3" data-i18n="mask"></label>
+                      <label for="cfg_timer_3_grp_mask" data-i18n="mask"></label>
                       <button
                         onclick="openGrpMaskHelp(this)"
                         class="i_help"
@@ -774,11 +775,11 @@
               </form>
             </div>
           </article>
-          <article>
+          <article class="jarolift-timer">
             <div class="dash-main">
               <div class="dash-header">Timer 5</div>
               <div class="section-header">
-                <label for="timer4_enable" data-i18n="activate"></label>
+                <label for="cfg_timer_4_enable" data-i18n="activate"></label>
                 <div class="switch-container">
                   <input
                     name="timer4_enable"
@@ -791,7 +792,7 @@
               <br />
               <form id="timerForm4" class="OPT_TIMER4">
                 <fieldset>
-                  <label for="timeType4" data-i18n="timer_type"></label>
+                  <label for="cfg_timer_4_type" data-i18n="timer_type"></label>
                   <select
                     id="cfg_timer_4_type"
                     name="timeType4"
@@ -803,7 +804,7 @@
                   </select>
 
                   <div class="time-input" id="timeInput4">
-                    <label for="timeValue4" data-i18n="time_HH_MM"></label>
+                    <label for="cfg_timer_4_time_value" data-i18n="time_HH_MM"></label>
                     <input
                       type="time"
                       id="cfg_timer_4_time_value"
@@ -821,7 +822,7 @@
                         id="cfg_timer_4_use_min_time" />
 
                       <label
-                        for="timer4_use_min_time"
+                        for="cfg_timer_4_use_min_time"
                         data-i18n="use_min_time"></label>
                     </div>
 
@@ -841,7 +842,7 @@
                         id="cfg_timer_4_use_max_time" />
 
                       <label
-                        for="timer4_use_max_time"
+                        for="cfg_timer_4_use_max_time"
                         data-i18n="use_max_time"></label>
                     </div>
 
@@ -857,7 +858,7 @@
                     class="time-input"
                     id="offsetInput4"
                     style="display: none">
-                    <label for="offsetValue4" data-i18n="offset_desc"></label>
+                    <label for="cfg_timer_4_offset_value" data-i18n="offset_desc"></label>
                     <input
                       type="number"
                       id="cfg_timer_4_offset_value"
@@ -867,7 +868,7 @@
                   </div>
 
                   <!-- Dropdown for shutter cmd -->
-                  <label for="command4" data-i18n="command"></label>
+                  <label for="cfg_timer_4_cmd" data-i18n="command"></label>
                   <select id="cfg_timer_4_cmd" name="command4">
                     <option value="0" data-i18n="cmd_up"></option>
                     <option value="1" data-i18n="cmd_down"></option>
@@ -876,41 +877,41 @@
 
                   <!-- Checkbox for wekdays -->
                   <label data-i18n="weekdays"></label>
-                  <div class="grid">
+                  <div class="timer-weekdays">
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_4_monday"
                         name="days4" />
-                      <label for="monday4" data-i18n="day_mo"></label>
+                      <label for="cfg_timer_4_monday" data-i18n="day_mo"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_4_tuesday"
                         name="days4" />
-                      <label for="tuesday4" data-i18n="day_tu"></label>
+                      <label for="cfg_timer_4_tuesday" data-i18n="day_tu"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_4_wednesday"
                         name="days4" />
-                      <label for="wednesday4" data-i18n="day_we"></label>
+                      <label for="cfg_timer_4_wednesday" data-i18n="day_we"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_4_thursday"
                         name="days4" />
-                      <label for="thursday4" data-i18n="day_th"></label>
+                      <label for="cfg_timer_4_thursday" data-i18n="day_th"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_4_friday"
                         name="days4" />
-                      <label for="friday4" data-i18n="day_fr"></label>
+                      <label for="cfg_timer_4_friday" data-i18n="day_fr"></label>
                     </div>
                     <br />
                     <div>
@@ -918,20 +919,20 @@
                         type="checkbox"
                         id="cfg_timer_4_saturday"
                         name="days4" />
-                      <label for="saturday4" data-i18n="day_sa"></label>
+                      <label for="cfg_timer_4_saturday" data-i18n="day_sa"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_4_sunday"
                         name="days4" />
-                      <label for="sunday4" data-i18n="day_su"></label>
+                      <label for="cfg_timer_4_sunday" data-i18n="day_su"></label>
                     </div>
                   </div>
                   <!-- selection of shutter -->
                   <div>
                     <div class="leftright">
-                      <label for="mask_timer4" data-i18n="mask"></label>
+                      <label for="cfg_timer_4_grp_mask" data-i18n="mask"></label>
                       <button
                         onclick="openGrpMaskHelp(this)"
                         class="i_help"
@@ -958,11 +959,11 @@
               </form>
             </div>
           </article>
-          <article>
+          <article class="jarolift-timer">
             <div class="dash-main">
               <div class="dash-header">Timer 6</div>
               <div class="section-header">
-                <label for="timer5_enable" data-i18n="activate"></label>
+                <label for="cfg_timer_5_enable" data-i18n="activate"></label>
                 <div class="switch-container">
                   <input
                     name="timer5_enable"
@@ -975,7 +976,7 @@
               <br />
               <form id="timerForm5" class="OPT_TIMER5">
                 <fieldset>
-                  <label for="timeType5" data-i18n="timer_type"></label>
+                  <label for="cfg_timer_5_type" data-i18n="timer_type"></label>
                   <select
                     id="cfg_timer_5_type"
                     name="timeType5"
@@ -987,7 +988,7 @@
                   </select>
 
                   <div class="time-input" id="timeInput5">
-                    <label for="timeValue5" data-i18n="time_HH_MM"></label>
+                    <label for="cfg_timer_5_time_value" data-i18n="time_HH_MM"></label>
                     <input
                       type="time"
                       id="cfg_timer_5_time_value"
@@ -1005,7 +1006,7 @@
                         id="cfg_timer_5_use_min_time" />
 
                       <label
-                        for="timer5_use_min_time"
+                        for="cfg_timer_5_use_min_time"
                         data-i18n="use_min_time"></label>
                     </div>
 
@@ -1025,7 +1026,7 @@
                         id="cfg_timer_5_use_max_time" />
 
                       <label
-                        for="timer5_use_max_time"
+                        for="cfg_timer_5_use_max_time"
                         data-i18n="use_max_time"></label>
                     </div>
 
@@ -1041,7 +1042,7 @@
                     class="time-input"
                     id="offsetInput5"
                     style="display: none">
-                    <label for="offsetValue5" data-i18n="offset_desc"></label>
+                    <label for="cfg_timer_5_offset_value" data-i18n="offset_desc"></label>
                     <input
                       type="number"
                       id="cfg_timer_5_offset_value"
@@ -1051,7 +1052,7 @@
                   </div>
 
                   <!-- Dropdown for shutter cmd -->
-                  <label for="command5" data-i18n="command"></label>
+                  <label for="cfg_timer_5_cmd" data-i18n="command"></label>
                   <select id="cfg_timer_5_cmd" name="command5">
                     <option value="0" data-i18n="cmd_up"></option>
                     <option value="1" data-i18n="cmd_down"></option>
@@ -1060,41 +1061,41 @@
 
                   <!-- Checkbox for wekdays -->
                   <label data-i18n="weekdays"></label>
-                  <div class="grid">
+                  <div class="timer-weekdays">
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_5_monday"
                         name="days5" />
-                      <label for="monday5" data-i18n="day_mo"></label>
+                      <label for="cfg_timer_5_monday" data-i18n="day_mo"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_5_tuesday"
                         name="days5" />
-                      <label for="tuesday5" data-i18n="day_tu"></label>
+                      <label for="cfg_timer_5_tuesday" data-i18n="day_tu"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_5_wednesday"
                         name="days5" />
-                      <label for="wednesday5" data-i18n="day_we"></label>
+                      <label for="cfg_timer_5_wednesday" data-i18n="day_we"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_5_thursday"
                         name="days5" />
-                      <label for="thursday5" data-i18n="day_th"></label>
+                      <label for="cfg_timer_5_thursday" data-i18n="day_th"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_5_friday"
                         name="days5" />
-                      <label for="friday5" data-i18n="day_fr"></label>
+                      <label for="cfg_timer_5_friday" data-i18n="day_fr"></label>
                     </div>
                     <br />
                     <div>
@@ -1102,20 +1103,20 @@
                         type="checkbox"
                         id="cfg_timer_5_saturday"
                         name="days5" />
-                      <label for="saturday5" data-i18n="day_sa"></label>
+                      <label for="cfg_timer_5_saturday" data-i18n="day_sa"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_5_sunday"
                         name="days5" />
-                      <label for="sunday5" data-i18n="day_su"></label>
+                      <label for="cfg_timer_5_sunday" data-i18n="day_su"></label>
                     </div>
                   </div>
                   <!-- selection of shutter -->
                   <div>
                     <div class="leftright">
-                      <label for="mask_timer5" data-i18n="mask"></label>
+                      <label for="cfg_timer_5_grp_mask" data-i18n="mask"></label>
                       <button
                         onclick="openGrpMaskHelp(this)"
                         class="i_help"

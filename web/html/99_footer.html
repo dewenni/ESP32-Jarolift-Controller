@@ -23,23 +23,10 @@
       <main class="container-fluid">
         <!--SECTION-START-->
       </main>
+    </section>
       <footer>
-        <div
-          id="connectionLostBar"
-          class="footerBar"
-          style="display: none; background-color: #732e2e">
-          <div data-i18n="lost_connection"></div>
-          <button
-            id="p99_reloadButton"
-            class="svg i_auto"
-            style="width: 50px"></button>
-        </div>
-        <div
-          id="errorBar"
-          class="footerBar"
-          style="display: none; background-color: #732e2e">
-          <div id="errorBarText"></div>
-        </div>
+        <!-- Compatibility signal for the existing EspWebUI reconnect handlers. -->
+        <span id="connectionLostBar" hidden style="display: none"></span>
         <div
           id="msgBar"
           class="footerBar msgBar"
@@ -47,7 +34,6 @@
           <div id="msgBarText"></div>
         </div>
       </footer>
-    </section>
   </body>
 </html>
 <!--SECTION-END-->

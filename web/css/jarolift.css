@@ -1,0 +1,75 @@
+/* Jarolift controls use the shared theme palette and existing command elements. */
+.jarolift-page { container-type: inline-size; max-width: 96rem; }
+.jarolift-control-grid, .jarolift-timer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+  gap: 1rem;
+  align-items: start;
+}
+.jarolift-control-grid > .dash, .jarolift-timer, .jarolift-service .service-card {
+  min-width: 0; max-width: none; width: 100%; margin: 0; padding: 0;
+  border: 1px solid var(--ui-border); border-radius: 0.75rem; background: var(--ui-surface);
+}
+.jarolift-page .dash-main { min-width: 0; padding: 1.1rem; }
+.jarolift-page .dash-header { text-align: left; font-weight: 500; font-size: 1.05rem; margin-bottom: 1rem; overflow-wrap: anywhere; }
+.jarolift-page .dash-content { margin: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.5rem; }
+.jarolift-page .svgbtn {
+  width: 100%; height: 3rem; min-width: 0; margin: 0; padding: 0;
+  background-size: 22px; background-position: center; background-repeat: no-repeat;
+  background-color: var(--ui-rail); border: 1px solid var(--ui-border);
+}
+.jarolift-page .svgbtn:hover { background-color: var(--ui-hover); border-color: var(--ui-target); }
+.jarolift-page .svgbtn:active { background-color: var(--ui-selected); }
+.jarolift-page button { touch-action: manipulation; }
+.jarolift-timer-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 23rem), 1fr)); }
+.jarolift-timer .section-header { margin-top: 0; margin-bottom: 1rem; }
+.jarolift-timer .section-header + br { display: none; }
+.jarolift-timer form, .jarolift-timer fieldset { margin: 0; min-width: 0; }
+.jarolift-timer fieldset > br, .timer-weekdays > br { display: none; }
+.jarolift-timer label { font-size: 0.85rem; color: var(--ui-muted); }
+.jarolift-timer input, .jarolift-timer select { max-width: 100%; }
+.timer-weekdays { display: flex; flex-wrap: wrap; gap: 0.5rem 0.8rem; margin: 0.5rem 0 1rem; }
+.timer-weekdays > div { display: inline-flex; align-items: center; gap: 0.25rem; }
+.timer-weekdays input, .timer-weekdays label { margin: 0; }
+.jarolift-timer input[type=number] { width: 8rem; }
+.jarolift-timer .leftright { justify-content: start; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem; }
+.jarolift-timer .leftright label { margin: 0; }
+.jarolift-timer .i_help { width: 1.25rem; padding: 0; margin: 0; background-size: contain; }
+.jarolift-service-grid { max-width: 48rem; }
+.jarolift-service .service-card .dash-main { gap: 0.65rem !important; }
+.jarolift-service .service-card label, .jarolift-service .service-card select { margin: 0; }
+.jarolift-service .service-card select { max-width: 24rem; }
+.jarolift-service .svgbtn2 { width: 100%; margin: 0; background-color: var(--ui-rail); background-size: 22px; background-position: 0.8rem center; padding: 0.65rem 0.8rem 0.65rem 2.7rem; text-align: left; white-space: normal; }
+.jarolift-service hr { margin: 0.5rem 0; }
+.jarolift-log-toolbar { grid-template-columns: repeat(2, minmax(0, 1fr)) max-content; max-width: 64rem; }
+.jarolift-help > .grid { display: block; max-width: 64rem !important; margin-bottom: 1rem; padding: 1.25rem; border: 1px solid var(--ui-border); border-radius: 0.75rem; background: var(--ui-surface); overflow-x: auto; }
+.jarolift-help h4 { font-size: 1.1rem; font-weight: 500; }
+.jarolift-help h6 { color: var(--ui-muted); font-size: 0.85rem; font-weight: 400; }
+.jarolift-help > hr { display: none; }
+.jarolift-help td { overflow-wrap: anywhere; }
+.settings-container { flex-wrap: wrap; }
+.settings-container > div { min-width: min(100%, 12rem); }
+@container (max-width: 650px) {
+  .jarolift-log-toolbar { grid-template-columns: minmax(0, 1fr); }
+  .jarolift-log-toolbar .tools-actions { justify-content: start; }
+}
+
+/* Persistent radio/configuration errors belong with the header mode indicators. */
+.app-error {
+  max-width: 38vw;
+  padding: 0.25rem 0.6rem;
+  border: 1px solid color-mix(in srgb, var(--pico-del-color) 45%, transparent);
+  border-radius: 0.65rem;
+  background: color-mix(in srgb, var(--pico-del-color) 12%, var(--ui-surface));
+  color: var(--pico-del-color);
+  font-size: max(12px, 0.8rem);
+  line-height: 1.4;
+}
+@media (max-width: 768px) {
+  .topMenu:has(> .app-error:not([style*="display: none"])) {
+    height: auto;
+    grid-template-rows: 44px auto;
+    padding-bottom: 0.5rem;
+  }
+  .topMenu > .app-error { grid-column: 1 / -1; max-width: 100%; }
+}

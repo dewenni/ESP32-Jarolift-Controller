@@ -1,3 +1,89 @@
+// Keep the existing server-driven error element in the visible header.
+function initJaroliftHeaderError() {
+  const error = document.getElementById("errorBar");
+  const desktop = document.querySelector(".app-header .app-modes");
+  const mobile = document.querySelector(".topMenu");
+  const narrow = window.matchMedia("(max-width: 768px)");
+  const update = () => {
+    const host = narrow.matches ? mobile : desktop;
+    if (error.parentElement !== host) host.append(error);
+  };
+  narrow.addEventListener("change", update);
+  update();
+}
+
+function initPageHeader() {
+  const status = document.querySelector(".app-connection-actions");
+  const indicator = document.getElementById("p00_web_connection");
+  const label = document.getElementById("p00_web_connection_text");
+  const reload = document.getElementById("p99_reloadButton");
+  const desktop = document.querySelector(".app-header");
+  const mobile = document.querySelector(".topMenu");
+  const content = document.querySelector(".home-section");
+  const narrow = window.matchMedia("(max-width: 768px)");
+  const controls = document.querySelectorAll("[data-connection-required]");
+  const layout = () => {
+    const host = narrow.matches ? mobile : desktop;
+    if (status.parentElement !== host) host.append(status);
+    if (narrow.matches) content.style.top = (mobile.getBoundingClientRect().bottom + 20) + "px";
+    else content.style.removeProperty("top");
+  };
+  const update = () => {
+    const connected = !!(typeof ws !== "undefined" && ws && ws.readyState === WebSocket.OPEN);
+    const language = document.getElementById("cfg_lang").value === "1" ? "en" : "de";
+    const key = connected ? "ui_connected" : "ui_disconnected";
+    indicator.classList.toggle("is-connected", connected);
+    label.dataset.i18n = key;
+    label.textContent = user_translations[key][language];
+    reload.hidden = connected || isGitHubPages();
+    reload.title = reload.ariaLabel = user_translations.ui_reload[language];
+    // Inert preserves individual disabled states set by the ESP on reconnect.
+    controls.forEach(control => { control.inert = !connected && !isGitHubPages(); });
+    layout();
+  };
+  window.addEventListener("webui:connected", update);
+  // Retain the existing library's reconnect signal without displaying a footer bar.
+  new MutationObserver(update).observe(document.getElementById("connectionLostBar"), {
+    attributes: true, attributeFilter: ["style", "class"],
+  });
+  document.getElementById("cfg_lang").addEventListener("change", update);
+  narrow.addEventListener("change", layout);
+  new ResizeObserver(layout).observe(mobile);
+  update();
+}
+
+function initMobileNavigation() {
+  const menu = document.getElementById("topMenuDropdown").parentElement;
+  // Close explicitly without Pico's full-screen summary pseudo-element.
+  document.addEventListener("click", event => {
+    if (!menu.contains(event.target) || event.target.closest("a[data-tab]")) menu.open = false;
+  });
+  menu.addEventListener("keydown", event => {
+    if (event.key === "Escape") {
+      menu.open = false;
+      menu.querySelector("summary").focus();
+    }
+  });
+}
+
+function initHomeAssistantSettings() {
+  const mqtt = document.getElementById("cfg_mqtt_enable");
+  const section = document.getElementById("p12_ha_settings");
+  const update = () => {
+    document.getElementById("p12_ha_mqtt_warning").hidden = mqtt.checked;
+  };
+  mqtt.addEventListener("change", update);
+  section.addEventListener("toggle", update);
+  document.getElementById("p12_ha_mqtt_link").addEventListener("click", event => {
+    event.preventDefault();
+    const target = document.getElementById("p12_mqtt_settings");
+    target.open = true;
+    target.scrollIntoView({ block: "nearest" });
+    mqtt.focus({ preventScroll: true });
+  });
+  update();
+}
+
 function initMqttConnectionStatus() {
   const input = document.getElementById("p12_mqtt_connection");
   const state = document.getElementById("p12_mqtt_connection_state");
@@ -10,7 +96,11 @@ function initMqttConnectionStatus() {
       input.removeAttribute("aria-invalid");
     }
   };
-  new MutationObserver(update).observe(state, { childList: true, characterData: true, subtree: true });
+  new MutationObserver(update).observe(state, {
+    childList: true,
+    characterData: true,
+    subtree: true,
+  });
   update();
 }
 
@@ -32,6 +122,11 @@ function validateHost(input) {
 
 document.addEventListener("DOMContentLoaded", function () {
   // call functions on refresh
+  initPageHeader();
+  initJaroliftHeaderError();
+  initMobileNavigation();
+  initHomeAssistantSettings();
+  initInformationPages();
   initMqttConnectionStatus();
   initWiFiApDialog();
   initWiFiSsidDialog();
