@@ -6,6 +6,7 @@
 #include "cc1101.h"
 #include <Arduino.h>
 #include <EEPROM.h>
+#include <esp32-hal-rmt.h>
 #include <nvs.h>
 #include <nvs_flash.h>
 
@@ -122,7 +123,7 @@ private:
   // Konstanten
   static constexpr int kLowPulse = 400; // in µs
   static constexpr int kHighPulse = 800;
-  static constexpr int kDebounce = 200;
+  static constexpr int kDebounce = 200; // Minimum RX pulse width in us (TDRC16: ~290-420 us)
   static constexpr uint8_t kSyncWord = 199;
 
   static constexpr uint8_t FCT_CODE_UP = 0x8;
@@ -139,9 +140,18 @@ private:
   // Hilfsfunktionen
   void updateDeviceCounter(bool increment);
 
+  // Hardware-timed TX: 86 symbols per telegram, stored without heap allocation.
+  static constexpr uint32_t kRmtResolutionHz = 1000000;
+  static constexpr size_t kMaxTxSymbols = 96;
+  rmt_data_t txSymbols_[kMaxTxSymbols];
+  size_t txSymbolCount_ = 0;
+  bool txHalfUsed_ = false;
+  bool rmtOK_ = false;
+  void initRmt();
+  void txAddLevel(uint8_t level, uint16_t durationUs);
   void radioTxFrame(int length);
   void radioTxGroupH();
-  void radioTx(int repetitions);
+  bool radioTx(int repetitions);
   void enterRx();
   void enterTx();
   void processRxData();

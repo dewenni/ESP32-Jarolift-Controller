@@ -201,7 +201,7 @@ enum RFSTATE { RFSTATE_IDLE = 0, RFSTATE_RX, RFSTATE_TX };
 #define CC1101_DEFVAL_IOCFG2 0x0D   // GDO2 Output Pin Configuration
 #define CC1101_DEFVAL_IOCFG1 0x2E   // GDO1 Output Pin Configuration
 #define CC1101_DEFVAL_IOCFG0 0x2D   // GDO0 Output Pin Configuration
-#define CC1101_DEFVAL_FIFOTHR 0x47  // RX FIFO and TX FIFO Thresholds
+#define CC1101_DEFVAL_FIFOTHR 0x07  // RX FIFO and TX FIFO Thresholds
 #define CC1101_DEFVAL_SYNC1 0xD3    // Synchronization word, high byte
 #define CC1101_DEFVAL_SYNC0 0x91    // Synchronization word, low byte
 #define CC1101_DEFVAL_PKTLEN 0x3D   // Packet Length
@@ -227,10 +227,12 @@ enum RFSTATE { RFSTATE_IDLE = 0, RFSTATE_RX, RFSTATE_TX };
 // Carrier frequency = 433 MHz
 #define CC1101_DEFVAL_FREQ2_433 0x10 // Frequency Control Word, High Byte
 #define CC1101_DEFVAL_FREQ1_433 0xB0 // Frequency Control Word, Middle Byte
-#define CC1101_DEFVAL_FREQ0_433 0xB0 // Frequency Control Word, Low Byte
+#define CC1101_DEFVAL_FREQ0_433 0x71 // 433.9198 MHz with 26 MHz crystal
 
-#define CC1101_DEFVAL_MDMCFG4 0x69 // Modem Configuration
-#define CC1101_DEFVAL_MDMCFG3 0xE4 // Modem Configuration
+// Asynchronous OOK RX profile from SIGNALduinoAdv (Ralf9), bank 0 SlowRF.
+// 325 kHz RX bandwidth, ~5.6 kBaud; tested with TDRC16 in upstream PR #20.
+#define CC1101_DEFVAL_MDMCFG4 0x57 // Modem Configuration
+#define CC1101_DEFVAL_MDMCFG3 0xC4 // Modem Configuration
 #define CC1101_DEFVAL_MDMCFG2 0x30 // Modem Configuration
 #define CC1101_DEFVAL_MDMCFG1 0x22 // Modem Configuration
 #define CC1101_DEFVAL_MDMCFG0 0xF8 // Modem Configuration
@@ -241,13 +243,13 @@ enum RFSTATE { RFSTATE_IDLE = 0, RFSTATE_RX, RFSTATE_TX };
 #define CC1101_DEFVAL_MCSM0 0x18    // Main Radio Control State Machine Configuration
 #define CC1101_DEFVAL_FOCCFG 0x14   // Frequency Offset Compensation Configuration
 #define CC1101_DEFVAL_BSCFG 0x6C    // Bit Synchronization Configuration
-#define CC1101_DEFVAL_AGCCTRL2 0x04 // AGC Control
+#define CC1101_DEFVAL_AGCCTRL2 0x07 // AGC Control
 #define CC1101_DEFVAL_AGCCTRL1 0x00 // AGC Control
-#define CC1101_DEFVAL_AGCCTRL0 0x92 // AGC Control
+#define CC1101_DEFVAL_AGCCTRL0 0x91 // AGC Control
 #define CC1101_DEFVAL_WOREVT1 0x87  // High Byte Event0 Timeout
 #define CC1101_DEFVAL_WOREVT0 0x6B  // Low Byte Event0 Timeout
 #define CC1101_DEFVAL_WORCTRL 0xF8  // Wake On Radio Control
-#define CC1101_DEFVAL_FREND1 0xB6   // Front End RX Configuration
+#define CC1101_DEFVAL_FREND1 0x56   // Front End RX Configuration
 #define CC1101_DEFVAL_FREND0 0x11   // Front End TX Configuration
 #define CC1101_DEFVAL_FSCAL3 0xE9   // Frequency Synthesizer Calibration
 #define CC1101_DEFVAL_FSCAL2 0x2A   // Frequency Synthesizer Calibration
@@ -258,8 +260,8 @@ enum RFSTATE { RFSTATE_IDLE = 0, RFSTATE_RX, RFSTATE_TX };
 #define CC1101_DEFVAL_FSTEST 0x59   // Frequency Synthesizer Calibration Control
 #define CC1101_DEFVAL_PTEST 0x7F    // Production Test
 #define CC1101_DEFVAL_AGCTEST 0x3F  // AGC Test
-#define CC1101_DEFVAL_TEST2 0x81    // Various Test Settings
-#define CC1101_DEFVAL_TEST1 0x35    // Various Test Settings
+#define CC1101_DEFVAL_TEST2 0x88    // Various Test Settings
+#define CC1101_DEFVAL_TEST1 0x31    // Various Test Settings
 #define CC1101_DEFVAL_TEST0 0x09    // Various Test Settings
 
 /**

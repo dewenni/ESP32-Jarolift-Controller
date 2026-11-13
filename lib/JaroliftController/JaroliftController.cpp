@@ -1,5 +1,6 @@
 // JaroliftController.cpp
 #include "JaroliftController.h"
+#include "esp32-hal-periman.h"
 
 // Definition of the static instance pointer
 JaroliftController *JaroliftController::instance_ = nullptr;
@@ -170,16 +171,60 @@ void JaroliftController::updateDeviceCounter(bool increment) {
 
 /**
  *******************************************************************
+ * @brief   Attach the RMT transmitter to GDO0
+ * @param   none
+ * @return  none
+ * *******************************************************************/
+void JaroliftController::initRmt() {
+  rmtOK_ = rmtInit(gpio_.gdo0, RMT_TX_MODE, RMT_MEM_NUM_BLOCKS_2, kRmtResolutionHz);
+  if (rmtOK_) {
+    rmtSetEOT(gpio_.gdo0, HIGH); // idle level after each telegram = carrier off
+    rmt_data_t idle = {1, HIGH, 1, HIGH};
+    rmtWrite(gpio_.gdo0, &idle, 1, RMT_WAIT_FOR_EVER); // set line to idle level
+    ESP_LOGI(TAG, "RMT TX ready on GDO0 (GPIO %d)", gpio_.gdo0);
+  } else {
+    ESP_LOGE(TAG, "RMT init on GDO0 (GPIO %d) failed", gpio_.gdo0);
+  }
+}
+
+/**
+ *******************************************************************
+ * @brief   append one level segment to the RMT symbol buffer
+ * @details the CC1101 is in asynchronous TX mode: GDO0 LOW = carrier on
+ *          (PATABLE[0]), GDO0 HIGH = carrier off (PATABLE[1])
+ * @param   level, durationUs
+ * @return  none
+ * *******************************************************************/
+void JaroliftController::txAddLevel(uint8_t level, uint16_t durationUs) {
+  if (txSymbolCount_ >= kMaxTxSymbols) {
+    ESP_LOGE(TAG, "RMT symbol buffer overflow");
+    return;
+  }
+  rmt_data_t &sym = txSymbols_[txSymbolCount_];
+  if (!txHalfUsed_) {
+    sym.level0 = level;
+    sym.duration0 = durationUs;
+    sym.level1 = level; // placeholder, completed by the next segment
+    sym.duration1 = 0;
+    txHalfUsed_ = true;
+  } else {
+    sym.level1 = level;
+    sym.duration1 = durationUs;
+    txHalfUsed_ = false;
+    txSymbolCount_++;
+  }
+}
+
+/**
+ *******************************************************************
  * @brief   Generates sync-pulses (protocoll start)
  * @param   length
  * @return  none
  * *******************************************************************/
 void JaroliftController::radioTxFrame(int length) {
   for (int i = 0; i < length; ++i) {
-    digitalWrite(gpio_.gdo0, LOW);
-    delayMicroseconds(400);
-    digitalWrite(gpio_.gdo0, HIGH);
-    delayMicroseconds(380);
+    txAddLevel(LOW, 400);
+    txAddLevel(HIGH, 380);
   }
 }
 
@@ -193,15 +238,11 @@ void JaroliftController::radioTxGroupH() {
   for (int i = 0; i < 8; i++) {
     int bitVal = (discH_ >> i) & 0x1;
     if (bitVal == 1) {
-      digitalWrite(gpio_.gdo0, LOW);
-      delayMicroseconds(kLowPulse);
-      digitalWrite(gpio_.gdo0, HIGH);
-      delayMicroseconds(kHighPulse);
+      txAddLevel(LOW, kLowPulse);
+      txAddLevel(HIGH, kHighPulse);
     } else {
-      digitalWrite(gpio_.gdo0, LOW);
-      delayMicroseconds(kHighPulse);
-      digitalWrite(gpio_.gdo0, HIGH);
-      delayMicroseconds(kLowPulse);
+      txAddLevel(LOW, kHighPulse);
+      txAddLevel(HIGH, kLowPulse);
     }
   }
 }
@@ -209,33 +250,58 @@ void JaroliftController::radioTxGroupH() {
 /**
  *******************************************************************
  * @brief   tx routine to send data
+ * @details The complete telegram is built as RMT symbols and output by
+ *          the RMT peripheral. The pulse timing is therefore exact even
+ *          on single core chips (ESP32-S2) where WiFi interrupts used to
+ *          stretch the software delays and corrupt the telegram.
  * @param   repetitions
- * @return  none
+ * @return  whether at least one repetition was transmitted
  * *******************************************************************/
-void JaroliftController::radioTx(int repetitions) {
+bool JaroliftController::radioTx(int repetitions) {
   pack_ = ((button_ & 0xFULL) << 60) | ((newSerial_ & 0x0FFFFFFFULL) << 32) | encrypted_;
-  for (int a = 0; a < repetitions; a++) {
-    digitalWrite(gpio_.gdo0, LOW);
-    delayMicroseconds(1150);
-    radioTxFrame(13);
-    delayMicroseconds(3500);
-    for (int i = 0; i < 64; i++) {
-      int bitVal = (pack_ >> i) & 0x1;
-      if (bitVal == 1) {
-        digitalWrite(gpio_.gdo0, LOW);
-        delayMicroseconds(kLowPulse);
-        digitalWrite(gpio_.gdo0, HIGH);
-        delayMicroseconds(kHighPulse);
-      } else {
-        digitalWrite(gpio_.gdo0, LOW);
-        delayMicroseconds(kHighPulse);
-        digitalWrite(gpio_.gdo0, HIGH);
-        delayMicroseconds(kLowPulse);
-      }
-    }
-    radioTxGroupH();
-    delay(16);
+  if (perimanGetPinBusType(gpio_.gdo0) != ESP32_BUS_TYPE_RMT_TX) {
+    ESP_LOGW(TAG, "GDO0 (GPIO %d) is no longer attached to RMT (bus type %d) - re-init", gpio_.gdo0, (int)perimanGetPinBusType(gpio_.gdo0));
+    initRmt();
   }
+  if (!rmtOK_) {
+    ESP_LOGE(TAG, "RMT not initialized - telegram not sent");
+    return false;
+  }
+
+  // build telegram once
+  txSymbolCount_ = 0;
+  txHalfUsed_ = false;
+  txAddLevel(LOW, 1150);
+  radioTxFrame(13);
+  txAddLevel(HIGH, 3500);
+  for (int i = 0; i < 64; i++) {
+    int bitVal = (pack_ >> i) & 0x1;
+    if (bitVal == 1) {
+      txAddLevel(LOW, kLowPulse);
+      txAddLevel(HIGH, kHighPulse);
+    } else {
+      txAddLevel(LOW, kHighPulse);
+      txAddLevel(HIGH, kLowPulse);
+    }
+  }
+  radioTxGroupH();
+  if (txHalfUsed_) { // odd number of segments: close last symbol with idle level
+    txAddLevel(HIGH, 1);
+  }
+
+  int okCount = 0;
+  for (int a = 0; a < repetitions; a++) {
+    if (rmtWrite(gpio_.gdo0, txSymbols_, txSymbolCount_, RMT_WAIT_FOR_EVER)) {
+      okCount++;
+    } else {
+      ESP_LOGE(TAG, "rmtWrite failed");
+    }
+    delay(16); // pause between repetitions, line stays HIGH (carrier off)
+  }
+  ESP_LOGI(TAG, "TX via RMT: %u symbols, %d/%d repetitions sent, MARCSTATE 0x%02X", (unsigned)txSymbolCount_, okCount, repetitions,
+           cc1101_.readStatusReg(CC1101_MARCSTATE) & 0x1F);
+  // A transmitted repetition may already have advanced the receiver counter.
+  return okCount > 0;
 }
 
 /**
@@ -410,7 +476,7 @@ void IRAM_ATTR JaroliftController::measureRxEdge() {
       lowBuf_[0] = width;
       hiBuf_[1] = 0;
       rxLastPulse_ = now;
-    } else if (width > 300 && width < 1000) {
+    } else if (width > kDebounce && width < 1000) {
       if (!rxCapturing_)
         return;
       // 75 is the accepted frame limit, including sync. Never write past it.
@@ -426,7 +492,7 @@ void IRAM_ATTR JaroliftController::measureRxEdge() {
   } else {
     lineDown_ = now;
     const unsigned long width = now - lineUp_;
-    if (width > 300 && width < 1000) {
+    if (width > kDebounce && width < 1000) {
       // Preserve the existing preceding-HIGH / following-LOW pairing.
       if (rxCapturing_ && pbWrite_ < 75)
         hiBuf_[pbWrite_] = width;
@@ -458,7 +524,10 @@ void JaroliftController::cmdChannel(commands cmd, uint8_t channel) {
     generateKey();
     generateEncrypted();
     enterTx();
-    radioTx(2); // send command 2-times with same devCnt
+    if (!radioTx(2)) { // send command 2-times with same devCnt
+      enterRx();
+      return;
+    }
     enterRx();
     updateDeviceCounter(true);
     break;
@@ -471,7 +540,10 @@ void JaroliftController::cmdChannel(commands cmd, uint8_t channel) {
     generateKey();
     generateEncrypted();
     enterTx();
-    radioTx(2); // send command 2-times with same devCnt
+    if (!radioTx(2)) { // send command 2-times with same devCnt
+      enterRx();
+      return;
+    }
     enterRx();
     updateDeviceCounter(true);
     break;
@@ -484,7 +556,10 @@ void JaroliftController::cmdChannel(commands cmd, uint8_t channel) {
     generateKey();
     generateEncrypted();
     enterTx();
-    radioTx(2); // send command 2-times
+    if (!radioTx(2)) { // send command 2-times
+      enterRx();
+      return;
+    }
     enterRx();
     updateDeviceCounter(true);
     break;
@@ -497,7 +572,10 @@ void JaroliftController::cmdChannel(commands cmd, uint8_t channel) {
     generateKey();
     generateEncrypted();
     enterTx();
-    radioTx(20); // send "continuos STOP"
+    if (!radioTx(20)) { // send "continuos STOP"
+      enterRx();
+      return;
+    }
     enterRx();
     updateDeviceCounter(true);
     break;
@@ -512,7 +590,10 @@ void JaroliftController::cmdChannel(commands cmd, uint8_t channel) {
     for (int i = 0; i < 4; i++) {
       enterTx();
       generateEncrypted();
-      radioTx(1);
+      if (!radioTx(1)) {
+        enterRx();
+        return;
+      }
       updateDeviceCounter(true);
       enterRx();
       delay(300);
@@ -561,9 +642,15 @@ void JaroliftController::cmdGroup(commands cmd, uint16_t groupMask) {
   generateEncrypted();
   enterTx();
   if (cmd == CMD_SHADE) {
-    radioTx(20); // send "continuos STOP"
+    if (!radioTx(20)) { // send "continuos STOP"
+      enterRx();
+      return;
+    }
   } else {
-    radioTx(2); // send command 2-times
+    if (!radioTx(2)) { // send command 2-times
+      enterRx();
+      return;
+    }
   }
 
   enterRx();
@@ -606,7 +693,10 @@ void JaroliftController::cmdLearn(uint8_t channel) {
   };
   logLearn("start");
   enterTx();
-  radioTx(2);
+  if (!radioTx(2)) {
+    enterRx();
+    return;
+  }
   enterRx();
   updateDeviceCounter(true);
   if (config_.learnMode) {
@@ -615,7 +705,10 @@ void JaroliftController::cmdLearn(uint8_t channel) {
     generateEncrypted();
     logLearn("stop");
     enterTx();
-    radioTx(2);
+    if (!radioTx(2)) {
+      enterRx();
+      return;
+    }
     enterRx();
     updateDeviceCounter(true);
   }
@@ -641,7 +734,10 @@ void JaroliftController::cmdUnlearn(uint8_t channel) {
   generateEncrypted();
   enterTx();
   button_ = FCT_CODE_UPDOWN; // Up+Down
-  radioTx(2);
+  if (!radioTx(2)) {
+    enterRx();
+    return;
+  }
   enterRx();
   updateDeviceCounter(true);
   delay(300);
@@ -649,7 +745,10 @@ void JaroliftController::cmdUnlearn(uint8_t channel) {
     button_ = FCT_CODE_STOP; // 6x Stop
     enterTx();
     generateEncrypted();
-    radioTx(2);
+    if (!radioTx(2)) {
+      enterRx();
+      return;
+    }
     updateDeviceCounter(true);
     enterRx();
     delay(300);
@@ -657,7 +756,10 @@ void JaroliftController::cmdUnlearn(uint8_t channel) {
   button_ = FCT_CODE_UP; // UP
   enterTx();
   generateEncrypted();
-  radioTx(2);
+  if (!radioTx(2)) {
+    enterRx();
+    return;
+  }
   updateDeviceCounter(true);
   enterRx();
   updateDeviceCounter(false);
@@ -683,7 +785,10 @@ void JaroliftController::cmdSetEndPointUp(uint8_t channel) {
   generateEncrypted();
   enterTx();
   button_ = FCT_CODE_UPDOWN; // Up+Down
-  radioTx(1);
+  if (!radioTx(1)) {
+    enterRx();
+    return;
+  }
   enterRx();
   updateDeviceCounter(true);
   delay(300);
@@ -691,7 +796,10 @@ void JaroliftController::cmdSetEndPointUp(uint8_t channel) {
     button_ = FCT_CODE_STOP; // 2x Stop
     enterTx();
     generateEncrypted();
-    radioTx(1);
+    if (!radioTx(1)) {
+      enterRx();
+      return;
+    }
     updateDeviceCounter(true);
     enterRx();
     delay(300);
@@ -699,7 +807,10 @@ void JaroliftController::cmdSetEndPointUp(uint8_t channel) {
   button_ = FCT_CODE_UP; // UP
   enterTx();
   generateEncrypted();
-  radioTx(1);
+  if (!radioTx(1)) {
+    enterRx();
+    return;
+  }
   updateDeviceCounter(true);
   enterRx();
 }
@@ -724,7 +835,10 @@ void JaroliftController::cmdDeleteEndPointUp(uint8_t channel) {
   generateEncrypted();
   enterTx();
   button_ = FCT_CODE_UPDOWN; // Up+Down
-  radioTx(1);
+  if (!radioTx(1)) {
+    enterRx();
+    return;
+  }
   enterRx();
   updateDeviceCounter(true);
   delay(300);
@@ -732,7 +846,10 @@ void JaroliftController::cmdDeleteEndPointUp(uint8_t channel) {
     button_ = FCT_CODE_STOP; // 4x Stop
     enterTx();
     generateEncrypted();
-    radioTx(1);
+    if (!radioTx(1)) {
+      enterRx();
+      return;
+    }
     updateDeviceCounter(true);
     enterRx();
     delay(300);
@@ -740,7 +857,10 @@ void JaroliftController::cmdDeleteEndPointUp(uint8_t channel) {
   button_ = FCT_CODE_UP; // UP
   enterTx();
   generateEncrypted();
-  radioTx(1);
+  if (!radioTx(1)) {
+    enterRx();
+    return;
+  }
   updateDeviceCounter(true);
   enterRx();
 }
@@ -765,7 +885,10 @@ void JaroliftController::cmdSetEndPointDown(uint8_t channel) {
   generateEncrypted();
   enterTx();
   button_ = FCT_CODE_UPDOWN; // Up+Down
-  radioTx(1);
+  if (!radioTx(1)) {
+    enterRx();
+    return;
+  }
   enterRx();
   updateDeviceCounter(true);
   delay(300);
@@ -773,7 +896,10 @@ void JaroliftController::cmdSetEndPointDown(uint8_t channel) {
     button_ = FCT_CODE_STOP; // 2x Stop
     enterTx();
     generateEncrypted();
-    radioTx(1);
+    if (!radioTx(1)) {
+      enterRx();
+      return;
+    }
     updateDeviceCounter(true);
     enterRx();
     delay(300);
@@ -781,7 +907,10 @@ void JaroliftController::cmdSetEndPointDown(uint8_t channel) {
   button_ = FCT_CODE_DOWN; // DOWN
   enterTx();
   generateEncrypted();
-  radioTx(1);
+  if (!radioTx(1)) {
+    enterRx();
+    return;
+  }
   updateDeviceCounter(true);
   enterRx();
 }
@@ -806,7 +935,10 @@ void JaroliftController::cmdDeleteEndPointDown(uint8_t channel) {
   generateEncrypted();
   enterTx();
   button_ = FCT_CODE_UPDOWN; // Up+Down
-  radioTx(1);
+  if (!radioTx(1)) {
+    enterRx();
+    return;
+  }
   enterRx();
   updateDeviceCounter(true);
   delay(300);
@@ -814,7 +946,10 @@ void JaroliftController::cmdDeleteEndPointDown(uint8_t channel) {
     button_ = FCT_CODE_STOP; // 4x Stop
     enterTx();
     generateEncrypted();
-    radioTx(1);
+    if (!radioTx(1)) {
+      enterRx();
+      return;
+    }
     updateDeviceCounter(true);
     enterRx();
     delay(300);
@@ -822,7 +957,10 @@ void JaroliftController::cmdDeleteEndPointDown(uint8_t channel) {
   button_ = FCT_CODE_DOWN; // DOWN
   enterTx();
   generateEncrypted();
-  radioTx(1);
+  if (!radioTx(1)) {
+    enterRx();
+    return;
+  }
   updateDeviceCounter(true);
   enterRx();
 }
@@ -846,15 +984,15 @@ void JaroliftController::processRxData() {
       if (lo > maxLow) maxLow = lo;
       if (hi < minHigh) minHigh = hi;
       if (hi > maxHigh) maxHigh = hi;
-      if (lo <= 300 || lo >= 1000 || hi <= 300 || hi >= 1000)
+      if (lo <= kDebounce || lo >= 1000 || hi <= kDebounce || hi >= 1000)
         invalid++;
     }
     if (rxLogFrame_)
-      ESP_LOGI(TAG, "[KQ-RX] FRAME CAPTURED entries=%u sync=%u low=%u..%u high=%u..%u invalid=%u tail=%u",
+      ESP_LOGD(TAG, "[KQ-RX] FRAME CAPTURED entries=%u sync=%u low=%u..%u high=%u..%u invalid=%u tail=%u",
                count, lowBuf_[0], minLow, maxLow, minHigh, maxHigh, invalid,
                count > 65 ? (count - 65 > 8 ? 8 : count - 65) : 0);
     if (invalid) {
-      if (rxLogFrame_) ESP_LOGW(TAG, "[KQ-RX] FRAME REJECTED: incomplete pulse pairs");
+      if (rxLogFrame_) ESP_LOGD(TAG, "[KQ-RX] FRAME REJECTED: incomplete pulse pairs");
       return;
     }
 
@@ -911,7 +1049,7 @@ void JaroliftController::processRxData() {
 
     // callback function to receive information outside this library
     if (rxLogFrame_)
-      ESP_LOGI(TAG, "[KQ-RX] FRAME DECODED hop=%08lx serial=%07lx function=%x decrypted=%08lx disc=%04x channel=%04x callback=%s",
+      ESP_LOGD(TAG, "[KQ-RX] FRAME DECODED hop=%08lx serial=%07lx function=%x decrypted=%08lx disc=%04x channel=%04x callback=%s",
                (unsigned long)rxHopCode_, (unsigned long)rxSerial_, rxFunction_,
                (unsigned long)decoded, (unsigned int)(decoded >> 16), channel,
                remoteCallback ? "registered" : "missing");
@@ -938,6 +1076,8 @@ void JaroliftController::begin() {
   devCount_ = getDeviceCounter();
 
   cc1101_.setGPIO(gpio_.sck, gpio_.miso, gpio_.mosi, gpio_.cs, gpio_.gdo0);
+  // init() writes the configured transmit power to the CC1101 PATABLE.
+  cc1101_.setTxPowerAmp(PA_LongDistance);
   if (!cc1101_.init()) {
     ESP_LOGE(TAG, "Initialisation of the CC1101 module aborted!");
     return;
@@ -945,9 +1085,10 @@ void JaroliftController::begin() {
   cc1101_.setSyncWord(kSyncWord, false);
   cc1101_.setCarrierFreq(CFREQ_433);
   cc1101_.disableAddressCheck();
-  cc1101_.setTxPowerAmp(PA_LongDistance);
 
-  pinMode(gpio_.gdo0, OUTPUT);
+  initRmt();
+  if (!rmtOK_)
+    return;
   pinMode(gpio_.gdo2, INPUT_PULLUP);
   attachInterrupt(gpio_.gdo2, radioRxMeasureISR, CHANGE);
 
