@@ -1,12 +1,13 @@
 #pragma once
 #include <message.h>
-#include <stdint.h>
 #include <positionModel.h>
 #include <remoteMapping.h>
+#include <stdint.h>
+
 /*-------------------------------------------------------------------------------
 General Configuration
 --------------------------------------------------------------------------------*/
-#define VERSION "v1.10.0" // internal program version
+#define VERSION "v2.00.0" // internal program version
 
 #define WIFI_RECONNECT 30000     // Delay between wifi reconnection tries
 #define MQTT_RECONNECT 10000     // Delay between mqtt reconnection tries
