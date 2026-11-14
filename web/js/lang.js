@@ -134,6 +134,7 @@ const user_translations = {
   info_mqtt_error_hint: { de: "Der letzte Fehler ist gespeichert und beschreibt nicht zwingend den aktuellen Verbindungszustand.", en: "The last error is stored and does not necessarily describe the current connection state." },
   info_firmware_file: { de: "Firmware-Datei", en: "Firmware file" },
   info_config_file: { de: "Konfigurationsdatei", en: "Configuration file" },
+  info_choose_file: { de: "Datei auswählen", en: "Choose file" },
   info_no_file: { de: "Keine Datei ausgewählt", en: "No file selected" },
   info_log_level: { de: "Level", en: "Level" },
   info_log_order: { de: "Reihenfolge", en: "Order" },
