@@ -1160,7 +1160,7 @@ void JaroliftController::begin() {
 
   enterRx();
 
-  ESP_LOGI(TAG, "[KQ-RX] glitch filter <200 us; terminal HIGH decoding and discriminator check enabled");
+  ESP_LOGD(TAG, "[KQ-RX] glitch filter <200 us; terminal HIGH decoding and discriminator check enabled");
   initOK_ = true;
 }
 
