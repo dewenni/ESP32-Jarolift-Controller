@@ -300,7 +300,7 @@ bool JaroliftController::radioTx(int repetitions) {
     }
     delay(16); // pause between repetitions, line stays HIGH (carrier off)
   }
-  ESP_LOGI(TAG, "TX via RMT: %u symbols, %d/%d repetitions sent, MARCSTATE 0x%02X", (unsigned)txSymbolCount_, okCount, repetitions,
+  ESP_LOGD(TAG, "TX via RMT: %u symbols, %d/%d repetitions sent, MARCSTATE 0x%02X", (unsigned)txSymbolCount_, okCount, repetitions,
            cc1101_.readStatusReg(CC1101_MARCSTATE) & 0x1F);
   // A transmitted repetition may already have advanced the receiver counter.
   lastTxOK_ = okCount > 0;
