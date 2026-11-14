@@ -46,8 +46,8 @@ void mqttSendPosition(uint8_t channel, int8_t position) {
  * *******************************************************************/
 void mqttSendRemote(uint32_t serial, int8_t function, uint16_t channel) {
   // Remote commands affect positioning even while MQTT is disabled/offline.
-  const auto *mapping=remoteMappingReceive(serial,channel,function);
-  uint16_t affected=mapping?mapping->targets:0;
+  const auto mapping=remoteMappingReceive(serial,channel,function);
+  uint16_t affected=mapping.targets;
   for(uint8_t ch=0;ch<16;++ch)if(!config.jaro.ch_enable[ch])affected&=~(uint16_t(1)<<ch);
   if (affected) {
     switch(function) {
@@ -89,7 +89,7 @@ void mqttSendRemote(uint32_t serial, int8_t function, uint16_t channel) {
     break;
   }
 
-  const char *remoteName=mapping?mapping->name:"unknown";
+  const char *remoteName=mapping.name?mapping.name:"unknown";
 
   JsonDocument remoteJSON;
   remoteJSON["name"] = remoteName;

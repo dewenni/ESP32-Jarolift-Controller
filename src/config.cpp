@@ -16,7 +16,8 @@
  * V4: Added homee 3rd position (generic node profile) toggle.
  */
 // V5: optional calibrated shutter positioning. Older files default to disabled.
-const int CFG_VERSION = 6;
+// V6: exact remote signals. V7: learned source bits and automatic groups.
+const int CFG_VERSION = 7;
 
 char filename[24] = {"/config.json"};
 bool setupMode;

@@ -108,6 +108,14 @@
           <p class="info-text" id="p04_position_notice" role="status"></p>
         </section>
       </div>
+
+      <section class="remote-mapping-service">
+        <div class="remote-mapping-toolbar"><h2 data-i18n="remotes"></h2><span id="remote_mapping_count"></span><button type="button" id="remote_mapping_add" data-ui-local data-i18n="rm_add"></button></div>
+        <p class="info-text" data-i18n="rm_info"></p>
+        <div id="remote_mapping_rows"></div>
+        <p id="remote_mapping_empty" class="info-text" data-i18n="rm_empty"></p>
+        <p id="remote_mapping_notice" role="status" aria-live="polite"></p>
+      </section>
     </article>
   </div>
 </div>
@@ -119,6 +127,20 @@
   <footer class="position-actions"><button type="button" data-ui-local class="secondary" id="p04_position_cancel" data-i18n="pos_cancel"></button><button type="button" data-ui-local id="p04_position_next"></button></footer>
  </article>
 </dialog>
+
+<div hidden id="remote_mapping_config"></div>
+<dialog id="remote_mapping_dialog" aria-labelledby="remote_mapping_title"><article>
+  <header><small id="remote_mapping_channel"></small><h2 id="remote_mapping_title" data-i18n="rm_title"></h2></header>
+  <p id="remote_mapping_steps"></p>
+  <p id="remote_mapping_phase"></p>
+  <p class="info-text" data-i18n="rm_warning"></p>
+  <output id="remote_mapping_signal"></output>
+  <button type="button" id="remote_mapping_retry" data-ui-local data-i18n="rm_retry"></button>
+  <label for="remote_mapping_name" data-i18n="name"></label><input id="remote_mapping_name" type="text" autocomplete="off" disabled />
+  <p id="remote_mapping_shared" class="info-text" data-i18n="rm_shared" hidden></p>
+  <p id="remote_mapping_dialog_notice" role="status" aria-live="polite"></p>
+  <footer><button type="button" id="remote_mapping_close" data-ui-local data-i18n="rm_close"></button><button type="button" id="remote_mapping_save" data-ui-local data-i18n="rm_save" disabled></button></footer>
+</article></dialog>
 <!--SECTION-END-->
     </main>
     <!-- Footer -->

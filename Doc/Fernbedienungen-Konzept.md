@@ -89,10 +89,9 @@ Im Service-Bereich nur Zuordnungen des ausgewählten Rollladens zeigen:
 | Schlafzimmer · linke Taste | Entfernen |
 | Zentral · Kanal 4 | Entfernen |
 
-Unter Einstellungen → Gerät → Originalfernbedienungen die Gesamtübersicht
-beibehalten: Bezeichnung und zugeordnete Rollläden. Seriennummer und Quellmaske
-nur als technische Details anzeigen. Kein Feld für Modell oder Profil.
-Von dort kann zur Service-Seite gewechselt, umbenannt oder entfernt werden.
+Die Verwaltung bleibt vollständig im Service-Menü beim ausgewählten Rollladen.
+Keine zweite Liste in den Einstellungen und kein Feld für Modell oder Profil.
+Bekannte Quellen erneut erfassen, um ihre gemeinsame Bezeichnung zu ändern.
 
 „Entfernen“ am Rollladen entfernt nur diese Beziehung. Andere Ziele derselben
 Quelle bleiben bestehen. Das Löschen eines gesamten Eintrags entfernt nur die
@@ -125,7 +124,10 @@ aktualisieren. Keine separaten Zustände für WebUI, MQTT und Fernbedienung füh
 
 ## Datenhaltung und bestehende Einträge
 
-Die vorhandene begrenzte Liste grundsätzlich beibehalten. Je Zuordnung genügen:
+Maximal fünf Zuordnungen pro Rollladen und 80 unterschiedliche Quellen insgesamt.
+Gruppensignale belegen keine zusätzlichen Einträge. Bezeichnungen sind auf
+32 Unicode-Zeichen begrenzt (bis zu 128 UTF-8-Bytes plus Abschlussbyte).
+Die feste Tabelle benötigt 11.520 Bytes RAM. Je Zuordnung genügen:
 
 - Bezeichnung;
 - erfasste vollständige Seriennummer;
@@ -175,3 +177,22 @@ unabhängige Änderungen nicht in dieses Thema hineinziehen.
 
 Jeden abgeschlossenen Schritt separat committen. Keine produktive Umsetzung
 oder Veröffentlichung allein durch die Freigabe dieses Konzepts.
+
+## Umsetzung / Prüfung
+
+Konfigurationsversion 7. Version-6-Einzelquellen werden anhand der Senderkennung
+zusammengeführt, ihre Zielmasken vereinigt. Alte Gruppen bleiben sichtbar, werden
+aber nicht ausgewertet. Lange alte Namen werden an einer UTF-8-Zeichengrenze
+gekürzt. Bestehende/importierte Listen mit mehr als fünf Beziehungen bleiben
+erhalten; neue Beziehungen sind erst nach Entfernen überzähliger Einträge möglich.
+Beim Laden höchstens 80 Quellen übernehmen.
+
+Zwei Tastendrücke werden anhand von mindestens 400 ms Empfangspause zwischen
+passenden Telegrammen unterschieden. Normale Funkwiederholungen desselben
+Tastendrucks bestätigen nicht sofort. Dies ist eine Bedienhilfe, kein Nachweis
+der Authentizität eines Funksignals. Erfassung und Bestätigung laufen nach
+30 Sekunden ab, ein bestätigter Dialog nach zwei Minuten.
+
+Softwaretests prüfen Zuordnung, Gruppen, Grenzen, UTF-8, Migration, Besitz des
+Dialogs und Zeitüberschreitungen. Funkempfang und Zuordnung müssen zusätzlich
+mit den dokumentierten Fernbedienungen an der Hardware geprüft werden.

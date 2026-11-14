@@ -51,6 +51,24 @@ Discovery verwendet das bestehende Cover mit unveränderter Identität und ergä
 
 ## Originalfernbedienungen zuordnen
 
-Einstellungen → Gerät → Originalfernbedienungen: „Zuordnung hinzufügen“, auf der Fernbedienung den gewünschten Kanal/die gewünschte Gruppe wählen und eine Taste drücken (auch STOP). Der ESP erfasst das erste gültige Signal. Seriennummer und Empfangsmaske prüfen, Namen vergeben, Zielrollos auswählen und speichern. Eine bereits vorhandene Kombination wird zum Bearbeiten geöffnet; „Erneut erfassen“ ersetzt das Eingangssignal des Dialogs. Capture sendet selbst keine Motorbefehle.
+Service → Rollladen auswählen → Originalfernbedienungen → „Zuordnung hinzufügen“.
+Auf der Originalfernbedienung einen bereits am Motor angelernten Einzelkanal
+wählen und möglichst STOP drücken. Taste loslassen, kurz warten und denselben
+Kanal nochmals drücken. Danach einen Namen mit höchstens 32 Unicode-Zeichen
+vergeben und speichern. Die ESP-Registrierung sendet keine Motorbefehle; die
+Tastendrücke auf der Fernbedienung können natürlich die Motoren bedienen.
 
-Die Liste erlaubt Bearbeiten und Löschen von bis zu 32 Einträgen. Löschen entfernt keine Anlernung am Motor. Wiederholte Funkframes überschreiben das erfasste Signal nicht. Erfassung endet nach 30 Sekunden ohne Signal; ein nicht gespeicherter Dialog nach zwei Minuten. Alte sechsstellige Präfixeinträge werden ab Konfigurationsversion 6 nicht übernommen und müssen neu erfasst werden. Nur exakt passende Seriennummer und Empfangsmaske beeinflussen die zugeordneten Positionsstände, auch bei deaktiviertem MQTT.
+Bis zu fünf Quellen je Motor, insgesamt 80 Quellen. Dieselbe Quelle kann mehreren
+Motoren zugeordnet werden. „Löschen“ entfernt ausschließlich die Beziehung zum
+ausgewählten Motor; andere Zuordnungen und die echte Anlernung bleiben bestehen.
+Ein erneutes Erfassen einer bekannten Quelle erlaubt, ihre gemeinsame Bezeichnung
+zu ändern. Gruppensignale wirken automatisch auf alle zugeordneten Einzelkanäle
+derselben Senderkennung (`serial & 0x0ffffff0`); keine separate Gruppenregistrierung.
+
+Konfigurationsversion 7 übernimmt bestehende Einzelquellen aus Version 6 und
+vereinigt doppelte Quellen. Alte Gruppen werden als „Neu erfassen“ angezeigt und
+nicht ausgewertet. Noch ältere Präfixeinträge müssen neu erfasst werden. Bestehende
+überzählige Beziehungen bleiben erhalten; neue sind auf fünf je Motor begrenzt.
+Die Auswertung beeinflusst den gemeinsamen Positionsstatus auch bei deaktiviertem
+MQTT. Fehlende oder falsch empfangene Funksignale können weiterhin nicht sicher
+erkannt werden.

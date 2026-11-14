@@ -2,7 +2,7 @@
 
 ## Breaking change: original remote mappings
 
-The old six-digit prefix registration is removed. Settings → Device → Original remotes now contains a list with Add/Edit/Delete and signal capture. Each mapping uses the exact 28-bit serial (displayed as eight hex digits) **and** the received 16-bit channel mask, mapped to one or more ESP shutters. Single channels and groups sharing a serial therefore remain distinct. Up to 32 mappings are stored in configuration version 6. Legacy prefix mappings are discarded, not guessed or migrated: capture each required channel/group again. Existing radio pairing at the motors is unaffected. Deleting a row only deletes the ESP association. Capture does not transmit motor commands, but pressing the original remote may operate the shutters.
+Original remote associations are now managed in Service for the selected shutter, without a remote model or manual serial/mask entry. Capture and confirm an already paired **single channel**, then name it (up to 32 Unicode characters). Up to five associations per shutter and 80 distinct sources are stored in configuration version 7. Groups automatically match their registered source bits within the same sender family (`serial & 0x0ffffff0`). Removing an association affects only the selected shutter. Existing v6 single-channel entries are merged by source; old group mappings remain visible but inactive and must be captured again as single channels. Older prefix mappings cannot be recovered. Physical motor pairing is unaffected. Capture does not transmit motor commands, but pressing the original remote may operate the shutters.
 
 ## Home Assistant percentage control
 

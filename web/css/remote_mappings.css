@@ -1,22 +1,17 @@
+.remote-mapping-service { border-top:1px solid var(--ui-border); padding-top:1.25rem; margin-top:1.25rem; }
 .remote-mapping-toolbar { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1rem; }
+.remote-mapping-toolbar h2 { margin:0; }
 .remote-mapping-toolbar button { width:auto; margin:0; }
-.remote-mapping-table { overflow-x:auto; }
-.remote-mapping-table table { width:100%; margin:0; }
-.remote-mapping-table th { font-size:.8rem; }
-.remote-mapping-table td:nth-child(2),.remote-mapping-table td:nth-child(3) { font-family:var(--pico-font-family-monospace); font-size:.8rem; white-space:nowrap; }
-.remote-mapping-actions { text-align:right; white-space:nowrap; }
-.remote-mapping-actions button { width:auto; padding:.4rem .6rem; margin:.15rem; font-size:.8rem; }
-#remote_mapping_dialog { width:min(640px,calc(100% - 1.5rem)); max-height:calc(100dvh - 2rem); padding:0; overflow:auto; }
-#remote_mapping_dialog article { margin:0; padding:1.25rem; }
-#remote_mapping_dialog header,#remote_mapping_dialog footer { margin:0 0 1rem; padding:0; border:0; background:transparent; }
-#remote_mapping_dialog h2 { font-size:1.2rem; margin:0; }
-#remote_mapping_dialog p { font-size:.85rem; color:var(--ui-muted); }
-#remote_mapping_signal { display:block; background:var(--ui-field); border:1px solid var(--ui-border); border-radius:.5rem; padding:.8rem; margin:.75rem 0; color:var(--ui-text); font-family:var(--pico-font-family-monospace); font-size:.85rem; overflow-wrap:anywhere; }
-#remote_mapping_targets { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.5rem 1rem; margin-bottom:1rem; }
-#remote_mapping_targets label { display:flex; align-items:center; gap:.5rem; margin:0; font-size:.85rem; }
-#remote_mapping_targets input { flex:none; margin:0; }
-#remote_mapping_dialog footer { display:flex; justify-content:flex-end; flex-wrap:wrap; gap:.5rem; margin:1rem 0 0; }
-#remote_mapping_dialog button { width:auto; margin:0; }
-#remote_mapping_notice, #remote_mapping_dialog_notice { font-size:.85rem; color:var(--ui-accent); }
+.remote-mapping-row { display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:.75rem 0; border-bottom:1px solid var(--ui-border); }
+.remote-mapping-row small { display:block; color:var(--ui-muted); overflow-wrap:anywhere; }
+.remote-mapping-row button { width:auto; margin:0; padding:.4rem .6rem; }
+#remote_mapping_count, #remote_mapping_steps { color:var(--ui-muted); font-size:.85rem; }
+#remote_mapping_signal { display:block; padding:.75rem; margin-bottom:1rem; border:1px solid var(--ui-border); border-radius:var(--pico-border-radius); font-variant-numeric:tabular-nums; }
+#remote_mapping_dialog article { max-width:36rem; }
+#remote_mapping_dialog footer { display:flex; justify-content:flex-end; gap:.75rem; }
+#remote_mapping_dialog footer button { width:auto; margin:0; }
+
+.remote-mapping-service .info-text { font-size:.85rem; color:var(--ui-muted); }
 #remote_mapping_notice:empty, #remote_mapping_dialog_notice:empty { display:none; }
-@media(max-width:440px) { #remote_mapping_targets { grid-template-columns:minmax(0,1fr); } }
+
+.remote-mapping-row > div { min-width:0; overflow-wrap:anywhere; }
