@@ -10,6 +10,6 @@ void shutterPositionPublish();
 void shutterPositionInvalidate(uint8_t channel);
 bool shutterPositionBusy();
 
-// Percentage targets share the WebUI reference sequence; MQTT payload must be 0..100.
+// Accepted targets start immediately or wait in the shared 16-entry FIFO. MQTT payload: 0..100.
 bool shutterPositionReady(uint8_t channel);
 bool shutterPositionTarget(uint8_t channel, const char *payload);

@@ -9,6 +9,16 @@
 
 namespace {
 PositionMove move;
+// At most one waiting target per channel; fixed storage, no heap allocation.
+struct Target { uint8_t channel, goal; } targets[16];
+uint8_t targetCount = 0;
+void clearTargets() { targetCount = 0; }
+Target popTarget() {
+  const Target next = targets[0];
+  for (uint8_t i=1; i<targetCount; ++i) targets[i-1] = targets[i];
+  --targetCount;
+  return next;
+}
 int8_t positions[16] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
 // Passive endpoint estimates for manual/group/received remote commands (no motor sends).
 struct Travel { uint32_t since=0, duration=0; uint8_t target=0; } travel[16];
@@ -41,6 +51,14 @@ void status() {
   doc["moving"] = move.active() ? int(move.channel) : -1;
   doc["phase"] = int(move.phase);
   doc["target"] = move.target;
+  const uint32_t elapsed = millis() - move.since;
+  doc["remaining"] = move.phase == PositionMove::Reference && elapsed < move.duration
+      ? (move.duration - elapsed + 999) / 1000 : 0;
+  JsonArray waiting = doc["queue"].to<JsonArray>();
+  for (uint8_t i=0; i<targetCount; ++i) {
+    JsonArray entry = waiting.add<JsonArray>();
+    entry.add(targets[i].channel); entry.add(targets[i].goal);
+  }
   JsonObject session = doc["cal"].to<JsonObject>();
   session["phase"] = cal.phase; session["channel"] = cal.channel;
   session["mark"] = cal.mark; session["token"] = cal.token;
@@ -52,6 +70,7 @@ void status() {
   dirty = false; lastUpdate = millis();
 }
 void cancel(bool stopMotor) {
+  clearTargets();
   if (move.active()) {
     const uint8_t ch = move.channel;
     move.cancel(); setPosition(ch,-1);
@@ -69,13 +88,23 @@ bool available(uint8_t ch) {
   return ch<16 && config.position.enable && config.jaro.ch_enable[ch] && !setupMode &&
          !EspSysUtil::OTA::getInstance().isActive();
 }
-bool requestTarget(uint8_t ch, uint8_t goal) {
-  if(!available(ch)) {notice="unavailable";dirty=true;return false;}
-  if(shutterPositionBusy() || jaroCommandsPending()) {notice="busy";dirty=true;return false;}
-  if(!shutterPositionReady(ch)) {notice="not_calibrated";dirty=true;return false;}
+bool startTarget(uint8_t ch, uint8_t goal) {
   travel[ch].duration=0;setPosition(ch,-1);notice="";
-  if(!send(ch,goal>=50)) {notice="send_failed";dirty=true;return false;}
+  if(!send(ch,goal>=50)) {failure("send_failed");return false;}
   move.begin(ch,goal,config.position.calibration[ch],jaroPositionSentAt());dirty=true;
+  return true;
+}
+bool requestTarget(uint8_t ch, uint8_t goal) {
+  dirty=true;
+  if(!available(ch)) {notice="unavailable";return false;}
+  if(cal.phase || jaroCommandsPending()) {notice="busy";return false;}
+  if(!shutterPositionReady(ch)) {notice="not_calibrated";return false;}
+  if(!move.active() && !targetCount) return startTarget(ch,goal);
+  for(uint8_t i=0; i<targetCount; ++i) if(targets[i].channel==ch) {
+    targets[i].goal=goal;notice="";return true;
+  }
+  if(targetCount>=16) {notice="queue_full";return false;}
+  targets[targetCount++]={ch,goal};notice="";
   return true;
 }
 }
@@ -94,7 +123,7 @@ bool shutterPositionTarget(uint8_t ch, const char *payload) {
   return requestTarget(ch,static_cast<uint8_t>(value));
 }
 
-bool shutterPositionBusy() { return move.active() || cal.phase; }
+bool shutterPositionBusy() { return move.active() || cal.phase || targetCount; }
 void shutterPositionManual(uint16_t mask, bool stopMotor) {
   // One automatic sequence at a time. Other radio commands must not delay its STOP.
   if (shutterPositionBusy()) cancel(stopMotor);
@@ -106,6 +135,7 @@ void shutterPositionRemote(uint16_t mask, JaroCmdType command) {
   const bool affected=(move.active() && (mask & (uint16_t(1)<<move.channel))) ||
                       (cal.phase && (mask & (uint16_t(1)<<cal.channel)));
   if (affected) cancel(false);
+  else if(mask) clearTargets(); // Do not resume queued automation after manual remote operation.
   shutterPositionCommand(mask,command);
   dirty=true;
 }
@@ -181,7 +211,8 @@ void shutterPositionWebCommand(const char *payload) {
 void shutterPositionCyclic() {
   const uint32_t now=millis();
   if (previousEnable != config.position.enable) {previousEnable=config.position.enable;dirty=true;}
-  if(shutterPositionBusy() && (!config.position.enable || !available(cal.phase?cal.channel:move.channel) || (move.active() && !config.position.calibration[move.channel].valid()))) failure("cancelled");
+  if(shutterPositionBusy() && (!config.position.enable || setupMode || EspSysUtil::OTA::getInstance().isActive())) failure("cancelled");
+  if((cal.phase && !available(cal.channel)) || (move.active() && (!available(move.channel) || !config.position.calibration[move.channel].valid()))) failure("cancelled");
   if(cal.phase && (now-cal.lease>6000 || ((cal.phase==2 || cal.phase==4) && now-cal.since>180000))) failure("timeout");
   const auto action=move.next(now);
   if(action==PositionMove::MoveToTarget) {
@@ -191,11 +222,19 @@ void shutterPositionCyclic() {
   } else if(action==PositionMove::Stop) {
     const uint8_t ch=move.channel,goal=move.target;
     const bool sent=jaroPositionSend(ch,CMD_STOP);
-    move.cancel();setPosition(ch,sent?goal:-1);notice=sent?"":"send_failed";dirty=true;
+    move.cancel();setPosition(ch,sent?goal:-1);notice=sent?"":"send_failed";
+    if(!sent) clearTargets();
+    dirty=true;
   } else if(action==PositionMove::Complete) {setPosition(move.channel,move.target);dirty=true;}
   for(uint8_t ch=0;ch<16;++ch) {
     auto &t=travel[ch];
     if(t.duration && now-t.since>=t.duration) {t.duration=0;setPosition(ch,t.target);}
+  }
+  // Revalidate immediately before each queued move; disabled/uncalibrated channels are skipped.
+  while(targetCount && !move.active() && !cal.phase && !jaroCommandsPending()) {
+    const Target next=popTarget();dirty=true;
+    if(!available(next.channel) || !shutterPositionReady(next.channel)) {notice="unavailable";continue;}
+    startTarget(next.channel,next.goal);
   }
   // All timing stays on the ESP. Browsers only receive a small snapshot once per second.
   if (!EspSysUtil::OTA::getInstance().isActive() && (dirty || (shutterPositionBusy() && now-lastUpdate>=1000))) status();

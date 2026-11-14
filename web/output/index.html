@@ -12,6 +12,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   </head>
   <body>
+    <header class="app-header">
+      <strong class="app-brand">Jarolift-Controller</strong>
+      <div class="app-modes">
+        <span class="simModeBar">SIMULATION</span>
+        <span class="setupModeBar">SETUP-MODE</span>
+        <span id="errorBar" class="app-error" role="status" style="display: none"><span id="errorBarText"></span></span>
+      </div>
+      <div class="app-connection-actions">
+      <span id="p00_web_connection" class="app-connection" role="status" aria-live="polite">
+        <span id="p00_web_connection_text" data-i18n="ui_disconnected"></span>
+      </span>
+        <button id="p99_reloadButton" type="button" class="app-reload svg i_auto" data-ui-local aria-label="Reload" hidden></button>
+      </div>
+    </header>
     <dialog id="bitmask_dialog">
       <article class="dash">
         <div class="dash-main">
@@ -104,41 +118,7 @@
       </article>
     </dialog>
     <!-- Dialog Version -->
-    <dialog id="version_dialog">
-      <article class="dash">
-        <div class="dash-main">
-          <div class="dash-header" data-i18n="version_info"></div>
-          <br />
-          <div class="leftright">
-            <span data-i18n="act_version"></span>
-            <span id="p00_dialog_version"></span>
-          </div>
-          <div class="leftright">
-            <span data-i18n="github_version"></span>
-            <a id="p00_dialog_git_version" aria-busy="true"></a>
-          </div>
-          <br />
-          <div
-            id="p00_update_btn_hide"
-            class="dash-footer"
-            style="display: none">
-            <button
-              id="p00_update_btn"
-              style="width: 75%"
-              aria-busy="false"></button>
-          </div>
-          <div class="dash-footer">
-            <button
-              id="close_version_Dialog_btn"
-              data-i18n="close"
-              style="width: 75%"></button>
-          </div>
-        </div>
-        <div class="dash-icon">
-          <div class="svg i_github"></div>
-        </div>
-      </article>
-    </dialog>
+
     <!-- Dialog OTA-FAILED -->
     <dialog id="ota_update_failed_dialog">
       <article class="dash">
@@ -188,36 +168,28 @@
       <div class="topMenu">
         <ul>
           <li>
-            <strong style="margin-right: 10px">Jarolift-Controller</strong>
-            <span class="simModeBar">SIM</span>
-            <span class="setupModeBar">SETUP</span>
+            <strong class="app-brand">Jarolift-Controller</strong>
           </li>
         </ul>
+        <div class="app-modes">
+          <span class="simModeBar">SIM</span>
+          <span class="setupModeBar">SETUP</span>
+        </div>
         <ul>
           <li>
             <details class="dropdown">
-              <summary id="topMenuDropdown" class="i_menu"></summary>
-              <ul class="nav-list" dir="rtl">
-                <li><a data-tab="tab1" href="#" data-i18n="channels"></a></li>
-                <li><a data-tab="tab2" href="#" data-i18n="groups"></a></li>
-                <li><a data-tab="tab3" href="#" data-i18n="timer"></a></li>
-                <li><a data-tab="tab4" href="#" data-i18n="service"></a></li>
-                <li>
-                  <a data-tab="tab9" href="#" data-i18n="system"></a>
-                </li>
-                <li>
-                  <a data-tab="tab10" href="#" data-i18n="logger"></a>
-                </li>
-                <li>
-                  <a data-tab="tab11" href="#" data-i18n="tools"></a>
-                </li>
-                <li>
-                  <a data-tab="tab12" href="#" data-i18n="settings"></a>
-                </li>
-                <li>
-                  <a data-tab="tab13" href="#" data-i18n="help"></a>
-                </li>
-              </ul>
+              <summary id="topMenuDropdown" aria-label="Navigation">
+                <i class="svg i_menu" aria-hidden="true"></i>
+              </summary>
+              <ul class="nav-list"><li><a data-tab="tab1" href="#" data-i18n="channels"></a></li>
+<li><a data-tab="tab2" href="#" data-i18n="groups"></a></li>
+<li><a data-tab="tab3" href="#" data-i18n="timer"></a></li>
+<li><a data-tab="tab4" href="#" data-i18n="service"></a></li>
+<li><a data-tab="tab9" href="#" data-i18n="system"></a></li>
+<li><a data-tab="tab10" href="#" data-i18n="logger"></a></li>
+<li><a data-tab="tab11" href="#" data-i18n="tools"></a></li>
+<li><a data-tab="tab12" href="#" data-i18n="settings"></a></li>
+<li><a data-tab="tab13" href="#" data-i18n="help"></a></li></ul>
             </details>
           </li>
         </ul>
@@ -226,271 +198,217 @@
     <!--TOP-MENU-END-->
     <!--SIDEBAR-->
     <div class="sidebar">
-      <div>
-        <div>Jarolift-Controller</div>
-      </div>
-      <div class="simModeBar">SIMULATION-MODE</div>
-      <div class="setupModeBar">SETUP-MODE</div>
-      <ul class="nav-list">
-        <li>
-          <a href="#" data-tab="tab1" class="active">
-            <i class="svg i_updown"></i>
-            <span class="links_name" data-i18n="channels"></span>
-          </a>
-        </li>
-        <li>
-          <a href="#" data-tab="tab2">
-            <i class="svg i_updown2"></i>
-            <span class="links_name" data-i18n="groups"></span>
-          </a>
-        </li>
-        <li>
-          <a href="#" data-tab="tab3">
-            <i class="svg i_clock"></i>
-            <span class="links_name" data-i18n="timer"></span>
-          </a>
-        </li>
-        <li>
-          <a href="#" data-tab="tab4">
-            <i class="svg i_service"></i>
-            <span class="links_name" data-i18n="service"></span>
-          </a>
-        </li>
-        <li>
-          <a href="#" data-tab="tab9">
-            <i class="svg i_info"></i>
-            <span class="links_name" data-i18n="system"></span>
-          </a>
-        </li>
-        <li>
-          <a href="#" data-tab="tab10">
-            <i class="svg i_log"></i>
-            <span class="links_name" data-i18n="logger"></span>
-          </a>
-        </li>
-        <li>
-          <a href="#" data-tab="tab11">
-            <i class="svg i_upload"></i>
-            <span class="links_name" data-i18n="tools"></span>
-          </a>
-        </li>
-        <li>
-          <a href="#" data-tab="tab12">
-            <i class="svg i_settings"></i>
-            <span class="links_name" data-i18n="settings"></span>
-          </a>
-        </li>
-        <li>
-          <a href="#" data-tab="tab13">
-            <i class="svg i_help"></i>
-            <span class="links_name" data-i18n="help"></span>
-          </a>
-        </li>
-      </ul>
-      <div style="display: inline-flex; margin-top: auto; margin-bottom: 5px">
-        <a id="p00_version" style="margin-right: auto; margin-top: auto"></a>
-        <i id="p00_wifi_icon" style="width: 28px; height: 28px"></i>
-        <i id="p00_eth_icon" style="width: 28px; height: 28px"></i>
-        <a
-          href="/logout"
-          class="svg i_logout OPT_AUTH"
-          style="width: 28px; height: 28px"></a>
+      <ul class="nav-list"><li><a href="#" data-tab="tab1" class="active"><span class="links_name" data-i18n="channels"></span></a></li>
+<li><a href="#" data-tab="tab2"><span class="links_name" data-i18n="groups"></span></a></li>
+<li><a href="#" data-tab="tab3"><span class="links_name" data-i18n="timer"></span></a></li>
+<li><a href="#" data-tab="tab4"><span class="links_name" data-i18n="service"></span></a></li>
+<li><a href="#" data-tab="tab9"><span class="links_name" data-i18n="system"></span></a></li>
+<li><a href="#" data-tab="tab10"><span class="links_name" data-i18n="logger"></span></a></li>
+<li><a href="#" data-tab="tab11"><span class="links_name" data-i18n="tools"></span></a></li>
+<li><a href="#" data-tab="tab12"><span class="links_name" data-i18n="settings"></span></a></li>
+<li><a href="#" data-tab="tab13"><span class="links_name" data-i18n="help"></span></a></li></ul>
+      <div class="sidebar-status">
+        <button type="button" id="p00_version" class="sidebar-version" data-ui-local aria-controls="tab11"></button>
+        <i id="p00_wifi_icon" role="img"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="wifi-outer" d="M3 8a14 14 0 0 1 18 0"/><path class="wifi-middle" d="M6 11.5a9 9 0 0 1 12 0"/><path class="wifi-inner" d="M9 15a4.6 4.6 0 0 1 6 0"/><circle class="wifi-dot" cx="12" cy="19" r="0.8"/></svg></i>
+        <i id="p00_eth_icon" role="img"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v11h-3v4H9v-4H6zM9 3v4m3-4v4m3-4v4M12 18v3M8 21h8"/></svg></i>
+        <a href="/logout" class="sidebar-logout OPT_AUTH" aria-label="Abmelden" title="Abmelden"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4H5v16h9M10 12h11m-4-4 4 4-4 4"/></svg></a>
       </div>
     </div>
     <!--Sidebar-END-->
     <section class="home-section">
       <main class="container-fluid">
 <!-- Tab-1 -->
-      <div id="tab1" class="tab-content active">
-        <div class="grid">
-          <article class="dash CH1" style="height: 120px">
+      <div id="tab1" class="tab-content jarolift-page active" data-connection-required><header class="page-heading"><h1 data-i18n="channels"></h1><p data-i18n="jaro_channels_subtitle"></p></header>
+
+        <div class="jarolift-control-grid">
+          <article class="dash CH1">
             <div class="dash-main">
               <div class="dash-header" id="p01_jaro_ch_name_0">channel 1</div>
               <div class="dash-content">
-                <button id="p01_up_0" class="svgbtn i_up"></button>
-                <button id="p01_stop_0" class="svgbtn i_stop"></button>
-                <button id="p01_down_0" class="svgbtn i_down"></button>
-                <button id="p01_shade_0" class="svgbtn i_shade"></button>
+                <button id="p01_up_0" class="svgbtn i_up" aria-label="Up"></button>
+                <button id="p01_stop_0" class="svgbtn i_stop" aria-label="Stop"></button>
+                <button id="p01_down_0" class="svgbtn i_down" aria-label="Down"></button>
+                <button id="p01_shade_0" class="svgbtn i_shade" aria-label="Shade"></button>
               </div>
             </div>
           </article>
 
-          <article class="dash CH2" style="height: 120px">
+          <article class="dash CH2">
             <div class="dash-main">
               <div class="dash-header" id="p01_jaro_ch_name_1">channel 2</div>
               <div class="dash-content">
-                <button id="p01_up_1" class="svgbtn i_up"></button>
-                <button id="p01_stop_1" class="svgbtn i_stop"></button>
-                <button id="p01_down_1" class="svgbtn i_down"></button>
-                <button id="p01_shade_1" class="svgbtn i_shade"></button>
+                <button id="p01_up_1" class="svgbtn i_up" aria-label="Up"></button>
+                <button id="p01_stop_1" class="svgbtn i_stop" aria-label="Stop"></button>
+                <button id="p01_down_1" class="svgbtn i_down" aria-label="Down"></button>
+                <button id="p01_shade_1" class="svgbtn i_shade" aria-label="Shade"></button>
               </div>
             </div>
           </article>
 
-          <article class="dash CH3" style="height: 120px">
+          <article class="dash CH3">
             <div class="dash-main">
               <div class="dash-header" id="p01_jaro_ch_name_2">channel 3</div>
               <div class="dash-content">
-                <button id="p01_up_2" class="svgbtn i_up"></button>
-                <button id="p01_stop_2" class="svgbtn i_stop"></button>
-                <button id="p01_down_2" class="svgbtn i_down"></button>
-                <button id="p01_shade_2" class="svgbtn i_shade"></button>
+                <button id="p01_up_2" class="svgbtn i_up" aria-label="Up"></button>
+                <button id="p01_stop_2" class="svgbtn i_stop" aria-label="Stop"></button>
+                <button id="p01_down_2" class="svgbtn i_down" aria-label="Down"></button>
+                <button id="p01_shade_2" class="svgbtn i_shade" aria-label="Shade"></button>
               </div>
             </div>
           </article>
 
-          <article class="dash CH4" style="height: 120px">
+          <article class="dash CH4">
             <div class="dash-main">
               <div class="dash-header" id="p01_jaro_ch_name_3">channel 4</div>
               <div class="dash-content">
-                <button id="p01_up_3" class="svgbtn i_up"></button>
-                <button id="p01_stop_3" class="svgbtn i_stop"></button>
-                <button id="p01_down_3" class="svgbtn i_down"></button>
-                <button id="p01_shade_3" class="svgbtn i_shade"></button>
+                <button id="p01_up_3" class="svgbtn i_up" aria-label="Up"></button>
+                <button id="p01_stop_3" class="svgbtn i_stop" aria-label="Stop"></button>
+                <button id="p01_down_3" class="svgbtn i_down" aria-label="Down"></button>
+                <button id="p01_shade_3" class="svgbtn i_shade" aria-label="Shade"></button>
               </div>
             </div>
           </article>
 
-          <article class="dash CH5" style="height: 120px">
+          <article class="dash CH5">
             <div class="dash-main">
               <div class="dash-header" id="p01_jaro_ch_name_4">channel 5</div>
               <div class="dash-content">
-                <button id="p01_up_4" class="svgbtn i_up"></button>
-                <button id="p01_stop_4" class="svgbtn i_stop"></button>
-                <button id="p01_down_4" class="svgbtn i_down"></button>
-                <button id="p01_shade_4" class="svgbtn i_shade"></button>
+                <button id="p01_up_4" class="svgbtn i_up" aria-label="Up"></button>
+                <button id="p01_stop_4" class="svgbtn i_stop" aria-label="Stop"></button>
+                <button id="p01_down_4" class="svgbtn i_down" aria-label="Down"></button>
+                <button id="p01_shade_4" class="svgbtn i_shade" aria-label="Shade"></button>
               </div>
             </div>
           </article>
 
-          <article class="dash CH6" style="height: 120px">
+          <article class="dash CH6">
             <div class="dash-main">
               <div class="dash-header" id="p01_jaro_ch_name_5">channel 6</div>
               <div class="dash-content">
-                <button id="p01_up_5" class="svgbtn i_up"></button>
-                <button id="p01_stop_5" class="svgbtn i_stop"></button>
-                <button id="p01_down_5" class="svgbtn i_down"></button>
-                <button id="p01_shade_5" class="svgbtn i_shade"></button>
+                <button id="p01_up_5" class="svgbtn i_up" aria-label="Up"></button>
+                <button id="p01_stop_5" class="svgbtn i_stop" aria-label="Stop"></button>
+                <button id="p01_down_5" class="svgbtn i_down" aria-label="Down"></button>
+                <button id="p01_shade_5" class="svgbtn i_shade" aria-label="Shade"></button>
               </div>
             </div>
           </article>
 
-          <article class="dash CH7" style="height: 120px">
+          <article class="dash CH7">
             <div class="dash-main">
               <div class="dash-header" id="p01_jaro_ch_name_6">channel 7</div>
               <div class="dash-content">
-                <button id="p01_up_6" class="svgbtn i_up"></button>
-                <button id="p01_stop_6" class="svgbtn i_stop"></button>
-                <button id="p01_down_6" class="svgbtn i_down"></button>
-                <button id="p01_shade_6" class="svgbtn i_shade"></button>
+                <button id="p01_up_6" class="svgbtn i_up" aria-label="Up"></button>
+                <button id="p01_stop_6" class="svgbtn i_stop" aria-label="Stop"></button>
+                <button id="p01_down_6" class="svgbtn i_down" aria-label="Down"></button>
+                <button id="p01_shade_6" class="svgbtn i_shade" aria-label="Shade"></button>
               </div>
             </div>
           </article>
 
-          <article class="dash CH8" style="height: 120px">
+          <article class="dash CH8">
             <div class="dash-main">
               <div class="dash-header" id="p01_jaro_ch_name_7">channel 8</div>
               <div class="dash-content">
-                <button id="p01_up_7" class="svgbtn i_up"></button>
-                <button id="p01_stop_7" class="svgbtn i_stop"></button>
-                <button id="p01_down_7" class="svgbtn i_down"></button>
-                <button id="p01_shade_7" class="svgbtn i_shade"></button>
+                <button id="p01_up_7" class="svgbtn i_up" aria-label="Up"></button>
+                <button id="p01_stop_7" class="svgbtn i_stop" aria-label="Stop"></button>
+                <button id="p01_down_7" class="svgbtn i_down" aria-label="Down"></button>
+                <button id="p01_shade_7" class="svgbtn i_shade" aria-label="Shade"></button>
               </div>
             </div>
           </article>
 
-          <article class="dash CH9" style="height: 120px">
+          <article class="dash CH9">
             <div class="dash-main">
               <div class="dash-header" id="p01_jaro_ch_name_8">channel 9</div>
               <div class="dash-content">
-                <button id="p01_up_8" class="svgbtn i_up"></button>
-                <button id="p01_stop_8" class="svgbtn i_stop"></button>
-                <button id="p01_down_8" class="svgbtn i_down"></button>
-                <button id="p01_shade_8" class="svgbtn i_shade"></button>
+                <button id="p01_up_8" class="svgbtn i_up" aria-label="Up"></button>
+                <button id="p01_stop_8" class="svgbtn i_stop" aria-label="Stop"></button>
+                <button id="p01_down_8" class="svgbtn i_down" aria-label="Down"></button>
+                <button id="p01_shade_8" class="svgbtn i_shade" aria-label="Shade"></button>
               </div>
             </div>
           </article>
 
-          <article class="dash CH10" style="height: 120px">
+          <article class="dash CH10">
             <div class="dash-main">
               <div class="dash-header" id="p01_jaro_ch_name_9">channel 10</div>
               <div class="dash-content">
-                <button id="p01_up_9" class="svgbtn i_up"></button>
-                <button id="p01_stop_9" class="svgbtn i_stop"></button>
-                <button id="p01_down_9" class="svgbtn i_down"></button>
-                <button id="p01_shade_9" class="svgbtn i_shade"></button>
+                <button id="p01_up_9" class="svgbtn i_up" aria-label="Up"></button>
+                <button id="p01_stop_9" class="svgbtn i_stop" aria-label="Stop"></button>
+                <button id="p01_down_9" class="svgbtn i_down" aria-label="Down"></button>
+                <button id="p01_shade_9" class="svgbtn i_shade" aria-label="Shade"></button>
               </div>
             </div>
           </article>
 
-          <article class="dash CH11" style="height: 120px">
+          <article class="dash CH11">
             <div class="dash-main">
               <div class="dash-header" id="p01_jaro_ch_name_10">channel 11</div>
               <div class="dash-content">
-                <button id="p01_up_10" class="svgbtn i_up"></button>
-                <button id="p01_stop_10" class="svgbtn i_stop"></button>
-                <button id="p01_down_10" class="svgbtn i_down"></button>
-                <button id="p01_shade_10" class="svgbtn i_shade"></button>
+                <button id="p01_up_10" class="svgbtn i_up" aria-label="Up"></button>
+                <button id="p01_stop_10" class="svgbtn i_stop" aria-label="Stop"></button>
+                <button id="p01_down_10" class="svgbtn i_down" aria-label="Down"></button>
+                <button id="p01_shade_10" class="svgbtn i_shade" aria-label="Shade"></button>
               </div>
             </div>
           </article>
 
-          <article class="dash CH12" style="height: 120px">
+          <article class="dash CH12">
             <div class="dash-main">
               <div class="dash-header" id="p01_jaro_ch_name_11">channel 12</div>
               <div class="dash-content">
-                <button id="p01_up_11" class="svgbtn i_up"></button>
-                <button id="p01_stop_11" class="svgbtn i_stop"></button>
-                <button id="p01_down_11" class="svgbtn i_down"></button>
-                <button id="p01_shade_11" class="svgbtn i_shade"></button>
+                <button id="p01_up_11" class="svgbtn i_up" aria-label="Up"></button>
+                <button id="p01_stop_11" class="svgbtn i_stop" aria-label="Stop"></button>
+                <button id="p01_down_11" class="svgbtn i_down" aria-label="Down"></button>
+                <button id="p01_shade_11" class="svgbtn i_shade" aria-label="Shade"></button>
               </div>
             </div>
           </article>
 
-          <article class="dash CH13" style="height: 120px">
+          <article class="dash CH13">
             <div class="dash-main">
               <div class="dash-header" id="p01_jaro_ch_name_12">channel 13</div>
               <div class="dash-content">
-                <button id="p01_up_12" class="svgbtn i_up"></button>
-                <button id="p01_stop_12" class="svgbtn i_stop"></button>
-                <button id="p01_down_12" class="svgbtn i_down"></button>
-                <button id="p01_shade_12" class="svgbtn i_shade"></button>
+                <button id="p01_up_12" class="svgbtn i_up" aria-label="Up"></button>
+                <button id="p01_stop_12" class="svgbtn i_stop" aria-label="Stop"></button>
+                <button id="p01_down_12" class="svgbtn i_down" aria-label="Down"></button>
+                <button id="p01_shade_12" class="svgbtn i_shade" aria-label="Shade"></button>
               </div>
             </div>
           </article>
 
-          <article class="dash CH14" style="height: 120px">
+          <article class="dash CH14">
             <div class="dash-main">
               <div class="dash-header" id="p01_jaro_ch_name_13">channel 14</div>
               <div class="dash-content">
-                <button id="p01_up_13" class="svgbtn i_up"></button>
-                <button id="p01_stop_13" class="svgbtn i_stop"></button>
-                <button id="p01_down_13" class="svgbtn i_down"></button>
-                <button id="p01_shade_13" class="svgbtn i_shade"></button>
+                <button id="p01_up_13" class="svgbtn i_up" aria-label="Up"></button>
+                <button id="p01_stop_13" class="svgbtn i_stop" aria-label="Stop"></button>
+                <button id="p01_down_13" class="svgbtn i_down" aria-label="Down"></button>
+                <button id="p01_shade_13" class="svgbtn i_shade" aria-label="Shade"></button>
               </div>
             </div>
           </article>
 
-          <article class="dash CH15" style="height: 120px">
+          <article class="dash CH15">
             <div class="dash-main">
               <div class="dash-header" id="p01_jaro_ch_name_14">channel 15</div>
               <div class="dash-content">
-                <button id="p01_up_14" class="svgbtn i_up"></button>
-                <button id="p01_stop_14" class="svgbtn i_stop"></button>
-                <button id="p01_down_14" class="svgbtn i_down"></button>
-                <button id="p01_shade_14" class="svgbtn i_shade"></button>
+                <button id="p01_up_14" class="svgbtn i_up" aria-label="Up"></button>
+                <button id="p01_stop_14" class="svgbtn i_stop" aria-label="Stop"></button>
+                <button id="p01_down_14" class="svgbtn i_down" aria-label="Down"></button>
+                <button id="p01_shade_14" class="svgbtn i_shade" aria-label="Shade"></button>
               </div>
             </div>
           </article>
 
-          <article class="dash CH16" style="height: 120px">
+          <article class="dash CH16">
             <div class="dash-main">
               <div class="dash-header" id="p01_jaro_ch_name_15">channel 16</div>
               <div class="dash-content">
-                <button id="p01_up_15" class="svgbtn i_up"></button>
-                <button id="p01_stop_15" class="svgbtn i_stop"></button>
-                <button id="p01_down_15" class="svgbtn i_down"></button>
-                <button id="p01_shade_15" class="svgbtn i_shade"></button>
+                <button id="p01_up_15" class="svgbtn i_up" aria-label="Up"></button>
+                <button id="p01_stop_15" class="svgbtn i_stop" aria-label="Stop"></button>
+                <button id="p01_down_15" class="svgbtn i_down" aria-label="Down"></button>
+                <button id="p01_shade_15" class="svgbtn i_shade" aria-label="Shade"></button>
               </div>
             </div>
           </article>
@@ -499,76 +417,77 @@
       </div>
       <!-- END Tab-Content -->
 <!-- Tab-2 -->
-      <div id="tab2" class="tab-content">
-        <div class="grid">
-          <article class="dash GRP0" style="height: 120px">
+      <div id="tab2" class="tab-content jarolift-page" data-connection-required><header class="page-heading"><h1 data-i18n="groups"></h1><p data-i18n="jaro_groups_subtitle"></p></header>
+
+        <div class="jarolift-control-grid">
+          <article class="dash GRP0">
             <div class="dash-main">
               <div class="dash-header" id="p02_jaro_grp_name_0">group 1</div>
               <div class="dash-content">
-                <button id="p02_up_0" class="svgbtn i_up"></button>
-                <button id="p02_stop_0" class="svgbtn i_stop"></button>
-                <button id="p02_down_0" class="svgbtn i_down"></button>
-                <button id="p02_shade_0" class="svgbtn i_shade"></button>
+                <button id="p02_up_0" class="svgbtn i_up" aria-label="Up"></button>
+                <button id="p02_stop_0" class="svgbtn i_stop" aria-label="Stop"></button>
+                <button id="p02_down_0" class="svgbtn i_down" aria-label="Down"></button>
+                <button id="p02_shade_0" class="svgbtn i_shade" aria-label="Shade"></button>
               </div>
             </div>
           </article>
 
-          <article class="dash GRP1" style="height: 120px">
+          <article class="dash GRP1">
             <div class="dash-main">
               <div class="dash-header" id="p02_jaro_grp_name_1">group 2</div>
               <div class="dash-content">
-                <button id="p02_up_1" class="svgbtn i_up"></button>
-                <button id="p02_stop_1" class="svgbtn i_stop"></button>
-                <button id="p02_down_1" class="svgbtn i_down"></button>
-                <button id="p02_shade_1" class="svgbtn i_shade"></button>
+                <button id="p02_up_1" class="svgbtn i_up" aria-label="Up"></button>
+                <button id="p02_stop_1" class="svgbtn i_stop" aria-label="Stop"></button>
+                <button id="p02_down_1" class="svgbtn i_down" aria-label="Down"></button>
+                <button id="p02_shade_1" class="svgbtn i_shade" aria-label="Shade"></button>
               </div>
             </div>
           </article>
 
-          <article class="dash GRP2" style="height: 120px">
+          <article class="dash GRP2">
             <div class="dash-main">
               <div class="dash-header" id="p02_jaro_grp_name_2">group 3</div>
               <div class="dash-content">
-                <button id="p02_up_2" class="svgbtn i_up"></button>
-                <button id="p02_stop_2" class="svgbtn i_stop"></button>
-                <button id="p02_down_2" class="svgbtn i_down"></button>
-                <button id="p02_shade_2" class="svgbtn i_shade"></button>
+                <button id="p02_up_2" class="svgbtn i_up" aria-label="Up"></button>
+                <button id="p02_stop_2" class="svgbtn i_stop" aria-label="Stop"></button>
+                <button id="p02_down_2" class="svgbtn i_down" aria-label="Down"></button>
+                <button id="p02_shade_2" class="svgbtn i_shade" aria-label="Shade"></button>
               </div>
             </div>
           </article>
 
-          <article class="dash GRP3" style="height: 120px">
+          <article class="dash GRP3">
             <div class="dash-main">
               <div class="dash-header" id="p02_jaro_grp_name_3">group 4</div>
               <div class="dash-content">
-                <button id="p02_up_3" class="svgbtn i_up"></button>
-                <button id="p02_stop_3" class="svgbtn i_stop"></button>
-                <button id="p02_down_3" class="svgbtn i_down"></button>
-                <button id="p02_shade_3" class="svgbtn i_shade"></button>
+                <button id="p02_up_3" class="svgbtn i_up" aria-label="Up"></button>
+                <button id="p02_stop_3" class="svgbtn i_stop" aria-label="Stop"></button>
+                <button id="p02_down_3" class="svgbtn i_down" aria-label="Down"></button>
+                <button id="p02_shade_3" class="svgbtn i_shade" aria-label="Shade"></button>
               </div>
             </div>
           </article>
 
-          <article class="dash GRP4" style="height: 120px">
+          <article class="dash GRP4">
             <div class="dash-main">
               <div class="dash-header" id="p02_jaro_grp_name_4">group 5</div>
               <div class="dash-content">
-                <button id="p02_up_4" class="svgbtn i_up"></button>
-                <button id="p02_stop_4" class="svgbtn i_stop"></button>
-                <button id="p02_down_4" class="svgbtn i_down"></button>
-                <button id="p02_shade_4" class="svgbtn i_shade"></button>
+                <button id="p02_up_4" class="svgbtn i_up" aria-label="Up"></button>
+                <button id="p02_stop_4" class="svgbtn i_stop" aria-label="Stop"></button>
+                <button id="p02_down_4" class="svgbtn i_down" aria-label="Down"></button>
+                <button id="p02_shade_4" class="svgbtn i_shade" aria-label="Shade"></button>
               </div>
             </div>
           </article>
 
-          <article class="dash GRP5" style="height: 120px">
+          <article class="dash GRP5">
             <div class="dash-main">
               <div class="dash-header" id="p02_jaro_grp_name_5">group 6</div>
               <div class="dash-content">
-                <button id="p02_up_5" class="svgbtn i_up"></button>
-                <button id="p02_stop_5" class="svgbtn i_stop"></button>
-                <button id="p02_down_5" class="svgbtn i_down"></button>
-                <button id="p02_shade_5" class="svgbtn i_shade"></button>
+                <button id="p02_up_5" class="svgbtn i_up" aria-label="Up"></button>
+                <button id="p02_stop_5" class="svgbtn i_stop" aria-label="Stop"></button>
+                <button id="p02_down_5" class="svgbtn i_down" aria-label="Down"></button>
+                <button id="p02_shade_5" class="svgbtn i_shade" aria-label="Shade"></button>
               </div>
             </div>
           </article>
@@ -577,13 +496,14 @@
       </div>
       <!-- END Tab-Content -->
 <!-- Tab-3 -->
-      <div id="tab3" class="tab-content">
-        <div class="grid" id="timers-container">
-          <article>
+      <div id="tab3" class="tab-content jarolift-page jarolift-timers" data-connection-required><header class="page-heading"><h1 data-i18n="timer"></h1><p data-i18n="jaro_timers_subtitle"></p></header>
+
+        <div class="jarolift-timer-grid" id="timers-container">
+          <article class="jarolift-timer">
             <div class="dash-main">
               <div class="dash-header">Timer 1</div>
               <div class="section-header">
-                <label for="timer0_enable" data-i18n="activate"></label>
+                <label for="cfg_timer_0_enable" data-i18n="activate"></label>
                 <div class="switch-container">
                   <input
                     name="timer0_enable"
@@ -596,7 +516,7 @@
               <br />
               <form id="timerForm0" class="OPT_TIMER0">
                 <fieldset>
-                  <label for="timeType0" data-i18n="timer_type"></label>
+                  <label for="cfg_timer_0_type" data-i18n="timer_type"></label>
                   <select
                     id="cfg_timer_0_type"
                     name="timeType0"
@@ -608,7 +528,7 @@
                   </select>
 
                   <div class="time-input" id="timeInput0">
-                    <label for="timeValue0" data-i18n="time_HH_MM"></label>
+                    <label for="cfg_timer_0_time_value" data-i18n="time_HH_MM"></label>
                     <input
                       type="time"
                       id="cfg_timer_0_time_value"
@@ -619,7 +539,7 @@
                     class="time-input"
                     id="offsetInput0"
                     style="display: none">
-                    <label for="offsetValue0" data-i18n="offset_desc"></label>
+                    <label for="cfg_timer_0_offset_value" data-i18n="offset_desc"></label>
                     <input
                       type="number"
                       id="cfg_timer_0_offset_value"
@@ -640,7 +560,7 @@
                         id="cfg_timer_0_use_min_time" />
 
                       <label
-                        for="timer0_use_min_time"
+                        for="cfg_timer_0_use_min_time"
                         data-i18n="use_min_time"></label>
                     </div>
 
@@ -661,7 +581,7 @@
                         id="cfg_timer_0_use_max_time" />
 
                       <label
-                        for="timer0_use_max_time"
+                        for="cfg_timer_0_use_max_time"
                         data-i18n="use_max_time"></label>
                     </div>
 
@@ -674,7 +594,7 @@
                   </div>
 
                   <!-- Dropdown for shutter cmd -->
-                  <label for="command0" data-i18n="command"></label>
+                  <label for="cfg_timer_0_cmd" data-i18n="command"></label>
                   <select id="cfg_timer_0_cmd" name="command0">
                     <option value="0" data-i18n="cmd_up"></option>
                     <option value="1" data-i18n="cmd_down"></option>
@@ -683,41 +603,41 @@
 
                   <!-- Checkbox for wekdays -->
                   <label data-i18n="weekdays"></label>
-                  <div class="grid">
+                  <div class="timer-weekdays">
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_0_monday"
                         name="days0" />
-                      <label for="monday0" data-i18n="day_mo"></label>
+                      <label for="cfg_timer_0_monday" data-i18n="day_mo"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_0_tuesday"
                         name="days0" />
-                      <label for="tuesday0" data-i18n="day_tu"></label>
+                      <label for="cfg_timer_0_tuesday" data-i18n="day_tu"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_0_wednesday"
                         name="days0" />
-                      <label for="wednesday0" data-i18n="day_we"></label>
+                      <label for="cfg_timer_0_wednesday" data-i18n="day_we"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_0_thursday"
                         name="days0" />
-                      <label for="thursday0" data-i18n="day_th"></label>
+                      <label for="cfg_timer_0_thursday" data-i18n="day_th"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_0_friday"
                         name="days0" />
-                      <label for="friday0" data-i18n="day_fr"></label>
+                      <label for="cfg_timer_0_friday" data-i18n="day_fr"></label>
                     </div>
                     <br />
                     <div>
@@ -725,20 +645,20 @@
                         type="checkbox"
                         id="cfg_timer_0_saturday"
                         name="days0" />
-                      <label for="saturday0" data-i18n="day_sa"></label>
+                      <label for="cfg_timer_0_saturday" data-i18n="day_sa"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_0_sunday"
                         name="days0" />
-                      <label for="sunday0" data-i18n="day_su"></label>
+                      <label for="cfg_timer_0_sunday" data-i18n="day_su"></label>
                     </div>
                   </div>
                   <!-- selection of shutter -->
                   <div>
                     <div class="leftright">
-                      <label for="mask_timer0" data-i18n="mask"></label>
+                      <label for="cfg_timer_0_grp_mask" data-i18n="mask"></label>
                       <button
                         onclick="openGrpMaskHelp(this)"
                         class="i_help"
@@ -765,11 +685,11 @@
               </form>
             </div>
           </article>
-          <article>
+          <article class="jarolift-timer">
             <div class="dash-main">
               <div class="dash-header">Timer 2</div>
               <div class="section-header">
-                <label for="timer1_enable" data-i18n="activate"></label>
+                <label for="cfg_timer_1_enable" data-i18n="activate"></label>
                 <div class="switch-container">
                   <input
                     name="timer1_enable"
@@ -782,7 +702,7 @@
               <br />
               <form id="timerForm1" class="OPT_TIMER1">
                 <fieldset>
-                  <label for="timeType1" data-i18n="timer_type"></label>
+                  <label for="cfg_timer_1_type" data-i18n="timer_type"></label>
                   <select
                     id="cfg_timer_1_type"
                     name="timeType1"
@@ -794,7 +714,7 @@
                   </select>
 
                   <div class="time-input" id="timeInput1">
-                    <label for="timeValue1" data-i18n="time_HH_MM"></label>
+                    <label for="cfg_timer_1_time_value" data-i18n="time_HH_MM"></label>
                     <input
                       type="time"
                       id="cfg_timer_1_time_value"
@@ -805,7 +725,7 @@
                     class="time-input"
                     id="offsetInput1"
                     style="display: none">
-                    <label for="offsetValue1" data-i18n="offset_desc"></label>
+                    <label for="cfg_timer_1_offset_value" data-i18n="offset_desc"></label>
                     <input
                       type="number"
                       id="cfg_timer_1_offset_value"
@@ -826,7 +746,7 @@
                         id="cfg_timer_1_use_min_time" />
 
                       <label
-                        for="timer1_use_min_time"
+                        for="cfg_timer_1_use_min_time"
                         data-i18n="use_min_time"></label>
                     </div>
 
@@ -847,7 +767,7 @@
                         id="cfg_timer_1_use_max_time" />
 
                       <label
-                        for="timer1_use_max_time"
+                        for="cfg_timer_1_use_max_time"
                         data-i18n="use_max_time"></label>
                     </div>
 
@@ -860,7 +780,7 @@
                   </div>
 
                   <!-- Dropdown for shutter cmd -->
-                  <label for="command1" data-i18n="command"></label>
+                  <label for="cfg_timer_1_cmd" data-i18n="command"></label>
                   <select id="cfg_timer_1_cmd" name="command1">
                     <option value="0" data-i18n="cmd_up"></option>
                     <option value="1" data-i18n="cmd_down"></option>
@@ -869,41 +789,41 @@
 
                   <!-- Checkbox for wekdays -->
                   <label data-i18n="weekdays"></label>
-                  <div class="grid">
+                  <div class="timer-weekdays">
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_1_monday"
                         name="days1" />
-                      <label for="monday1" data-i18n="day_mo"></label>
+                      <label for="cfg_timer_1_monday" data-i18n="day_mo"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_1_tuesday"
                         name="days1" />
-                      <label for="tuesday1" data-i18n="day_tu"></label>
+                      <label for="cfg_timer_1_tuesday" data-i18n="day_tu"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_1_wednesday"
                         name="days1" />
-                      <label for="wednesday1" data-i18n="day_we"></label>
+                      <label for="cfg_timer_1_wednesday" data-i18n="day_we"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_1_thursday"
                         name="days1" />
-                      <label for="thursday1" data-i18n="day_th"></label>
+                      <label for="cfg_timer_1_thursday" data-i18n="day_th"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_1_friday"
                         name="days1" />
-                      <label for="friday1" data-i18n="day_fr"></label>
+                      <label for="cfg_timer_1_friday" data-i18n="day_fr"></label>
                     </div>
                     <br />
                     <div>
@@ -911,20 +831,20 @@
                         type="checkbox"
                         id="cfg_timer_1_saturday"
                         name="days1" />
-                      <label for="saturday1" data-i18n="day_sa"></label>
+                      <label for="cfg_timer_1_saturday" data-i18n="day_sa"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_1_sunday"
                         name="days1" />
-                      <label for="sunday1" data-i18n="day_su"></label>
+                      <label for="cfg_timer_1_sunday" data-i18n="day_su"></label>
                     </div>
                   </div>
                   <!-- selection of shutter -->
                   <div>
                     <div class="leftright">
-                      <label for="mask_timer0" data-i18n="mask"></label>
+                      <label for="cfg_timer_0_grp_mask" data-i18n="mask"></label>
                       <button
                         onclick="openGrpMaskHelp(this)"
                         class="i_help"
@@ -951,11 +871,11 @@
               </form>
             </div>
           </article>
-          <article>
+          <article class="jarolift-timer">
             <div class="dash-main">
               <div class="dash-header">Timer 3</div>
               <div class="section-header">
-                <label for="timer2_enable" data-i18n="activate"></label>
+                <label for="cfg_timer_2_enable" data-i18n="activate"></label>
                 <div class="switch-container">
                   <input
                     name="timer2_enable"
@@ -968,7 +888,7 @@
               <br />
               <form id="timerForm2" class="OPT_TIMER2">
                 <fieldset>
-                  <label for="timeType2" data-i18n="timer_type"></label>
+                  <label for="cfg_timer_2_type" data-i18n="timer_type"></label>
                   <select
                     id="cfg_timer_2_type"
                     name="timeType2"
@@ -980,7 +900,7 @@
                   </select>
 
                   <div class="time-input" id="timeInput2">
-                    <label for="timeValue2" data-i18n="time_HH_MM"></label>
+                    <label for="cfg_timer_2_time_value" data-i18n="time_HH_MM"></label>
                     <input
                       type="time"
                       id="cfg_timer_2_time_value"
@@ -998,7 +918,7 @@
                         id="cfg_timer_2_use_min_time" />
 
                       <label
-                        for="timer2_use_min_time"
+                        for="cfg_timer_2_use_min_time"
                         data-i18n="use_min_time"></label>
                     </div>
 
@@ -1018,7 +938,7 @@
                         id="cfg_timer_2_use_max_time" />
 
                       <label
-                        for="timer2_use_max_time"
+                        for="cfg_timer_2_use_max_time"
                         data-i18n="use_max_time"></label>
                     </div>
 
@@ -1034,7 +954,7 @@
                     class="time-input"
                     id="offsetInput2"
                     style="display: none">
-                    <label for="offsetValue2" data-i18n="offset_desc"></label>
+                    <label for="cfg_timer_2_offset_value" data-i18n="offset_desc"></label>
                     <input
                       type="number"
                       id="cfg_timer_2_offset_value"
@@ -1044,7 +964,7 @@
                   </div>
 
                   <!-- Dropdown for shutter cmd -->
-                  <label for="command2" data-i18n="command"></label>
+                  <label for="cfg_timer_2_cmd" data-i18n="command"></label>
                   <select id="cfg_timer_2_cmd" name="command2">
                     <option value="0" data-i18n="cmd_up"></option>
                     <option value="1" data-i18n="cmd_down"></option>
@@ -1053,41 +973,41 @@
 
                   <!-- Checkbox for wekdays -->
                   <label data-i18n="weekdays"></label>
-                  <div class="grid">
+                  <div class="timer-weekdays">
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_2_monday"
                         name="days2" />
-                      <label for="monday2" data-i18n="day_mo"></label>
+                      <label for="cfg_timer_2_monday" data-i18n="day_mo"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_2_tuesday"
                         name="days2" />
-                      <label for="tuesday2" data-i18n="day_tu"></label>
+                      <label for="cfg_timer_2_tuesday" data-i18n="day_tu"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_2_wednesday"
                         name="days2" />
-                      <label for="wednesday2" data-i18n="day_we"></label>
+                      <label for="cfg_timer_2_wednesday" data-i18n="day_we"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_2_thursday"
                         name="days2" />
-                      <label for="thursday2" data-i18n="day_th"></label>
+                      <label for="cfg_timer_2_thursday" data-i18n="day_th"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_2_friday"
                         name="days2" />
-                      <label for="friday2" data-i18n="day_fr"></label>
+                      <label for="cfg_timer_2_friday" data-i18n="day_fr"></label>
                     </div>
                     <br />
                     <div>
@@ -1095,20 +1015,20 @@
                         type="checkbox"
                         id="cfg_timer_2_saturday"
                         name="days2" />
-                      <label for="saturday2" data-i18n="day_sa"></label>
+                      <label for="cfg_timer_2_saturday" data-i18n="day_sa"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_2_sunday"
                         name="days2" />
-                      <label for="sunday2" data-i18n="day_su"></label>
+                      <label for="cfg_timer_2_sunday" data-i18n="day_su"></label>
                     </div>
                   </div>
                   <!-- selection of shutter -->
                   <div>
                     <div class="leftright">
-                      <label for="mask_timer2" data-i18n="mask"></label>
+                      <label for="cfg_timer_2_grp_mask" data-i18n="mask"></label>
                       <button
                         onclick="openGrpMaskHelp(this)"
                         class="i_help"
@@ -1135,11 +1055,11 @@
               </form>
             </div>
           </article>
-          <article>
+          <article class="jarolift-timer">
             <div class="dash-main">
               <div class="dash-header">Timer 4</div>
               <div class="section-header">
-                <label for="timer3_enable" data-i18n="activate"></label>
+                <label for="cfg_timer_3_enable" data-i18n="activate"></label>
                 <div class="switch-container">
                   <input
                     name="timer3_enable"
@@ -1152,7 +1072,7 @@
               <br />
               <form id="timerForm3" class="OPT_TIMER3">
                 <fieldset>
-                  <label for="timeType3" data-i18n="timer_type"></label>
+                  <label for="cfg_timer_3_type" data-i18n="timer_type"></label>
                   <select
                     id="cfg_timer_3_type"
                     name="timeType3"
@@ -1164,7 +1084,7 @@
                   </select>
 
                   <div class="time-input" id="timeInput3">
-                    <label for="timeValue3" data-i18n="time_HH_MM"></label>
+                    <label for="cfg_timer_3_time_value" data-i18n="time_HH_MM"></label>
                     <input
                       type="time"
                       id="cfg_timer_3_time_value"
@@ -1182,7 +1102,7 @@
                         id="cfg_timer_3_use_min_time" />
 
                       <label
-                        for="timer3_use_min_time"
+                        for="cfg_timer_3_use_min_time"
                         data-i18n="use_min_time"></label>
                     </div>
 
@@ -1202,7 +1122,7 @@
                         id="cfg_timer_3_use_max_time" />
 
                       <label
-                        for="timer3_use_max_time"
+                        for="cfg_timer_3_use_max_time"
                         data-i18n="use_max_time"></label>
                     </div>
 
@@ -1218,7 +1138,7 @@
                     class="time-input"
                     id="offsetInput3"
                     style="display: none">
-                    <label for="offsetValue3" data-i18n="offset_desc"></label>
+                    <label for="cfg_timer_3_offset_value" data-i18n="offset_desc"></label>
                     <input
                       type="number"
                       id="cfg_timer_3_offset_value"
@@ -1228,7 +1148,7 @@
                   </div>
 
                   <!-- Dropdown for shutter cmd -->
-                  <label for="command3" data-i18n="command"></label>
+                  <label for="cfg_timer_3_cmd" data-i18n="command"></label>
                   <select id="cfg_timer_3_cmd" name="command3">
                     <option value="0" data-i18n="cmd_up"></option>
                     <option value="1" data-i18n="cmd_down"></option>
@@ -1237,41 +1157,41 @@
 
                   <!-- Checkbox for wekdays -->
                   <label data-i18n="weekdays"></label>
-                  <div class="grid">
+                  <div class="timer-weekdays">
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_3_monday"
                         name="days3" />
-                      <label for="monday3" data-i18n="day_mo"></label>
+                      <label for="cfg_timer_3_monday" data-i18n="day_mo"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_3_tuesday"
                         name="days3" />
-                      <label for="tuesday3" data-i18n="day_tu"></label>
+                      <label for="cfg_timer_3_tuesday" data-i18n="day_tu"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_3_wednesday"
                         name="days3" />
-                      <label for="wednesday3" data-i18n="day_we"></label>
+                      <label for="cfg_timer_3_wednesday" data-i18n="day_we"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_3_thursday"
                         name="days3" />
-                      <label for="thursday3" data-i18n="day_th"></label>
+                      <label for="cfg_timer_3_thursday" data-i18n="day_th"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_3_friday"
                         name="days3" />
-                      <label for="friday3" data-i18n="day_fr"></label>
+                      <label for="cfg_timer_3_friday" data-i18n="day_fr"></label>
                     </div>
                     <br />
                     <div>
@@ -1279,20 +1199,20 @@
                         type="checkbox"
                         id="cfg_timer_3_saturday"
                         name="days3" />
-                      <label for="saturday3" data-i18n="day_sa"></label>
+                      <label for="cfg_timer_3_saturday" data-i18n="day_sa"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_3_sunday"
                         name="days3" />
-                      <label for="sunday3" data-i18n="day_su"></label>
+                      <label for="cfg_timer_3_sunday" data-i18n="day_su"></label>
                     </div>
                   </div>
                   <!-- selection of shutter -->
                   <div>
                     <div class="leftright">
-                      <label for="mask_timer3" data-i18n="mask"></label>
+                      <label for="cfg_timer_3_grp_mask" data-i18n="mask"></label>
                       <button
                         onclick="openGrpMaskHelp(this)"
                         class="i_help"
@@ -1319,11 +1239,11 @@
               </form>
             </div>
           </article>
-          <article>
+          <article class="jarolift-timer">
             <div class="dash-main">
               <div class="dash-header">Timer 5</div>
               <div class="section-header">
-                <label for="timer4_enable" data-i18n="activate"></label>
+                <label for="cfg_timer_4_enable" data-i18n="activate"></label>
                 <div class="switch-container">
                   <input
                     name="timer4_enable"
@@ -1336,7 +1256,7 @@
               <br />
               <form id="timerForm4" class="OPT_TIMER4">
                 <fieldset>
-                  <label for="timeType4" data-i18n="timer_type"></label>
+                  <label for="cfg_timer_4_type" data-i18n="timer_type"></label>
                   <select
                     id="cfg_timer_4_type"
                     name="timeType4"
@@ -1348,7 +1268,7 @@
                   </select>
 
                   <div class="time-input" id="timeInput4">
-                    <label for="timeValue4" data-i18n="time_HH_MM"></label>
+                    <label for="cfg_timer_4_time_value" data-i18n="time_HH_MM"></label>
                     <input
                       type="time"
                       id="cfg_timer_4_time_value"
@@ -1366,7 +1286,7 @@
                         id="cfg_timer_4_use_min_time" />
 
                       <label
-                        for="timer4_use_min_time"
+                        for="cfg_timer_4_use_min_time"
                         data-i18n="use_min_time"></label>
                     </div>
 
@@ -1386,7 +1306,7 @@
                         id="cfg_timer_4_use_max_time" />
 
                       <label
-                        for="timer4_use_max_time"
+                        for="cfg_timer_4_use_max_time"
                         data-i18n="use_max_time"></label>
                     </div>
 
@@ -1402,7 +1322,7 @@
                     class="time-input"
                     id="offsetInput4"
                     style="display: none">
-                    <label for="offsetValue4" data-i18n="offset_desc"></label>
+                    <label for="cfg_timer_4_offset_value" data-i18n="offset_desc"></label>
                     <input
                       type="number"
                       id="cfg_timer_4_offset_value"
@@ -1412,7 +1332,7 @@
                   </div>
 
                   <!-- Dropdown for shutter cmd -->
-                  <label for="command4" data-i18n="command"></label>
+                  <label for="cfg_timer_4_cmd" data-i18n="command"></label>
                   <select id="cfg_timer_4_cmd" name="command4">
                     <option value="0" data-i18n="cmd_up"></option>
                     <option value="1" data-i18n="cmd_down"></option>
@@ -1421,41 +1341,41 @@
 
                   <!-- Checkbox for wekdays -->
                   <label data-i18n="weekdays"></label>
-                  <div class="grid">
+                  <div class="timer-weekdays">
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_4_monday"
                         name="days4" />
-                      <label for="monday4" data-i18n="day_mo"></label>
+                      <label for="cfg_timer_4_monday" data-i18n="day_mo"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_4_tuesday"
                         name="days4" />
-                      <label for="tuesday4" data-i18n="day_tu"></label>
+                      <label for="cfg_timer_4_tuesday" data-i18n="day_tu"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_4_wednesday"
                         name="days4" />
-                      <label for="wednesday4" data-i18n="day_we"></label>
+                      <label for="cfg_timer_4_wednesday" data-i18n="day_we"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_4_thursday"
                         name="days4" />
-                      <label for="thursday4" data-i18n="day_th"></label>
+                      <label for="cfg_timer_4_thursday" data-i18n="day_th"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_4_friday"
                         name="days4" />
-                      <label for="friday4" data-i18n="day_fr"></label>
+                      <label for="cfg_timer_4_friday" data-i18n="day_fr"></label>
                     </div>
                     <br />
                     <div>
@@ -1463,20 +1383,20 @@
                         type="checkbox"
                         id="cfg_timer_4_saturday"
                         name="days4" />
-                      <label for="saturday4" data-i18n="day_sa"></label>
+                      <label for="cfg_timer_4_saturday" data-i18n="day_sa"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_4_sunday"
                         name="days4" />
-                      <label for="sunday4" data-i18n="day_su"></label>
+                      <label for="cfg_timer_4_sunday" data-i18n="day_su"></label>
                     </div>
                   </div>
                   <!-- selection of shutter -->
                   <div>
                     <div class="leftright">
-                      <label for="mask_timer4" data-i18n="mask"></label>
+                      <label for="cfg_timer_4_grp_mask" data-i18n="mask"></label>
                       <button
                         onclick="openGrpMaskHelp(this)"
                         class="i_help"
@@ -1503,11 +1423,11 @@
               </form>
             </div>
           </article>
-          <article>
+          <article class="jarolift-timer">
             <div class="dash-main">
               <div class="dash-header">Timer 6</div>
               <div class="section-header">
-                <label for="timer5_enable" data-i18n="activate"></label>
+                <label for="cfg_timer_5_enable" data-i18n="activate"></label>
                 <div class="switch-container">
                   <input
                     name="timer5_enable"
@@ -1520,7 +1440,7 @@
               <br />
               <form id="timerForm5" class="OPT_TIMER5">
                 <fieldset>
-                  <label for="timeType5" data-i18n="timer_type"></label>
+                  <label for="cfg_timer_5_type" data-i18n="timer_type"></label>
                   <select
                     id="cfg_timer_5_type"
                     name="timeType5"
@@ -1532,7 +1452,7 @@
                   </select>
 
                   <div class="time-input" id="timeInput5">
-                    <label for="timeValue5" data-i18n="time_HH_MM"></label>
+                    <label for="cfg_timer_5_time_value" data-i18n="time_HH_MM"></label>
                     <input
                       type="time"
                       id="cfg_timer_5_time_value"
@@ -1550,7 +1470,7 @@
                         id="cfg_timer_5_use_min_time" />
 
                       <label
-                        for="timer5_use_min_time"
+                        for="cfg_timer_5_use_min_time"
                         data-i18n="use_min_time"></label>
                     </div>
 
@@ -1570,7 +1490,7 @@
                         id="cfg_timer_5_use_max_time" />
 
                       <label
-                        for="timer5_use_max_time"
+                        for="cfg_timer_5_use_max_time"
                         data-i18n="use_max_time"></label>
                     </div>
 
@@ -1586,7 +1506,7 @@
                     class="time-input"
                     id="offsetInput5"
                     style="display: none">
-                    <label for="offsetValue5" data-i18n="offset_desc"></label>
+                    <label for="cfg_timer_5_offset_value" data-i18n="offset_desc"></label>
                     <input
                       type="number"
                       id="cfg_timer_5_offset_value"
@@ -1596,7 +1516,7 @@
                   </div>
 
                   <!-- Dropdown for shutter cmd -->
-                  <label for="command5" data-i18n="command"></label>
+                  <label for="cfg_timer_5_cmd" data-i18n="command"></label>
                   <select id="cfg_timer_5_cmd" name="command5">
                     <option value="0" data-i18n="cmd_up"></option>
                     <option value="1" data-i18n="cmd_down"></option>
@@ -1605,41 +1525,41 @@
 
                   <!-- Checkbox for wekdays -->
                   <label data-i18n="weekdays"></label>
-                  <div class="grid">
+                  <div class="timer-weekdays">
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_5_monday"
                         name="days5" />
-                      <label for="monday5" data-i18n="day_mo"></label>
+                      <label for="cfg_timer_5_monday" data-i18n="day_mo"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_5_tuesday"
                         name="days5" />
-                      <label for="tuesday5" data-i18n="day_tu"></label>
+                      <label for="cfg_timer_5_tuesday" data-i18n="day_tu"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_5_wednesday"
                         name="days5" />
-                      <label for="wednesday5" data-i18n="day_we"></label>
+                      <label for="cfg_timer_5_wednesday" data-i18n="day_we"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_5_thursday"
                         name="days5" />
-                      <label for="thursday5" data-i18n="day_th"></label>
+                      <label for="cfg_timer_5_thursday" data-i18n="day_th"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_5_friday"
                         name="days5" />
-                      <label for="friday5" data-i18n="day_fr"></label>
+                      <label for="cfg_timer_5_friday" data-i18n="day_fr"></label>
                     </div>
                     <br />
                     <div>
@@ -1647,20 +1567,20 @@
                         type="checkbox"
                         id="cfg_timer_5_saturday"
                         name="days5" />
-                      <label for="saturday5" data-i18n="day_sa"></label>
+                      <label for="cfg_timer_5_saturday" data-i18n="day_sa"></label>
                     </div>
                     <div>
                       <input
                         type="checkbox"
                         id="cfg_timer_5_sunday"
                         name="days5" />
-                      <label for="sunday5" data-i18n="day_su"></label>
+                      <label for="cfg_timer_5_sunday" data-i18n="day_su"></label>
                     </div>
                   </div>
                   <!-- selection of shutter -->
                   <div>
                     <div class="leftright">
-                      <label for="mask_timer5" data-i18n="mask"></label>
+                      <label for="cfg_timer_5_grp_mask" data-i18n="mask"></label>
                       <button
                         onclick="openGrpMaskHelp(this)"
                         class="i_help"
@@ -1691,17 +1611,11 @@
         </div>
         <!-- END Tab-Content -->
       </div>
-<!-- Logger-Inhalt hier -->
-      <div id="tab4" class="tab-content">
-        <div class="grid">
-          <!-- Grid 1 -->
-          <article class="dash">
-            <div class="dash-main" style="gap: 10px">
-              <div class="dash-header" data-i18n="service_cmds">
-                Service Commands
-              </div>
-              <label for="selected_shutter" data-i18n="shutter"></label>
-              <select id="p04_selected_shutter" name="selected_shutter">
+<div id="tab4" class="tab-content jarolift-page jarolift-service" data-connection-required>
+  <header class="page-heading"><h1 data-i18n="service"></h1><p data-i18n="jaro_service_subtitle"></p></header>
+  <div class="jarolift-service-grid">
+    <article class="service-card service-setup" id="p04_service_setup">
+      <div class="service-select"><label for="p04_selected_shutter" data-i18n="shutter"></label><select id="p04_selected_shutter" name="selected_shutter">
                 <option class="CH1" value="0" id="p04_shutter_name_0"></option>
                 <option class="CH2" value="1" id="p04_shutter_name_1"></option>
                 <option class="CH3" value="2" id="p04_shutter_name_2"></option>
@@ -1736,49 +1650,87 @@
                   class="CH16"
                   value="15"
                   id="p04_shutter_name_15"></option>
-              </select>
-              <div class="dash-content">
-                <button id="p04_up" class="svgbtn i_up"></button>
-                <button id="p04_stop" class="svgbtn i_stop"></button>
-                <button id="p04_down" class="svgbtn i_down"></button>
-                <button id="p04_shade" class="svgbtn i_shade"></button>
-              </div>
-              <hr />
-              <button
-                id="p04_cmd_set_shade"
-                data-i18n="set_shade"
-                class="svgbtn2 i_shade"></button>
-              <hr />
-              <button
-                class="svgbtn2 i_end_up"
-                id="p04_cmd_end_up_set"
-                data-i18n="cmd_endpoint_up$ $set"></button>
-              <button
-                class="svgbtn2 i_end_down"
-                id="p04_cmd_end_down_set"
-                data-i18n="cmd_endpoint_down$ $set"></button>
-              <hr />
-              <button
-                class="svgbtn2 i_end_up_bin"
-                id="p04_cmd_end_up_delete"
-                data-i18n="cmd_endpoint_up$ $delete"></button>
-              <button
-                class="svgbtn2 i_end_down_bin"
-                id="p04_cmd_end_down_delete"
-                data-i18n="cmd_endpoint_down$ $delete"></button>
+              </select></div>
+      <div class="service-setup-body">
+        <section class="service-commands">
+          <h2 data-i18n="service_cmds"></h2>
+          <div class="dash-content service-drive">
+            <button id="p04_up" class="svgbtn i_up" aria-label="Up"></button>
+            <button id="p04_stop" class="svgbtn i_stop" aria-label="Stop"></button>
+            <button id="p04_down" class="svgbtn i_down" aria-label="Down"></button>
+            <button id="p04_shade" class="svgbtn i_shade" aria-label="Shade"></button>
+          </div>
+          <hr />
+          <button id="p04_cmd_set_shade" data-i18n="set_shade" class="svgbtn2 i_shade"></button>
+          <hr />
+          <div class="service-command-pair">
+            <button class="svgbtn2 i_end_up" id="p04_cmd_end_up_set" data-i18n="cmd_endpoint_up$ $set"></button>
+            <button class="svgbtn2 i_end_down" id="p04_cmd_end_down_set" data-i18n="cmd_endpoint_down$ $set"></button>
+          </div>
+          <hr />
+          <div class="service-command-pair">
+            <button class="svgbtn2 i_end_up_bin" id="p04_cmd_end_up_delete" data-i18n="cmd_endpoint_up$ $delete"></button>
+            <button class="svgbtn2 i_end_down_bin" id="p04_cmd_end_down_delete" data-i18n="cmd_endpoint_down$ $delete"></button>
+          </div>
+        </section>
+        <section class="position-service">
+          <div id="p04_position_intro">
+            <div class="position-intro-copy">
+            <h2 data-i18n="pos_calibration"></h2>
+            <p id="p04_position_summary" class="position-status" aria-live="polite"></p>
+            <p class="info-text" data-i18n="pos_service_hint"></p>
+            <div class="position-brief">
+              <div><strong>↑ <span data-i18n="pos_up"></span></strong><p data-i18n="pos_lift$ · $pos_half$ · $pos_full_open"></p></div>
+              <div><strong>↓ <span data-i18n="pos_down"></span></strong><p data-i18n="pos_half$ · $pos_bottom$ · $pos_full_closed"></p></div>
             </div>
-          </article>
-        </div>
+            <details class="position-help"><summary data-i18n="pos_notes"></summary><p class="info-text" data-i18n="pos_remote_hint"></p></details>
+            </div>
+            <div class="position-actions"><button type="button" data-ui-local id="p04_position_begin" data-i18n="pos_calibrate"></button></div>
+          </div>
+          <div id="p04_position_inline"></div>
+          <p class="info-text" id="p04_position_notice" role="status"></p>
+        </section>
       </div>
-<!-- System-Inhalt hier -->
-      <div id="tab9" class="tab-content">
-        <div class="grid">
-          <!-- Grid 1 -->
-          <article class="card">
-            <p class="table-header" data-i18n="network_info"></p>
-            <table class="striped">
+
+      <section class="remote-mapping-service">
+        <div class="remote-mapping-toolbar"><h2 data-i18n="remotes"></h2><span id="remote_mapping_count"></span><button type="button" id="remote_mapping_add" data-ui-local data-i18n="rm_add"></button></div>
+        <p class="info-text" data-i18n="rm_info"></p>
+        <div id="remote_mapping_rows"></div>
+        <p id="remote_mapping_empty" class="info-text" data-i18n="rm_empty"></p>
+        <p id="remote_mapping_notice" role="status" aria-live="polite"></p>
+      </section>
+    </article>
+  </div>
+</div>
+<dialog id="p04_position_dialog" aria-labelledby="p04_position_title">
+ <article class="position-dialog">
+  <header><small id="p04_position_channel"></small><h2 id="p04_position_title" data-i18n="pos_calibration"></h2></header>
+  <div id="p04_position_steps" class="position-steps"></div>
+  <div id="p04_position_body"></div>
+  <footer class="position-actions"><button type="button" data-ui-local class="secondary" id="p04_position_cancel" data-i18n="pos_cancel"></button><button type="button" data-ui-local id="p04_position_next"></button></footer>
+ </article>
+</dialog>
+
+<div hidden id="remote_mapping_config"></div>
+<dialog id="remote_mapping_dialog" aria-labelledby="remote_mapping_title"><article>
+  <header><small id="remote_mapping_channel"></small><h2 id="remote_mapping_title" data-i18n="rm_title"></h2></header>
+  <p id="remote_mapping_steps"></p>
+  <p id="remote_mapping_phase"></p>
+  <p class="info-text" data-i18n="rm_warning"></p>
+  <output id="remote_mapping_signal"></output>
+  <button type="button" id="remote_mapping_retry" data-ui-local data-i18n="rm_retry"></button>
+  <label for="remote_mapping_name" data-i18n="name"></label><input id="remote_mapping_name" type="text" autocomplete="off" disabled />
+  <p id="remote_mapping_shared" class="info-text" data-i18n="rm_shared" hidden></p>
+  <p id="remote_mapping_dialog_notice" role="status" aria-live="polite"></p>
+  <footer><button type="button" id="remote_mapping_close" data-ui-local data-i18n="rm_close"></button><button type="button" id="remote_mapping_save" data-ui-local data-i18n="rm_save" disabled></button></footer>
+</article></dialog>
+<div id="tab9" class="tab-content information-page information-page--compact"><header class="page-heading"><h1 data-i18n="system"></h1><p data-i18n="system_subtitle"></p></header>
+<div class="information-grid"><article class="card">
+<h2 class="table-header" data-i18n="wifi"></h2>
+<table class="striped">
               <tbody>
-                <tr>
+                <tr><td data-i18n="connection"></td><td id="p09_wifi_status" class="table-value" data-info-state="connection"></td></tr>
+<tr>
                   <td data-i18n="wifi_ip"></td>
                   <td id="p09_wifi_ip" class="table-value"></td>
                 </tr>
@@ -1792,7 +1744,10 @@
                 </tr>
               </tbody>
             </table>
-            <table class="striped">
+</article>
+<article class="card">
+<h2 class="table-header" data-i18n="info_ethernet"></h2>
+<table class="striped">
               <tbody>
                 <tr>
                   <td data-i18n="eth_ip"></td>
@@ -1800,7 +1755,7 @@
                 </tr>
                 <tr>
                   <td data-i18n="eth_status"></td>
-                  <td id="p09_eth_status" class="table-value"></td>
+                  <td id="p09_eth_status" class="table-value" data-info-state="connection" data-info-enabled="cfg_eth_enable"></td>
                 </tr>
                 <tr>
                   <td data-i18n="eth_link_speed"></td>
@@ -1812,10 +1767,9 @@
                 </tr>
               </tbody>
             </table>
-          </article>
-
-          <article class="card">
-            <p class="table-header" data-i18n="mqtt_info"></p>
+</article>
+<article class="card">
+            <h2 class="table-header" data-i18n="mqtt_info"></h2>
             <table class="striped">
               <tbody>
                 <tr>
@@ -1824,7 +1778,7 @@
                 </tr>
                 <tr>
                   <td data-i18n="connection"></td>
-                  <td id="p09_mqtt_connection" class="table-value"></td>
+                  <td id="p09_mqtt_connection" class="table-value" data-info-state="connection" data-info-enabled="cfg_mqtt_enable" data-info-disabled-source="p09_mqtt_status"></td>
                 </tr>
                 <tr>
                   <td data-i18n="last_error"></td>
@@ -1832,15 +1786,11 @@
                 </tr>
               </tbody>
             </table>
-          </article>
-        </div>
-        <!-- END Grid 1 -->
-
-        <div class="grid">
-          <!-- Grid 2 -->
-          <article class="card">
-            <p class="table-header" data-i18n="sysinfo"></p>
-            <table class="striped">
+          <p class="information-note" data-i18n="info_mqtt_error_hint"></p>
+</article>
+<article class="card">
+<h2 class="table-header" data-i18n="sysinfo"></h2>
+<table class="striped">
               <tbody>
                 <tr>
                   <td data-i18n="sw_version"></td>
@@ -1852,7 +1802,7 @@
                 </tr>
               </tbody>
             </table>
-            <table class="striped">
+<table class="striped">
               <tbody>
                 <tr>
                   <td data-i18n="lifetime"></td>
@@ -1864,7 +1814,18 @@
                 </tr>
               </tbody>
             </table>
-            <table class="striped">
+</article>
+<article class="card">
+<h2 class="table-header" data-i18n="info_memory"></h2>
+<table class="striped memory-table">
+              <tbody>
+                <tr><td data-i18n="info_firmware_used"></td><td class="table-value"><span id="p09_esp_flash_usage"></span><span class="information-unit">%</span><span class="memory-detail"><span id="p09_firmware_size"></span> / <span id="p09_firmware_capacity"></span> kB</span><progress data-info-meter="p09_esp_flash_usage" max="100" aria-label="Flash" hidden></progress></td></tr>
+                <tr><td data-i18n="info_ram_free"></td><td class="table-value"><span id="p09_heap_free"></span><span class="information-unit">kB</span><span class="memory-detail"><span id="p09_esp_heap_usage"></span> % <span data-i18n="info_memory_used"></span></span><progress data-info-meter="p09_esp_heap_usage" max="100" aria-label="Heap" hidden></progress></td></tr>
+                <tr><td data-i18n="info_largest_free_block"></td><td class="table-value"><span id="p09_esp_maxallocheap"></span><span class="information-unit">kB</span></td></tr>
+                <tr><td data-i18n="info_minimum_free_ram"></td><td class="table-value"><span id="p09_esp_minfreeheap"></span><span class="information-unit">kB</span></td></tr>
+              </tbody>
+            </table>
+</article><article class="card"><h2 class="table-header" data-i18n="jaro_hardware"></h2><table class="striped">
               <tbody>
                 <tr>
                   <td>ESP-ChipSeries</td>
@@ -1887,36 +1848,8 @@
                   <td id="p09_esp_flash_size" class="table-value"></td>
                 </tr>
               </tbody>
-            </table>
-            <table class="striped">
-              <tbody>
-                <tr>
-                  <td data-i18n="esp_flash_usage"></td>
-                  <td id="p09_esp_flash_usage" class="table-value"></td>
-                  <td>%</td>
-                </tr>
-                <tr>
-                  <td data-i18n="esp_heap_usage"></td>
-                  <td id="p09_esp_heap_usage" class="table-value"></td>
-                  <td>%</td>
-                </tr>
-                <tr>
-                  <td data-i18n="esp_maxallocheap"></td>
-                  <td id="p09_esp_maxallocheap" class="table-value"></td>
-                  <td>KB</td>
-                </tr>
-                <tr>
-                  <td data-i18n="esp_minfreeheap"></td>
-                  <td id="p09_esp_minfreeheap" class="table-value"></td>
-                  <td>KB</td>
-                </tr>
-              </tbody>
-            </table>
-          </article>
-
-          <article class="card">
-            <p class="table-header" data-i18n="time_info"></p>
-            <table class="striped">
+            </table></article>
+<article class="card"><h2 class="table-header" data-i18n="time_info"></h2><table class="striped">
               <tbody>
                 <tr>
                   <td data-i18n="date"></td>
@@ -1935,97 +1868,100 @@
                   <td id="p09_sundown" class="table-value"></td>
                 </tr>
               </tbody>
-            </table>
-          </article>
-        </div>
-        <!-- END Grid 2 -->
-      </div>
+            </table></article></div></div>
 <!-- Logger-Inhalt hier -->
-      <div id="tab10" class="tab-content">
-        <div class="grid">
-          <!-- Grid 1 -->
-          <article style="width: 100%">
-            <div
-              class="dash-content"
-              style="margin-bottom: 0px; flex-wrap: wrap">
-              <button id="p10_log_clr_btn" data-i18n="clear"></button>
-              <button id="p10_log_refresh_btn" data-i18n="refresh"></button>
-              <select
-                id="cfg_logger_level"
-                style="max-width: 390px; margin: 0px">
+      <div id="tab10" class="tab-content information-page">
+        <header class="page-heading log-heading">
+          <div><h1 data-i18n="logger"></h1><p data-i18n="info_log_subtitle"></p></div>
+          <label class="log-recording"><span data-i18n="info_log_recording"></span><input name="log_enable" type="checkbox" role="switch" id="cfg_logger_enable" /></label>
+        </header>
+<div class="log-toolbar jarolift-log-toolbar">
+
+<div id="log_level_field"><label for="cfg_logger_level" data-i18n="info_log_level"></label><select
+                id="cfg_logger_level">
                 <option value="1" data-i18n="log_level_1"></option>
                 <option value="2" data-i18n="log_level_2"></option>
                 <option value="3" data-i18n="log_level_3"></option>
                 <option value="4" data-i18n="log_level_4"></option>
               </select>
-              <select
-                id="cfg_logger_order"
-                style="max-width: 220px; margin: 0px">
+</div>
+
+<div><label for="cfg_logger_order" data-i18n="info_log_order"></label><select
+                id="cfg_logger_order">
                 <option value="0" data-i18n="sort_down"></option>
                 <option value="1" data-i18n="sort_up"></option>
               </select>
-              <input
-                name="log_enable"
-                type="checkbox"
-                role="switch"
-                id="cfg_logger_enable" />
+</div>
+<div class="tools-actions"><button id="p10_log_refresh_btn" data-i18n="refresh"></button><button id="p10_log_clr_btn" data-i18n="clear"></button>
+</div>
+</div>
+<article class="card log-panel">
+<div id="p10_log_output" role="log">
+</div>
+</article>
+</div>
+<div id="tab11" class="tab-content information-page">
+        <header class="page-heading">
+          <h1 data-i18n="tools"></h1><p data-i18n="info_tools_subtitle"></p>
+        </header>
+        <div class="information-grid tools-grid">
+          <article class="card tools tools-firmware" data-connection-required>
+            <h2 class="table-header" data-i18n="info_firmware_update"></h2>
+            <div class="tools-update-methods">
+              <section class="tools-update-method">
+                <h3 class="tools-method-title"><svg class="tools-upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M12 16V3m-5 5 5-5 5 5M4 15v5h16v-5" /></svg><span data-i18n="info_update_local"></span></h3>
+                <p class="tools-method-description" data-i18n="info_update_local_hint"></p>
+            <form method="POST" action="#" enctype="multipart/form-data" id="ota_upload_form">
+              <label class="tools-file-label" for="ota_file_input" data-i18n="info_firmware_file"></label>
+              <div class="tools-source-box tools-file-picker">
+                <input type="file" name="ota_update" id="ota_file_input" onchange="ota_sub_fun(this)" accept=".bin" hidden />
+                <button type="button" data-ui-local data-i18n="info_choose_file" onclick="document.getElementById('ota_file_input').click()"></button>
+                <span data-selected-file="ota_file_input" data-i18n="info_no_file" aria-live="polite"></span>
+              </div>
+              <div class="tools-actions">
+                <button type="submit" id="ota_update_btn" disabled data-i18n="info_install_file"></button>
+              </div>
+              <div id="ota_status_txt" class="information-note" style="display:none" data-i18n="update_ready"></div>
+              <progress id="ota_progress_bar" style="display:none" max="100" value="0"></progress>
+            </form>
+              </section>
+              <section class="tools-update-method">
+                <h3 class="tools-method-title"><i class="svg i_github" aria-hidden="true"></i><span data-i18n="info_update_github"></span></h3>
+                <p class="tools-method-description" data-i18n="info_update_github_hint"></p>
+                <div class="tools-source-box tools-version-info" id="github-update-info">
+                  <div><span data-i18n="info_git_installed"></span> <strong id="p00_dialog_version"></strong></div>
+                  <div><span data-i18n="info_git_release"></span> <a id="p00_dialog_git_version" target="_blank" rel="noopener noreferrer">—</a></div>
+                  <span id="p11_git_feedback" role="status" aria-live="polite"></span>
+                </div>
+                <span id="p11_git_state" hidden>idle</span>
+                <span id="p11_git_progress" hidden>0</span>
+                <div class="tools-actions">
+                  <button type="button" id="p11_check_git_btn" data-ui-local data-i18n="info_check_github"></button>
+                  <span id="p00_update_btn_hide" style="display: none"><button type="button" id="p00_update_btn" data-ui-local></button></span>
+                </div>
+                <progress id="github_progress_bar" max="100" value="0" hidden></progress>
+              </section>
             </div>
-            <hr />
-            <div
-              id="p10_log_output"
-              style="
-                font-family: 'Consolas', monospace;
-                font-size: medium;
-              "></div>
+          </article>
+          <article class="card tools" data-connection-required>
+            <h2 class="table-header" data-i18n="info_configuration"></h2>
+            <form method="POST" action="#" enctype="multipart/form-data" id="file_upload_form">
+              <label class="tools-file-label" for="file_input" data-i18n="info_config_file"></label>
+              <div class="tools-file-picker">
+                <input type="file" name="file_update" id="file_input" accept=".json" onchange="file_sub_fun(this)" hidden />
+                <button type="button" data-ui-local data-i18n="info_choose_file" onclick="document.getElementById('file_input').click()"></button>
+                <span data-selected-file="file_input" data-i18n="info_no_file" aria-live="polite"></span>
+              </div>
+              <div class="tools-actions">
+                <button type="submit" id="file_upload_btn" data-i18n="info_import" disabled></button>
+                <button type="button" id="p11_export_btn" data-i18n="info_export" onclick="exportConfig()"></button>
+                <button type="button" id="p11_file_show_btn" data-i18n="info_show"></button>
+              </div>
+              <div id="upload_status_txt" class="information-note" style="display:none" data-i18n="import_ready"></div>
+            </form>
           </article>
         </div>
-      </div>
-<div id="tab11" class="tab-content">
-        <!-- OTA-update -->
-        <div class="grid">
-          <article class="tools">
-            <div class="dash-main">
-              <div class="dash-header" data-i18n="ota"></div>
-              <div class="dash-content">
-                <form
-                  method="POST"
-                  action="#"
-                  enctype="multipart/form-data"
-                  id="ota_upload_form">
-                  <button
-                    id="p11_check_git_btn"
-                    class="svgbtn2 i_github"
-                    data-i18n="check_github"></button>
-                  <br />
-                  <input
-                    type="file"
-                    name="ota_update"
-                    id="ota_file_input"
-                    onchange="ota_sub_fun(this)"
-                    accept=".bin" />
-                  <input
-                    type="submit"
-                    id="ota_update_btn"
-                    disabled="disabled"
-                    value="Update" />
-                  <br />
-                  <div
-                    id="ota_status_txt"
-                    style="display: none; text-align: left"
-                    data-i18n="update_ready">
-                    --
-                  </div>
-                  <br /><progress
-                    id="ota_progress_bar"
-                    style="display: none"
-                    max="100"
-                    value="0"></progress>
-                </form>
-              </div>
-            </div>
-          </article>
-          <!-- Dialog OPEN-CONFIG -->
-          <dialog id="open_config_dialog">
+        <dialog id="open_config_dialog">
             <article>
               <header><strong>config.json</strong></header>
               <pre id="config_output"></pre>
@@ -2037,224 +1973,30 @@
               </div>
             </article>
           </dialog>
-          <!-- config import/export -->
-          <article class="tools">
-            <div class="dash-main">
-              <div class="dash-header" data-i18n="config_mgn"></div>
-              <div class="dash-content">
-                <form
-                  method="POST"
-                  action="#"
-                  enctype="multipart/form-data"
-                  id="file_upload_form">
-                  <input
-                    type="file"
-                    name="file_update"
-                    id="file_input"
-                    accept=".json"
-                    onchange="file_sub_fun(this)" />
-                  <div
-                    id="upload_status_txt"
-                    style="display: none; text-align: left"
-                    data-i18n="import_ready">
-                    --
-                  </div>
-                  <button
-                    style="width: 100%"
-                    type="submit"
-                    id="file_upload_btn"
-                    data-i18n="import"
-                    disabled="true"></button>
-                  <button
-                    style="width: 100%"
-                    id="p11_export_btn"
-                    data-i18n="export"
-                    onclick="exportConfig()"></button>
-                  <button
-                    style="width: 100%; margin-top: 17px"
-                    id="p11_file_show_btn"
-                    data-i18n="open"></button>
-                </form>
-              </div>
-            </div>
-          </article>
-        </div>
       </div>
-<div id="tab12" class="tab-content">
-        <div class="grid" style="max-width: 1024px">
-          <div style="width: 100%">
-            <!-- WLAN -->
-            <details>
-              <summary data-i18n="wifi"></summary>
-              <div class="section-header">
-                <label for="wifi_enable" data-i18n="activate"></label>
-                <div class="switch-container">
-                  <input
-                    name="wifi_enable"
-                    type="checkbox"
-                    role="switch"
-                    id="cfg_wifi_enable" />
-                </div>
-              </div>
-              <br />
-              <label for="wifi_hostname" data-i18n="hostname"></label>
-              <input type="text" id="cfg_wifi_hostname" name="wifi_hostname" />
-              <label for="wifi_ssid" data-i18n="ssid"></label>
-              <input type="text" id="cfg_wifi_ssid" name="wifi_ssid" />
-              <label for="wifi_password">Passwort</label>
-              <input
-                type="password"
-                id="cfg_wifi_password"
-                name="wifi_password" />
-
-              <div class="section-header">
-                <label for="man_ip_enable" data-i18n="static_ip"></label>
-                <div class="switch-container">
-                  <input
-                    name="man_ip_enable"
-                    type="checkbox"
-                    role="switch"
-                    hideOpt="WIFI_STATIC_IP"
-                    id="cfg_wifi_static_ip" />
-                </div>
-              </div>
-              <br />
-              <div class="WIFI_STATIC_IP">
-                <label for="ip_adr" data-i18n="ip_adr"></label>
-                <input
-                  type="url"
-                  data-type="ip"
-                  oninput="validateIP(this)"
-                  id="cfg_wifi_ipaddress"
-                  name="ip_adr" />
-                <label for="ip_subnet" data-i18n="ip_subnet"></label>
-                <input
-                  type="url"
-                  data-type="ip"
-                  oninput="validateIP(this)"
-                  id="cfg_wifi_subnet"
-                  name="ip_subnet" />
-                <label for="ip_gateway" data-i18n="ip_gateway"></label>
-                <input
-                  type="url"
-                  data-type="ip"
-                  oninput="validateIP(this)"
-                  id="cfg_wifi_gateway"
-                  name="ip_gateway" />
-                <label for="ip_dns" data-i18n="ip_dns"></label>
-                <input
-                  type="url"
-                  data-type="ip"
-                  oninput="validateIP(this)"
-                  id="cfg_wifi_dns"
-                  name="ip_dns" />
-              </div>
+<div id="tab12" class="tab-content"><header class="page-heading"><h1 data-i18n="settings"></h1><p data-i18n="settings_subtitle"></p></header>
+<div class="settings-layout" data-settings data-settings-layout="tabs">
+    <div class="settings-body">
+      <aside class="settings-category-nav" aria-labelledby="p12_settings_area_label">
+        <label class="settings-category-picker">
+          <span id="p12_settings_area_label" data-i18n="settings_area"></span>
+          <select id="p12_settings_area" data-settings-select data-ui-local></select>
+        </label>
+        <div class="settings-category-list" data-settings-list></div>
+      </aside>
+      <div class="settings-panels" data-connection-required>
+        <section id="p12_settings_general" class="settings-panel" data-settings-group="general" data-settings-label="settings_general"><h2 data-i18n="settings_general"></h2>
+<details name="settings-general">
+              <summary data-i18n="language"></summary>
+              <select id="cfg_lang">
+                <option value="0" data-i18n="german"></option>
+                <option value="1" data-i18n="english"></option>
+              </select>
             </details>
-            <hr />
-            <!-- ETHERNET -->
-            <details>
-              <summary>Ethernet (W5500)</summary>
-              <div class="section-header">
-                <label for="eth_enable" data-i18n="activate"></label>
-                <div class="switch-container">
-                  <input
-                    name="eth_enable"
-                    type="checkbox"
-                    role="switch"
-                    id="cfg_eth_enable" />
-                </div>
-              </div>
-              <br />
-              <label for="eth_hostname" data-i18n="hostname"></label>
-              <input type="text" id="cfg_eth_hostname" name="eth_hostname" />
-              <label for="eth_gpio_sck">GPIO CLK</label>
-              <input type="number" id="cfg_eth_gpio_sck" name="eth_gpio_sck" />
-              <label for="eth_gpio_mosi">GPIO MOSI</label>
-              <input
-                type="number"
-                id="cfg_eth_gpio_mosi"
-                name="eth_gpio_mosi" />
-              <label for="eth_gpio_miso">GPIO MISO</label>
-              <input
-                type="number"
-                id="cfg_eth_gpio_miso"
-                name="eth_gpio_miso" />
-              <label for="eth_gpio_cs">GPIO CS</label>
-              <input type="number" id="cfg_eth_gpio_cs" name="eth_gpio_cs" />
-              <label for="eth_gpio_irq">GPIO INT</label>
-              <input type="number" id="cfg_eth_gpio_irq" name="eth_gpio_irq" />
-              <label for="eth_gpio_rst">GPIO RST</label>
-              <input type="number" id="cfg_eth_gpio_rst" name="eth_gpio_rst" />
-              <div class="section-header">
-                <label for="man_ip_enable" data-i18n="static_ip"></label>
-                <div class="switch-container">
-                  <input
-                    name="man_ip_enable"
-                    type="checkbox"
-                    role="switch"
-                    hideOpt="ETH_STATIC_IP"
-                    id="cfg_eth_static_ip" />
-                </div>
-              </div>
-              <br />
-              <div class="ETH_STATIC_IP">
-                <label for="ip_adr" data-i18n="ip_adr"></label>
-                <input
-                  type="url"
-                  data-type="ip"
-                  oninput="validateIP(this)"
-                  id="cfg_eth_ipaddress"
-                  name="ip_adr" />
-                <label for="ip_subnet" data-i18n="ip_subnet"></label>
-                <input
-                  type="url"
-                  data-type="ip"
-                  oninput="validateIP(this)"
-                  id="cfg_eth_subnet"
-                  name="ip_subnet" />
-                <label for="ip_gateway" data-i18n="ip_gateway"></label>
-                <input
-                  type="url"
-                  data-type="ip"
-                  oninput="validateIP(this)"
-                  id="cfg_eth_gateway"
-                  name="ip_gateway" />
-                <label for="ip_dns" data-i18n="ip_dns"></label>
-                <input
-                  type="url"
-                  data-type="ip"
-                  oninput="validateIP(this)"
-                  id="cfg_eth_dns"
-                  name="ip_dns" />
-              </div>
-            </details>
-            <hr />
-            <!-- Authentication -->
-            <details>
-              <summary data-i18n="access"></summary>
-              <div class="section-header">
-                <label for="auth_enable" data-i18n="activate"></label>
-                <div class="switch-container">
-                  <input
-                    name="auth_enable"
-                    type="checkbox"
-                    role="switch"
-                    hideOpt="OPT_AUTH"
-                    id="cfg_auth_enable" />
-                </div>
-              </div>
-              <br />
-              <label for="auth_user" data-i18n="user"></label>
-              <input type="text" id="cfg_auth_user" name="auth_user" />
-              <label for="auth_passw" data-i18n="password"></label>
-              <input type="password" id="cfg_auth_password" name="auth_passw" />
-            </details>
-            <hr />
-            <!-- NTP-Server -->
-            <details>
+<details name="settings-general">
               <summary data-i18n="ntp"></summary>
               <div class="section-header">
-                <label for="ntp_enable" data-i18n="activate"></label>
+                <label for="cfg_ntp_enable" data-i18n="activate"></label>
                 <div class="switch-container">
                   <input
                     name="ntp_enable"
@@ -2264,10 +2006,10 @@
                 </div>
               </div>
               <br />
-              <label for="ntp_server" data-i18n="server"></label>
+              <label for="cfg_ntp_server" data-i18n="server"></label>
               <input type="text" id="cfg_ntp_server" name="ntp_server" />
               <div class="leftright">
-                <label for="time_zone" data-i18n="ntp_tz"></label>
+                <label for="cfg_ntp_tz" data-i18n="ntp_tz"></label>
                 <button
                   id="p12_ntp_open_dialog_btn"
                   class="i_help"
@@ -2279,38 +2021,268 @@
               </div>
               <input type="text" id="cfg_ntp_tz" name="time_zone" />
             </details>
-            <!-- Dialog OPEN-NTP-HELP -->
-            <dialog id="p12_ntp_dialog">
-              <article>
-                <div id="p12_ntp_help_output"></div>
-                <div class="dash-footer">
-                  <button
-                    id="p12_ntp_close_dialog_btn"
-                    data-i18n="close"
-                    style="width: 75%"></button>
-                </div>
-              </article>
-            </dialog>
-            <hr />
-            <!-- Geo Location -->
-            <details>
+<details name="settings-general">
               <summary data-i18n="geo_location"></summary>
               <br />
-              <label for="latitude" data-i18n="latitude"></label>
-              <input type="number" id="cfg_geo_latitude" name="latitude" />
-              <label for="longitude" data-i18n="longitude"></label>
-              <input type="number" id="cfg_geo_longitude" name="longitude" />
-              <div class="info-box">
+              <div class="settings-fields"><div class="settings-field settings-field--medium"><label for="cfg_geo_latitude" data-i18n="latitude"></label><input type="number" id="cfg_geo_latitude" name="latitude" /></div>
+              <div class="settings-field settings-field--medium"><label for="cfg_geo_longitude" data-i18n="longitude"></label><input type="number" id="cfg_geo_longitude" name="longitude" /></div>
+              </div><div class="info-box">
                 <div class="info-icon">&#9432;</div>
                 <div class="info-text" data-i18n="geo_info"></div>
               </div>
             </details>
-            <hr />
-            <!-- MQTT -->
-            <details>
+</section>
+<section id="p12_settings_network" class="settings-panel" data-settings-group="network" data-settings-label="settings_network"><h2 data-i18n="settings_network"></h2>
+<details name="settings-network">
+              <summary data-i18n="wifi"></summary>
+              <div class="section-header">
+                <label for="cfg_wifi_enable" data-i18n="activate"></label>
+                <div class="switch-container">
+                  <input
+                    name="wifi_enable"
+                    type="checkbox"
+                    role="switch"
+                    id="cfg_wifi_enable" />
+                </div>
+              </div>
+              <br />
+              <label for="cfg_wifi_hostname" data-i18n="hostname"></label>
+              <input type="text" id="cfg_wifi_hostname" name="wifi_hostname" />
+              <label for="cfg_wifi_ssid" data-i18n="ssid"></label>
+              <fieldset role="group">
+                <input
+                  type="text"
+                  id="cfg_wifi_ssid"
+                  aria-describedby="p12_wifi_ssid_hint"
+                  name="wifi_ssid"
+                  style="min-width: 0" />
+                <button
+                  type="button"
+                  id="p12_wifi_ssid_scan_btn"
+                  data-i18n="wifi_ssid_search"
+                  style="white-space: nowrap; flex: 0 0 auto"></button>
+              </fieldset>
+              <small id="p12_wifi_ssid_hint" data-i18n="wifi_ssid_hint"></small>
+              <dialog
+                id="p12_wifi_ssid_dialog"
+                aria-labelledby="p12_wifi_ssid_title">
+                <article style="width: min(48rem, 95vw)">
+                  <header
+                    id="p12_wifi_ssid_title"
+                    data-i18n="wifi_ssid_title"></header>
+                  <p
+                    id="p12_wifi_ssid_status"
+                    role="status"
+                    aria-live="polite"></p>
+                  <label
+                    for="p12_wifi_ssid_list"
+                    data-i18n="wifi_ssid_select"></label>
+                  <select
+                    id="p12_wifi_ssid_list"
+                    size="6"
+                    style="width: 100%"></select>
+                  <footer>
+                    <button
+                      type="button"
+                      id="p12_wifi_ssid_retry_btn"
+                      data-i18n="wifi_ap_retry"></button>
+                    <button
+                      type="button"
+                      id="p12_wifi_ssid_apply_btn"
+                      data-i18n="wifi_ap_apply"></button>
+                    <button
+                      type="button"
+                      id="p12_wifi_ssid_close_btn"
+                      class="secondary"
+                      data-i18n="close"></button>
+                  </footer>
+                </article>
+              </dialog>
+              <label for="cfg_wifi_password">Passwort</label>
+              <input
+                type="password"
+                id="cfg_wifi_password"
+                name="wifi_password" />
+
+              <label for="cfg_wifi_bssid" data-i18n="wifi_ap_bssid"></label>
+              <fieldset role="group">
+                <input
+                  type="text"
+                  id="cfg_wifi_bssid"
+                  aria-describedby="p12_wifi_ap_hint"
+                  name="wifi_bssid"
+                  placeholder="AA:BB:CC:DD:EE:FF"
+                  maxlength="17"
+                  oninput="validateWiFiBssid(this)"
+                  style="min-width: 0" />
+                <button
+                  type="button"
+                  id="p12_wifi_ap_scan_btn"
+                  data-i18n="wifi_ap_search"
+                  style="white-space: nowrap; flex: 0 0 auto"></button>
+              </fieldset>
+              <small id="p12_wifi_ap_hint" data-i18n="wifi_ap_hint"></small>
+              <span id="p12_wifi_ap_results" hidden></span>
+
+              <dialog
+                id="p12_wifi_ap_dialog"
+                aria-labelledby="p12_wifi_ap_title">
+                <article style="width: min(48rem, 95vw)">
+                  <header
+                    id="p12_wifi_ap_title"
+                    data-i18n="wifi_ap_title"></header>
+                  <p>
+                    <span data-i18n="ssid"></span>:
+                    <strong id="p12_wifi_ap_ssid"></strong>
+                  </p>
+                  <p
+                    id="p12_wifi_ap_status"
+                    role="status"
+                    aria-live="polite"></p>
+                  <label
+                    for="p12_wifi_ap_list"
+                    data-i18n="wifi_ap_select"></label>
+                  <select
+                    id="p12_wifi_ap_list"
+                    size="6"
+                    style="width: 100%"></select>
+                  <footer>
+                    <button
+                      type="button"
+                      id="p12_wifi_ap_retry_btn"
+                      data-i18n="wifi_ap_retry"></button>
+                    <button
+                      type="button"
+                      id="p12_wifi_ap_apply_btn"
+                      data-i18n="wifi_ap_apply"></button>
+                    <button
+                      type="button"
+                      id="p12_wifi_ap_close_btn"
+                      class="secondary"
+                      data-i18n="close"></button>
+                  </footer>
+                </article>
+              </dialog>
+
+              <div class="section-header">
+                <label for="cfg_wifi_static_ip" data-i18n="static_ip"></label>
+                <div class="switch-container">
+                  <input
+                    name="man_ip_enable"
+                    type="checkbox"
+                    role="switch"
+                    hideOpt="WIFI_STATIC_IP"
+                    id="cfg_wifi_static_ip" />
+                </div>
+              </div>
+              <br />
+              <div class="WIFI_STATIC_IP">
+                <label for="cfg_wifi_ipaddress" data-i18n="ip_adr"></label>
+                <input
+                  type="url"
+                  data-type="ip"
+                  oninput="validateIP(this)"
+                  id="cfg_wifi_ipaddress"
+                  name="ip_adr" />
+                <label for="cfg_wifi_subnet" data-i18n="ip_subnet"></label>
+                <input
+                  type="url"
+                  data-type="ip"
+                  oninput="validateIP(this)"
+                  id="cfg_wifi_subnet"
+                  name="ip_subnet" />
+                <label for="cfg_wifi_gateway" data-i18n="ip_gateway"></label>
+                <input
+                  type="url"
+                  data-type="ip"
+                  oninput="validateIP(this)"
+                  id="cfg_wifi_gateway"
+                  name="ip_gateway" />
+                <label for="cfg_wifi_dns" data-i18n="ip_dns"></label>
+                <input
+                  type="url"
+                  data-type="ip"
+                  oninput="validateIP(this)"
+                  id="cfg_wifi_dns"
+                  name="ip_dns" />
+              </div>
+            </details>
+<details name="settings-network">
+              <summary>Ethernet (W5500)</summary>
+              <div class="section-header">
+                <label for="cfg_eth_enable" data-i18n="activate"></label>
+                <div class="switch-container">
+                  <input
+                    name="eth_enable"
+                    type="checkbox"
+                    role="switch"
+                    id="cfg_eth_enable" />
+                </div>
+              </div>
+              <br />
+              <label for="cfg_eth_hostname" data-i18n="hostname"></label>
+              <input type="text" id="cfg_eth_hostname" name="eth_hostname" />
+              <div class="settings-fields"><div class="settings-field settings-field--compact"><label for="cfg_eth_gpio_sck">GPIO CLK</label><input type="number" id="cfg_eth_gpio_sck" name="eth_gpio_sck" /></div>
+              <div class="settings-field settings-field--compact"><label for="cfg_eth_gpio_mosi">GPIO MOSI</label><input
+                type="number"
+                id="cfg_eth_gpio_mosi"
+                name="eth_gpio_mosi" /></div>
+              <div class="settings-field settings-field--compact"><label for="cfg_eth_gpio_miso">GPIO MISO</label><input
+                type="number"
+                id="cfg_eth_gpio_miso"
+                name="eth_gpio_miso" /></div>
+              <div class="settings-field settings-field--compact"><label for="cfg_eth_gpio_cs">GPIO CS</label><input type="number" id="cfg_eth_gpio_cs" name="eth_gpio_cs" /></div>
+              <div class="settings-field settings-field--compact"><label for="cfg_eth_gpio_irq">GPIO INT</label><input type="number" id="cfg_eth_gpio_irq" name="eth_gpio_irq" /></div>
+              <div class="settings-field settings-field--compact"><label for="cfg_eth_gpio_rst">GPIO RST</label><input type="number" id="cfg_eth_gpio_rst" name="eth_gpio_rst" /></div>
+              </div><div class="section-header">
+                <label for="cfg_wifi_static_ip" data-i18n="static_ip"></label>
+                <div class="switch-container">
+                  <input
+                    name="man_ip_enable"
+                    type="checkbox"
+                    role="switch"
+                    hideOpt="ETH_STATIC_IP"
+                    id="cfg_eth_static_ip" />
+                </div>
+              </div>
+              <br />
+              <div class="ETH_STATIC_IP">
+                <label for="cfg_wifi_ipaddress" data-i18n="ip_adr"></label>
+                <input
+                  type="url"
+                  data-type="ip"
+                  oninput="validateIP(this)"
+                  id="cfg_eth_ipaddress"
+                  name="ip_adr" />
+                <label for="cfg_wifi_subnet" data-i18n="ip_subnet"></label>
+                <input
+                  type="url"
+                  data-type="ip"
+                  oninput="validateIP(this)"
+                  id="cfg_eth_subnet"
+                  name="ip_subnet" />
+                <label for="cfg_wifi_gateway" data-i18n="ip_gateway"></label>
+                <input
+                  type="url"
+                  data-type="ip"
+                  oninput="validateIP(this)"
+                  id="cfg_eth_gateway"
+                  name="ip_gateway" />
+                <label for="cfg_wifi_dns" data-i18n="ip_dns"></label>
+                <input
+                  type="url"
+                  data-type="ip"
+                  oninput="validateIP(this)"
+                  id="cfg_eth_dns"
+                  name="ip_dns" />
+              </div>
+            </details>
+</section>
+<section id="p12_settings_integrations" class="settings-panel" data-settings-group="integrations" data-settings-label="settings_integrations"><h2 data-i18n="settings_integrations"></h2>
+<details id="p12_mqtt_settings" name="settings-integrations">
               <summary data-i18n="mqtt"></summary>
               <div class="section-header">
-                <label for="mqtt_enable" data-i18n="activate"></label>
+                <label for="cfg_mqtt_enable" data-i18n="activate"></label>
                 <div class="switch-container">
                   <input
                     name="mqtt_enable"
@@ -2319,52 +2291,72 @@
                     id="cfg_mqtt_enable" />
                 </div>
               </div>
+
+              <br />
+              <div role="group">
+                <button
+                  type="button"
+                  id="p12_mqtt_test_btn"
+                  style="white-space: nowrap; flex: 0 0 auto"
+                  data-i18n="mqtt_connection_test"></button>
+                <input
+                  type="text"
+                  id="p12_mqtt_connection"
+                  style="height: auto; min-width: 0"
+                  aria-label="MQTT connection status"
+                  value="---"
+                  disabled />
+              </div>
+              <span id="p12_mqtt_connection_state" hidden></span>
+              <label for="cfg_mqtt_server" data-i18n="server"></label>
+              <input
+                type="text"
+                oninput="validateHost(this)"
+                id="cfg_mqtt_server"
+                name="mqtt_server" />
+              <label for="cfg_mqtt_port" data-i18n="port"></label>
+              <input type="text" id="cfg_mqtt_port" name="mqtt_port" />
+              <label for="cfg_mqtt_topic" data-i18n="topic"></label>
+              <input type="text" id="cfg_mqtt_topic" name="mqtt_topic" />
+              <label for="cfg_mqtt_user" data-i18n="user"></label>
+              <input type="text" id="cfg_mqtt_user" name="mqtt_user" />
+              <label for="cfg_mqtt_password" data-i18n="password"></label>
+              <input
+                type="password"
+                id="cfg_mqtt_password"
+                name="mqtt_password" />
+</details>
+<details id="p12_ha_settings" name="settings-integrations">
+              <summary>Home Assistant</summary>
               <div class="section-header">
-                <label for="mqtt_ha_enable">Home Assistant</label>
+                <label for="cfg_mqtt_ha_enable" data-i18n="activate"></label>
                 <input
                   name="mqtt_ha_enable"
                   type="checkbox"
                   role="switch"
                   id="cfg_mqtt_ha_enable" />
               </div>
-              <br />
-              <label for="mqtt_server" data-i18n="server"></label>
-              <input
-                type="url"
-                data-type="ip"
-                oninput="validateIP(this)"
-                id="cfg_mqtt_server"
-                name="mqtt_server" />
-              <label for="mqtt_port" data-i18n="port"></label>
-              <input type="text" id="cfg_mqtt_port" name="mqtt_port" />
-              <label for="mqtt_topic" data-i18n="topic"></label>
-              <input type="text" id="cfg_mqtt_topic" name="mqtt_topic" />
-              <label for="mqtt_user" data-i18n="user"></label>
-              <input type="text" id="cfg_mqtt_user" name="mqtt_user" />
-              <label for="mqtt_password" data-i18n="password"></label>
-              <input
-                type="password"
-                id="cfg_mqtt_password"
-                name="mqtt_password" />
-              <label for="mqtt_ha_topic">Home Assistant Topic</label>
+              <p><small data-i18n="ha_mqtt_hint"></small></p>
+              <p id="p12_ha_mqtt_warning" hidden>
+                <small><span data-i18n="ha_mqtt_disabled"></span> <a href="#p12_mqtt_settings" id="p12_ha_mqtt_link" data-i18n="ha_mqtt_open"></a></small>
+              </p>
+              <label for="cfg_mqtt_ha_topic">Home Assistant Topic</label>
               <input
                 type="text"
                 id="cfg_mqtt_ha_topic"
                 placeholder="homeassistant"
                 name="mqtt_ha_topic" />
-              <label for="mqtt_ha_device">Home Assistant Device Name</label>
+              <label for="cfg_mqtt_ha_device">Home Assistant Device Name</label>
               <input
                 type="text"
                 id="cfg_mqtt_ha_device"
                 placeholder="jarolift"
                 name="mqtt_ha_device" />
             </details>
-            <hr />
-            <!-- Homee -->
-            <details>
+<details name="settings-integrations">
               <summary data-i18n="homee"></summary>
               <div class="section-header">
-                <label for="homee_enable" data-i18n="activate"></label>
+                <label for="cfg_homee_enable" data-i18n="activate"></label>
                 <div class="switch-container">
                   <input
                     name="homee_enable"
@@ -2380,7 +2372,7 @@
               <br />
               <div class="section-header">
                 <label
-                  for="homee_third_position"
+                  for="cfg_homee_third_position"
                   data-i18n="homee_third_position"></label>
                 <div class="switch-container">
                   <input
@@ -2397,76 +2389,20 @@
                   data-i18n="info_homee_third_position"></div>
               </div>
               <br />
-              <label for="homee_name" data-i18n="homee_virtual_name"></label>
+              <label for="p12_homee_name" data-i18n="homee_virtual_name"></label>
               <input
                 type="text"
                 id="p12_homee_name"
                 name="homee_name"
                 disabled />
             </details>
-            <hr />
-            <!-- Hardware -->
-            <details>
-              <summary data-i18n="gpio"></summary>
-              <br />
-              <div class="info-box">
-                <div class="info-icon">&#9432;</div>
-                <div class="info-text" data-i18n="info_gpios"></div>
-              </div>
-              <br />
-              <label for="gdo0">GDO0</label>
-              <input
-                class="num-input"
-                name="gdo0"
-                type="number"
-                id="cfg_gpio_gdo0"
-                placeholder="-1 to disable" />
-              <label for="gdo2">GDO2</label>
-              <input
-                class="num-input"
-                name="gdo2"
-                type="number"
-                id="cfg_gpio_gdo2"
-                placeholder="-1 to disable" />
-              <label for="sck">SCK</label>
-              <input
-                class="num-input"
-                name="sck"
-                type="number"
-                id="cfg_gpio_sck"
-                placeholder="-1 to disable" />
-              <label for="miso">MISO</label>
-              <input
-                class="num-input"
-                name="miso"
-                type="number"
-                id="cfg_gpio_miso"
-                placeholder="-1 to disable" />
-              <label for="mosi">MOSI</label>
-              <input
-                class="num-input"
-                name="mosi"
-                type="number"
-                id="cfg_gpio_mosi"
-                placeholder="-1 to disable" />
-              <label for="cs">CS</label>
-              <input
-                class="num-input"
-                name="cs"
-                type="number"
-                id="cfg_gpio_cs"
-                placeholder="-1 to disable" />
-              <label for="led_setup" data-i18n="led_setup"></label>
-              <input
-                class="num-input"
-                name="led_setup"
-                type="number"
-                id="cfg_gpio_led_setup"
-                placeholder="-1 to disable" />
-            </details>
-            <hr />
-            <!-- JAROLIFT -->
-            <details>
+</section>
+<section id="p12_settings_device" class="settings-panel" data-settings-group="device" data-settings-label="settings_device"><h2 data-i18n="settings_device"></h2>
+<details class="settings-card" name="settings-device"><summary data-i18n="pos_title"></summary>
+  <div class="section-header"><label for="cfg_position_enable" data-i18n="pos_enable"></label><div class="switch-container"><input type="checkbox" role="switch" id="cfg_position_enable" /></div></div>
+  <p class="info-text" data-i18n="pos_settings_hint"></p>
+</details>
+<details name="settings-device">
               <summary>JAROLIFT</summary>
               <div class="section-header">
                 <label for="learn_mode" data-i18n="learn_mode"></label>
@@ -2482,7 +2418,7 @@
                 <div class="info-text" data-i18n="info_leanmode"></div>
               </div>
               <br />
-              <label for="master_MSB">master MSB (HEX-Format)</label>
+              <label for="cfg_jaro_masterMSB">master MSB (HEX-Format)</label>
               <div class="row">
                 <input
                   name="master_MSB"
@@ -2502,7 +2438,7 @@
                   Edit
                 </button>
               </div>
-              <label for="master_LSB">master LSB (HEX-Format)</label>
+              <label for="cfg_jaro_masterLSB">master LSB (HEX-Format)</label>
               <div class="row">
                 <input
                   name="master_LSB"
@@ -2523,7 +2459,7 @@
                 </button>
               </div>
               <br />
-              <label for="serial" data-i18n="serial_nr++ (HEX-Format)"></label>
+              <label for="cfg_jaro_serial" data-i18n="serial_nr++ (HEX-Format)"></label>
               <div class="row">
                 <input
                   name="serial"
@@ -2548,7 +2484,7 @@
                 <div class="info-text" data-i18n="info_serial"></div>
               </div>
               <br />
-              <label for="devcnt">Device Counter</label>
+              <label for="p12_jaro_devcnt">Device Counter</label>
               <div class="row">
                 <input
                   name="devcnt"
@@ -2567,9 +2503,7 @@
               </div>
               <br />
             </details>
-            <hr />
-            <!-- Shutter 1-16 -->
-            <details>
+<details name="settings-device">
               <summary data-i18n="shutter"></summary>
               <br />
               <div class="info-box">
@@ -2578,7 +2512,7 @@
               </div>
               <br />
               <div class="row">
-                <label for="shutter1" data-i18n="channel++ 1"></label>
+                <label for="cfg_jaro_ch_name_0" data-i18n="channel++ 1"></label>
                 <input
                   name="shutter1"
                   type="text"
@@ -2600,7 +2534,7 @@
                 </div>
               </div>
               <div class="row">
-                <label for="shutter2" data-i18n="channel++ 2"></label>
+                <label for="cfg_jaro_ch_name_1" data-i18n="channel++ 2"></label>
                 <input
                   name="shutter2"
                   type="text"
@@ -2622,7 +2556,7 @@
                 </div>
               </div>
               <div class="row">
-                <label for="shutter3" data-i18n="channel++ 3"></label>
+                <label for="cfg_jaro_ch_name_2" data-i18n="channel++ 3"></label>
                 <input
                   name="shutter3"
                   type="text"
@@ -2644,7 +2578,7 @@
                 </div>
               </div>
               <div class="row">
-                <label for="shutter4" data-i18n="channel++ 4"></label>
+                <label for="cfg_jaro_ch_name_3" data-i18n="channel++ 4"></label>
                 <input
                   name="shutter4"
                   type="text"
@@ -2666,7 +2600,7 @@
                 </div>
               </div>
               <div class="row">
-                <label for="shutter5" data-i18n="channel++ 5"></label>
+                <label for="cfg_jaro_ch_name_4" data-i18n="channel++ 5"></label>
                 <input
                   name="shutter5"
                   type="text"
@@ -2688,7 +2622,7 @@
                 </div>
               </div>
               <div class="row">
-                <label for="shutter6" data-i18n="channel++ 6"></label>
+                <label for="cfg_jaro_ch_name_5" data-i18n="channel++ 6"></label>
                 <input
                   name="shutter6"
                   type="text"
@@ -2710,7 +2644,7 @@
                 </div>
               </div>
               <div class="row">
-                <label for="shutter7" data-i18n="channel++ 7"></label>
+                <label for="cfg_jaro_ch_name_6" data-i18n="channel++ 7"></label>
                 <input
                   name="shutter7"
                   type="text"
@@ -2732,7 +2666,7 @@
                 </div>
               </div>
               <div class="row">
-                <label for="shutter8" data-i18n="channel++ 8"></label>
+                <label for="cfg_jaro_ch_name_7" data-i18n="channel++ 8"></label>
                 <input
                   name="shutter8"
                   type="text"
@@ -2754,7 +2688,7 @@
                 </div>
               </div>
               <div class="row">
-                <label for="shutter9" data-i18n="channel++ 9"></label>
+                <label for="cfg_jaro_ch_name_8" data-i18n="channel++ 9"></label>
                 <input
                   name="shutter9"
                   type="text"
@@ -2776,7 +2710,7 @@
                 </div>
               </div>
               <div class="row">
-                <label for="shutter10" data-i18n="channel++ 10"></label>
+                <label for="cfg_jaro_ch_name_9" data-i18n="channel++ 10"></label>
                 <input
                   name="shutter10"
                   type="text"
@@ -2798,7 +2732,7 @@
                 </div>
               </div>
               <div class="row">
-                <label for="shutter11" data-i18n="channel++ 11"></label>
+                <label for="cfg_jaro_ch_name_10" data-i18n="channel++ 11"></label>
                 <input
                   name="shutter11"
                   type="text"
@@ -2820,7 +2754,7 @@
                 </div>
               </div>
               <div class="row">
-                <label for="shutter12" data-i18n="channel++ 12"></label>
+                <label for="cfg_jaro_ch_name_11" data-i18n="channel++ 12"></label>
                 <input
                   name="shutter12"
                   type="text"
@@ -2842,7 +2776,7 @@
                 </div>
               </div>
               <div class="row">
-                <label for="shutter13" data-i18n="channel++ 13"></label>
+                <label for="cfg_jaro_ch_name_12" data-i18n="channel++ 13"></label>
                 <input
                   name="shutter13"
                   type="text"
@@ -2864,7 +2798,7 @@
                 </div>
               </div>
               <div class="row">
-                <label for="shutter14" data-i18n="channel++ 14"></label>
+                <label for="cfg_jaro_ch_name_13" data-i18n="channel++ 14"></label>
                 <input
                   name="shutter14"
                   type="text"
@@ -2886,7 +2820,7 @@
                 </div>
               </div>
               <div class="row">
-                <label for="shutter15" data-i18n="channel++ 15"></label>
+                <label for="cfg_jaro_ch_name_14" data-i18n="channel++ 15"></label>
                 <input
                   name="shutter15"
                   type="text"
@@ -2908,7 +2842,7 @@
                 </div>
               </div>
               <div class="row">
-                <label for="shutter16" data-i18n="channel++ 16"></label>
+                <label for="cfg_jaro_ch_name_15" data-i18n="channel++ 16"></label>
                 <input
                   name="shutter16"
                   type="text"
@@ -2930,22 +2864,7 @@
                 </div>
               </div>
             </details>
-            <hr />
-            <!-- Dialog OPEN-BITMASK-HELP -->
-            <dialog id="p12_bitmask_dialog">
-              <article>
-                <h3 data-i18n="help"></h3>
-                <div data-i18n="mask_help"></div>
-                <div class="dash-footer">
-                  <button
-                    onclick="closeGrpMaskHelp(this)"
-                    data-i18n="close"
-                    style="width: 75%"></button>
-                </div>
-              </article>
-            </dialog>
-            <!-- Group 1-6 -->
-            <details>
+<details name="settings-device">
               <summary data-i18n="groups"></summary>
               <div class="info-box">
                 <div class="info-icon">&#9432;</div>
@@ -2967,7 +2886,7 @@
               <br />
               <div class="details-container">
                 <div>
-                  <label for="name_grp_0" data-i18n="name"></label>
+                  <label for="cfg_jaro_grp_name_0" data-i18n="name"></label>
                   <input
                     name="name_grp_0"
                     type="text"
@@ -2977,7 +2896,7 @@
                 </div>
                 <div>
                   <div class="label-with-button">
-                    <label for="mask_grp_0" data-i18n="mask"></label>
+                    <label for="cfg_jaro_grp_mask_0" data-i18n="mask"></label>
                     <button
                       onclick="openGrpMaskHelp(this)"
                       class="i_help"
@@ -3016,7 +2935,7 @@
               <br />
               <div class="details-container">
                 <div>
-                  <label for="name_grp_1" data-i18n="name"></label>
+                  <label for="cfg_jaro_grp_name_1" data-i18n="name"></label>
                   <input
                     name="name_grp_1"
                     type="text"
@@ -3026,7 +2945,7 @@
                 </div>
                 <div>
                   <div class="label-with-button">
-                    <label for="mask_grp_1" data-i18n="mask"></label>
+                    <label for="cfg_jaro_grp_mask_1" data-i18n="mask"></label>
                     <button
                       onclick="openGrpMaskHelp(this)"
                       class="i_help"
@@ -3065,7 +2984,7 @@
               <br />
               <div class="details-container">
                 <div>
-                  <label for="name_grp_2" data-i18n="name"></label>
+                  <label for="cfg_jaro_grp_name_2" data-i18n="name"></label>
                   <input
                     name="name_grp_2"
                     type="text"
@@ -3075,7 +2994,7 @@
                 </div>
                 <div>
                   <div class="label-with-button">
-                    <label for="mask_grp_2" data-i18n="mask"></label>
+                    <label for="cfg_jaro_grp_mask_2" data-i18n="mask"></label>
                     <button
                       onclick="openGrpMaskHelp(this)"
                       class="i_help"
@@ -3114,7 +3033,7 @@
               <br />
               <div class="details-container">
                 <div>
-                  <label for="name_grp_3" data-i18n="name"></label>
+                  <label for="cfg_jaro_grp_name_3" data-i18n="name"></label>
                   <input
                     name="name_grp_3"
                     type="text"
@@ -3124,7 +3043,7 @@
                 </div>
                 <div>
                   <div class="label-with-button">
-                    <label for="mask_grp_3" data-i18n="mask"></label>
+                    <label for="cfg_jaro_grp_mask_3" data-i18n="mask"></label>
                     <button
                       onclick="openGrpMaskHelp(this)"
                       class="i_help"
@@ -3163,7 +3082,7 @@
               <br />
               <div class="details-container">
                 <div>
-                  <label for="name_grp_4" data-i18n="name"></label>
+                  <label for="cfg_jaro_grp_name_4" data-i18n="name"></label>
                   <input
                     name="name_grp_4"
                     type="text"
@@ -3173,7 +3092,7 @@
                 </div>
                 <div>
                   <div class="label-with-button">
-                    <label for="mask_grp_4" data-i18n="mask"></label>
+                    <label for="cfg_jaro_grp_mask_4" data-i18n="mask"></label>
                     <button
                       onclick="openGrpMaskHelp(this)"
                       class="i_help"
@@ -3212,7 +3131,7 @@
               <br />
               <div class="details-container">
                 <div>
-                  <label for="name_grp_5" data-i18n="name"></label>
+                  <label for="cfg_jaro_grp_name_5" data-i18n="name"></label>
                   <input
                     name="name_grp_5"
                     type="text"
@@ -3222,7 +3141,7 @@
                 </div>
                 <div>
                   <div class="label-with-button">
-                    <label for="mask_grp_5" data-i18n="mask"></label>
+                    <label for="cfg_jaro_grp_mask_5" data-i18n="mask"></label>
                     <button
                       onclick="openGrpMaskHelp(this)"
                       class="i_help"
@@ -3247,1056 +3166,427 @@
               </div>
               <br />
             </details>
-            <hr />
-            <!-- Remotes 1-16 -->
-            <details>
-              <summary data-i18n="remotes"></summary>
+
+<details name="settings-device">
+              <summary data-i18n="gpio"></summary>
+              <br />
               <div class="info-box">
                 <div class="info-icon">&#9432;</div>
-                <div class="info-text" data-i18n="info_remotes"></div>
+                <div class="info-text" data-i18n="info_gpios"></div>
               </div>
               <br />
-              <!-- Remote 1 -->
+              <div class="settings-fields"><div class="settings-field settings-field--compact"><label for="cfg_gpio_gdo0">GDO0</label><input
+                class="num-input"
+                name="gdo0"
+                type="number"
+                id="cfg_gpio_gdo0"
+                placeholder="-1 to disable" /></div>
+              <div class="settings-field settings-field--compact"><label for="cfg_gpio_gdo2">GDO2</label><input
+                class="num-input"
+                name="gdo2"
+                type="number"
+                id="cfg_gpio_gdo2"
+                placeholder="-1 to disable" /></div>
+              <div class="settings-field settings-field--compact"><label for="cfg_gpio_sck">SCK</label><input
+                class="num-input"
+                name="sck"
+                type="number"
+                id="cfg_gpio_sck"
+                placeholder="-1 to disable" /></div>
+              <div class="settings-field settings-field--compact"><label for="cfg_gpio_miso">MISO</label><input
+                class="num-input"
+                name="miso"
+                type="number"
+                id="cfg_gpio_miso"
+                placeholder="-1 to disable" /></div>
+              <div class="settings-field settings-field--compact"><label for="cfg_gpio_mosi">MOSI</label><input
+                class="num-input"
+                name="mosi"
+                type="number"
+                id="cfg_gpio_mosi"
+                placeholder="-1 to disable" /></div>
+              <div class="settings-field settings-field--compact"><label for="cfg_gpio_cs">CS</label><input
+                class="num-input"
+                name="cs"
+                type="number"
+                id="cfg_gpio_cs"
+                placeholder="-1 to disable" /></div>
+              <div class="settings-field settings-field--compact"><label for="cfg_gpio_led_setup" data-i18n="led_setup"></label><input
+                class="num-input"
+                name="led_setup"
+                type="number"
+                id="cfg_gpio_led_setup"
+                placeholder="-1 to disable" /></div>
+            </div></details>
+</section>
+<section id="p12_settings_maintenance" class="settings-panel" data-settings-group="maintenance" data-settings-label="settings_maintenance"><h2 data-i18n="settings_maintenance"></h2>
+<details name="settings-maintenance">
+              <summary data-i18n="access"></summary>
               <div class="section-header">
-                <label for="remote0" data-i18n="remote++ 1"></label>
+                <label for="cfg_auth_enable" data-i18n="activate"></label>
                 <div class="switch-container">
                   <input
-                    name="remote0_enable"
+                    name="auth_enable"
                     type="checkbox"
                     role="switch"
-                    id="cfg_jaro_remote_enable_0" />
+                    hideOpt="OPT_AUTH"
+                    id="cfg_auth_enable" />
                 </div>
               </div>
               <br />
-              <div class="settings-container">
-                <div>
-                  <label for="name_remote_0" data-i18n="name"></label>
-                  <input
-                    name="name_remote_0"
-                    type="text"
-                    id="cfg_jaro_remote_name_0"
-                    placeholder="name" />
-                </div>
-                <div>
-                  <label for="serial_remote_0" data-i18n="serial_nr"></label>
-                  <input
-                    name="serial_remote_0"
-                    id="cfg_jaro_remote_serial_0"
-                    type="text"
-                    data-type="hex"
-                    data-length="6"
-                    oninput="validateHex(this)"
-                    pattern="[0-9a-fA-F]{1,6}"
-                    title="Enter up to 6 HEX digits"
-                    maxlength="6"
-                    onblur="formatHex(this)"
-                    placeholder="serial" />
-                </div>
-                <div>
-                  <label for="mask_remote_0" data-i18n="mask"></label>
-                  <input
-                    class="bitmask-input"
-                    name="mask_remote_0"
-                    type="text"
-                    data-type="bin"
-                    id="cfg_jaro_remote_mask_0"
-                    oninput="validateBin(this)"
-                    onblur="formatBin(this)"
-                    pattern="[01]{1,16}"
-                    placeholder="click for Dialog"
-                    maxlength="16" />
-                </div>
-              </div>
-              <hr />
-              <!-- Remote 2 -->
+              <label for="cfg_auth_user" data-i18n="user"></label>
+              <input type="text" id="cfg_auth_user" name="auth_user" maxlength="63" />
+              <label for="cfg_auth_password" data-i18n="password"></label>
+              <input type="password" id="cfg_auth_password" name="auth_passw" maxlength="63" />
+            </details>
+<details name="settings-maintenance">
+              <summary data-i18n="service_access"></summary>
+              <label for="cfg_service_password" data-i18n="service_password"></label>
+              <input type="password" id="cfg_service_password" name="service_password" maxlength="63" autocomplete="new-password" />
+              <p><small data-i18n="service_hint"></small></p>
               <div class="section-header">
-                <label for="remote1" data-i18n="remote++ 2"></label>
+                <label for="cfg_service_telnet_enable" data-i18n="service_telnet"></label>
                 <div class="switch-container">
-                  <input
-                    name="remote1_enable"
-                    type="checkbox"
-                    role="switch"
-                    id="cfg_jaro_remote_enable_1" />
-                </div>
-              </div>
-              <br />
-              <div class="settings-container">
-                <div>
-                  <label for="name_remote_1" data-i18n="name"></label>
-                  <input
-                    name="name_remote_1"
-                    type="text"
-                    id="cfg_jaro_remote_name_1"
-                    placeholder="name" />
-                </div>
-                <div>
-                  <label for="serial_remote_1" data-i18n="serial_nr"></label>
-                  <input
-                    name="serial_remote_1"
-                    id="cfg_jaro_remote_serial_1"
-                    type="text"
-                    data-type="hex"
-                    data-length="6"
-                    oninput="validateHex(this)"
-                    pattern="[0-9a-fA-F]{1,6}"
-                    title="Enter up to 6 HEX digits"
-                    maxlength="6"
-                    onblur="formatHex(this)"
-                    placeholder="serial" />
-                </div>
-                <div>
-                  <label for="mask_remote_1" data-i18n="mask"></label>
-                  <input
-                    class="bitmask-input"
-                    name="mask_remote_1"
-                    type="text"
-                    data-type="bin"
-                    id="cfg_jaro_remote_mask_1"
-                    oninput="validateBin(this)"
-                    onblur="formatBin(this)"
-                    pattern="[01]{1,16}"
-                    placeholder="click for Dialog"
-                    maxlength="16" />
-                </div>
-              </div>
-              <hr />
-              <!-- Remote 3 -->
-              <div class="section-header">
-                <label for="remote2" data-i18n="remote++ 3"></label>
-                <div class="switch-container">
-                  <input
-                    name="remote2_enable"
-                    type="checkbox"
-                    role="switch"
-                    id="cfg_jaro_remote_enable_2" />
-                </div>
-              </div>
-              <br />
-              <div class="settings-container">
-                <div>
-                  <label for="name_remote_2" data-i18n="name"></label>
-                  <input
-                    name="name_remote_2"
-                    type="text"
-                    id="cfg_jaro_remote_name_2"
-                    placeholder="name" />
-                </div>
-                <div>
-                  <label for="serial_remote_2" data-i18n="serial_nr"></label>
-                  <input
-                    name="serial_remote_2"
-                    id="cfg_jaro_remote_serial_2"
-                    type="text"
-                    data-type="hex"
-                    data-length="6"
-                    oninput="validateHex(this)"
-                    pattern="[0-9a-fA-F]{1,6}"
-                    title="Enter up to 6 HEX digits"
-                    maxlength="6"
-                    onblur="formatHex(this)"
-                    placeholder="serial" />
-                </div>
-                <div>
-                  <label for="mask_remote_2" data-i18n="mask"></label>
-                  <input
-                    class="bitmask-input"
-                    name="mask_remote_2"
-                    type="text"
-                    data-type="bin"
-                    id="cfg_jaro_remote_mask_2"
-                    oninput="validateBin(this)"
-                    onblur="formatBin(this)"
-                    pattern="[01]{1,16}"
-                    placeholder="click for Dialog"
-                    maxlength="16" />
-                </div>
-              </div>
-              <hr />
-              <!-- Remote 4 -->
-              <div class="section-header">
-                <label for="remote3" data-i18n="remote++ 4"></label>
-                <div class="switch-container">
-                  <input
-                    name="remote3_enable"
-                    type="checkbox"
-                    role="switch"
-                    id="cfg_jaro_remote_enable_3" />
-                </div>
-              </div>
-              <br />
-              <div class="settings-container">
-                <div>
-                  <label for="name_remote_3" data-i18n="name"></label>
-                  <input
-                    name="name_remote_3"
-                    type="text"
-                    id="cfg_jaro_remote_name_3"
-                    placeholder="name" />
-                </div>
-                <div>
-                  <label for="serial_remote_3" data-i18n="serial_nr"></label>
-                  <input
-                    name="serial_remote_3"
-                    id="cfg_jaro_remote_serial_3"
-                    type="text"
-                    data-type="hex"
-                    data-length="6"
-                    oninput="validateHex(this)"
-                    pattern="[0-9a-fA-F]{1,6}"
-                    title="Enter up to 6 HEX digits"
-                    maxlength="6"
-                    onblur="formatHex(this)"
-                    placeholder="serial" />
-                </div>
-                <div>
-                  <label for="mask_remote_3" data-i18n="mask"></label>
-                  <input
-                    class="bitmask-input"
-                    name="mask_remote_3"
-                    type="text"
-                    data-type="bin"
-                    id="cfg_jaro_remote_mask_3"
-                    oninput="validateBin(this)"
-                    onblur="formatBin(this)"
-                    pattern="[01]{1,16}"
-                    placeholder="click for Dialog"
-                    maxlength="16" />
-                </div>
-              </div>
-              <hr />
-              <!-- Remote 5 -->
-              <div class="section-header">
-                <label for="remote4" data-i18n="remote++ 5"></label>
-                <div class="switch-container">
-                  <input
-                    name="remote4_enable"
-                    type="checkbox"
-                    role="switch"
-                    id="cfg_jaro_remote_enable_4" />
-                </div>
-              </div>
-              <br />
-              <div class="settings-container">
-                <div>
-                  <label for="name_remote_4" data-i18n="name"></label>
-                  <input
-                    name="name_remote_4"
-                    type="text"
-                    id="cfg_jaro_remote_name_4"
-                    placeholder="name" />
-                </div>
-                <div>
-                  <label for="serial_remote_4" data-i18n="serial_nr"></label>
-                  <input
-                    name="serial_remote_4"
-                    id="cfg_jaro_remote_serial_4"
-                    type="text"
-                    data-type="hex"
-                    data-length="6"
-                    oninput="validateHex(this)"
-                    pattern="[0-9a-fA-F]{1,6}"
-                    title="Enter up to 6 HEX digits"
-                    maxlength="6"
-                    onblur="formatHex(this)"
-                    placeholder="serial" />
-                </div>
-                <div>
-                  <label for="mask_remote_4" data-i18n="mask"></label>
-                  <input
-                    class="bitmask-input"
-                    name="mask_remote_4"
-                    type="text"
-                    data-type="bin"
-                    id="cfg_jaro_remote_mask_4"
-                    oninput="validateBin(this)"
-                    onblur="formatBin(this)"
-                    pattern="[01]{1,16}"
-                    placeholder="click for Dialog"
-                    maxlength="16" />
-                </div>
-              </div>
-              <hr />
-              <!-- Remote 6 -->
-              <div class="section-header">
-                <label for="remote5" data-i18n="remote++ 6"></label>
-                <div class="switch-container">
-                  <input
-                    name="remote5_enable"
-                    type="checkbox"
-                    role="switch"
-                    id="cfg_jaro_remote_enable_5" />
-                </div>
-              </div>
-              <br />
-              <div class="settings-container">
-                <div>
-                  <label for="name_remote_5" data-i18n="name"></label>
-                  <input
-                    name="name_remote_5"
-                    type="text"
-                    id="cfg_jaro_remote_name_5"
-                    placeholder="name" />
-                </div>
-                <div>
-                  <label for="serial_remote_5" data-i18n="serial_nr"></label>
-                  <input
-                    name="serial_remote_5"
-                    id="cfg_jaro_remote_serial_5"
-                    type="text"
-                    data-type="hex"
-                    data-length="6"
-                    oninput="validateHex(this)"
-                    pattern="[0-9a-fA-F]{1,6}"
-                    title="Enter up to 6 HEX digits"
-                    maxlength="6"
-                    onblur="formatHex(this)"
-                    placeholder="serial" />
-                </div>
-                <div>
-                  <label for="mask_remote_5" data-i18n="mask"></label>
-                  <input
-                    class="bitmask-input"
-                    name="mask_remote_5"
-                    type="text"
-                    data-type="bin"
-                    id="cfg_jaro_remote_mask_5"
-                    oninput="validateBin(this)"
-                    onblur="formatBin(this)"
-                    pattern="[01]{1,16}"
-                    placeholder="click for Dialog"
-                    maxlength="16" />
-                </div>
-              </div>
-              <hr />
-              <!-- Remote 7 -->
-              <div class="section-header">
-                <label for="remote6" data-i18n="remote++ 7"></label>
-                <div class="switch-container">
-                  <input
-                    name="remote6_enable"
-                    type="checkbox"
-                    role="switch"
-                    id="cfg_jaro_remote_enable_6" />
-                </div>
-              </div>
-              <br />
-              <div class="settings-container">
-                <div>
-                  <label for="name_remote_6" data-i18n="name"></label>
-                  <input
-                    name="name_remote_6"
-                    type="text"
-                    id="cfg_jaro_remote_name_6"
-                    placeholder="name" />
-                </div>
-                <div>
-                  <label for="serial_remote_6" data-i18n="serial_nr"></label>
-                  <input
-                    name="serial_remote_6"
-                    id="cfg_jaro_remote_serial_6"
-                    type="text"
-                    data-type="hex"
-                    data-length="6"
-                    oninput="validateHex(this)"
-                    pattern="[0-9a-fA-F]{1,6}"
-                    title="Enter up to 6 HEX digits"
-                    maxlength="6"
-                    onblur="formatHex(this)"
-                    placeholder="serial" />
-                </div>
-                <div>
-                  <label for="mask_remote_6" data-i18n="mask"></label>
-                  <input
-                    class="bitmask-input"
-                    name="mask_remote_6"
-                    type="text"
-                    data-type="bin"
-                    id="cfg_jaro_remote_mask_6"
-                    oninput="validateBin(this)"
-                    onblur="formatBin(this)"
-                    pattern="[01]{1,16}"
-                    placeholder="click for Dialog"
-                    maxlength="16" />
-                </div>
-              </div>
-              <hr />
-              <!-- Remote 8 -->
-              <div class="section-header">
-                <label for="remote7" data-i18n="remote++ 8"></label>
-                <div class="switch-container">
-                  <input
-                    name="remote7_enable"
-                    type="checkbox"
-                    role="switch"
-                    id="cfg_jaro_remote_enable_7" />
-                </div>
-              </div>
-              <br />
-              <div class="settings-container">
-                <div>
-                  <label for="name_remote_7" data-i18n="name"></label>
-                  <input
-                    name="name_remote_7"
-                    type="text"
-                    id="cfg_jaro_remote_name_7"
-                    placeholder="name" />
-                </div>
-                <div>
-                  <label for="serial_remote_7" data-i18n="serial_nr"></label>
-                  <input
-                    name="serial_remote_7"
-                    id="cfg_jaro_remote_serial_7"
-                    type="text"
-                    data-type="hex"
-                    data-length="6"
-                    oninput="validateHex(this)"
-                    pattern="[0-9a-fA-F]{1,6}"
-                    title="Enter up to 6 HEX digits"
-                    maxlength="6"
-                    onblur="formatHex(this)"
-                    placeholder="serial" />
-                </div>
-                <div>
-                  <label for="mask_remote_7" data-i18n="mask"></label>
-                  <input
-                    class="bitmask-input"
-                    name="mask_remote_7"
-                    type="text"
-                    data-type="bin"
-                    id="cfg_jaro_remote_mask_7"
-                    oninput="validateBin(this)"
-                    onblur="formatBin(this)"
-                    pattern="[01]{1,16}"
-                    placeholder="click for Dialog"
-                    maxlength="16" />
-                </div>
-              </div>
-              <hr />
-              <!-- Remote 9 -->
-              <div class="section-header">
-                <label for="remote8" data-i18n="remote++ 9"></label>
-                <div class="switch-container">
-                  <input
-                    name="remote8_enable"
-                    type="checkbox"
-                    role="switch"
-                    id="cfg_jaro_remote_enable_8" />
-                </div>
-              </div>
-              <br />
-              <div class="settings-container">
-                <div>
-                  <label for="name_remote_8" data-i18n="name"></label>
-                  <input
-                    name="name_remote_8"
-                    type="text"
-                    id="cfg_jaro_remote_name_8"
-                    placeholder="name" />
-                </div>
-                <div>
-                  <label for="serial_remote_8" data-i18n="serial_nr"></label>
-                  <input
-                    name="serial_remote_8"
-                    id="cfg_jaro_remote_serial_8"
-                    type="text"
-                    data-type="hex"
-                    data-length="6"
-                    oninput="validateHex(this)"
-                    pattern="[0-9a-fA-F]{1,6}"
-                    title="Enter up to 6 HEX digits"
-                    maxlength="6"
-                    onblur="formatHex(this)"
-                    placeholder="serial" />
-                </div>
-                <div>
-                  <label for="mask_remote_8" data-i18n="mask"></label>
-                  <input
-                    class="bitmask-input"
-                    name="mask_remote_8"
-                    type="text"
-                    data-type="bin"
-                    id="cfg_jaro_remote_mask_8"
-                    oninput="validateBin(this)"
-                    onblur="formatBin(this)"
-                    pattern="[01]{1,16}"
-                    placeholder="click for Dialog"
-                    maxlength="16" />
-                </div>
-              </div>
-              <hr />
-              <!-- Remote 10 -->
-              <div class="section-header">
-                <label for="remote9" data-i18n="remote++ 10"></label>
-                <div class="switch-container">
-                  <input
-                    name="remote9_enable"
-                    type="checkbox"
-                    role="switch"
-                    id="cfg_jaro_remote_enable_9" />
-                </div>
-              </div>
-              <br />
-              <div class="settings-container">
-                <div>
-                  <label for="name_remote_9" data-i18n="name"></label>
-                  <input
-                    name="name_remote_9"
-                    type="text"
-                    id="cfg_jaro_remote_name_9"
-                    placeholder="name" />
-                </div>
-                <div>
-                  <label for="serial_remote_9" data-i18n="serial_nr"></label>
-                  <input
-                    name="serial_remote_9"
-                    id="cfg_jaro_remote_serial_9"
-                    type="text"
-                    data-type="hex"
-                    data-length="6"
-                    oninput="validateHex(this)"
-                    pattern="[0-9a-fA-F]{1,6}"
-                    title="Enter up to 6 HEX digits"
-                    maxlength="6"
-                    onblur="formatHex(this)"
-                    placeholder="serial" />
-                </div>
-                <div>
-                  <label for="mask_remote_9" data-i18n="mask"></label>
-                  <input
-                    class="bitmask-input"
-                    name="mask_remote_9"
-                    type="text"
-                    data-type="bin"
-                    id="cfg_jaro_remote_mask_9"
-                    oninput="validateBin(this)"
-                    onblur="formatBin(this)"
-                    pattern="[01]{1,16}"
-                    placeholder="click for Dialog"
-                    maxlength="16" />
-                </div>
-              </div>
-              <hr />
-              <!-- Remote 11 -->
-              <div class="section-header">
-                <label for="remote10" data-i18n="remote++ 11"></label>
-                <div class="switch-container">
-                  <input
-                    name="remote10_enable"
-                    type="checkbox"
-                    role="switch"
-                    id="cfg_jaro_remote_enable_10" />
-                </div>
-              </div>
-              <br />
-              <div class="settings-container">
-                <div>
-                  <label for="name_remote_10" data-i18n="name"></label>
-                  <input
-                    name="name_remote_10"
-                    type="text"
-                    id="cfg_jaro_remote_name_10"
-                    placeholder="name" />
-                </div>
-                <div>
-                  <label for="serial_remote_10" data-i18n="serial_nr"></label>
-                  <input
-                    name="serial_remote_10"
-                    id="cfg_jaro_remote_serial_10"
-                    type="text"
-                    data-type="hex"
-                    data-length="6"
-                    oninput="validateHex(this)"
-                    pattern="[0-9a-fA-F]{1,6}"
-                    title="Enter up to 6 HEX digits"
-                    maxlength="6"
-                    onblur="formatHex(this)"
-                    placeholder="serial" />
-                </div>
-                <div>
-                  <label for="mask_remote_10" data-i18n="mask"></label>
-                  <input
-                    class="bitmask-input"
-                    name="mask_remote_10"
-                    type="text"
-                    data-type="bin"
-                    id="cfg_jaro_remote_mask_10"
-                    oninput="validateBin(this)"
-                    onblur="formatBin(this)"
-                    pattern="[01]{1,16}"
-                    placeholder="click for Dialog"
-                    maxlength="16" />
-                </div>
-              </div>
-              <hr />
-              <!-- Remote 12 -->
-              <div class="section-header">
-                <label for="remote11" data-i18n="remote++ 12"></label>
-                <div class="switch-container">
-                  <input
-                    name="remote11_enable"
-                    type="checkbox"
-                    role="switch"
-                    id="cfg_jaro_remote_enable_11" />
-                </div>
-              </div>
-              <br />
-              <div class="settings-container">
-                <div>
-                  <label for="name_remote_11" data-i18n="name"></label>
-                  <input
-                    name="name_remote_11"
-                    type="text"
-                    id="cfg_jaro_remote_name_11"
-                    placeholder="name" />
-                </div>
-                <div>
-                  <label for="serial_remote_11" data-i18n="serial_nr"></label>
-                  <input
-                    name="serial_remote_11"
-                    id="cfg_jaro_remote_serial_11"
-                    type="text"
-                    data-type="hex"
-                    data-length="6"
-                    oninput="validateHex(this)"
-                    pattern="[0-9a-fA-F]{1,6}"
-                    title="Enter up to 6 HEX digits"
-                    maxlength="6"
-                    onblur="formatHex(this)"
-                    placeholder="serial" />
-                </div>
-                <div>
-                  <label for="mask_remote_11" data-i18n="mask"></label>
-                  <input
-                    class="bitmask-input"
-                    name="mask_remote_11"
-                    type="text"
-                    data-type="bin"
-                    id="cfg_jaro_remote_mask_11"
-                    oninput="validateBin(this)"
-                    onblur="formatBin(this)"
-                    pattern="[01]{1,16}"
-                    placeholder="click for Dialog"
-                    maxlength="16" />
-                </div>
-              </div>
-              <hr />
-              <!-- Remote 13 -->
-              <div class="section-header">
-                <label for="remote12" data-i18n="remote++ 13"></label>
-                <div class="switch-container">
-                  <input
-                    name="remote12_enable"
-                    type="checkbox"
-                    role="switch"
-                    id="cfg_jaro_remote_enable_12" />
-                </div>
-              </div>
-              <br />
-              <div class="settings-container">
-                <div>
-                  <label for="name_remote_12" data-i18n="name"></label>
-                  <input
-                    name="name_remote_12"
-                    type="text"
-                    id="cfg_jaro_remote_name_12"
-                    placeholder="name" />
-                </div>
-                <div>
-                  <label for="serial_remote_12" data-i18n="serial_nr"></label>
-                  <input
-                    name="serial_remote_12"
-                    id="cfg_jaro_remote_serial_12"
-                    type="text"
-                    data-type="hex"
-                    data-length="6"
-                    oninput="validateHex(this)"
-                    pattern="[0-9a-fA-F]{1,6}"
-                    title="Enter up to 6 HEX digits"
-                    maxlength="6"
-                    onblur="formatHex(this)"
-                    placeholder="serial" />
-                </div>
-                <div>
-                  <label for="mask_remote_12" data-i18n="mask"></label>
-                  <input
-                    class="bitmask-input"
-                    name="mask_remote_12"
-                    type="text"
-                    data-type="bin"
-                    id="cfg_jaro_remote_mask_12"
-                    oninput="validateBin(this)"
-                    onblur="formatBin(this)"
-                    pattern="[01]{1,16}"
-                    placeholder="click for Dialog"
-                    maxlength="16" />
-                </div>
-              </div>
-              <hr />
-              <!-- Remote 14 -->
-              <div class="section-header">
-                <label for="remote13" data-i18n="remote++ 14"></label>
-                <div class="switch-container">
-                  <input
-                    name="remote13_enable"
-                    type="checkbox"
-                    role="switch"
-                    id="cfg_jaro_remote_enable_13" />
-                </div>
-              </div>
-              <br />
-              <div class="settings-container">
-                <div>
-                  <label for="name_remote_13" data-i18n="name"></label>
-                  <input
-                    name="name_remote_13"
-                    type="text"
-                    id="cfg_jaro_remote_name_13"
-                    placeholder="name" />
-                </div>
-                <div>
-                  <label for="serial_remote_13" data-i18n="serial_nr"></label>
-                  <input
-                    name="serial_remote_13"
-                    id="cfg_jaro_remote_serial_13"
-                    type="text"
-                    data-type="hex"
-                    data-length="6"
-                    oninput="validateHex(this)"
-                    pattern="[0-9a-fA-F]{1,6}"
-                    title="Enter up to 6 HEX digits"
-                    maxlength="6"
-                    onblur="formatHex(this)"
-                    placeholder="serial" />
-                </div>
-                <div>
-                  <label for="mask_remote_13" data-i18n="mask"></label>
-                  <input
-                    class="bitmask-input"
-                    name="mask_remote_13"
-                    type="text"
-                    data-type="bin"
-                    id="cfg_jaro_remote_mask_13"
-                    oninput="validateBin(this)"
-                    onblur="formatBin(this)"
-                    pattern="[01]{1,16}"
-                    placeholder="click for Dialog"
-                    maxlength="16" />
-                </div>
-              </div>
-              <hr />
-              <!-- Remote 15 -->
-              <div class="section-header">
-                <label for="remote14" data-i18n="remote++ 15"></label>
-                <div class="switch-container">
-                  <input
-                    name="remote14_enable"
-                    type="checkbox"
-                    role="switch"
-                    id="cfg_jaro_remote_enable_14" />
-                </div>
-              </div>
-              <br />
-              <div class="settings-container">
-                <div>
-                  <label for="name_remote_14" data-i18n="name"></label>
-                  <input
-                    name="name_remote_14"
-                    type="text"
-                    id="cfg_jaro_remote_name_14"
-                    placeholder="name" />
-                </div>
-                <div>
-                  <label for="serial_remote_14" data-i18n="serial_nr"></label>
-                  <input
-                    name="serial_remote_14"
-                    id="cfg_jaro_remote_serial_14"
-                    type="text"
-                    data-type="hex"
-                    data-length="6"
-                    oninput="validateHex(this)"
-                    pattern="[0-9a-fA-F]{1,6}"
-                    title="Enter up to 6 HEX digits"
-                    maxlength="6"
-                    onblur="formatHex(this)"
-                    placeholder="serial" />
-                </div>
-                <div>
-                  <label for="mask_remote_14" data-i18n="mask"></label>
-                  <input
-                    class="bitmask-input"
-                    name="mask_remote_14"
-                    type="text"
-                    data-type="bin"
-                    id="cfg_jaro_remote_mask_14"
-                    oninput="validateBin(this)"
-                    onblur="formatBin(this)"
-                    pattern="[01]{1,16}"
-                    placeholder="click for Dialog"
-                    maxlength="16" />
-                </div>
-              </div>
-              <hr />
-              <!-- Remote 16 -->
-              <div class="section-header">
-                <label for="remote15" data-i18n="remote++ 16"></label>
-                <div class="switch-container">
-                  <input
-                    name="remote15_enable"
-                    type="checkbox"
-                    role="switch"
-                    id="cfg_jaro_remote_enable_15" />
-                </div>
-              </div>
-              <br />
-              <div class="settings-container">
-                <div>
-                  <label for="name_remote_15" data-i18n="name"></label>
-                  <input
-                    name="name_remote_15"
-                    type="text"
-                    id="cfg_jaro_remote_name_15"
-                    placeholder="name" />
-                </div>
-                <div>
-                  <label for="serial_remote_15" data-i18n="serial_nr"></label>
-                  <input
-                    name="serial_remote_15"
-                    id="cfg_jaro_remote_serial_15"
-                    type="text"
-                    data-type="hex"
-                    data-length="6"
-                    oninput="validateHex(this)"
-                    pattern="[0-9a-fA-F]{1,6}"
-                    title="Enter up to 6 HEX digits"
-                    maxlength="6"
-                    onblur="formatHex(this)"
-                    placeholder="serial" />
-                </div>
-                <div>
-                  <label for="mask_remote_15" data-i18n="mask"></label>
-                  <input
-                    class="bitmask-input"
-                    name="mask_remote_15"
-                    type="text"
-                    data-type="bin"
-                    id="cfg_jaro_remote_mask_15"
-                    oninput="validateBin(this)"
-                    onblur="formatBin(this)"
-                    pattern="[01]{1,16}"
-                    placeholder="click for Dialog"
-                    maxlength="16" />
+                  <input id="cfg_service_telnet_enable" name="service_telnet_enable" type="checkbox" role="switch" />
                 </div>
               </div>
             </details>
-            <hr />
-            <!-- Language -->
-            <details>
-              <summary data-i18n="language"></summary>
-              <select id="cfg_lang">
-                <option value="0" data-i18n="german"></option>
-                <option value="1" data-i18n="english"></option>
-              </select>
-            </details>
-            <hr />
-            <!-- Buttons -->
-            <button
+</section>
+<div class="settings-actions">
+<button
               id="p12_btn_restart"
               data-i18n="restart"
               onclick="restartFunction()"
               style="width: 100%; margin-bottom: 10px"></button>
-            <br />
-            <br />
-          </div>
-        </div>
-      </div>
-<div id="tab13" class="tab-content">
-        <div class="grid" style="max-width: 800px">
-          <div>
-            <h4 data-i18n="gpio"></h2>
-            <h6 data-i18n="gpio_info"></h6>
-              <table>
-              <tr>
-                <th>Signal</th>
-                <th>GPIO</th>
-              </tr>
-              <tbody>
-                <tr>
-                  <td>GD0</td>
-                  <td>21</td>
-                </tr>
-                <tr>
-                  <td>GD2</td>
-                  <td>22</td>
-                </tr>
-                <tr>
-                  <td>CLK</td>
-                  <td>18</td>
-                </tr>
-                <tr>
-                  <td>MOSI</td>
-                  <td>23</td>
-                </tr>
-                <tr>
-                  <td>MISO</td>
-                  <td>19</td>
-                </tr>
-                <tr>
-                  <td>CS</td>
-                  <td>5</td>
-                </tr>
-              </tbody>
-            </table>
-            <div class="info-box">
-              <div class="info-icon">&#9432;</div>
-              <div class="info-text" data-i18n="gpio_restart_info"></div>
-            </div>
-          </div>
-        </div>
-        <hr />
-        <!--GPIO-END-->
-        <div class="grid" style="max-width: 800px">
-          <div>
-            <h4 data-i18n="mqtt"></h4>
-            <h6 data-i18n="general"></h6>
-            <table>
-              <tr>
-                <th>Command</th>
-                <th>Topic</th>
-                <th>Payload</th>
-              </tr>
-              <tbody>
-                <tr>
-                  <td>Restart ESP</td>
-                  <td>../cmd/restart</td>
-                  <td>none</td>
-                </tr>
-              </tbody>
-            </table>
-            <h6 data-i18n="shutter"></h6>
-            <table>
-              <tr>
-                <th>Command</th>
-                <th>Topic</th>
-                <th>Payload</th>
-              </tr>
-              <tbody>
-                <tr>
-                  <td>Restart ESP</td>
-                  <td>../cmd/restart</td>
-                  <td>none</td>
-                </tr>
-                <tr>
-                  <td>Shutter UP</td>
-                  <td>../cmd/shutter/1 ... cmd/shutter/16</td>
-                  <td>{UP, OPEN, 0}</td>
-                </tr>
-                <tr>
-                  <td>Shutter DOWN</td>
-                  <td>../cmd/shutter/1 ... cmd/shutter/16</td>
-                  <td>{DOWN, CLOSE, 1}</td>
-                </tr>
-                <tr>
-                  <td>Shutter STOP</td>
-                  <td>../cmd/shutter/1 ... cmd/shutter/16</td>
-                  <td>{STOP, 2}</td>
-                </tr>
-                <tr>
-                  <td>Shutter SHADE</td>
-                  <td>../cmd/shutter/1 ... cmd/shutter/16</td>
-                  <td>{SHADE, 3}</td>
-                </tr>
-              </tbody>
-            </table>
-            <h6 data-i18n="groups"></h6>
-            <table>
-              <tr>
-                <th>Command</th>
-                <th>Topic</th>
-                <th>Payload</th>
-              </tr>
-              <tbody>
-                <tr>
-                  <td>Group UP</td>
-                  <td>../cmd/group/1 ... cmd/shutter/6</td>
-                  <td>{UP, OPEN, 0}</td>
-                </tr>
-                <tr>
-                  <td>Group DOWN</td>
-                  <td>../cmd/group/1 ... cmd/shutter/6</td>
-                  <td>{DOWN, CLOSE, 1}</td>
-                </tr>
-                <tr>
-                  <td>Group STOP</td>
-                  <td>../cmd/group/1 ... cmd/shutter/6</td>
-                  <td>{STOP, 2}</td>
-                </tr>
-                <tr>
-                  <td>Group SHADE</td>
-                  <td>../cmd/group/1 ... cmd/shutter/6</td>
-                  <td>{SHADE, 3}</td>
-                </tr>
-              </tbody>
-            </table>
-            <h6 data-i18n="group$ $mask"></h6>
-            <div data-i18n="grp_mask_help"></div><br>
-            <code> Binary: 0b0000000000010101</code><br>
-            <code> Hex: 0x15</code><br>
-            <code> Decimal: 21</code><br><br>
-            
-            <table>
-              <tr>
-                <th>Command</th>
-                <th>Topic</th>
-                <th>Payload</th>
-              </tr>
-              <tbody>
-                <tr>
-                  <td>Group UP</td>
-                  <td>../cmd/group/up</td>
-                  <td>{0b0000000000010101, 0x15, 21}</td>
-                </tr>
-                <tr>
-                  <td>Group DOWN</td>
-                  <td>../cmd/group/down</td>
-                  <td>{0b0000000000010101, 0x15, 21}</td>
-                </tr>
-                <tr>
-                  <td>Group STOP</td>
-                  <td>../cmd/group/stop</td>
-                  <td>{0b0000000000010101, 0x15, 21}</td>
-                </tr>
-                <tr>
-                  <td>Group SHADE</td>
-                  <td>../cmd/group/shade</td>
-                  <td>{0b0000000000010101, 0x15, 21}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="info-box">
-              <div class="info-icon">&#9432;</div>
-              <div class="info-text" data-i18n="mqtt_info2"></div>
-            </div>
-        </div>
-      </div>
+</div>
+</div></div></div>
+
+
+<dialog id="p12_ntp_dialog">
+              <article>
+                <div id="p12_ntp_help_output"></div>
+                <div class="dash-footer">
+                  <button
+                    id="p12_ntp_close_dialog_btn"
+                    data-i18n="close"
+                    style="width: 75%"></button>
+                </div>
+              </article>
+            </dialog>
+<dialog id="p12_bitmask_dialog">
+              <article>
+                <h3 data-i18n="help"></h3>
+                <div data-i18n="mask_help"></div>
+                <div class="dash-footer">
+                  <button
+                    onclick="closeGrpMaskHelp(this)"
+                    data-i18n="close"
+                    style="width: 75%"></button>
+                </div>
+              </article>
+            </dialog></div>
+
+<div hidden aria-hidden="true"><input type="hidden" id="cfg_position_calibration_0_0" /><input type="hidden" id="cfg_position_calibration_0_1" /><input type="hidden" id="cfg_position_calibration_0_2" /><input type="hidden" id="cfg_position_calibration_0_3" /><input type="hidden" id="cfg_position_calibration_0_4" /><input type="hidden" id="cfg_position_calibration_0_5" /><input type="hidden" id="cfg_position_calibration_1_0" /><input type="hidden" id="cfg_position_calibration_1_1" /><input type="hidden" id="cfg_position_calibration_1_2" /><input type="hidden" id="cfg_position_calibration_1_3" /><input type="hidden" id="cfg_position_calibration_1_4" /><input type="hidden" id="cfg_position_calibration_1_5" /><input type="hidden" id="cfg_position_calibration_2_0" /><input type="hidden" id="cfg_position_calibration_2_1" /><input type="hidden" id="cfg_position_calibration_2_2" /><input type="hidden" id="cfg_position_calibration_2_3" /><input type="hidden" id="cfg_position_calibration_2_4" /><input type="hidden" id="cfg_position_calibration_2_5" /><input type="hidden" id="cfg_position_calibration_3_0" /><input type="hidden" id="cfg_position_calibration_3_1" /><input type="hidden" id="cfg_position_calibration_3_2" /><input type="hidden" id="cfg_position_calibration_3_3" /><input type="hidden" id="cfg_position_calibration_3_4" /><input type="hidden" id="cfg_position_calibration_3_5" /><input type="hidden" id="cfg_position_calibration_4_0" /><input type="hidden" id="cfg_position_calibration_4_1" /><input type="hidden" id="cfg_position_calibration_4_2" /><input type="hidden" id="cfg_position_calibration_4_3" /><input type="hidden" id="cfg_position_calibration_4_4" /><input type="hidden" id="cfg_position_calibration_4_5" /><input type="hidden" id="cfg_position_calibration_5_0" /><input type="hidden" id="cfg_position_calibration_5_1" /><input type="hidden" id="cfg_position_calibration_5_2" /><input type="hidden" id="cfg_position_calibration_5_3" /><input type="hidden" id="cfg_position_calibration_5_4" /><input type="hidden" id="cfg_position_calibration_5_5" /><input type="hidden" id="cfg_position_calibration_6_0" /><input type="hidden" id="cfg_position_calibration_6_1" /><input type="hidden" id="cfg_position_calibration_6_2" /><input type="hidden" id="cfg_position_calibration_6_3" /><input type="hidden" id="cfg_position_calibration_6_4" /><input type="hidden" id="cfg_position_calibration_6_5" /><input type="hidden" id="cfg_position_calibration_7_0" /><input type="hidden" id="cfg_position_calibration_7_1" /><input type="hidden" id="cfg_position_calibration_7_2" /><input type="hidden" id="cfg_position_calibration_7_3" /><input type="hidden" id="cfg_position_calibration_7_4" /><input type="hidden" id="cfg_position_calibration_7_5" /><input type="hidden" id="cfg_position_calibration_8_0" /><input type="hidden" id="cfg_position_calibration_8_1" /><input type="hidden" id="cfg_position_calibration_8_2" /><input type="hidden" id="cfg_position_calibration_8_3" /><input type="hidden" id="cfg_position_calibration_8_4" /><input type="hidden" id="cfg_position_calibration_8_5" /><input type="hidden" id="cfg_position_calibration_9_0" /><input type="hidden" id="cfg_position_calibration_9_1" /><input type="hidden" id="cfg_position_calibration_9_2" /><input type="hidden" id="cfg_position_calibration_9_3" /><input type="hidden" id="cfg_position_calibration_9_4" /><input type="hidden" id="cfg_position_calibration_9_5" /><input type="hidden" id="cfg_position_calibration_10_0" /><input type="hidden" id="cfg_position_calibration_10_1" /><input type="hidden" id="cfg_position_calibration_10_2" /><input type="hidden" id="cfg_position_calibration_10_3" /><input type="hidden" id="cfg_position_calibration_10_4" /><input type="hidden" id="cfg_position_calibration_10_5" /><input type="hidden" id="cfg_position_calibration_11_0" /><input type="hidden" id="cfg_position_calibration_11_1" /><input type="hidden" id="cfg_position_calibration_11_2" /><input type="hidden" id="cfg_position_calibration_11_3" /><input type="hidden" id="cfg_position_calibration_11_4" /><input type="hidden" id="cfg_position_calibration_11_5" /><input type="hidden" id="cfg_position_calibration_12_0" /><input type="hidden" id="cfg_position_calibration_12_1" /><input type="hidden" id="cfg_position_calibration_12_2" /><input type="hidden" id="cfg_position_calibration_12_3" /><input type="hidden" id="cfg_position_calibration_12_4" /><input type="hidden" id="cfg_position_calibration_12_5" /><input type="hidden" id="cfg_position_calibration_13_0" /><input type="hidden" id="cfg_position_calibration_13_1" /><input type="hidden" id="cfg_position_calibration_13_2" /><input type="hidden" id="cfg_position_calibration_13_3" /><input type="hidden" id="cfg_position_calibration_13_4" /><input type="hidden" id="cfg_position_calibration_13_5" /><input type="hidden" id="cfg_position_calibration_14_0" /><input type="hidden" id="cfg_position_calibration_14_1" /><input type="hidden" id="cfg_position_calibration_14_2" /><input type="hidden" id="cfg_position_calibration_14_3" /><input type="hidden" id="cfg_position_calibration_14_4" /><input type="hidden" id="cfg_position_calibration_14_5" /><input type="hidden" id="cfg_position_calibration_15_0" /><input type="hidden" id="cfg_position_calibration_15_1" /><input type="hidden" id="cfg_position_calibration_15_2" /><input type="hidden" id="cfg_position_calibration_15_3" /><input type="hidden" id="cfg_position_calibration_15_4" /><input type="hidden" id="cfg_position_calibration_15_5" /></div>
+<div id="tab13" class="tab-content information-page information-page--compact jarolift-help">
+<header class="page-heading">
+<h1 data-i18n="help">
+</h1>
+<p data-i18n="jaro_help_subtitle">
+</p>
+</header>
+<p data-i18n="help_intro" class="help-intro">
+</p>
+<nav class="help-shortcuts">
+<a href="#help-operation" data-help-open="help-operation">
+<strong data-i18n="help_operate">
+</strong>
+<span data-i18n="help_operate_hint">
+</span>
+</a>
+<a href="#help-position" data-help-open="help-position">
+<strong data-i18n="help_setup">
+</strong>
+<span data-i18n="help_setup_hint">
+</span>
+</a>
+<a href="#help-problems" data-help-open="help-problems">
+<strong data-i18n="help_solve">
+</strong>
+<span data-i18n="help_solve_hint">
+</span>
+</a>
+</nav>
+<details id="help-operation" class="help-panel" name="jarolift-help" open>
+<summary data-i18n="help_operation">
+</summary>
+<div class="help-content">
+<p data-i18n="help_buttons">
+</p>
+<p data-i18n="help_target">
+</p>
+<p data-i18n="help_estimate" class="help-note">
+</p>
+<div class="tools-actions">
+<button data-i18n="help_channels" type="button" data-ui-local data-help-page="tab1">
+</button>
+</div>
+<h3 data-i18n="help_timer_groups"></h3>
+<p data-i18n="help_groups">
+</p>
+<p data-i18n="help_timer">
+</p>
+<p data-i18n="help_timer_location">
+</p>
+<div class="tools-actions">
+<button data-i18n="help_timers" type="button" data-ui-local data-help-page="tab3">
+</button>
+</div>
+</div>
+</details>
+<details id="help-position" class="help-panel" name="jarolift-help">
+<summary data-i18n="help_position">
+</summary>
+<div class="help-content">
+<p data-i18n="help_position_enable">
+</p>
+<h3 data-i18n="help_reference_title">
+</h3>
+<p data-i18n="help_reference">
+</p>
+<p data-i18n="help_reference_route">
+</p>
+<h3 data-i18n="help_calibration_title">
+</h3>
+<ol>
+<li data-i18n="help_cal1">
+</li>
+<li data-i18n="help_cal2">
+</li>
+<li data-i18n="help_cal3">
+</li>
+<li data-i18n="help_cal4">
+</li>
+<li data-i18n="help_cal5">
+</li>
+</ol>
+<p data-i18n="help_calibration_note" class="help-note">
+</p>
+<div class="tools-actions">
+<button data-i18n="help_service" type="button" data-ui-local data-help-page="tab4">
+</button>
+<button data-i18n="help_settings" type="button" data-ui-local data-help-page="tab12">
+</button>
+</div>
+</div>
+</details>
+<details id="help-remotes" class="help-panel" name="jarolift-help">
+<summary data-i18n="help_remotes">
+</summary>
+<div class="help-content">
+<p data-i18n="help_remote_intro">
+</p>
+<ol>
+<li data-i18n="help_remote1">
+</li>
+<li data-i18n="help_remote2">
+</li>
+<li data-i18n="help_remote3">
+</li>
+</ol>
+<p data-i18n="help_remote_limits">
+</p>
+<p data-i18n="help_remote_delete">
+</p>
+<div class="tools-actions">
+<button data-i18n="help_service" type="button" data-ui-local data-help-page="tab4">
+</button>
+</div>
+</div>
+</details>
+<details id="help-mqtt" class="help-panel" name="jarolift-help">
+<summary data-i18n="help_mqtt_title"></summary>
+<div class="help-content">
+<p data-i18n="help_mqtt_ha">
+</p>
+<p data-i18n="help_ha_status">
+</p>
+<h3 data-i18n="help_mqtt_topics"></h3>
+<p data-i18n="help_mqtt_reference">
+</p>
+<p class="information-note" data-i18n="mqtt_info2">
+</p>
+<div class="help-table">
+<table>
+<thead>
+<tr>
+<th data-i18n="help_topic">
+</th>
+<th data-i18n="help_payload">
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>../cmd/shutter/N</code>
+</td>
+<td data-i18n="help_shutter_payload">
+</td>
+</tr>
+<tr>
+<td>
+<code>../cmd/group/G</code>
+</td>
+<td data-i18n="help_group_payload">
+</td>
+</tr>
+<tr>
+<td>
+<code>../cmd/position/N</code>
+</td>
+<td data-i18n="help_position_payload">
+</td>
+</tr>
+<tr>
+<td>
+<code>../status/shutter/N</code>
+</td>
+<td data-i18n="help_status_payload">
+</td>
+</tr>
+<tr>
+<td>
+<code>../cmd/restart</code>
+</td>
+<td data-i18n="help_restart_payload">
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p data-i18n="help_mqtt_numbers" class="help-note">
+</p>
+<p data-i18n="help_group_mask">
+</p>
+</div>
+</details>
+<details id="help-connections" class="help-panel" name="jarolift-help">
+<summary data-i18n="help_connections">
+</summary>
+<div class="help-content">
+<p data-i18n="help_access">
+</p>
+<p data-i18n="help_setup_access">
+</p>
+<p data-i18n="help_updates">
+</p>
+<div class="tools-actions">
+<button data-i18n="help_tools" type="button" data-ui-local data-help-page="tab11">
+</button>
+<button data-i18n="help_settings" type="button" data-ui-local data-help-page="tab12">
+</button>
+</div>
+</div>
+</details>
+<details id="help-problems" class="help-panel" name="jarolift-help">
+<summary data-i18n="help_problems">
+</summary>
+<div class="help-content">
+<dl>
+<dt data-i18n="help_unknown">
+</dt>
+<dd data-i18n="help_unknown_answer">
+</dd>
+<dt data-i18n="help_missing">
+</dt>
+<dd data-i18n="help_missing_answer">
+</dd>
+<dt data-i18n="help_busy">
+</dt>
+<dd data-i18n="help_busy_answer">
+</dd>
+<dt data-i18n="help_rf">
+</dt>
+<dd data-i18n="help_rf_answer">
+</dd>
+<dt data-i18n="help_network">
+</dt>
+<dd data-i18n="help_network_answer">
+</dd>
+</dl>
+<div class="tools-actions">
+<button data-i18n="help_system" type="button" data-ui-local data-help-page="tab9">
+</button>
+<button data-i18n="help_logger" type="button" data-ui-local data-help-page="tab10">
+</button>
+</div>
+</div>
+</details>
+<details id="help-wiring" class="help-panel" name="jarolift-help">
+<summary data-i18n="help_wiring_title"></summary>
+<div class="help-content">
+<p data-i18n="gpio_info">
+</p>
+<div class="help-table">
+<table>
+<thead>
+<tr>
+<th>CC1101</th>
+<th>GPIO</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GDO0</td>
+<td>21</td>
+</tr>
+<tr>
+<td>GDO2</td>
+<td>22</td>
+</tr>
+<tr>
+<td>CLK</td>
+<td>18</td>
+</tr>
+<tr>
+<td>MOSI</td>
+<td>23</td>
+</tr>
+<tr>
+<td>MISO</td>
+<td>19</td>
+</tr>
+<tr>
+<td>CS</td>
+<td>5</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p data-i18n="help_gpio_note">
+</p>
+</div>
+</details>
+<section class="card help-docs">
+<h2 data-i18n="help_docs">
+</h2>
+<div class="help-doc-links">
+<a data-i18n="help_readme" id="help-readme" href="https://github.com/dewenni/ESP32-Jarolift-Controller/blob/main/README_DE.md" target="_blank" rel="noopener noreferrer">
+</a>
+<a data-i18n="help_doc_position" href="https://github.com/dewenni/ESP32-Jarolift-Controller/blob/main/Doc/Positionierung.md" target="_blank" rel="noopener noreferrer">
+</a>
+<a data-i18n="help_doc_rf" href="https://github.com/dewenni/ESP32-Jarolift-Controller/blob/main/Doc/RF-Empfang.md" target="_blank" rel="noopener noreferrer">
+</a>
+</div>
+<p data-i18n="help_doc_hint" class="information-note">
+</p>
+</section>
+</div>
 </main>
+    </section>
       <footer>
-        <div
-          id="connectionLostBar"
-          class="footerBar"
-          style="display: none; background-color: #732e2e">
-          <div data-i18n="lost_connection"></div>
-          <button
-            id="p99_reloadButton"
-            class="svg i_auto"
-            style="width: 50px"></button>
-        </div>
-        <div
-          id="errorBar"
-          class="footerBar"
-          style="display: none; background-color: #732e2e">
-          <div id="errorBarText"></div>
-        </div>
+        <!-- Compatibility signal for the existing EspWebUI reconnect handlers. -->
+        <span id="connectionLostBar" hidden style="display: none"></span>
         <div
           id="msgBar"
           class="footerBar msgBar"
@@ -4304,6 +3594,5 @@
           <div id="msgBarText"></div>
         </div>
       </footer>
-    </section>
   </body>
 </html>

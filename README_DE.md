@@ -461,7 +461,7 @@ Die Kalibrierungsseite im Vordergrund lassen. Der Browser sendet Lebenszeichen; 
 
 Die Kalibrierung bleibt nach einem Neustart erhalten, die aktuelle Positionsschätzung nicht. STOP, SCHATTEN und Neustart setzen die Position auf unbekannt. Bei kalibrierten Rollläden wird nach manuellem AUF/AB erst nach vollständiger Fahrzeit plus Reserve eine Endlage angenommen. Empfangene Befehle zugeordneter Originalfernbedienungen aktualisieren dieselbe Schätzung, auch ohne MQTT. Nicht empfangene Signale können nicht berücksichtigt werden.
 
-Es kann jeweils nur eine automatische Zielanfahrt oder Kalibrierung laufen. Manuelle Befehle haben Vorrang und brechen die automatische Sequenz ab; es gibt keinen automatischen Wiederanlauf. Eine angenommene reguläre Prozentfahrt führt der ESP auch nach Schließen des Browsers zu Ende. Anlern-/Entlernbefehle oder Endlagenänderungen machen die Kalibrierung des betreffenden Rollladens ungültig. Deaktivieren der Positionssteuerung oder Starten eines OTA-Updates bricht automatische Fahrsequenzen ab.
+Automatische Zielanfahrten werden nacheinander ausgeführt. WebUI, MQTT und Home Assistant teilen einen RAM-Puffer für bis zu **16 wartende Ziele**, zusätzlich zur laufenden Fahrt. Ein neuer Sollwert ersetzt den wartenden Auftrag desselben Rollladens, ohne dessen Platz zu verändern. Andere kalibrierte Rollläden bleiben im WebUI bedienbar; wartende Ziele zeigen „Ziel · wartet“ und einen Spinner anstelle des Play-Symbols. Der Platz im Puffer ist über den Button-Tooltip verfügbar. Eine Kalibrierung benötigt einen freien Controller und einen leeren Puffer. Manuelle Befehle haben Vorrang, brechen die automatische Sequenz ab und verwerfen alle wartenden Ziele; es gibt keinen automatischen Wiederanlauf. Eine angenommene reguläre Prozentfahrt führt der ESP auch nach Schließen des Browsers zu Ende. Anlern-/Entlernbefehle oder Endlagenänderungen machen die Kalibrierung des betreffenden Rollladens ungültig. Deaktivieren der Positionssteuerung oder Starten eines OTA-Updates bricht automatische Fahrsequenzen ab.
 
 Eine Referenzfahrt gleicht eine unbekannte Ausgangslage aus. Gegen einen unbemerkt bleibenden Fernbedienungsbefehl während der Fahrt schützt sie nicht. Nach der Kalibrierung 25 %, 50 % und 75 % an jedem Rollladen prüfen.
 
@@ -679,6 +679,8 @@ Zusätzlich zu mqtt gibt es weitere Kommunikationsmöglichkeiten.
 Außerdem gibt es eine Log-Funktion, mit der je nach Filter verschiedene Meldungen aufgezeichnet und über die WebUI angezeigt werden können. Dies kann für das eigene Debugging und auch für die Weiterentwicklung der Software nützlich sein.
 
 <img style="width: 500px;" src="./Doc/webUI_logger.png">
+
+Beim ESP32-S2 speichert das Diagnose-Logbuch bis zu **128 Einträge**, um den begrenzteren internen Daten-RAM zu berücksichtigen. Andere unterstützte ESP32-Varianten behalten bis zu **200 Einträge**.
 
 ## Telnet
 
