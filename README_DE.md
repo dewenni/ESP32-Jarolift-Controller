@@ -6,7 +6,7 @@
 
 -----
 
-**[🇬🇧  english version of this description](README.md)**
+**[🇬🇧 English version](README.md)**
 
 -----
 
@@ -21,14 +21,12 @@
 ![GitHub watchers](https://img.shields.io/github/watchers/dewenni/ESP32-Jarolift-Controller?style=social)
 [![GitHub stars](https://img.shields.io/github/stars/dewenni/ESP32-Jarolift-Controller.svg?style=social&label=Star)](https://github.com/dewenni/ESP32-Jarolift-Controller/stargazers/)
 
-[![Stargazers over time](http://starchart.cc/dewenni/ESP32-Jarolift-Controller.svg?background=%23ffffff00&axis=%236c81a6&line=%236c81a6)](https://github.com/dewenni/ESP32-Jarolift-Controller/stargazers/)
-
 </div>
 
 -----
 
 <div align="center">
-Wenn dir dieses Projekt gefällt, drücke genre auf den <b>[Stern ⭐️]</b> Button and drücke <b>[Watch 👁]</b> um auf dem Laufenden zu bleiben.
+Wenn dir dieses Projekt gefällt, klicke gerne auf <b>[Star ⭐️]</b> und <b>[Watch 👁]</b> um auf dem Laufenden zu bleiben.
 <br><br>
 Und wenn du meine Arbeit unterstützen möchtest, kannst auch folgendes nutzen <p>
 
@@ -62,18 +60,25 @@ Definiere bis zu 6 Rollladengruppen, um mehrere Rollläden auf einmal zu steuern
 - **Timer Funktion**  
 für Stand-Alone Anwendung auch mit integrierter Timer Funktion mit fester Uhrzeit, Sonnenaufgang oder Sonnenuntergang als Auslöser.
 
+- **Zeitbasierte Positionssteuerung:**
+Optionale Prozentziele mit Referenzfahrt und individueller Kalibrierung je Rollladen. WebUI, MQTT und Home Assistant verwenden dieselbe geschätzte Öffnung: 0 % geschlossen, 100 % geöffnet.
+
+- **Originalfernbedienungen zuordnen:**
+Einzelkanäle per Service-Dialog einem oder mehreren Rollläden zuordnen. Empfangene Einzel- und Gruppenbefehle werden für den gemeinsamen Status berücksichtigt.
+
 ### WebUI-Demo
 
 Um sich einen ersten Eindruck von den Funktionen und der WebUI zu verschaffen, steht auch eine eingeschränkte Demo zur Verfügung.  
 Diese kann über den folgenden Link aufgerufen werden: [WebUI-DEMO](https://dewenni.github.io/ESP32-Jarolift-Controller/)
 
+Experimentelle Version.
 Die Verwendung erfolgt auf eigene Gefahr. Nur für den privaten/schulischen Gebrauch. (Keeloq-Algorithmus ist nur für TI-Mikrocontroller lizenziert)
 Dieses Projekt ist in keiner Weise mit dem Hersteller der Jarolift-Komponenten verbunden.
 Jarolift ist ein Warenzeichen der Schöneberger Rolladenfabrik GmbH & Co. KG
 
 Diese Version ist für einen ESP32 und basiert auf Ideen und Code von [madmartin/Jarolift_MQTT](https://github.com/madmartin/Jarolift_MQTT).
 
-### Project Homepage, Forum und Author
+### Projekt-Homepage, Forum und Autor
 
 Der ursprüngliche Steuercode wurde von Steffen Hille im Nov. 2017 geschrieben.
 
@@ -92,14 +97,18 @@ Die Homepage des Projekts ist hier: [Project Home](http://www.bastelbudenbuben.d
   - [ESP-Flash-Tool](#esp-flash-tool)
   - [OTA-Updates](#ota-updates)
   - [Setup-Mode](#setup-mode)
+  - [Zugänge und Passwörter](#zugänge-und-passwörter)
   - [Konfiguration](#konfiguration)
-  - [Filemanager](#filemanager)
+  - [Konfiguration importieren und exportieren](#konfiguration-importieren-und-exportieren)
   - [Anlernen von Rolläden](#anlernen-von-rolläden)
   - [Migration](#migration)
 - [WebUI](#webui)
   - [Kanäle](#kanäle)
   - [Gruppen](#gruppen)
   - [Timer](#timer)
+  - [Service](#service)
+  - [Positionssteuerung](#positionssteuerung)
+  - [Originalfernbedienungen zuordnen](#originalfernbedienungen-zuordnen)
 - [MQTT](#mqtt)
   - [Kommandos](#kommandos)
   - [Status](#status)
@@ -224,100 +233,81 @@ Für Mac ist es schwierig, ein Tool mit einer grafischen Benutzeroberfläche zu 
 
 ### lokales Web OTA-Update
 
-Eine Möglichkeit ist, die OTA-Update-Datei von der neuesten Version auf GitHub herunterzuladen.
-Nachdem man diese auf seinen Computer heruntergeladen hat, kann man ein Update mit dem eingebetteten WebUI OTA-Update durchführen.
-Die Update Funktion befindet sich auf der Registerkarte „Tools“ der WebUI.
+Unter **Tools → Firmware-Update → Lokale Datei** die OTA-Datei für die verwendete ESP-Variante auswählen und **Datei installieren** anklicken. Beim ESP32 heißt die Release-Datei `esp32_jarolift_ota_vX.Y.Z.bin`; andere Chipvarianten haben einen eigenen Präfix. Für OTA die OTA-Datei verwenden, nicht das vollständige `*_flash_*`-Image zur Erstinstallation. Fortschritt und Ergebnis erscheinen auf der Tools-Seite.
 
-Hier kannst du einfach die Datei `esp32_jarolift_controller_ota_update_vx.x.x.bin` aus dem Release-Bereich auswählen und das Update starten.
-
-![ota-1](Doc/webUI_ota.gif)
+<img style="width: 500px;" src="./Doc/webUI_local_ota.gif">
 
 ### GitHub OTA-Update
 
-Seit Version 1.4.0 ist es auch möglich, den Controller direkt in der WebUI zu aktualisieren, ohne vorher die .bin-Datei herunterzuladen.
-Wenn man auf die Versionsinfo unten links klickt, öffnet sich ein Dialog. Wenn eine neue Version verfügbar ist, kann man das Update hier direkt anstoßen. Es wird dann automatisch die neueste Version von github heruntergeladen und installiert!
+Unter **Tools → Firmware-Update → Von GitHub** auf **GitHub-Version prüfen** klicken. Installierte Version, letztes veröffentlichtes Release und die Verfügbarkeit einer passenden OTA-Datei werden direkt auf dieser Seite angezeigt. Ist ein installierbares Release vorhanden, erscheint ein eigener Installationsbutton. Die Prüfung allein startet kein Update. Ältere Versionen werden ausdrücklich als Downgrade gekennzeichnet und müssen bestätigt werden.
 
-![ota-2](Doc/github_ota.gif)
+Der Versionslink unten in der Navigation führt zu diesem Bereich. Das Update findet nicht mehr in einem Versions-Popup statt.
+
+<img style="width: 500px;" src="./Doc/webUI_github_ota.gif">
 
 ### PlatformIO OTA-Update
 
-Aber es ist auch möglich, die Software drahtlos mit Platformio herunterzuladen.
-Setze `upload_port` in der `platformio.ini` und ergänze für drahtlose Uploads `upload_flags = --auth=<Passwort>`. ArduinoOTA verwendet das Passwort der WebUI-Auth-Einstellungen, auch bei deaktivierter Web-Authentifizierung. Ohne gesetztes Passwort gilt `jarolift-2026!`.
+Drahtlose Uploads über ArduinoOTA verwenden das **Service-Passwort**, unabhängig von der WebUI-Authentifizierung. Dieses wird unter **Einstellungen → Zugriff & Wartung → Service-Zugänge** gesetzt. Ein leeres Service-Passwort deaktiviert ArduinoOTA im Normalbetrieb; es gibt dort kein Ersatzpasswort.
 
-Unterbrochene Browser-Uploads werden nach 60 Sekunden ohne Fortschritt abgebrochen; der vorherige Watchdog-Zustand wird wiederhergestellt. Neue OTA-Firmware wird nach zwei Minuten Laufzeit mit Netzwerkverbindung bestätigt, ohne Netzwerk nach zehn Minuten. Ein Neustart vor dieser Bestätigung kann den Bootloader-Rollback zur vorherigen Firmware auslösen.
+In `platformio.ini` die passende Umgebung verwenden und folgende Werte setzen:
 
-Es gibt zwei vordefinierte Optionen:
+```ini
+upload_protocol = espota
+upload_port = <IP-Adresse-des-ESP>
+upload_flags = --auth=<Service-Passwort>
+```
 
-- OPTION 1: direct cable upload
-- OPTION 2: wireless OTA Update
+ArduinoOTA benötigt keinen Benutzernamen. Im Setup-Mode gilt das feste Passwort aus [Zugänge und Passwörter](#zugänge-und-passwörter).
+
+Unterbrochene Browser-Uploads werden nach 60 Sekunden ohne Fortschritt abgebrochen; dabei wird der vorherige Watchdog-Zustand wiederhergestellt. Neue OTA-Firmware wird nach zwei Minuten Laufzeit mit Netzwerkverbindung oder nach zehn Minuten offline bestätigt. Ein Neustart vor dieser Bestätigung kann einen Bootloader-Rollback zur vorherigen Firmware auslösen.
 
 ## Setup Mode
 
-Es ist ein `Setup Mode` verfügbar. Der „Setup Mode“ wird aktiviert, wenn der ESP **5** mal neu gestartet wird.
-Nach jdem Neustart dürfen maximal bis zu 5 Sekunden vergehen.
+Der Setup-Mode dient der Erstkonfiguration und Wiederherstellung. Er wird aktiviert, wenn WLAN ohne SSID eingeschaltet ist, beide Netzwerkschnittstellen ausgeschaltet sind oder bei aktivierter WebUI-Authentifizierung Benutzername beziehungsweise Passwort fehlen. Auch eine fehlende oder nicht lesbare Konfiguration führt in die Wiederherstellung. Alternativ den ESP **fünfmal neu starten**; jeder weitere Neustart muss innerhalb von fünf Sekunden nach dem vorherigen Start erfolgen.
 
-Beispiel: restart 1/5 - 2s warten - restart 2/5 - 2s warten - restart 3/5 - 2s warten - restart 4/5 - 2s warten - restart /5/5 => Setup-Mode
+Der ESP erstellt den WLAN-Accesspoint **`ESP32-Jarolift`**. Mit diesem verbinden und **<http://192.168.4.1>** öffnen. Der Accesspoint selbst hat kein WLAN-Passwort; für die WebUI gilt **`admin` / `jarolift-2026!`**. Diese festen Setup-Zugangsdaten funktionieren auch bei leerer oder beschädigter `config.json`. Die Zugangsdaten für den Normalbetrieb ersetzen sie nicht.
 
-Der `Setup-Mode` wird auch aktiviert, wenn kein gültiges WLAN und keine gültige ETH-Verbindung konfiguriert ist.
+Anschließend das Netzwerk konfigurieren, die Einstellungen speichern und für den Normalbetrieb neu starten.
 
-Wenn der ESP in den „Setup Mode“ geht, erstellt er automatisch einen eigenen Netzwerk Accesspoint mit der ssid
-📶 `"ESP32_Jarolift"`  
-Nachdem du mit diesem Netzwerk verbunden bist, kannst du die WebUI übernachfolgende Adresse öffnen  
-**http://192.168.4.1**
+## Zugänge und Passwörter
+
+WebUI-Zugang und Service-Zugang werden getrennt unter **Einstellungen → Zugriff & Wartung** eingerichtet:
+
+| Zugang | Normalbetrieb | Setup-Mode |
+| --- | --- | --- |
+| WebUI | Optionale Authentifizierung: frei wählbarer Benutzername und Passwort sowie ein Schalter zum Aktivieren. Bei ausgeschalteter Authentifizierung ist keine Anmeldung erforderlich. | Anmeldung immer erforderlich: Benutzer `admin`, Passwort `jarolift-2026!`, unabhängig von der Konfiguration. |
+| Lokales/GitHub-Update über die WebUI, Konfiguration importieren/exportieren | Folgt der WebUI-Authentifizierung; kein zusätzliches Service-Passwort. | Verwendet die WebUI-Anmeldung des Setup-Mode. |
+| Remote-OTA über ArduinoOTA | Benötigt das separat konfigurierte Service-Passwort. Bei leerem Passwort deaktiviert. Kein Benutzername. | Festes Passwort `jarolift-2026!`; kein Benutzername. |
+| Telnet | Muss separat eingeschaltet werden und benötigt das Service-Passwort. Bei leerem Passwort deaktiviert. Kein Benutzername. | Der Telnet-Schalter gilt weiterhin; bei aktiviertem Telnet gilt `jarolift-2026!`. Der Setup-Mode schaltet Telnet nicht automatisch ein. |
+
+Das WebUI-Passwort und das Service-Passwort sind unabhängig. Eine ausgeschaltete WebUI-Authentifizierung hebt den Passwortschutz der Service-Zugänge nicht auf. Telnet und ArduinoOTA verwenden dasselbe Service-Passwort.
 
 ## Konfiguration
 
-Hier können alle Konfigurationen vorgenommen werden, die zu der Heizungsanlage und der Infrastruktur passen.
+Die Einstellungen sind in fünf Kategorien gegliedert. Innerhalb einer Kategorie lässt sich der gewünschte Abschnitt aufklappen.
 
-- **WiFi**  
-Gib im Feld „WiFi“ deine WLAN Anmeldedaten ein, um den ESP mit Ihrem Netzwerk zu verbinden.
+| Kategorie | Abschnitte und Verwendung |
+| --- | --- |
+| **Allgemein** | Sprache, NTP-Server/Zeitzone und geografische Lage. Breiten- und Längengrad werden für Timer mit Sonnenaufgang/Sonnenuntergang benötigt. |
+| **Netzwerk** | WLAN-Zugangsdaten, optional fester Accesspoint (BSSID), IP-Konfiguration und Ethernet/W5500 einschließlich der SPI-GPIOs. |
+| **Integrationen** | MQTT-Broker/Topic/Zugangsdaten, Home-Assistant-Discovery und homee. Home-Assistant-Discovery setzt eingerichtetes und aktiviertes MQTT voraus. |
+| **Gerät** | Globaler Schalter für die Positionssteuerung, JAROLIFT-Protokolleinstellungen, Rollläden, Gruppen und GPIO-Zuweisung. Hier werden unter anderem Controller-Seriennummer/Masterkeys, Gerätezähler und Anlernmethode eingestellt, Rollläden aktiviert und benannt, Motoren angelernt sowie Gruppen definiert. |
+| **Zugriff & Wartung** | Optionale WebUI-Authentifizierung und das separate Service-Passwort mit dem Telnet-Schalter. Siehe [Zugänge und Passwörter](#zugänge-und-passwörter). |
 
-- **Ethernet W5500**  
-Verwende optional die Ethernet-Verbindung auf Basis des W5500, um den ESP mit dem Netzwerk zu verbinden.
+Für WLAN gibt es getrennte Suchbuttons für **SSID** und **Accesspoint/BSSID**. Ein gefundenes Netz beziehungsweise einen Accesspoint im Dialog auswählen; versteckte SSIDs lassen sich weiterhin manuell eingeben. Eine leere BSSID erlaubt die automatische Accesspoint-Auswahl. Mit fester BSSID wird nur dieser Accesspoint verwendet. Bei Änderung der SSID wird die bisherige BSSID zurückgesetzt.
 
-- **Authentifizierung**  
-Hier kann optional die Authentifizierungsfunktion aktiviert werden und Benutzer und Passwort konfiguriert werden.
+Die Positionssteuerung wird unter **Gerät** zentral aktiviert. Jeder Rollladen wird anschließend separat auf der **Service-Seite** kalibriert. Auch Originalfernbedienungen werden dort beim ausgewählten Rollladen zugeordnet; eine manuelle Seriennummern-Eingabe in den Einstellungen entfällt.
 
-- **NTP-Server**  
-Der ESP kann sich mit einem NTP-Server verbinden, um die richtigen Zeitinformationen zu erhalten.
-Die voreingestellte Zeitzone sollte passen, wenn du dich in Deutschland befindest. Andernfalls können diese manuell geändert werden.
+Änderungen werden automatisch gespeichert. **Änderungen an GPIOs und JAROLIFT-Protokolleinstellungen benötigen einen Neustart.** Für Oberfläche und sprachabhängige Meldungen stehen Deutsch und Englisch zur Verfügung.
 
-- **MQTT**  
-hier können Sie die MQTT-Kommunikation aktivieren und obligatorische Parameter eingeben.  
+<img style="width: 500px;" src="./Doc/webUI_settings.png">
 
-- **GPIO**  
-Hier kann man die GPIO konfigurieren, um den CC1101 mit dem ESP32 zu verbinden
-
-- **Jarolift**  
-Hier müssen bestimmte Jarolift-spezifische Protokolleinstellungen vorgenommen werden
-
-- **Shutter**  
-hier können die einzelnen Rollläden mit individuellen Namen konfiguriert werden
-
-- **Group**  
-Hier können wahlweise Rollladengruppen definiert werden
-
-- **Originalfernbedienungen**
-
-  Unter Einstellungen → Gerät → Originalfernbedienungen mit „Zuordnung hinzufügen“ ein Tastensignal erfassen (STOP ist ebenfalls möglich). Den gewünschten Kanal oder die Gruppe auf der Fernbedienung auswählen, die Zuordnung benennen und die angesprochenen ESP-Rollos auswählen. Vollständige Seriennummer und empfangene Kanalmaske identifizieren den Eintrag gemeinsam. Vorhandene Einträge lassen sich bearbeiten oder löschen. Löschen entfernt nur die ESP-Zuordnung; die Fernbedienung bleibt am Motor angelernt. Alte sechsstellige Präfix-Zuordnungen müssen neu erfasst werden.
-
-- **Language**  
-Es sind zwei Sprachen verfügbar. Wählen deine bevorzugte Sprache.
-
-> [!NOTE]
-> Alle Einstellungen werden automatisch gespeichert, wenn Änderungen vorgenommen werden.
-
-> [!IMPORTANT]
-> Changes to GPIO or Jarolift settings require a restart!
-
-![weubui-settings](Doc/webUI_settings.png)
-
-## Filemanager
+## Konfiguration importieren und exportieren
 
 Es gibt es auch einen eingebauten Dateimanager zum Öffnen (anzeigen), Herunterladen (exportieren) und Hochladen (importieren) der Konfigurationsdatei.
 Die Konfiguration wird in der Datei ``config.json`` gespeichert. Zur Sicherung und Wiederherstellung der Konfiguration kannst du diese Datei herunterladen und hochladen.
 
-![filemanager](/Doc/webUI_tools.png)
+<img style="width: 500px;" src="./Doc/webUI_tools.png">
 
 ## Anlernen von Rolläden
 
@@ -344,18 +334,18 @@ acht mal drücken. Der Motor wird zur Bestätigung kurz vibrieren.
 Jetzt innerhalb von 5 Sekunden den entsprechenden "Lern-Button" im WebUI in den Settings bei dem jeweiligen Rolladen drücken.
 Wenn der Rolladen erfolgreich eingelernt wurde, vibriert der Motor erneut.
 
-## Migration von madmartin/Jarolift_MQTT
+## Migration
 
-Es ist möglich, von einer vorherigen Version von [madmartin/Jarolift_MQTT](https://github.com/madmartin/Jarolift_MQTT) zu diesem Projekt zu migrieren.
+Es ist möglich, von einer aktuellen Version von [madmartin/Jarolift_MQTT](https://github.com/madmartin/Jarolift_MQTT) zu diesem Projekt zu migrieren.
 
-#### Ein funktionierendes Setup für dieses Projekt herstellen
+### Ein funktionierendes Setup für dieses Projekt herstellen
 
 - eine funktionierende Version dieses Projekts zum Laufen zu bringen
 - die richtigen GPIO-Einstellungen für den CC1101 setzen
-- die Master Keys setzen (entweder hat man die oder man findet sie)
+- die Master Keys setzen
 - den Log-Level im Logger der WebUI auf „Debug“ setzen
 
-#### Ermitteln Sie die richtige Seriennummer
+### Die richtige Seriennummer ermitteln
 
 - Führe einen Shutter HOCH Befehl des „alten“ Setups `(madmartin/Jarolift_MQTT)` für **Kanal 0!** aus.
 - Du solltest nun eine Debug-Meldung dieses Befehls im Logger der WebUI sehen.  
@@ -364,13 +354,13 @@ Dies sollte die gleiche Seriennummer sein, die in der WebUI des „alten“ Setu
 - Setze diese Seriennummer in der WebUI dieses Projekts in den Einstellungen.
 
 
-#### Den richtigen Gerätezähler finden
+### Den richtigen Gerätezähler finden
 
 - den aktuellen Gerätezähler der „alten“ Konfiguration auf der System-Seite der WebUI ablesen.
 - den gleichen Wert für den Gerätezähler in den Einstellungen dieses Projekts einstellen.
 
 
-#### Die Rollläden definieren
+### Die Rollläden definieren
 
 - Definiere die gleichen Rolläden in der gleichen Reihenfolge wie in der „alten“ Einstellung und aktiviere diese.
 
@@ -383,42 +373,131 @@ Wenn alles richtig gemacht wurde, sollten alle Rollläden wie vorher funktionier
 
 # WebUI
 
-Das WebUI ist responsive und bietet auch eine Layout für Mobile Geräte
+Die WebUI passt sich der Fenstergröße an und bietet auch eine mobile Darstellung.
 
-![weubui_dash](Doc/webUI_1.png)
-(Desktop Version)
-
-<img style="display: inline;
-  margin-right: 50px;
-  width: 200px;" src="./Doc/webUI_mobile_1.png">
-<img style="display: inline;
-  margin-right: 50px;
-  width: 200px;" src="./Doc/webUI_mobile_2.png">
+(Desktop-Version)
+![weubui_dash](Doc/webUI_shutter.png)
 
 (Mobile Version)
 
-## Channels
+<img style="display: inline;
+  margin-right: 20px;
+  width: 200px;" src="./Doc/webUI_mobile_1.jpeg">
+<img style="display: inline;
+  margin-right: 20px;
+  width: 200px;" src="./Doc/webUI_mobile_3.jpeg">
+<img style="display: inline;
+  margin-right: 20px;
+  width: 200px;" src="./Doc/webUI_mobile_2.jpeg">
 
-Nachdem die Rolläden in den Einstellungen konfiguriert und aktiviert wurden, können diese auch direkt im WebUI bedient werden.
+## Kanäle
 
-![webUI_shutter](/Doc/webUI_shutter.png)
+Jeder aktivierte Rollladen besitzt eine eigene Bedienung mit **AUF, STOP, AB und SCHATTEN**. Diese Tasten bleiben unabhängig von der Prozentsteuerung verfügbar.
 
-## Groups
+Bei global ausgeschalteter Positionssteuerung wird kein zusätzlicher Positionsbereich eingeblendet. Bei aktivierter Funktion gilt:
 
-Die in den Einstellungen konfigurierten Gruppen können wie die einzelnen Rollläden auch direkt im WebUI bedient werden.
+- **Nicht kalibriert:** Unter den normalen Tasten erscheinen nur ein kompakter Hinweis und der Link zur Kalibrierung.
+- **Kalibriert:** Eine kleine Rollladengrafik und die geschätzte Öffnung werden angezeigt, dazu Zielslider und separater Ausführen-Button. Verschieben des Sliders wählt nur den Sollwert; erst der Button startet die Fahrt.
+- **Position unbekannt:** Es wird keine gemessene Position vorgetäuscht. Ein Prozentziel kann trotzdem angefahren werden, da zuvor eine Referenzfahrt erfolgt.
 
-![webUI_groups](/Doc/webUI_groups.png)
+<img style="width: 500px;" src="./Doc/webUI_shutter.png">
+
+## Gruppen
+
+Konfigurierte Gruppen bieten dieselben Befehle AUF/STOP/AB/SCHATTEN für ihre ausgewählten Rollläden. Prozentziele für Gruppen werden derzeit nicht unterstützt.
+
+<img style="width: 500px;" src="./Doc/webUI_groups.png">
 
 ## Timer
 
-Die Timer ermöglicht die automatische Steuerung einzelner Rollläden oder eine Auswahl mehrerer Rollläden als Gruppe.
-Als Auslöser kann ein fester Zeitpunkt oder Sonnenaufgang bzw. Sonnenuntergang mit optionalem Zeitversatz vorgegeben werden.
+Timer steuern einzelne Rollläden oder eine Auswahl als Gruppe. Als Auslöser stehen eine feste Uhrzeit, Sonnenaufgang und Sonnenuntergang mit optionalem Zeitversatz zur Verfügung. Dazu werden Wochentage und Befehl eingestellt. Die geografische Lage wird unter **Einstellungen → Allgemein** hinterlegt. Der Rollladenauswahldialog erzeugt die Ziel-Bitmaske automatisch.
 
-![webUI_timer](/Doc/webUI_timer.png)
+<img style="width: 500px;" src="./Doc/webUI_timer.png">
 
-Die Auswahl von Rollläden wird durch einen zusätzlichen Dialog unterstützt. Dort werden alle konfigurierten und aktivierten Rollläden angezeigt. Diese können dort ausgewählt werden und die benötigte Bitmaske wird dann automatisch berechnet.
+## Service
 
-<img style="width: 444px;" src="./Doc/webUI_bitmask_wiz.png">
+Oben auf der Service-Seite wird der Rollladen ausgewählt. Dieselbe Auswahl gilt für die manuelle Bedienung, das Setzen/Löschen der Motor-Endlagen, das Setzen der Schattenposition, die Positionskalibrierung und die Zuordnung von Originalfernbedienungen.
+
+Das eigentliche Anlernen des Motors erfolgt unter **Einstellungen → Gerät → Rollläden**. Die Fernbedienungsregistrierung auf der Service-Seite informiert nur den ESP über eine bestehende Beziehung; sie lernt die Fernbedienung nicht am Motor an.
+
+<img style="width: 500px;" src="./Doc/webUI_service.png">
+
+## Positionssteuerung
+
+### Prinzip und Aktivierung
+
+Die Motoren melden weder Position noch Endlage zurück. Die Positionssteuerung arbeitet deshalb mit **kalibrierten Fahrzeiten**, nicht mit einer gemessenen Positionsrückmeldung. Die Öffnungsskala lautet **0 % = vollständig geschlossen, 100 % = vollständig geöffnet**.
+
+Unter **Einstellungen → Gerät → Positionssteuerung** wird die optionale Funktion global aktiviert. Prozentcontrols erscheinen nur bei individuell kalibrierten Rollläden. Andere Rollläden bleiben über die normalen Tasten bedienbar.
+
+Jede Prozentanforderung fährt zuerst eine bekannte Endlage an, unabhängig von der zuvor geschätzten Position:
+
+| Zielöffnung | Ablauf |
+| --- | --- |
+| 0 % | Vollständig schließen. |
+| Größer 0 %, unter 50 % | Vollständig schließen, pausieren und dann bis zum Ziel öffnen. |
+| Ab 50 %, unter 100 % | Vollständig öffnen, pausieren und dann bis zum Ziel schließen. |
+| 100 % | Vollständig öffnen. |
+
+Die Referenzfahrt verwendet die vollständige kalibrierte Fahrzeit mit 5 % Reserve, mindestens einer und höchstens drei Sekunden. Vor dem Richtungswechsel liegt eine Pause von 600 ms. Das dauert bewusst länger als eine direkte Fahrt, vermeidet aber die Abhängigkeit von einem gemerkten Ausgangswert nach unbemerkter Fernbedienungsbetätigung.
+
+### Einen Rollladen kalibrieren
+
+Zuerst die tatsächlichen Endlagen des Motors einrichten. Die Positionskalibrierung ersetzt diese nicht. Die halbe Öffnungshöhe vorher markieren und den Rollladen während der Kalibrierung direkt beobachten.
+
+1. Unter **Service** den aktivierten Rollladen auswählen und mit den normalen Tasten vollständig schließen.
+2. Die Kalibrierung öffnen und die vollständig geschlossene Ausgangslage bestätigen.
+3. Öffnungsfahrt starten. Jeweils bestätigen, wenn sich der Panzer erstmals anhebt, die halbe Höhe erreicht und vollständig geöffnet ist.
+4. Aus vollständig geöffneter Lage die Schließfahrt starten. Halbe Höhe, Ankunft der Unterkante unten und anschließend vollständig geschlossene Lamellen bestätigen.
+5. Die Zeiten prüfen und ausdrücklich übernehmen. Erst dadurch wird eine vorhandene Kalibrierung ersetzt und in `config.json` gespeichert.
+
+Die Markierungen berücksichtigen das anfängliche Anziehen beziehungsweise die Lamellenbewegung. Separate Kennlinien für Öffnen und Schließen nähern außerdem den veränderlichen Wickeldurchmesser an; zwischen den Markierungen wird zeitlich linear interpoliert. Die Werte sind Zeitpunkte ab Fahrtbeginn je Richtung, keine einzelnen Segmentdauern. Pro Richtung sind maximal 180 Sekunden möglich; unplausible Zeiten werden abgewiesen.
+
+Die Kalibrierungsseite im Vordergrund lassen. Der Browser sendet Lebenszeichen; bleiben diese länger als sechs Sekunden aus, bricht der ESP die Kalibrierung ab und sendet STOP. Dafür muss der ESP betriebsbereit bleiben und der Funkbefehl den Motor erreichen. Ein Verbindungsabbruch garantiert keinen sofortigen Stopp.
+
+<img style="width: 500px;" src="./Doc/webUI_calibration.gif">
+
+### Status, manuelle Bedienung und Grenzen
+
+Die Kalibrierung bleibt nach einem Neustart erhalten, die aktuelle Positionsschätzung nicht. STOP, SCHATTEN und Neustart setzen die Position auf unbekannt. Bei kalibrierten Rollläden wird nach manuellem AUF/AB erst nach vollständiger Fahrzeit plus Reserve eine Endlage angenommen. Empfangene Befehle zugeordneter Originalfernbedienungen aktualisieren dieselbe Schätzung, auch ohne MQTT. Nicht empfangene Signale können nicht berücksichtigt werden.
+
+Es kann jeweils nur eine automatische Zielanfahrt oder Kalibrierung laufen. Manuelle Befehle haben Vorrang und brechen die automatische Sequenz ab; es gibt keinen automatischen Wiederanlauf. Eine angenommene reguläre Prozentfahrt führt der ESP auch nach Schließen des Browsers zu Ende. Anlern-/Entlernbefehle oder Endlagenänderungen machen die Kalibrierung des betreffenden Rollladens ungültig. Deaktivieren der Positionssteuerung oder Starten eines OTA-Updates bricht automatische Fahrsequenzen ab.
+
+Eine Referenzfahrt gleicht eine unbekannte Ausgangslage aus. Gegen einen unbemerkt bleibenden Fernbedienungsbefehl während der Fahrt schützt sie nicht. Nach der Kalibrierung 25 %, 50 % und 75 % an jedem Rollladen prüfen.
+
+Prozentziele sind auch über [MQTT und Home Assistant](#prozentziele--home-assistant) verfügbar. Weitere Details stehen in [Positionierung.md](Doc/Positionierung.md).
+
+## Originalfernbedienungen zuordnen
+
+### Was wird zugeordnet?
+
+Auf der **Service-Seite** wird ein Rollladen ausgewählt und der **bereits an diesem Motor angelernte Einzelkanal** der Originalfernbedienung registriert. Damit kann der ESP Positionsschätzung und MQTT-Status auch bei Bedienung über die Originalfernbedienung aktualisieren. Die Registrierung sendet keinen Anlernbefehl und verändert die echte Anlernung am Motor nicht.
+
+Fernbedienungstyp, Seriennummer und Bitmaske müssen nicht manuell eingegeben werden. Die Quelle wird aus dem Funksignal erfasst. Ein Quellkanal kann mehrere ESP-Rollläden bedienen; jeder Rollladen kann **bis zu fünf Zuordnungen** besitzen. Insgesamt sind maximal **80 unterschiedliche Quellen** möglich. Namen sind auf **32 Unicode-Zeichen** begrenzt.
+
+### Zuordnung anlegen und entfernen
+
+1. Unter **Service** den gewünschten Rollladen auswählen und **Originalfernbedienungen → Zuordnung hinzufügen** öffnen.
+2. Auf der Originalfernbedienung den passenden **Einzelkanal** auswählen und eine Taste drücken, bevorzugt STOP. AUF/AB sind ebenfalls erfassbar, können aber den tatsächlichen Motor bewegen.
+3. Die Taste loslassen, kurz warten und denselben Kanal erneut zur Bestätigung betätigen. Ein langes Halten mit Wiederholtelegrammen ist nicht die vorgesehene Bestätigung. Die Befehle dürfen sich unterscheiden, der Quellkanal muss übereinstimmen.
+4. Die Quelle benennen und speichern. Sie wird dem ausgewählten Rollladen zugeordnet. Für weitere von dieser Quelle bediente Rollläden wiederholen; bestehende Zuordnungen bleiben erhalten.
+
+Die Liste zeigt nur Zuordnungen des ausgewählten Rollladens. **Löschen** entfernt ausschließlich diese Beziehung. Andere zugeordnete Rollläden und die echte Anlernung am Motor bleiben erhalten. Erneutes Erfassen einer bekannten Quelle ermöglicht das Ändern ihrer gemeinsamen Bezeichnung; diese gilt auch für ihre anderen zugeordneten Rollläden.
+
+<img style="width: 500px;" src="./Doc/webUI_remote_01.png">
+<img style="width: 250px;" src="./Doc/webUI_remote_02.png">
+<img style="width: 250px;" src="./Doc/webUI_remote_03.png">
+
+### Gruppentasten und bestehende Konfigurationen
+
+Es werden einzelne Quellkanäle registriert, keine Gruppenauswahl. Gruppenbefehle werden automatisch aufgelöst: Der ESP vergleicht Senderkennung und empfangene Kanalbits mit den registrierten Einzelquellen und vereinigt die betroffenen ESP-Rollläden. Eine Gruppe benötigt keinen zusätzlichen Eintrag. Quellkanal und ESP-Rollladennummer müssen nicht übereinstimmen.
+
+Beispiel: Fernbedienungskanal 1 ist ESP-Rollladen 3 zugeordnet, Fernbedienungskanal 4 dem ESP-Rollladen 8. Eine Gruppe mit beiden Quellkanälen aktualisiert Rollladen 3 und 8. Es werden nur hinterlegte Beziehungen berücksichtigt; aus einer nicht zugeordneten Gruppe kann der ESP die tatsächlich bewegten Motoren nicht ableiten.
+
+Konfigurationsversion 7 übernimmt Einzelkanal-Zuordnungen aus Version 6 und vereinigt doppelte Quellen unter Erhalt ihrer Ziele. Alte explizite Gruppen werden als neu zu erfassen angezeigt und nicht ausgewertet: Ihre Einzelkanäle müssen bei den passenden Motoren erfasst werden. Noch ältere Registrierungen nur über Seriennummern-Präfix sind ebenfalls neu zu erfassen. Bestehende importierte Zuordnungen über der neuen Grenze von fünf je Rollladen bleiben erhalten; vor weiteren Ergänzungen bei diesem Rollladen müssen überzählige Beziehungen entfernt werden.
+
+Zuverlässiger Funkempfang bleibt erforderlich. Die Zuordnung macht beschädigte oder fehlende Telegramme nicht zuverlässig. Messbeispiele sind in [remotes.md](Doc/remotes.md) dokumentiert.
+
 
 -----
 
@@ -515,11 +594,11 @@ payload:    {0b0000000000010101, 0x15, 21}
 
 ## Status
 
-## Rolladen-Status
+### Rolladen-Status
 
 Der Controller sendet auch einen Status, **basierend auf den empfangenen Kommandos.**  
 
-Diese Werte sind Schätzungen ohne Rückmeldung des Motors: **0 geschlossen, 100 geöffnet**, Zwischenwerte entsprechend der Zielanfahrt. Das ist ein Breaking Change gegenüber der bisherigen umgekehrten Skala. Bei kalibrierten Kanälen wird nach AUF/AB erst nach vollständiger Fahrzeit plus Reserve eine Endlage angenommen; ohne Kalibrierung wird wie bisher sofort die erwartete Endlage gemeldet. STOP und SCHATTEN setzen den Status auf `None` (unbekannt). Empfangene zugeordnete Originalfernbedienungsbefehle werden auch ohne MQTT berücksichtigt. Nicht empfangene Signale bleiben unerkannt. Nach MQTT-Reconnect wird der aktuelle Stand erneut veröffentlicht. Die Befehlskennungen (0 = UP, 1 = DOWN) bleiben unverändert und sind keine Prozentwerte.
+Diese Werte sind Schätzungen ohne Rückmeldung des Motors: **0 geschlossen, 100 geöffnet**, Zwischenwerte entsprechend der Zielanfahrt. Bei kalibrierten Kanälen wird nach AUF/AB erst nach vollständiger Fahrzeit plus Reserve eine Endlage angenommen; ohne Kalibrierung wird wie bisher sofort die erwartete Endlage gemeldet. STOP und SCHATTEN setzen den Status auf `None` (unbekannt). Empfangene zugeordnete Originalfernbedienungsbefehle werden auch ohne MQTT berücksichtigt. Nicht empfangene Signale bleiben unerkannt. Nach MQTT-Reconnect wird der aktuelle Stand erneut veröffentlicht. Die Befehlskennungen (0 = UP, 1 = DOWN) bleiben unverändert und sind keine Prozentwerte.
 
 ```text
 
@@ -536,28 +615,31 @@ topic:      ../status/shutter/1 ... status/shutter/16
 payload:    {None}
 ```
 
+> [!IMPORTANT]
+> Breaking Change: Der Rollladenstatus verwendet jetzt 0 = geschlossen und 100 = geöffnet. Die bisherige Skala war umgekehrt. Automatisierungen, die die alten Statuswerte auswerten, müssen angepasst werden. Die Befehlskennungen (0 = UP, 1 = DOWN) bleiben unverändert.
+
 ### Prozentziele / Home Assistant
 
 Bei global aktivierter Positionssteuerung und gültiger Kanalkalibrierung akzeptiert `../cmd/position/1` bis `/16` Ganzzahlen von 0 (geschlossen) bis 100 (geöffnet), ohne Retain. Die Fahrt nutzt dieselbe Referenzfahrt wie im WebUI. Discovery ergänzt die Prozentsteuerung automatisch für diese Kanäle und entfernt sie beim Deaktivieren oder bei ungültiger Kalibrierung. AUF/AB/STOP bleiben verfügbar; Gruppen-Prozentfahrten sind nicht enthalten.
 
 ### Remotes (Fernbedienungen)
 
-Sind in den Einstellungen auch originale Fernbedienungen über die Seriennummer hinterlegt, dann können auch Signale dieser Fernbedienungen erfasst und per MQTT ausgegeben werden. Die Information darüber, welcher Rollladen gesteuert wird, ist in den beiden Variablen `chBin` und `chDec` zu sehen. chBin“ zeigt den verwendeten Rollladen als 16-Bit-Binärwert an, während ‚chDec‘ dieselbe Information zur einfacheren Automatisierung als Dezimalwert anzeigt.
+Empfangene gültige Fernbedienungsbefehle werden bei verbundener MQTT-Verbindung unter `../status/remote/<vollständige-seriennummer>` veröffentlicht, zum Beispiel `../status/remote/0c7c000f`. Die Zuordnung unter [Service](#originalfernbedienungen-zuordnen) liefert den Namen und die betroffenen ESP-Rollläden. Nicht zugeordnete Quellen werden mit `name: "unknown"` gemeldet; mehrere passende Quellen können als `"multiple"` erscheinen.
+
+`chBin` und `chDec` beschreiben dieselbe **empfangene Quellkanalmaske** als 16-Bit-Binärdarstellung beziehungsweise Dezimalwert. Sie sind keine Zielmaske der ESP-Rollläden; dafür gelten die separat gespeicherten Zuordnungen.
+
+Topic: `../status/remote/0c7c000f`
 
 ```json
-topic:      "../status/remote/<serial-number>"
-payload:    {
-              "name":   "<alias-name>", 
-              "cmd":    "<UP, DOWN, STOP, SHADE>",
-              "chBin":  "<channel-binary>",
-              "chDec":  "<channel-decimal>"
-            }
+{
+  "name": "Wohnzimmer · Kanal 16",
+  "cmd": "UP",
+  "chBin": "10000000 00000000",
+  "chDec": 32768
+}
 ```
 
-
-
-> [!NOTE]
-> < ../ > ist der Platzhalter für das MQTT-Topic, das in den Einstellungen angegeben ist.
+`cmd` kann `UP`, `DOWN`, `STOP` oder `SHADE` sein. `../` steht in diesen Beispielen für den konfigurierten MQTT-Präfix.
 
 ## zusätzliche Informationen (nur lesen)
 
@@ -582,9 +664,9 @@ siehe auch die: [offizielle Dokumentation](https://www.home-assistant.io/integra
 
 <img src="Doc/webUI_ha2.png" alt="mqtt_ha1" width="75%">
 
-In den mqtt-Einstellungen können die Funktion zur Erkennung aktiviert sowie das mqtt-Topic und der Gerätename für den Home Assistant festgelegt werden.
+Unter **Einstellungen → Integrationen → Home Assistant** werden Discovery, Discovery-Topic und Gerätename konfiguriert. MQTT muss zusätzlich unter **Integrationen → MQTT** eingerichtet und aktiviert sein.
 
-<img src="Doc/webUI_ha1.png" alt="mqtt_ha1" width="50%">
+<img style="width: 500px;" src="./Doc/webUI_settings_ha.png">
 
 -----
 
@@ -596,19 +678,12 @@ Zusätzlich zu mqtt gibt es weitere Kommunikationsmöglichkeiten.
 
 Außerdem gibt es eine Log-Funktion, mit der je nach Filter verschiedene Meldungen aufgezeichnet und über die WebUI angezeigt werden können. Dies kann für das eigene Debugging und auch für die Weiterentwicklung der Software nützlich sein.
 
-<img src="./Doc/webUI_Logger.png" width="75%">
+<img style="width: 500px;" src="./Doc/webUI_logger.png">
 
 ## Telnet
 
-Neben der WebUI und MQTT gibt es auch eine Telnet-Schnittstelle zur Kommunikation mit dem ESP.
-Die Schnittstelle bietet mehrere Befehle, um Informationen auszulesen und Befehle zu senden.
-Eine Übersicht über die Befehle kann mit dem Befehl „help“ aufgerufen werden.
-Um eine Verbindung herzustellen, kann eine einfache Telnet-Verbindung über die entsprechende IP-Adresse des ESP gestartet werden.
+Telnet bietet Diagnose- und Steuerbefehle; `help` zeigt die verfügbaren Befehle an. Unter **Einstellungen → Zugriff & Wartung → Service-Zugänge** ein Service-Passwort setzen und Telnet ausdrücklich aktivieren. Ohne Service-Passwort bleibt Telnet im Normalbetrieb aus, unabhängig vom WebUI-Passwort.
 
-Jede Verbindung erfordert das in den Auth-Einstellungen der WebUI konfigurierte Passwort, auch bei deaktivierter Web-Authentifizierung. Ist kein Passwort gesetzt, gilt das Ersatzpasswort `jarolift-2026!`. Bitte ein eigenes Passwort in der WebUI setzen. Bei falschem Passwort wird die Verbindung getrennt; beim erneuten Verbinden ist eine neue Anmeldung erforderlich.
+Mit `telnet <IP-Adresse-des-ESP>` verbinden und am Passwortprompt das Service-Passwort eingeben. Ein Benutzername wird nicht benötigt. Ein falsches Passwort trennt die Verbindung; jede neue Verbindung erfordert erneut eine Anmeldung. Für den Setup-Mode gelten die Regeln unter [Zugänge und Passwörter](#zugänge-und-passwörter).
 
-Beispiel:
-
-`> telnet 192.168.178.193`
-
-<img src="./Doc/telnet.png" width="75%">
+<img style="width: 500px;" src="./Doc/webUI_telnet.png">

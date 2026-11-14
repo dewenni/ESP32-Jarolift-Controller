@@ -21,8 +21,6 @@
 ![GitHub watchers](https://img.shields.io/github/watchers/dewenni/ESP32-Jarolift-Controller?style=social)
 [![GitHub stars](https://img.shields.io/github/stars/dewenni/ESP32-Jarolift-Controller.svg?style=social&label=Star)](https://github.com/dewenni/ESP32-Jarolift-Controller/stargazers/)
 
-[![Stargazers over time](http://starchart.cc/dewenni/ESP32-Jarolift-Controller.svg?background=%23ffffff00&axis=%236c81a6&line=%236c81a6)](https://github.com/dewenni/ESP32-Jarolift-Controller/stargazers/)
-
 </div>
 
 -----
@@ -62,6 +60,12 @@ define shutter groups to control several shutters at once
 - **Timer function**  
 stand alone timer function with fixed time, sunrise or sunset as trigger.
 
+- **Time-based percentage positioning:**
+Optional percentage targets with a reference run and per-shutter calibration. WebUI, MQTT and Home Assistant share the estimated opening: 0% closed, 100% open.
+
+- **Original remote registration:**
+Assign captured single channels to one or several shutters on the Service page. Received individual and group commands update the shared status.
+
 ### WebUI-Demo
 
 For a first impression of the functions and the WebUI, a limited demo is also available.  
@@ -93,6 +97,7 @@ The project home is here: [Project Home](http://www.bastelbudenbuben.de/2017/04/
   - [ESP-Flash-Tool](#esp-flash-tool)
   - [OTA-Updates](#ota-updates)
   - [Setup-Mode](#setup-mode)
+  - [Access and passwords](#access-and-passwords)
   - [Configuration](#configuration)
   - [Filemanager](#filemanager)
   - [Teach-in of roller shutters](#teach-in-of-roller-shutters)
@@ -101,6 +106,9 @@ The project home is here: [Project Home](http://www.bastelbudenbuben.de/2017/04/
   - [Channels](#channels)
   - [Groups](#groups)
   - [Timer](#timer)
+  - [Service](#service)
+  - [Percentage positioning](#percentage-positioning)
+  - [Original remote registration](#original-remote-registration)
 - [MQTT](#mqtt)
   - [Commands](#commands)
   - [Status](#status)
@@ -227,102 +235,81 @@ for Mac it is hard to find a tool with a graphical UI, but you can simple use th
 
 ### local Web OTA-Update
 
-The first option is, to download the ota Update File from the latest release at GitHub.
-After you have downloaded this to your computer, you can perform a update with the embedded WebUI OTA-Update.
-You can find the update function in the "Tools" Tab of the WebUI.
+Open **Tools → Firmware update → Local file**, select the OTA binary for your ESP variant and click **Install file**. For an ESP32, the release file is named `esp32_jarolift_ota_vX.Y.Z.bin`; other chip variants have their own prefix. Use the OTA file, not the complete `*_flash_*` image used for initial installation. Upload progress and the result appear on the Tools page.
 
-here you can choose "Firmware" and select the `esp32_jarolift_controller_ota_update_vx.x.x.bin` file from the release section
-
-![ota-1](Doc/webUI_ota.gif)
+<img style="width: 500px;" src="./Doc/webUI_local_ota.gif">
 
 ### GitHub OTA-Update
 
-since Version 1.4.0 it is also possible to update the controller directly in the WebUI without downloading the .bin file before.
-If you click on the Version info on the bottom left, a dialog will open. If there is a new version available, you can directly initiate the update here. It will then automatically download and install the latest release from github!
+Open **Tools → Firmware update → From GitHub** and click **Check GitHub version**. The installed version, latest published release and availability of a matching OTA file are displayed directly on this page. A separate installation button appears when an installable release is found; checking alone does not start an update. Older releases are explicitly marked as a downgrade and require confirmation.
 
-![ota-2](Doc/github_ota.gif)
+The version link in the navigation footer takes you to this section. Updates are no longer performed in a version popup.
+
+<img style="width: 500px;" src="./Doc/webUI_github_ota.gif">
 
 ### PlatformIO OTA-Update
 
-But it is also possible to download the software wireless with platformio.
-Set `upload_port` in `platformio.ini` and supply `upload_flags = --auth=<password>` for wireless uploads. ArduinoOTA uses the WebUI Auth password even when web authentication is disabled; without a configured password it uses `jarolift-2026!`.
+Wireless uploads via ArduinoOTA use the **service password**, independently of WebUI authentication. Set it under **Settings → Access & maintenance → Service access**. In normal operation, an empty service password disables ArduinoOTA; there is no default-password fallback.
+
+In `platformio.ini`, use the appropriate environment and set:
+
+```ini
+upload_protocol = espota
+upload_port = <ESP-IP-address>
+upload_flags = --auth=<service-password>
+```
+
+ArduinoOTA does not require a username. In Setup Mode it uses the fixed password described under [Access and passwords](#access-and-passwords).
 
 Interrupted browser uploads are aborted after 60 seconds without progress, restoring the previous watchdog state. New OTA firmware is confirmed after two minutes of uptime with a network connection, or after ten minutes offline. Before confirmation, a reboot can trigger the bootloader rollback to the previous firmware.
 
-There are two predefined Options:
-
-- OPTION 1: direct cable upload
-- OPTION 2: wireless OTA Update
-
 ## Setup Mode
 
-A `Setup Mode` is available. Setup mode is activated when the ESP is restarted **5** times.
-A maximum of 5 seconds may elapse after each restart.
+Setup Mode provides access for initial configuration and recovery. It is activated when WiFi is enabled without an SSID, when both network interfaces are disabled, or when enabled WebUI authentication has incomplete credentials. A missing or unreadable configuration also enters recovery. It can also be requested by restarting the ESP **five times**, with each restart occurring within five seconds of the previous start.
 
-Example: restart 1/5 - wait 2s - restart 2/5 - wait 2s - restart 3/5 - wait 2s - restart 4/5 - wait 2s - restart /5/5 => Setup-Mode
+The ESP creates the WiFi access point **`ESP32-Jarolift`**. Connect to it and open **<http://192.168.4.1>**. The access point itself has no WiFi password; the WebUI login is **`admin` / `jarolift-2026!`**. These are fixed Setup Mode credentials and also work with an empty or damaged `config.json`. Configured normal-operation credentials do not replace them.
 
-The "Setup Mode" will also activated if there is no valid wifi and no valid ETH connection configured.
+Configure the network, save the settings and restart for normal operation.
 
-If the ESP goes into "Setup Mode", it will automatically create a own network access point with ssid  
-📶 `"ESP32_Jarolift"`  
-After you are connected to this network, you can open the webUI on ip-address  
-**"<http://192.168.4.1>"**
+## Access and passwords
+
+WebUI access and service access are configured separately under **Settings → Access & maintenance**:
+
+| Access | Normal operation | Setup Mode |
+| --- | --- | --- |
+| WebUI | Optional authentication: freely chosen username and password, plus an enable switch. With authentication disabled, no login is required. | Authentication always enabled: username `admin`, password `jarolift-2026!`, independent of the configuration. |
+| Local/GitHub update through the WebUI, configuration import/export | Follows WebUI authentication; no additional service password. | Uses the Setup Mode WebUI login. |
+| Remote OTA through ArduinoOTA | Requires the separately configured service password. Disabled if it is empty. No username. | Fixed password `jarolift-2026!`; no username. |
+| Telnet | Must be enabled separately and requires the service password. Disabled if the password is empty. No username. | Still requires the Telnet enable setting; when enabled, uses `jarolift-2026!`. Not enabled automatically by Setup Mode. |
+
+Changing the WebUI password does not change the service password, and disabling WebUI authentication does not remove service-password protection. The service password is shared by Telnet and ArduinoOTA.
 
 ## Configuration
 
-Here you can setup all the configuration that fits to your heating system and your infrastructure.
+Settings are organised into five categories. Within a category, expand the section you want to edit.
 
-- **WiFi**  
-enter your WiFi credentials to connect the ESP to your network
+| Category | Sections and purpose |
+| --- | --- |
+| **General** | Language, NTP server/time zone and geographic location. Latitude and longitude are used for sunrise/sunset timers. |
+| **Network** | WiFi credentials, optional fixed access point (BSSID), IP configuration and Ethernet/W5500 configuration including SPI GPIOs. |
+| **Integrations** | MQTT broker/topic/credentials, Home Assistant discovery and homee. Home Assistant discovery requires MQTT to be configured and enabled. |
+| **Device** | Global positioning switch, JAROLIFT protocol settings, shutters, groups and GPIO assignment. Configure controller serial/master keys, device counter and learning method here; enable and name shutters, pair motors and define groups. |
+| **Access & maintenance** | Optional WebUI authentication and the separate service password with the Telnet enable switch. See [Access and passwords](#access-and-passwords). |
 
-- **Ethernet W5500**  
-use Ethernet connection based on W5500 to connect the ESP to your network
+WiFi offers separate search buttons for **SSID** and **access point/BSSID**. Select a detected entry in the dialog or enter a hidden SSID manually. Leaving BSSID empty allows automatic access-point selection. A fixed BSSID binds the connection to that access point; changing the SSID clears the previous BSSID.
 
-- **Authentication**  
-you can activate the authentication feature and configure user and password.
+Positioning is enabled globally under **Device**, but each shutter must be calibrated separately on the **Service** page. Original remote associations are also managed on **Service**, next to the selected shutter; they are no longer entered manually in Settings.
 
-- **NTP Server**  
-the ESP can connect to a NTP server to get the right Time information.
-The default Time-Zone should fit if you are located in germany. Otherwise you can change it manually
+Changes are saved automatically. **GPIO and JAROLIFT protocol changes require a restart.** German and English are available for the interface and language-dependent messages.
 
-- **MQTT**  
-here you can activate the MQTT communication and enter mandatory parameters
-All the parameters are mandatory!
+<img style="width: 500px;" src="./Doc/webUI_settings.png">
 
-- **GPIO**  
-Here you can configure the GPIO to connect the CC1101 to the ESP32
-
-- **Jarolift**  
-here you have to configure some Jarolift specific protocol settings
-
-- **Shutter**  
-here you can configure each shutter with individual name
-
-- **Group**  
-here you can define optional shutter-groups
-
-- **Original remotes**
-
-  Under Settings → Device → Original remotes, use Add mapping to capture a button signal (STOP also works). Select the intended channel/group on the remote, name the mapping and choose its target ESP shutters. The full serial and received mask jointly identify a mapping. Existing rows can be edited or deleted. Deleting only removes the ESP association; motor pairing is unaffected. Capture legacy six-digit prefix registrations again.
-
-- **Language**  
-There are two languages available. Choose what you prefer.
-The language take effect on the webUI and also on the mqtt messages!
-
-> [!NOTE]
-> All settings are automatically saved when changes are made
-
-> [!IMPORTANT]
-> Changes to GPIO or Jarolift settings require a restart!
-
-![weubui-settings](Doc/webUI_settings.png)
-
-## Filemanager
+## Config Import and Export
 
 there is also a builtin file manager to open (show), download (export) and upload (import) the configuration file.
 The configuration is stored in the ```config.json``` file. To backup and restore the configuration you can download and upload this file.
 
-![filemanager](/Doc/webUI_tools.png)
+<img style="width: 500px;" src="./Doc/webUI_tools.png">
 
 ## Teach-in of roller shutters
 
@@ -388,40 +375,129 @@ If everything done correct, all shutters should work like before. If not, some s
 
 The WebUI is responsive and also offers a mobile layout.
 
-![weubui_dash](Doc/webUI_1.png)
 (Desktop Version)
-
-<img style="display: inline;
-  margin-right: 50px;
-  width: 200px;" src="./Doc/webUI_mobile_1.png">
-<img style="display: inline;
-  margin-right: 50px;
-  width: 200px;" src="./Doc/webUI_mobile_2.png">
+![weubui_dash](Doc/webUI_shutter.png)
 
 (Mobile Version)
 
+<img style="display: inline;
+  margin-right: 20px;
+  width: 200px;" src="./Doc/webUI_mobile_1.jpeg">
+<img style="display: inline;
+  margin-right: 20px;
+  width: 200px;" src="./Doc/webUI_mobile_3.jpeg">
+<img style="display: inline;
+  margin-right: 20px;
+  width: 200px;" src="./Doc/webUI_mobile_2.jpeg">
+
 ## Channels
 
-Once the roller shutters have been configured and activated, they can also be controlled directly in the WebUI.
+Each enabled shutter has its own control with **UP, STOP, DOWN and SHADE**. These buttons remain available independently of percentage positioning.
 
-![webUI_shutter](/Doc/webUI_shutter.png)
+With positioning disabled globally, the additional position section is hidden. With positioning enabled:
+
+- **Not calibrated:** only a compact notice and a link to calibration appear below the normal buttons.
+- **Calibrated:** a small shutter graphic and estimated opening are shown, together with a target slider and a separate execute button. Moving the slider selects a target; only pressing the execute button starts the movement.
+- **Position unknown:** no measured position is implied. A percentage target can still be requested because it starts with a reference run.
+
+<img style="width: 500px;" src="./Doc/webUI_shutter.png">
 
 ## Groups
 
-The groups that are configured in the settings can also be operated directly in the WebUI in the same way as the individual roller shutters.
+Configured groups offer the same UP/STOP/DOWN/SHADE commands for their selected shutters. Percentage targets for groups are not currently supported.
 
-![webUI_groups](/Doc/webUI_groups.png)
+<img style="width: 500px;" src="./Doc/webUI_groups.png">
 
 ## Timer
 
-The timer function enables the automatic control of individual roller shutters or a selection of several roller shutters as a group.
-A fixed time can be specified as a trigger, or sunrise or sunset with an optional time offset.
+Timers control an individual shutter or a group of shutters. Choose a fixed time, sunrise or sunset, optionally with an offset, plus weekdays and the command. Geographic coordinates are configured under **Settings → General**. The shutter-selection dialog creates the target bitmask automatically.
 
-![webUI_timer](/Doc/webUI_timer.png)
+<img style="width: 500px;" src="./Doc/webUI_timer.png">
 
-The selection of roller shutters is supported by an additional dialogue. All configured and activated roller shutters are displayed there. These can be selected there and the bitmask is then automatically created from them.
 
-<img style="width: 444px;" src="./Doc/webUI_bitmask_wiz.png">
+## Service
+
+Select the shutter at the top of the Service page. The same selection is used for manual operation, setting/deleting motor end positions, setting the shade position, position calibration and original-remote associations.
+
+Motor pairing is configured under **Settings → Device → Shutters**. Registering an original remote on Service only tells the ESP about an existing motor/remote relationship; it does not pair the remote with the motor.
+
+<img style="width: 500px;" src="./Doc/webUI_service.png">
+
+## Percentage positioning
+
+### Principle and activation
+
+The motors do not report their position or end stops. Positioning therefore uses **calibrated travel times**, not measured position feedback. The opening scale is **0% = fully closed, 100% = fully open**.
+
+Enable the feature under **Settings → Device → Position control**. It is optional and applies globally; only individually calibrated shutters receive percentage controls. Other shutters remain usable with their normal buttons.
+
+Every percentage request first travels to a known end position, regardless of the previously estimated position:
+
+| Target opening | Movement |
+| --- | --- |
+| 0% | Fully close. |
+| More than 0%, below 50% | Fully close, pause, then open to the requested percentage. |
+| 50% to below 100% | Fully open, pause, then close to the requested percentage. |
+| 100% | Fully open. |
+
+The reference run uses the full calibrated travel time plus a reserve of 5%, at least one second and at most three seconds. The direction-change pause is 600 ms. This deliberately takes longer than a direct move, but avoids relying on a remembered starting position after unobserved remote operation.
+
+### Calibrating a shutter
+
+First configure the motor's actual end stops. Calibration does not replace them. Mark the halfway point of the opening height and keep the shutter in direct view.
+
+1. On **Service**, select the enabled shutter and close it completely with the normal buttons.
+2. Open calibration and confirm the fully closed starting position.
+3. Start opening. Confirm when the shutter curtain first lifts, when it reaches half height, and when it is fully open.
+4. From the fully open position, start closing. Confirm half height, arrival of the bottom edge at the bottom, and finally complete slat closure.
+5. Review and explicitly apply the recorded times. Only this replaces existing calibration and stores it in `config.json`.
+
+These landmarks account for the initial take-up/slat movement and approximate the changing winding diameter using separate opening and closing curves with linear interpolation between the marks. The values are elapsed times from the start of each direction, not individual segment durations. Each direction is limited to 180 seconds; implausible timings are rejected.
+
+Keep the calibration page in the foreground. The browser sends a heartbeat; after more than six seconds without it, the ESP aborts calibration and sends STOP. This requires the ESP to remain operational and the radio command to reach the motor. A connection loss does not guarantee an immediate stop.
+
+<img style="width: 500px;" src="./Doc/webUI_calibration.gif">
+
+### Status, manual operation and limitations
+
+Calibration survives a restart; the current position estimate does not. STOP, SHADE and a restart make the position unknown. With calibrated shutters, manual UP/DOWN assumes the end position only after the full travel time plus reserve. Received commands from assigned original remotes update the same estimate, even without MQTT. Signals that are not received cannot be accounted for.
+
+Only one automatic target run or calibration can run at a time. Manual commands have priority and cancel the automatic sequence; it does not resume automatically. Once accepted, a normal percentage run is completed by the ESP even if the browser is closed. Motor learning/unlearning or end-position changes invalidate that shutter's calibration; disabling positioning or starting OTA aborts automatic movement sequences.
+
+A reference run compensates for an unknown initial position. It cannot protect against an unreceived remote command during the run. Test 25%, 50% and 75% on each calibrated shutter before relying on the estimate.
+
+Percentage targets are also available through [MQTT and Home Assistant](#percentage-targets--home-assistant). Further details: [Positionierung.md](Doc/Positionierung.md) (German).
+
+## Original remote registration
+
+### What is being assigned?
+
+On **Service**, select a shutter and register the original remote's **single channel that is already paired with this motor**. This association lets the ESP update its position estimate and MQTT status when the original remote is used. It does not send a motor teach-in command and does not change actual motor pairing.
+
+No remote model, serial number or bitmask needs to be entered manually. The source is captured from the received radio signal. A source channel can be assigned to several ESP shutters, and each shutter can have **up to five associations**. There are at most **80 distinct sources** overall. Names are limited to **32 Unicode characters**.
+
+### Registering and removing an association
+
+1. Select the intended shutter on **Service** and choose **Original remotes → Add mapping**.
+2. Select the appropriate **single channel** on the original remote and press a button, preferably STOP. UP/DOWN can also be captured, but may move the actual motor.
+3. Release the button, wait briefly and press the same channel again to confirm it. A long press with repeated telegrams is not the intended confirmation. The command may differ between the two presses; the source channel must match.
+4. Name the source and save. It is assigned to the selected shutter. Repeat for other shutters controlled by that source; existing associations are retained.
+
+The list shows only associations for the selected shutter. **Delete** removes only that relationship, leaving associations to other shutters and real motor pairing intact. Capturing an existing source again allows its shared name to be changed; that name is also used for its other assigned shutters.
+
+<img style="width: 500px;" src="./Doc/webUI_remote_01.png"> 
+<img style="width: 250px;" src="./Doc/webUI_remote_02.png"> <img style="width: 250px;" src="./Doc/webUI_remote_03.png">
+
+### Group buttons and existing configurations
+
+Register individual source channels, not a group selection. Group commands are resolved automatically: the ESP matches the sender identity and the received channel bits against registered single-channel sources, then combines the affected ESP shutters. A group needs no additional entry. Source-channel numbers need not match the ESP shutter numbers.
+
+For example, remote channel 1 can be assigned to ESP shutter 3 and remote channel 4 to ESP shutter 8. A group containing both remote channels updates shutters 3 and 8. Only registered relationships are considered; the ESP cannot infer which motors actually moved from an unregistered group.
+
+Configuration version 7 migrates version-6 single-channel mappings and merges duplicate sources while preserving their targets. Old explicit group mappings are shown as requiring recapture and are not evaluated: capture their individual channels for the appropriate motors. Older serial-prefix-only registrations must also be captured again. Existing imported associations beyond the new five-per-shutter limit are retained, but must be reduced before adding more to that shutter.
+
+Reliable reception is still required. Registration does not make corrupted or missed radio signals reliable. Measurement examples are documented in [remotes.md](Doc/remotes.md).
+
 
 -----
 
@@ -539,7 +615,8 @@ topic:      ../status/shutter/1 ... status/shutter/16
 payload:    {None}
 ```
 
-Status uses opening percentages: 0 closed, 100 open; `None` means unknown (including STOP/SHADE). Calibrated shutters report manual endpoints after full travel time plus reserve. Assigned received remote commands update the same estimate. This is a breaking change from the previous inverted scale.
+> [!IMPORTANT]
+> Breaking change: shutter status now uses 0 = closed and 100 = open, reversing the previous scale. Update automations that interpret the old status values. Command codes (0 = UP, 1 = DOWN) have not changed.
 
 ### Percentage targets / Home Assistant
 
@@ -547,21 +624,22 @@ With positioning enabled globally and valid channel calibration, `../cmd/positio
 
 ### Remotes
 
-If original remote controls are also stored in the settings via the serial number, signals from these remote controls can also be recorded and output via MQTT.
-The information about which shutter is controlled can be seen in the two variables `chBin` and `chDec`. `chBin` shows the used shutter as a 16-bit binary value, while `chDec` shows the same information as a decimal value for easier automation.
+Valid received remote commands are published while MQTT is connected under `../status/remote/<full-serial-number>`, for example `../status/remote/0c4b000f`. [Service associations](#original-remote-registration) supply the name and affected ESP shutters. Unassigned sources are reported with `name: "unknown"`; multiple matching sources can appear as `"multiple"`.
+
+`chBin` and `chDec` describe the same **received source-channel mask** as a 16-bit binary string and a decimal value. They are not the target mask of the ESP shutters; the separately stored associations determine those targets.
+
+Topic: `../status/remote/0c74b000f`
 
 ```json
-topic:      "../status/remote/<serial-number>"
-payload:    {
-              "name":   "<alias-name>", 
-              "cmd":    "<UP, DOWN, STOP, SHADE>",
-              "chBin":  "<channel-binary>",
-              "chDec":  "<channel-decimal>"
-            }
+{
+  "name": "Living room · channel 16",
+  "cmd": "UP",
+  "chBin": "10000000 00000000",
+  "chDec": 32768
+}
 ```
 
-> [!NOTE]
-> < ../ > is the placeholder for the MQTT topic which is specified in the settings.
+`cmd` can be `UP`, `DOWN`, `STOP` or `SHADE`. In these examples, `../` is a placeholder for the configured MQTT prefix.
 
 ## additional information's (read only)
 
@@ -586,8 +664,9 @@ see also the official documentation: <https://www.home-assistant.io/integrations
 
 <img src="Doc/webUI_ha2.png" alt="mqtt_ha1" width="75%">
 
-In the mqtt settings you can activate the discovery function and also set the mqtt discovery topic and the device name for Home Assistant  
-<img src="Doc/webUI_ha1.png" alt="mqtt_ha1" width="50%">
+Under **Settings → Integrations → Home Assistant**, enable discovery and configure the discovery topic and device name. MQTT must also be enabled and configured under **Integrations → MQTT**.
+
+<img style="width: 500px;" src="./Doc/webUI_settings_ha.png">
 
 -----
 
@@ -599,19 +678,12 @@ in addition to mqtt there are more communication options.
 
 There is also a log function with which you can record various messages depending on the filter and display them via the WebUI. This can be useful for your own debugging and also for the further development of the software.
 
-<img src="./Doc/webUI_Logger.png" width="75%">
+<img style="width: 500px;" src="./Doc/webUI_logger.png">
 
 ## Telnet
 
-In addition to the WebUI and MQTT, there is also a Telnet interface to communicate with the ESP.
-The interface offers several commands to read out information and send commands.
-An overview of the commands can be called up using the "help" command.
-To connect, a simple Telnet connection can be started via the corresponding IP address of the ESP.
+Telnet provides diagnostic and control commands; `help` lists the available commands. Under **Settings → Access & maintenance → Service access**, set a service password and explicitly enable Telnet. Without a service password, Telnet stays disabled in normal operation, independently of the WebUI password.
 
-Every connection requires the password configured in the WebUI Auth settings, even if web authentication is disabled. If no password is configured, the fallback is `jarolift-2026!`. Set your own password in the WebUI. A wrong password disconnects the client; reconnecting requires authentication again.
+Connect with `telnet <ESP-IP-address>` and enter the service password at the password prompt. No username is required. An incorrect password disconnects the client; each new connection requires authentication again. Setup Mode follows the rules under [Access and passwords](#access-and-passwords).
 
-Example:
-
-`> telnet 192.168.178.193`
-
-<img src="./Doc/telnet.png" width="75%">
+<img style="width: 500px;" src="./Doc/webUI_telnet.png">
