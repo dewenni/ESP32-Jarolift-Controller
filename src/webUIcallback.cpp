@@ -1,6 +1,8 @@
 
 #include <basics.h>
 #include <jarolift.h>
+#include <shutterPosition.h>
+#include <remoteMapping.h>
 #include <message.h>
 #include <webUI.h>
 #include <webUIupdates.h>
@@ -18,6 +20,13 @@ uint8_t srvShutter = 0;
 void webCallback(const char *elementId, const char *value) {
 
   ESP_LOGD(TAG, "Received - Element ID: %s", elementId);
+  if (strcmp(elementId, "remote_mapping_cmd") == 0) {remoteMappingWebCommand(value); return;}
+  if (strcmp(elementId, "p04_position_cmd") == 0) {shutterPositionWebCommand(value); return;}
+  if (strcmp(elementId, "cfg_position_enable") == 0) {
+    config.position.enable = EspStrUtil::stringToBool(value);
+    if (!config.position.enable) shutterPositionManual(0xffff);
+    return;
+  }
 
   // ------------------------------------------------------------------
   // GitHub / Version
@@ -460,32 +469,6 @@ void webCallback(const char *elementId, const char *value) {
     }
   }
 
-  // remote 1-16
-  for (int i = 0; i < 16; i++) {
-    char enableId[32];
-    char nameId[32];
-    char maskId[32];
-    char serialId[32];
-
-    snprintf(enableId, sizeof(enableId), "cfg_jaro_remote_enable_%d", i);
-    snprintf(nameId, sizeof(nameId), "cfg_jaro_remote_name_%d", i);
-    snprintf(maskId, sizeof(maskId), "cfg_jaro_remote_mask_%d", i);
-    snprintf(serialId, sizeof(serialId), "cfg_jaro_remote_serial_%d", i);
-
-    if (strcmp(elementId, enableId) == 0) {
-      config.jaro.remote_enable[i] = EspStrUtil::stringToBool(value);
-    }
-    if (strcmp(elementId, nameId) == 0) {
-      snprintf(config.jaro.remote_name[i], sizeof(config.jaro.remote_name[i]), "%s", value);
-    }
-    if (strcmp(elementId, maskId) == 0) {
-      config.jaro.remote_mask[i] = strtoul(value, NULL, 2);
-    }
-    if (strcmp(elementId, serialId) == 0) {
-      config.jaro.remote_serial[i] = strtoul(value, NULL, 16);
-    }
-  }
-
   // Shutter Service commands
   if (strcmp(elementId, "p04_selected_shutter") == 0) {
     srvShutter = atoi(value);
@@ -536,6 +519,7 @@ void webCallback(const char *elementId, const char *value) {
 
   // Restart (and save)
   if (strcmp(elementId, "restartAction") == 0) {
+    shutterPositionManual(0xffff);
     EspSysUtil::RestartReason::saveLocal("webUI command");
     configSaveToFile();
     delay(1000);

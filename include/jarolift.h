@@ -34,3 +34,10 @@ struct JaroCommand {
 void jaroCmd(JaroCmdType type, uint8_t channel);
 void jaroCmd(JaroCmdGrpType type, uint16_t group_mask);
 void jaroCmd(JaroCmdSrvType type, uint8_t channel);
+// Immediate, loop-task-only sends for the timed position controller.
+bool jaroPositionSend(uint8_t channel, JaroCmdType type);
+uint32_t jaroPositionSentAt();
+bool jaroCommandsPending();
+
+// Shared estimated opening: 0 closed, 100 open; -1 publishes MQTT None.
+void mqttSendPosition(uint8_t channel, int8_t position);

@@ -1,3 +1,21 @@
+# Unreleased
+
+## Breaking change: original remote mappings
+
+The old six-digit prefix registration is removed. Settings → Device → Original remotes now contains a list with Add/Edit/Delete and signal capture. Each mapping uses the exact 28-bit serial (displayed as eight hex digits) **and** the received 16-bit channel mask, mapped to one or more ESP shutters. Single channels and groups sharing a serial therefore remain distinct. Up to 32 mappings are stored in configuration version 6. Legacy prefix mappings are discarded, not guessed or migrated: capture each required channel/group again. Existing radio pairing at the motors is unaffected. Deleting a row only deletes the ESP association. Capture does not transmit motor commands, but pressing the original remote may operate the shutters.
+
+## Home Assistant percentage control
+
+Eligible individual shutters expose `<prefix>/cmd/position/N` for integer opening targets 0..100. These use the same reference run and calibrated timing as the WebUI. Disabled, uncalibrated, busy or unavailable channels reject percentage commands. Publish commands without retain. Group percentage control is not included.
+
+## Breaking change: unified shutter opening status
+
+`<prefix>/status/shutter/1` … `/16` now use **0 = fully closed, 100 = fully open** (previously reversed). Intermediate numbers are estimated opening percentages. Update manual MQTT cover configurations, automations and dashboards; invert old numeric comparisons. Command payloads remain unchanged: `0` still means UP, `1` DOWN, `2` STOP; prefer OPEN/CLOSE/STOP to avoid confusion.
+
+WebUI and MQTT now share one position estimate, including received commands from assigned original remotes and group commands. For calibrated shutters, manual UP/DOWN assumes the endpoint only after the full calibrated travel time plus reserve; repeated frames do not restart this timer. STOP, SHADE and interrupted automatic moves invalidate the estimate: retained MQTT payload `None` replaces stale positions. There is no assumed 10/90% shade position. Uncalibrated shutters still report the expected endpoint immediately for UP/DOWN. All values are estimates without motor feedback; missed remote signals remain undetectable.
+
+MQTT reconnect republishes the current estimates (or `None` after restart) so old retained values cannot retain the previous scale. Home Assistant Discovery is adjusted to the new status definition; resend discovery after updating existing installations. Home Assistant additionally gets a percentage slider only for globally enabled, calibrated channels. Discovery is refreshed automatically on eligibility changes and MQTT reconnect. OPEN/CLOSE/STOP remain available for all configured shutters.
+
 # v1.10.0
 
 ## what's new

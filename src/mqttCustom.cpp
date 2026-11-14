@@ -6,13 +6,18 @@
 #include <message.h>
 #include <mqttDiscovery.h>
 #include <jarolift.h>
+#include <shutterPosition.h>
 
 static const char *TAG = "MQTT";
 static bool bootUpMsgDone = false;
 static char haStatusTopic[128];
+static uint16_t discoveryPositionMask=0;
+static bool discoveryPending=true;
 
 void mqttCustomConnected() {
+  discoveryPending=true;
   sendWiFiInfo();
+  shutterPositionPublish();
   mqttSubscribe(addTopic("/cmd/#"));
   mqttSubscribe(addTopic("/setvalue/#"));
   const auto &settings = mqttGetConnectionConfig();
@@ -23,14 +28,21 @@ void mqttCustomConnected() {
 }
 
 void mqttCustomCyclic() {
+  if(mqttIsConnected() && config.mqtt.ha_enable && !EspSysUtil::OTA::getInstance().isActive()) {
+    uint16_t mask=0;
+    for(uint8_t ch=0;ch<16;++ch) if(shutterPositionReady(ch)) mask|=uint16_t(1)<<ch;
+    if(discoveryPending || mask!=discoveryPositionMask) {
+      mqttDiscoverySetup(false);
+      shutterPositionPublish();
+      discoveryPositionMask=mask;discoveryPending=false;
+    }
+  } else discoveryPending=true;
+
   // send bootup messages after restart and established mqtt connection
   if (!bootUpMsgDone && mqttIsConnected()) {
     bootUpMsgDone = true;
     ESP_LOGI(TAG, "ESP restarted (%s)", EspSysUtil::RestartReason::get());
 
-    if (config.mqtt.ha_enable) {
-      mqttDiscoverySetup(false);
-    }
   }
 }
 
@@ -97,6 +109,7 @@ void processMqttMessage(const s_MqttMessage &message) {
   int channel = checkJaroCmd(msgCpy.topic, shutterTopic, 16);
   const char *groupTopic = addTopic("/cmd/group/");
   int group = checkJaroCmd(msgCpy.topic, groupTopic, 6);
+  const int positionChannel=checkJaroCmd(msgCpy.topic,addTopic("/cmd/position/"),16);
 
   ESP_LOGD(TAG, "channel: %i", channel);
   ESP_LOGD(TAG, "group: %i", group);
@@ -119,6 +132,11 @@ void processMqttMessage(const s_MqttMessage &message) {
   } else if (strcmp(msgCpy.topic, haStatusTopic) == 0) {
     if (config.mqtt.ha_enable && strcmp(msgCpy.payload, "online") == 0) {
       mqttDiscoverySetup(false); // send actual discovery configuration
+    }
+  } else if(positionChannel!=-1) {
+    if(!shutterPositionTarget(positionChannel-1,msgCpy.payload)) {
+      mqttPublish(addTopic("/message"),"invalid or unavailable position target",false);
+      ESP_LOGW(TAG,"Rejected position target for channel %i",positionChannel);
     }
     // Shutter commands
   } else if (channel != -1) {

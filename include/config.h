@@ -1,6 +1,8 @@
 #pragma once
 #include <message.h>
 #include <stdint.h>
+#include <positionModel.h>
+#include <remoteMapping.h>
 /*-------------------------------------------------------------------------------
 General Configuration
 --------------------------------------------------------------------------------*/
@@ -22,10 +24,6 @@ struct s_cfg_jaro {
   char grp_name[6][64]{"\0"};
   bool grp_enable[6];
   uint16_t grp_mask[6];
-  char remote_name[16][64]{"\0"};
-  uint32_t remote_serial[16];
-  bool remote_enable[16];
-  uint16_t remote_mask[16];
 };
 
 struct s_cfg_timer {
@@ -132,6 +130,11 @@ struct s_cfg_homee {
   bool thirdPosition;
 };
 
+struct s_cfg_position {
+  bool enable = false;
+  PositionCalibration calibration[16];
+};
+
 struct s_config {
   int version;
   int lang;
@@ -144,6 +147,8 @@ struct s_config {
   s_cfg_service service;
   s_cfg_log log;
   s_cfg_jaro jaro;
+  RemoteMapping remoteMappings[REMOTE_MAPPING_LIMIT];
+  s_cfg_position position;
   s_cfg_timer timer[6];
   s_cfg_geo geo;
   s_cfg_homee homee;

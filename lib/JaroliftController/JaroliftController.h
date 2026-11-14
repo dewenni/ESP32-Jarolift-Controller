@@ -43,6 +43,9 @@ public:
 
   // Lebenszyklus
   void begin();
+  bool ready() const { return initOK_; }
+  bool lastTxOK() const { return lastTxOK_; }
+  uint32_t lastTxMs() const { return lastTxMs_; }
   void loop();
 
   // Einzelbefehle
@@ -147,6 +150,8 @@ private:
   size_t txSymbolCount_ = 0;
   bool txHalfUsed_ = false;
   bool rmtOK_ = false;
+  bool lastTxOK_ = false;
+  uint32_t lastTxMs_ = 0;
   void initRmt();
   void txAddLevel(uint8_t level, uint16_t durationUs);
   void radioTxFrame(int length);

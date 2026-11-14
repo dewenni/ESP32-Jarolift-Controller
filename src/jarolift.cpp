@@ -5,12 +5,11 @@
 #include <mqtt.h>
 #include <queue>
 #include <timer.h>
+#include <shutterPosition.h>
+#include <remoteMapping.h>
 
 #define MAX_CMD 20
 #define SEND_CYCLE 500
-#define POS_OPEN 0
-#define POS_CLOSE 100
-#define POS_SHADE 90
 
 static muTimer cmdTimer = muTimer();
 static muTimer timerTimer = muTimer();
@@ -26,35 +25,16 @@ JaroliftController jarolift;
  * @param   channel, position
  * @return  none
  * *******************************************************************/
-void mqttSendPosition(uint8_t channel, uint8_t position) {
+void mqttSendPosition(uint8_t channel, int8_t position) {
   char topic[64];
   char pos[16];
 
-  if (position > 100)
-    position = 100;
-  if (position < 0)
-    position = 0;
+  if(channel>=16 || position>100)return;
   if (mqttIsConnected()) {
-    itoa(position, pos, 10);
+    if(position<0) snprintf(pos,sizeof(pos),"None");
+    else itoa(position, pos, 10);
     snprintf(topic, sizeof(topic), "%s%d", addTopic("/status/shutter/"), channel + 1);
     mqttPublish(topic, pos, true);
-  }
-}
-
-/**
- * *******************************************************************
- * @brief   send expected position via mqtt
- * @param   channel, position
- * @return  none
- * *******************************************************************/
-void mqttSendPositionGroup(uint16_t group_mask, uint8_t position) {
-
-  // check all 16 channels
-  for (uint8_t c = 0; c < 16; c++) {
-    // check if channel is in group
-    if (group_mask & (1 << c)) {
-      mqttSendPosition(c, position);
-    }
   }
 }
 
@@ -65,9 +45,18 @@ void mqttSendPositionGroup(uint16_t group_mask, uint8_t position) {
  * @return  none
  * *******************************************************************/
 void mqttSendRemote(uint32_t serial, int8_t function, uint16_t channel) {
-
-  if (!mqttIsConnected()) {
-    return;
+  // Remote commands affect positioning even while MQTT is disabled/offline.
+  const auto *mapping=remoteMappingReceive(serial,channel,function);
+  uint16_t affected=mapping?mapping->targets:0;
+  for(uint8_t ch=0;ch<16;++ch)if(!config.jaro.ch_enable[ch])affected&=~(uint16_t(1)<<ch);
+  if (affected) {
+    switch(function) {
+    case 0x2: shutterPositionRemote(affected,CMD_DOWN); break;
+    case 0x8: shutterPositionRemote(affected,CMD_UP); break;
+    case 0x4: shutterPositionRemote(affected,CMD_STOP); break;
+    case 0x3: shutterPositionRemote(affected,CMD_SHADE); break;
+    default: break;
+    }
   }
 
   char topic[64];
@@ -100,33 +89,7 @@ void mqttSendRemote(uint32_t serial, int8_t function, uint16_t channel) {
     break;
   }
 
-  // unknown as default
-  const char *remoteName = "unknown";
-  for (int i = 0; i < 16; i++) {
-    if (config.jaro.remote_enable[i] && (serial >> 8 == config.jaro.remote_serial[i])) {
-      remoteName = config.jaro.remote_name[i];
-
-      // check if this remote is registered for one or more shutter
-      for (int j = 0; j < 16; j++) {
-        if (config.jaro.remote_mask[i] & (1 << j)) {
-          switch (function) {
-          case 0x2:
-            mqttSendPosition(j, POS_CLOSE);
-            break;
-          case 0x8:
-            mqttSendPosition(j, POS_OPEN);
-            break;
-          case 0x3:
-            mqttSendPosition(j, POS_SHADE);
-            break;
-          default:
-            break;
-          }
-        }
-      }
-      break; // stop is first remote was found
-    }
-  }
+  const char *remoteName=mapping?mapping->name:"unknown";
 
   JsonDocument remoteJSON;
   remoteJSON["name"] = remoteName;
@@ -138,7 +101,7 @@ void mqttSendRemote(uint32_t serial, int8_t function, uint16_t channel) {
   serializeJson(remoteJSON, sendremoteJSON);
   snprintf(topic, sizeof(topic), "%s%08lx", addTopic("/status/remote/"), serial);
 
-  mqttPublish(topic, sendremoteJSON, false);
+  if(mqttIsConnected()) mqttPublish(topic, sendremoteJSON, false);
 
   ESP_LOGI(TAG, "received remote signal | serial: 0x%08lx | cmd: %s, | channel: %s", serial, fun, chBIN);
 }
@@ -150,6 +113,8 @@ void mqttSendRemote(uint32_t serial, int8_t function, uint16_t channel) {
  * @return  none
  * *******************************************************************/
 void jaroCmd(JaroCmdType type, uint8_t channel) {
+  if (channel >= 16) return;
+  if (shutterPositionBusy()) shutterPositionManual(uint16_t(1) << channel);
   if (jaroCmdQueue.size() < MAX_CMD) {
     jaroCmdQueue.push({JaroCommand::SINGLE, {.single = {type, channel}}});
     ESP_LOGD(TAG, "add single cmd to buffer: %i, %i", type, channel + 1);
@@ -159,6 +124,7 @@ void jaroCmd(JaroCmdType type, uint8_t channel) {
 }
 
 void jaroCmd(JaroCmdGrpType type, uint16_t group_mask) {
+  if (shutterPositionBusy()) shutterPositionManual(group_mask);
   if (jaroCmdQueue.size() < MAX_CMD) {
     jaroCmdQueue.push({JaroCommand::GROUP, {.group = {type, group_mask}}});
     ESP_LOGD(TAG, "add group cmd to buffer: %i, %04X", type, group_mask);
@@ -168,6 +134,8 @@ void jaroCmd(JaroCmdGrpType type, uint16_t group_mask) {
 }
 
 void jaroCmd(JaroCmdSrvType type, uint8_t channel) {
+  if (channel >= 16) return;
+  if (shutterPositionBusy()) shutterPositionManual(uint16_t(1) << channel);
   if (jaroCmdQueue.size() < MAX_CMD) {
     jaroCmdQueue.push({JaroCommand::SERVICE, {.service = {type, channel}}});
     ESP_LOGD(TAG, "add service cmd to buffer: %i, %i", type, channel + 1);
@@ -203,7 +171,7 @@ void jaroliftSetup() {
   jarolift.setRemoteCallback(mqttSendRemote);
 }
 
-void jaroCmdReInit() { jaroliftSetup(); };
+void jaroCmdReInit() { shutterPositionManual(0xffff); jaroliftSetup(); };
 void jaroCmdSetDevCnt(uint16_t value) { jarolift.setDeviceCounter(value); };
 uint16_t jaroGetDevCnt() { return jarolift.getDeviceCounter(); };
 bool getCC1101State() { return jarolift.getCC1101State(); };
@@ -218,17 +186,21 @@ uint8_t getCC1101Rssi() { return jarolift.getRssi(); }
 void processJaroCommands() {
   if (!jaroCmdQueue.empty()) {
     JaroCommand cmd = jaroCmdQueue.front();
+    if ((cmd.cmdType == JaroCommand::SINGLE && cmd.single.channel >= 16) ||
+        (cmd.cmdType == JaroCommand::SERVICE && cmd.service.channel >= 16)) {jaroCmdQueue.pop(); return;}
+    uint16_t mask = cmd.cmdType == JaroCommand::GROUP ? cmd.group.group_mask : uint16_t(1) <<
+        (cmd.cmdType == JaroCommand::SERVICE ? cmd.service.channel : cmd.single.channel);
+    shutterPositionManual(mask);
+    if (cmd.cmdType == JaroCommand::SERVICE) shutterPositionInvalidate(cmd.service.channel);
 
     if (cmd.cmdType == JaroCommand::SINGLE) {
       switch (cmd.single.type) {
       case CMD_UP:
         jarolift.cmdChannel(JaroliftController::CMD_UP, cmd.single.channel);
-        mqttSendPosition(cmd.single.channel, POS_OPEN);
         ESP_LOGI(TAG, "execute cmd: UP - channel: %i", cmd.single.channel + 1);
         break;
       case CMD_DOWN:
         jarolift.cmdChannel(JaroliftController::CMD_DOWN, cmd.single.channel);
-        mqttSendPosition(cmd.single.channel, POS_CLOSE);
         ESP_LOGI(TAG, "execute cmd: DOWN - channel: %i", cmd.single.channel + 1);
         break;
       case CMD_STOP:
@@ -237,7 +209,6 @@ void processJaroCommands() {
         break;
       case CMD_SET_SHADE:
         jarolift.cmdChannel(JaroliftController::CMD_SET_SHADE, cmd.single.channel);
-        mqttSendPosition(cmd.single.channel, POS_SHADE);
         ESP_LOGI(TAG, "execute cmd: SETSHADE - channel: %i", cmd.single.channel + 1);
         break;
       case CMD_SHADE:
@@ -245,17 +216,16 @@ void processJaroCommands() {
         ESP_LOGI(TAG, "execute cmd: SHADE - channel: %i", cmd.single.channel + 1);
         break;
       }
+      if(jarolift.lastTxOK()) shutterPositionCommand(mask,cmd.single.type);
     } else if (cmd.cmdType == JaroCommand::GROUP) {
       switch (cmd.group.type) {
       case CMD_GRP_UP:
         jarolift.cmdGroup(JaroliftController::CMD_UP, cmd.group.group_mask);
         ESP_LOGI(TAG, "execute group cmd: UP - mask: %04X", cmd.group.group_mask);
-        mqttSendPositionGroup(cmd.group.group_mask, POS_OPEN);
         break;
       case CMD_GRP_DOWN:
         jarolift.cmdGroup(JaroliftController::CMD_DOWN, cmd.group.group_mask);
         ESP_LOGI(TAG, "execute group cmd: DOWN - mask: %04X", cmd.group.group_mask);
-        mqttSendPositionGroup(cmd.group.group_mask, POS_CLOSE);
         break;
       case CMD_GRP_STOP:
         jarolift.cmdGroup(JaroliftController::CMD_STOP, cmd.group.group_mask);
@@ -263,9 +233,12 @@ void processJaroCommands() {
         break;
       case CMD_GRP_SHADE:
         jarolift.cmdGroup(JaroliftController::CMD_SHADE, cmd.group.group_mask);
-        mqttSendPositionGroup(cmd.group.group_mask, POS_SHADE);
         ESP_LOGI(TAG, "execute group cmd: SHADE - mask: %04X", cmd.group.group_mask);
         break;
+      }
+      if(jarolift.lastTxOK()) {
+        const JaroCmdType type=cmd.group.type==CMD_GRP_UP?CMD_UP:cmd.group.type==CMD_GRP_DOWN?CMD_DOWN:cmd.group.type==CMD_GRP_STOP?CMD_STOP:CMD_SHADE;
+        shutterPositionCommand(mask,type);
       }
     } else if (cmd.cmdType == JaroCommand::SERVICE) {
       switch (cmd.service.type) {
@@ -307,6 +280,8 @@ void processJaroCommands() {
  * @return  none
  * *******************************************************************/
 void jaroliftCyclic() {
+  remoteMappingCyclic();
+  shutterPositionCyclic();
 
   if (cmdTimer.cycleTrigger(SEND_CYCLE)) {
     processJaroCommands();
@@ -317,4 +292,16 @@ void jaroliftCyclic() {
   }
 
   jarolift.loop();
+}
+bool jaroCommandsPending() { return !jaroCmdQueue.empty(); }
+uint32_t jaroPositionSentAt() { return jarolift.lastTxMs(); }
+bool jaroPositionSend(uint8_t channel, JaroCmdType type) {
+  if (channel >= 16 || !jarolift.ready()) return false;
+  switch(type) {
+  case CMD_UP: jarolift.cmdChannel(JaroliftController::CMD_UP, channel); break;
+  case CMD_DOWN: jarolift.cmdChannel(JaroliftController::CMD_DOWN, channel); break;
+  case CMD_STOP: jarolift.cmdChannel(JaroliftController::CMD_STOP, channel); break;
+  default: return false;
+  }
+  return jarolift.lastTxOK();
 }

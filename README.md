@@ -301,20 +301,9 @@ here you can configure each shutter with individual name
 - **Group**  
 here you can define optional shutter-groups
 
-- **Remotes**  
+- **Original remotes**
 
-  You can register some of your existing jarolift remote controls here.
-  This can be helpful if you want to recognize and react on the commands of these remote controls.
-
-  You can assign any name you like to the remote control. This is also output in the MQTT message.
-
-  The upper 6 digits of the 8-digit serial number must be entered for the serial number. The serial number can be found in the logbook by pressing the remote control near the controller. A message like this should then appear in the log:  
-  `I (220364) JARO: received remote signal | serial: 0c7c00 | ch: 3 | cmd: 0x8, | rssi: -96 dbm`  
-  
-  With the help of the bit mask and the dialogue behind it, it is then possible to define which shutters are assigned to this remote control, as with the groups. The status of these shutters is then updated depending on the signal received.
-  This means that the status of the roller shutters can be updated even if they are not operated via the ESP controller but via the original remote control.
-  
-  But please be aware that this will not be 100% reliable.
+  Under Settings → Device → Original remotes, use Add mapping to capture a button signal (STOP also works). Select the intended channel/group on the remote, name the mapping and choose its target ESP shutters. The full serial and received mask jointly identify a mapping. Existing rows can be edited or deleted. Deleting only removes the ESP association; motor pairing is unaffected. Capture legacy six-digit prefix registrations again.
 
 - **Language**  
 There are two languages available. Choose what you prefer.
@@ -533,24 +522,28 @@ payload:    {0b0000000000010101, 0x15, 21}
 
 The controller will also send a status **based on the commands**.  
 
-> [!IMPORTANT]
-> But it is important to know, that this status is only a "copy of the received command".  
-> It does not correspond to the real status of the roller shutter, because unfortunately the roller shutter itself does not have a status that could be analyzed. So if the roller shutter is operated via the original remote control, for example, or via local operation, or is stopped during movement, then this status is no longer correct!
+The status is an estimate without motor feedback. Calibrated shutters assume a manual UP/DOWN endpoint only after the full travel time plus reserve; uncalibrated shutters report the expected endpoint immediately. Received commands from assigned original remotes update the same estimate even while MQTT is offline. Missed signals remain undetectable. STOP/SHADE invalidate the estimate; `None` means unknown. MQTT reconnect republishes the current estimate. Command codes (0 = UP, 1 = DOWN) are unchanged, not percentage targets.
 
 ```text
 
 Status:     Shutter OPEN
 topic:      ../status/shutter/1 ... status/shutter/16
-payload:    {0}
+payload:    {100}
 
 Status:     Shutter CLOSED
 topic:      ../status/shutter/1 ... status/shutter/16
-payload:    {100}
+payload:    {0}
 
 Status:     Shutter SHADE
 topic:      ../status/shutter/1 ... status/shutter/16
-payload:    {90}
+payload:    {None}
 ```
+
+Status uses opening percentages: 0 closed, 100 open; `None` means unknown (including STOP/SHADE). Calibrated shutters report manual endpoints after full travel time plus reserve. Assigned received remote commands update the same estimate. This is a breaking change from the previous inverted scale.
+
+### Percentage targets / Home Assistant
+
+With positioning enabled globally and valid channel calibration, `../cmd/position/1` through `/16` accept integer opening targets from 0 (closed) to 100 (open), without retain. The same reference sequence as the WebUI is used. Discovery automatically adds percentage control for eligible channels and removes it when disabled or uncalibrated. OPEN/CLOSE/STOP remain available; group percentage moves are not included.
 
 ### Remotes
 

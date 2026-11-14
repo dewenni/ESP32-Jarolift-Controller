@@ -258,6 +258,7 @@ void JaroliftController::radioTxGroupH() {
  * @return  whether at least one repetition was transmitted
  * *******************************************************************/
 bool JaroliftController::radioTx(int repetitions) {
+  lastTxOK_ = false;
   pack_ = ((button_ & 0xFULL) << 60) | ((newSerial_ & 0x0FFFFFFFULL) << 32) | encrypted_;
   if (perimanGetPinBusType(gpio_.gdo0) != ESP32_BUS_TYPE_RMT_TX) {
     ESP_LOGW(TAG, "GDO0 (GPIO %d) is no longer attached to RMT (bus type %d) - re-init", gpio_.gdo0, (int)perimanGetPinBusType(gpio_.gdo0));
@@ -292,6 +293,7 @@ bool JaroliftController::radioTx(int repetitions) {
   int okCount = 0;
   for (int a = 0; a < repetitions; a++) {
     if (rmtWrite(gpio_.gdo0, txSymbols_, txSymbolCount_, RMT_WAIT_FOR_EVER)) {
+      if (okCount == 0) lastTxMs_ = millis();
       okCount++;
     } else {
       ESP_LOGE(TAG, "rmtWrite failed");
@@ -301,7 +303,8 @@ bool JaroliftController::radioTx(int repetitions) {
   ESP_LOGI(TAG, "TX via RMT: %u symbols, %d/%d repetitions sent, MARCSTATE 0x%02X", (unsigned)txSymbolCount_, okCount, repetitions,
            cc1101_.readStatusReg(CC1101_MARCSTATE) & 0x1F);
   // A transmitted repetition may already have advanced the receiver counter.
-  return okCount > 0;
+  lastTxOK_ = okCount > 0;
+  return lastTxOK_;
 }
 
 /**
@@ -1071,6 +1074,8 @@ void JaroliftController::processRxData() {
  * @return  none
  * *******************************************************************/
 void JaroliftController::begin() {
+  initOK_ = false;
+  lastTxOK_ = false;
   ESP_LOGI(TAG, "start CC1101 setup");
   EEPROM.begin(sizeof(devCount_));
   devCount_ = getDeviceCounter();

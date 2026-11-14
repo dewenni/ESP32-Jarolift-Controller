@@ -1,5 +1,6 @@
 // includes
 #include <ArduinoOTA.h>
+#include <shutterPosition.h>
 #include <esp_ota_ops.h>
 #include <basics.h>
 #include <config.h>
@@ -121,6 +122,7 @@ void setup() {
 
   // Setup OTA
   ArduinoOTA.onStart([]() {
+    shutterPositionManual(0xffff);
     ESP_LOGI(TAG, "OTA-started");
     wdt.disable(); // disable watchdog timer
     ota.setActive(true);
@@ -174,6 +176,9 @@ void loop() {
   mrd->loop();
 
   markAppValid();
+
+  // Timed STOP deadlines take priority over slower web/config work.
+  shutterPositionCyclic();
 
   // webUI Cyclic
   webUICyclic();

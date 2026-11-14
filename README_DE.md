@@ -297,20 +297,9 @@ hier können die einzelnen Rollläden mit individuellen Namen konfiguriert werde
 - **Group**  
 Hier können wahlweise Rollladengruppen definiert werden
 
-- **Fernebdienungen**
-  Hier können vorhandenen Jarolift-Fernbedienungen registrieren.
-  Dies kann hilfreich sein, wenn Befehle dieser Fernbedienungen erkennen und darauf reagieren möchte.
+- **Originalfernbedienungen**
 
-  Man kann der Fernbedienung einen beliebigen Namen zuweisen. Dieser wird auch in der MQTT-Nachricht ausgegeben.
-
-  Für die Seriennummer müssen die oberen 6 Ziffern der 8-stelligen Seriennummer eingegeben werden. Die Seriennummer kann im Logbuch gefunden werden, indem die Fernbedienung in der Nähe des Controllers gedrückt wird. Im Logbuch sollte dann eine Meldung wie diese erscheinen:  
-  `I (220364) JARO: received remote signal | serial: 0c7c00 | ch: 3 | cmd: 0x8, | rssi: -96 dbm`  
-  
-  Mit Hilfe der Bitmaske und dem dahinter liegenden Dialog kann man dann wie bei den Gruppen festlegen, welche Rollläden dieser Fernbedienung zugeordnet sind. 
-  Der Status dieser Rollläden wird dann in Abhängigkeit vom empfangenen Signal aktualisiert.
-  Das bedeutet, dass der Status der Rollläden auch dann aktualisiert werden kann, wenn sie nicht über den ESP-Controller, sondern über die Original-Fernbedienung gesteuert werden.
-
-  Bitte beachten, dass dies nicht zu 100% zuverlässig ist und ggf. nicht jedes Signal der Fernbedienung erkannt wird.
+  Unter Einstellungen → Gerät → Originalfernbedienungen mit „Zuordnung hinzufügen“ ein Tastensignal erfassen (STOP ist ebenfalls möglich). Den gewünschten Kanal oder die Gruppe auf der Fernbedienung auswählen, die Zuordnung benennen und die angesprochenen ESP-Rollos auswählen. Vollständige Seriennummer und empfangene Kanalmaske identifizieren den Eintrag gemeinsam. Vorhandene Einträge lassen sich bearbeiten oder löschen. Löschen entfernt nur die ESP-Zuordnung; die Fernbedienung bleibt am Motor angelernt. Alte sechsstellige Präfix-Zuordnungen müssen neu erfasst werden.
 
 - **Language**  
 Es sind zwei Sprachen verfügbar. Wählen deine bevorzugte Sprache.
@@ -530,23 +519,26 @@ payload:    {0b0000000000010101, 0x15, 21}
 
 Der Controller sendet auch einen Status, **basierend auf den empfangenen Kommandos.**  
 
-> [!IMPORTANT]
-> Aber es ist wichtig zu beachten, dass dieser Status nicht dem tatsächlichen Zustand des Rollladens entspricht, denn leider sendet der Rolladen selbst keinen Status den man dazu auswerten könnte. Wenn also der Rolladen z.B. über die originale Fernbedienung bedient wird oder über eine vor Ort Bedienung, oder während der Bewegung gestoppt wird, dann stimmt dieser Status hier nicht mehr!
+Diese Werte sind Schätzungen ohne Rückmeldung des Motors: **0 geschlossen, 100 geöffnet**, Zwischenwerte entsprechend der Zielanfahrt. Das ist ein Breaking Change gegenüber der bisherigen umgekehrten Skala. Bei kalibrierten Kanälen wird nach AUF/AB erst nach vollständiger Fahrzeit plus Reserve eine Endlage angenommen; ohne Kalibrierung wird wie bisher sofort die erwartete Endlage gemeldet. STOP und SCHATTEN setzen den Status auf `None` (unbekannt). Empfangene zugeordnete Originalfernbedienungsbefehle werden auch ohne MQTT berücksichtigt. Nicht empfangene Signale bleiben unerkannt. Nach MQTT-Reconnect wird der aktuelle Stand erneut veröffentlicht. Die Befehlskennungen (0 = UP, 1 = DOWN) bleiben unverändert und sind keine Prozentwerte.
 
 ```text
 
 Status:     Rolladen OFFEN
 topic:      ../status/shutter/1 ... status/shutter/16
-payload:    {0}
+payload:    {100}
 
 Status:     Rolladen GESCHLOSSEN
 topic:      ../status/shutter/1 ... status/shutter/16
-payload:    {100}
+payload:    {0}
 
 Status:     Rolladen SCHATTEN
 topic:      ../status/shutter/1 ... status/shutter/16
-payload:    {90}
+payload:    {None}
 ```
+
+### Prozentziele / Home Assistant
+
+Bei global aktivierter Positionssteuerung und gültiger Kanalkalibrierung akzeptiert `../cmd/position/1` bis `/16` Ganzzahlen von 0 (geschlossen) bis 100 (geöffnet), ohne Retain. Die Fahrt nutzt dieselbe Referenzfahrt wie im WebUI. Discovery ergänzt die Prozentsteuerung automatisch für diese Kanäle und entfernt sie beim Deaktivieren oder bei ungültiger Kalibrierung. AUF/AB/STOP bleiben verfügbar; Gruppen-Prozentfahrten sind nicht enthalten.
 
 ### Remotes (Fernbedienungen)
 

@@ -5,6 +5,7 @@
 #include <config.h>
 #include <language.h>
 #include <message.h>
+#include <shutterPosition.h>
 
 /* D E C L A R A T I O N S ****************************************************/
 
@@ -14,7 +15,8 @@
  * V3: Added homee integration enable flag.
  * V4: Added homee 3rd position (generic node profile) toggle.
  */
-const int CFG_VERSION = 4;
+// V5: optional calibrated shutter positioning. Older files default to disabled.
+const int CFG_VERSION = 6;
 
 char filename[24] = {"/config.json"};
 bool setupMode;
@@ -243,6 +245,7 @@ void configHashInit() {
  * @return  none
  * *******************************************************************/
 void configCyclic() {
+  if (shutterPositionBusy()) return; // Flash writes must not delay timed STOP commands.
 
   if (checkTimer.cycleTrigger(1000) && configInitDone) {
     unsigned long hashNew = EspStrUtil::hash(&config, sizeof(s_config));
@@ -259,6 +262,7 @@ void configCyclic() {
  * @return  none
  * *******************************************************************/
 void configInitValue() {
+  config.position = s_cfg_position{};
 
   // Preserve in-class defaults, including auth.enable and log.enable.
   config = s_config{};
@@ -310,6 +314,7 @@ void configInitValue() {
  * *******************************************************************/
 void configSaveToFile() {
   configSavePending = true;
+  if (shutterPositionBusy()) return;
   // Do not truncate the only surviving copy if recovery could not be committed.
   if (configRecoveryFile != nullptr) {
     if (!LittleFS.rename(configRecoveryFile, filename)) {
@@ -409,6 +414,13 @@ void configSaveToFile() {
   doc["logger"]["level"] = config.log.level;
   doc["logger"]["order"] = config.log.order;
 
+  doc["position"]["enable"] = config.position.enable;
+  JsonArray calibration = doc["position"]["calibration"].to<JsonArray>();
+  for (const auto &c : config.position.calibration) {
+    JsonArray times = calibration.add<JsonArray>();
+    for (auto t : c.up) times.add(t);
+    for (auto t : c.down) times.add(t);
+  }
   doc["jaro"]["masterMSB"] = config.jaro.masterMSB;
   doc["jaro"]["masterLSB"] = config.jaro.masterLSB;
   doc["jaro"]["serial"] = config.jaro.serial;
@@ -440,25 +452,7 @@ void configSaveToFile() {
     grp_mask.add(config.jaro.grp_mask[i]);
   }
 
-  JsonArray remote_enable = doc["jaro"]["remote_enable"].to<JsonArray>();
-  for (int i = 0; i < 16; i++) {
-    remote_enable.add(config.jaro.remote_enable[i]);
-  }
-
-  JsonArray remote_name = doc["jaro"]["remote_name"].to<JsonArray>();
-  for (int i = 0; i < 16; i++) {
-    remote_name.add(config.jaro.remote_name[i]);
-  }
-
-  JsonArray remote_mask = doc["jaro"]["remote_mask"].to<JsonArray>();
-  for (int i = 0; i < 16; i++) {
-    remote_mask.add(config.jaro.remote_mask[i]);
-  }
-
-  JsonArray remote_serial = doc["jaro"]["remote_serial"].to<JsonArray>();
-  for (int i = 0; i < 16; i++) {
-    remote_serial.add(config.jaro.remote_serial[i]);
-  }
+  remoteMappingSave(doc.as<JsonObject>());
 
   JsonArray timers = doc["timer"].to<JsonArray>();
   for (int i = 0; i < 6; i++) {
@@ -637,6 +631,16 @@ void configLoadFromFile() {
     config.log.level = doc["logger"]["level"];
     config.log.order = doc["logger"]["order"];
 
+    config.position = s_cfg_position{};
+    config.position.enable = doc["position"]["enable"] | false;
+    for (uint8_t i=0; i<16; ++i) {
+      auto &c = config.position.calibration[i];
+      for (uint8_t j=0; j<3; ++j) {
+        c.up[j] = doc["position"]["calibration"][i][j] | uint32_t(0);
+        c.down[j] = doc["position"]["calibration"][i][j+3] | uint32_t(0);
+      }
+      if (!c.valid()) c = PositionCalibration{};
+    }
     config.jaro.masterMSB = doc["jaro"]["masterMSB"];
     config.jaro.masterLSB = doc["jaro"]["masterLSB"];
     config.jaro.serial = doc["jaro"]["serial"];
@@ -662,22 +666,7 @@ void configLoadFromFile() {
     for (int i = 0; i < 6; i++) {
       config.jaro.grp_mask[i] = grp_mask[i];
     }
-    JsonArray remote_enable = doc["jaro"]["remote_enable"].as<JsonArray>();
-    for (int i = 0; i < 16; i++) {
-      config.jaro.remote_enable[i] = remote_enable[i];
-    }
-    JsonArray remote_name = doc["jaro"]["remote_name"].as<JsonArray>();
-    for (int i = 0; i < 16; i++) {
-      EspStrUtil::readJSONstring(config.jaro.remote_name[i], sizeof(config.jaro.remote_name[0]), remote_name[i]);
-    }
-    JsonArray remote_mask = doc["jaro"]["remote_mask"].as<JsonArray>();
-    for (int i = 0; i < 16; i++) {
-      config.jaro.remote_mask[i] = remote_mask[i];
-    }
-    JsonArray remote_serial = doc["jaro"]["remote_serial"].as<JsonArray>();
-    for (int i = 0; i < 16; i++) {
-      config.jaro.remote_serial[i] = remote_serial[i];
-    }
+    remoteMappingLoad(doc["remoteMappings"],config.version);
 
     JsonArray timers = doc["timer"].as<JsonArray>();
     for (size_t i = 0; i < timers.size() && i < 6; i++) { // Schleife über die Timer

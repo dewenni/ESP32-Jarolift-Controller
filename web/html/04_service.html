@@ -30,18 +30,11 @@
     <!-- Tab-Content -->
     <main class="container">
       <!--SECTION-START-->
-      <!-- Logger-Inhalt hier -->
-      <div id="tab4" class="tab-content jarolift-page jarolift-service" data-connection-required><header class="page-heading"><h1 data-i18n="service"></h1><p data-i18n="jaro_service_subtitle"></p></header>
-
-        <div class="jarolift-service-grid">
-          <!-- Grid 1 -->
-          <article class="dash service-card">
-            <div class="dash-main" style="gap: 10px">
-              <div class="dash-header" data-i18n="service_cmds">
-                Service Commands
-              </div>
-              <label for="p04_selected_shutter" data-i18n="shutter"></label>
-              <select id="p04_selected_shutter" name="selected_shutter">
+<div id="tab4" class="tab-content jarolift-page jarolift-service" data-connection-required>
+  <header class="page-heading"><h1 data-i18n="service"></h1><p data-i18n="jaro_service_subtitle"></p></header>
+  <div class="jarolift-service-grid">
+    <article class="service-card service-setup" id="p04_service_setup">
+      <div class="service-select"><label for="p04_selected_shutter" data-i18n="shutter"></label><select id="p04_selected_shutter" name="selected_shutter">
                 <option class="CH1" value="0" id="p04_shutter_name_0"></option>
                 <option class="CH2" value="1" id="p04_shutter_name_1"></option>
                 <option class="CH3" value="2" id="p04_shutter_name_2"></option>
@@ -76,41 +69,57 @@
                   class="CH16"
                   value="15"
                   id="p04_shutter_name_15"></option>
-              </select>
-              <div class="dash-content">
-                <button id="p04_up" class="svgbtn i_up"></button>
-                <button id="p04_stop" class="svgbtn i_stop"></button>
-                <button id="p04_down" class="svgbtn i_down"></button>
-                <button id="p04_shade" class="svgbtn i_shade"></button>
-              </div>
-              <hr />
-              <button
-                id="p04_cmd_set_shade"
-                data-i18n="set_shade"
-                class="svgbtn2 i_shade"></button>
-              <hr />
-              <button
-                class="svgbtn2 i_end_up"
-                id="p04_cmd_end_up_set"
-                data-i18n="cmd_endpoint_up$ $set"></button>
-              <button
-                class="svgbtn2 i_end_down"
-                id="p04_cmd_end_down_set"
-                data-i18n="cmd_endpoint_down$ $set"></button>
-              <hr />
-              <button
-                class="svgbtn2 i_end_up_bin"
-                id="p04_cmd_end_up_delete"
-                data-i18n="cmd_endpoint_up$ $delete"></button>
-              <button
-                class="svgbtn2 i_end_down_bin"
-                id="p04_cmd_end_down_delete"
-                data-i18n="cmd_endpoint_down$ $delete"></button>
+              </select></div>
+      <div class="service-setup-body">
+        <section class="service-commands">
+          <h2 data-i18n="service_cmds"></h2>
+          <div class="dash-content service-drive">
+            <button id="p04_up" class="svgbtn i_up" aria-label="Up"></button>
+            <button id="p04_stop" class="svgbtn i_stop" aria-label="Stop"></button>
+            <button id="p04_down" class="svgbtn i_down" aria-label="Down"></button>
+            <button id="p04_shade" class="svgbtn i_shade" aria-label="Shade"></button>
+          </div>
+          <hr />
+          <button id="p04_cmd_set_shade" data-i18n="set_shade" class="svgbtn2 i_shade"></button>
+          <hr />
+          <div class="service-command-pair">
+            <button class="svgbtn2 i_end_up" id="p04_cmd_end_up_set" data-i18n="cmd_endpoint_up$ $set"></button>
+            <button class="svgbtn2 i_end_down" id="p04_cmd_end_down_set" data-i18n="cmd_endpoint_down$ $set"></button>
+          </div>
+          <hr />
+          <div class="service-command-pair">
+            <button class="svgbtn2 i_end_up_bin" id="p04_cmd_end_up_delete" data-i18n="cmd_endpoint_up$ $delete"></button>
+            <button class="svgbtn2 i_end_down_bin" id="p04_cmd_end_down_delete" data-i18n="cmd_endpoint_down$ $delete"></button>
+          </div>
+        </section>
+        <section class="position-service">
+          <div id="p04_position_intro">
+            <h2 data-i18n="pos_calibration"></h2>
+            <p id="p04_position_summary" class="position-status" aria-live="polite"></p>
+            <p class="info-text" data-i18n="pos_service_hint"></p>
+            <div class="position-brief">
+              <div><strong>↑ <span data-i18n="pos_up"></span></strong><p data-i18n="pos_lift$ · $pos_half$ · $pos_full_open"></p></div>
+              <div><strong>↓ <span data-i18n="pos_down"></span></strong><p data-i18n="pos_half$ · $pos_bottom$ · $pos_full_closed"></p></div>
             </div>
-          </article>
-        </div>
+            <div class="position-actions"><button type="button" data-ui-local id="p04_position_begin" data-i18n="pos_calibrate"></button></div>
+            <details class="position-help"><summary data-i18n="pos_notes"></summary><p class="info-text" data-i18n="pos_remote_hint"></p></details>
+          </div>
+          <div id="p04_position_inline"></div>
+          <p class="info-text" id="p04_position_notice" role="status"></p>
+        </section>
       </div>
-      <!--SECTION-END-->
+    </article>
+  </div>
+</div>
+<dialog id="p04_position_dialog" aria-labelledby="p04_position_title">
+ <article class="position-dialog">
+  <header><small id="p04_position_channel"></small><h2 id="p04_position_title" data-i18n="pos_calibration"></h2></header>
+  <div id="p04_position_steps" class="position-steps"></div>
+  <div id="p04_position_body"></div>
+  <footer class="position-actions"><button type="button" data-ui-local class="secondary" id="p04_position_cancel" data-i18n="pos_cancel"></button><button type="button" data-ui-local id="p04_position_next"></button></footer>
+ </article>
+</dialog>
+<!--SECTION-END-->
     </main>
     <!-- Footer -->
     <footer

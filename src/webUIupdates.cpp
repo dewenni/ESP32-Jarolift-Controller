@@ -3,6 +3,7 @@
 #include <basics.h>
 #include <github.h>
 #include <jarolift.h>
+#include <shutterPosition.h>
 #include <language.h>
 #include <message.h>
 #include <timer.h>
@@ -362,6 +363,7 @@ void requestGitHubUpdate() { startGitHubUpdate = true; }
 void processGitHubUpdate() {
   if (startGitHubUpdate && !ota.isActive()) {
     startGitHubUpdate = false;
+    shutterPositionManual(0xffff);
     ghSetProgressCallback(otaProgressCallback);
     webUI.wsUpdateWebText("p00_update_btn", "updating: 0%", false);
     webUI.wsUpdateWebDisabled("p00_update_btn", true);

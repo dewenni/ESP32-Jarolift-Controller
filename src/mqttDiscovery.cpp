@@ -3,6 +3,7 @@
 #include <message.h>
 #include <mqtt.h>
 #include <mqttDiscovery.h>
+#include <shutterPosition.h>
 
 /* D E C L A R A T I O N S ****************************************************/
 char discoveryPrefix[128];
@@ -139,10 +140,21 @@ void mqttHaConfig(statType statType, const char *name, const char *deviceClass, 
       sprintf(cmdTopic, "%s/cmd/group/%i", statePrefix, devCfg.num1);
       doc["cmd_t"] = cmdTopic;
     } else if (statType == TYP_SHUTTER) {
-      doc["state_open"] = "0";
-      doc["state_closed"] = "100";
+      // All numeric opening estimates (including intermediate targets) are valid cover states.
+      doc["val_tpl"] = "{{ 'None' if value == 'None' else ('closed' if value | int == 0 else 'open') }}";
       sprintf(cmdTopic, "%s/cmd/shutter/%i", statePrefix, devCfg.num1);
       doc["cmd_t"] = cmdTopic;
+      if(shutterPositionReady(devCfg.num1-1)) {
+        doc["optimistic"] = false;
+        doc["pos_t"] = stateTopic;
+        // Unknown state is carried by stat_t; a nonnumeric position must be ignored.
+        doc["pos_tpl"] = "{{ '' if value == 'None' else value }}";
+        doc["pos_clsd"] = 0;
+        doc["pos_open"] = 100;
+        char positionTopic[256];
+        snprintf(positionTopic,sizeof(positionTopic),"%s/cmd/position/%i",statePrefix,devCfg.num1);
+        doc["set_pos_t"] = positionTopic;
+      }
     }
 
   } else if (devType == DEV_BTN) {
@@ -172,8 +184,12 @@ void mqttHaConfig(statType statType, const char *name, const char *deviceClass, 
   deviceObj["mdl"] = "MQTT_Controller";
   deviceObj["sw"] = swVersion;
 
-  char jsonString[1024];
-  serializeJson(doc, jsonString);
+  char jsonString[1536];
+  if(measureJson(doc)>=sizeof(jsonString)) {
+    ESP_LOGW("MQTT","Discovery payload too large for %s",name);
+    return;
+  }
+  serializeJson(doc, jsonString, sizeof(jsonString));
 
   if (resetMqttConfig && devType == DEV_SHUTTER) {
     mqttPublish(configTopic, "", false);
