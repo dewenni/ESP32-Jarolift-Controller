@@ -447,6 +447,7 @@ void IRAM_ATTR JaroliftController::handleRadioRxMeasure() {
 }
 
 void IRAM_ATTR JaroliftController::finishRxFrame() {
+  rxUndo_.riseStored = rxUndo_.fallStored = false;
   if (rxCapturing_ && pbWrite_ >= 65 && pbWrite_ <= 75) {
     rxDataReady_ = true;
   } else {
@@ -465,9 +466,26 @@ void IRAM_ATTR JaroliftController::measureRxEdge() {
     if (rxDataReady_)
       return;
   }
+  // Adapted from Reinhard-M's RX glitch filter in Banabas PRs #20/#21.
+  // Undo both edges of a spike, preserving the full surrounding pulse.
   if (state) {
-    lineUp_ = now;
     const unsigned long width = now - lineDown_;
+    if (width < kDebounce) {
+      lineDown_ = rxUndo_.lineDown;
+      if (rxUndo_.fallStored)
+        hiBuf_[rxUndo_.highIndex] = rxUndo_.high;
+      rxUndo_.fallStored = rxUndo_.riseStored = false;
+      return;
+    }
+    rxUndo_.lineUp = lineUp_;
+    rxUndo_.write = pbWrite_;
+    rxUndo_.lastPulse = rxLastPulse_;
+    rxUndo_.capturing = rxCapturing_;
+    rxUndo_.sync = lowBuf_[0];
+    rxUndo_.firstHigh = hiBuf_[1];
+    rxUndo_.riseStored = true;
+    rxUndo_.fallStored = false;
+    lineUp_ = now;
     if (width > 3650 && width < 4300) {
       // A new sync can also terminate the preceding candidate.
       if (rxCapturing_ && pbWrite_ >= 65 && pbWrite_ <= 75) {
@@ -488,17 +506,34 @@ void IRAM_ATTR JaroliftController::measureRxEdge() {
         rxCapturing_ = false;
         return;
       }
-      lowBuf_[pbWrite_++] = width;
+      lowBuf_[pbWrite_] = width;
+      pbWrite_ = pbWrite_ + 1;
       hiBuf_[pbWrite_] = 0;
       rxLastPulse_ = now;
     }
   } else {
-    lineDown_ = now;
     const unsigned long width = now - lineUp_;
-    if (width > kDebounce && width < 1000) {
-      // Preserve the existing preceding-HIGH / following-LOW pairing.
-      if (rxCapturing_ && pbWrite_ < 75)
-        hiBuf_[pbWrite_] = width;
+    if (width < kDebounce) {
+      if (rxUndo_.riseStored) {
+        lineUp_ = rxUndo_.lineUp;
+        pbWrite_ = rxUndo_.write;
+        rxLastPulse_ = rxUndo_.lastPulse;
+        rxCapturing_ = rxUndo_.capturing;
+        lowBuf_[0] = rxUndo_.sync;
+        hiBuf_[1] = rxUndo_.firstHigh;
+      }
+      rxUndo_.riseStored = rxUndo_.fallStored = false;
+      return;
+    }
+    rxUndo_.lineDown = lineDown_;
+    lineDown_ = now;
+    rxUndo_.riseStored = rxUndo_.fallStored = false;
+    if (rxCapturing_ && pbWrite_ < 75) {
+      rxUndo_.highIndex = pbWrite_;
+      rxUndo_.high = hiBuf_[pbWrite_];
+      rxUndo_.fallStored = true;
+      // Always invalidate an out-of-range HIGH, never keep a partial spike.
+      hiBuf_[pbWrite_] = (width > kDebounce && width < 1000) ? width : 0;
     }
   }
 }
@@ -980,29 +1015,47 @@ void JaroliftController::processRxData() {
   if ((lowBuf_[0] > 3650 && lowBuf_[0] < 4300) && (pbWrite_ >= 65 && pbWrite_ <= 75)) {
     const unsigned int count = pbWrite_;
     unsigned int minLow = 4300, maxLow = 0, minHigh = 4300, maxHigh = 0;
-    unsigned int invalid = 0;
+    unsigned int invalid = 0, shortTotal = 0, longTotal = 0;
     for (unsigned int i = 1; i < count; ++i) {
       const unsigned int lo = lowBuf_[i], hi = hiBuf_[i];
       if (lo < minLow) minLow = lo;
       if (lo > maxLow) maxLow = lo;
       if (hi < minHigh) minHigh = hi;
       if (hi > maxHigh) maxHigh = hi;
-      if (lo <= kDebounce || lo >= 1000 || hi <= kDebounce || hi >= 1000)
+      if (lo <= kDebounce || lo >= 1000 || hi <= kDebounce || hi >= 1000 || lo + hi < 900 || lo + hi > 1500)
         invalid++;
+      shortTotal += lo < hi ? lo : hi;
+      longTotal += lo > hi ? lo : hi;
     }
+    // At carrier-off the final LOW can merge with the idle gap. Its HIGH
+    // has already been measured at hiBuf_[count], but there is no next rising
+    // edge to complete the pair. Decode that measured half-bit only for the
+    // exact 72-bit boundary, and only if it clearly matches one pulse cluster.
+    const unsigned int endHigh = hiBuf_[count];
+    const unsigned int shortMean = shortTotal / (count - 1);
+    const unsigned int longMean = longTotal / (count - 1);
+    const bool shortMatch = endHigh > kDebounce && endHigh < 1000 &&
+                            endHigh * 4 >= shortMean * 3 && endHigh * 4 <= shortMean * 5;
+    const bool longMatch = endHigh > kDebounce && endHigh < 1000 &&
+                           endHigh * 4 >= longMean * 3 && endHigh * 4 <= longMean * 5;
+    const bool finalHighOnly = count == 72 && shortMatch != longMatch;
+    const unsigned int bits = count - 1 + (finalHighOnly ? 1 : 0);
+    const unsigned int tail = bits > 64 ? (bits - 64 > 8 ? 8 : bits - 64) : 0;
     if (rxLogFrame_)
-      ESP_LOGD(TAG, "[KQ-RX] FRAME CAPTURED entries=%u sync=%u low=%u..%u high=%u..%u invalid=%u tail=%u",
-               count, lowBuf_[0], minLow, maxLow, minHigh, maxHigh, invalid,
-               count > 65 ? (count - 65 > 8 ? 8 : count - 65) : 0);
-    if (invalid) {
-      if (rxLogFrame_) ESP_LOGD(TAG, "[KQ-RX] FRAME REJECTED: incomplete pulse pairs");
+      ESP_LOGD(TAG, "[KQ-RX] FRAME CAPTURED entries=%u sync=%u low=%u..%u high=%u..%u invalid=%u tail=%u end_high=%u final_high_only=%u",
+               count, lowBuf_[0], minLow, maxLow, minHigh, maxHigh, invalid, tail, endHigh, finalHighOnly);
+    if (invalid || (bits > 64 && bits < 72)) {
+      if (rxLogFrame_) ESP_LOGD(TAG, "[KQ-RX] FRAME REJECTED: invalid pulse pairs or incomplete group bits");
       return;
     }
+    const auto bitValue = [&](unsigned int index) {
+      return finalHighOnly && index == count ? shortMatch : lowBuf_[index] >= hiBuf_[index];
+    };
 
     // extract Hopcode (32 Bit)
     rxHopCode_ = 0;
     for (int i = 0; i < 32; i++) {
-      if (lowBuf_[i + 1] < hiBuf_[i + 1])
+      if (!bitValue(i + 1))
         rxHopCode_ &= ~(uint32_t(1) << i);
       else
         rxHopCode_ |= (uint32_t(1) << i);
@@ -1011,7 +1064,7 @@ void JaroliftController::processRxData() {
     // extract Serial (28 Bit)
     rxSerial_ = 0;
     for (int i = 0; i < 28; i++) {
-      if (lowBuf_[i + 33] < hiBuf_[i + 33])
+      if (!bitValue(i + 33))
         rxSerial_ &= ~(uint32_t(1) << i);
       else
         rxSerial_ |= (uint32_t(1) << i);
@@ -1020,15 +1073,15 @@ void JaroliftController::processRxData() {
     // extract function code (4 Bit)
     rxFunction_ = 0;
     for (int i = 0; i < 4; i++) {
-      if (lowBuf_[61 + i] < hiBuf_[61 + i])
+      if (!bitValue(61 + i))
         rxFunction_ &= ~(uint32_t(1) << i);
       else
         rxFunction_ |= (uint32_t(1) << i);
     }
     // extract high disc - group bits (9-16 Bit)
     rxDiscH_ = 0;
-    for (unsigned int i = 0; i < 8 && 65 + i < count; i++) {
-      if (lowBuf_[65 + i] < hiBuf_[65 + i])
+    for (unsigned int i = 0; i < 8 && 65 + i <= bits; i++) {
+      if (!bitValue(65 + i))
         rxDiscH_ &= ~(uint32_t(1) << i);
       else
         rxDiscH_ |= (uint32_t(1) << i);
@@ -1036,6 +1089,14 @@ void JaroliftController::processRxData() {
 
     rxKeyGen();
     uint32_t decoded = rxDecode();
+    // Jarolift carries the serial's low byte inside the encrypted discriminator.
+    // A damaged serial changes the decryption key; reject inconsistent results.
+    if (((decoded >> 16) & 0xff) != (rxSerial_ & 0xff)) {
+      if (rxLogFrame_)
+        ESP_LOGD(TAG, "[KQ-RX] FRAME REJECTED: discriminator mismatch serial=%07lx decrypted=%08lx",
+                 (unsigned long)rxSerial_, (unsigned long)decoded);
+      return;
+    }
     if (rxFunction_ == 0x4)
       steadyCount_++;
     else
@@ -1099,6 +1160,7 @@ void JaroliftController::begin() {
 
   enterRx();
 
+  ESP_LOGI(TAG, "[KQ-RX] glitch filter <200 us; terminal HIGH decoding and discriminator check enabled");
   initOK_ = true;
 }
 
@@ -1130,6 +1192,7 @@ void JaroliftController::loop() {
     pbWrite_ = 0;
     rxCapturing_ = false;
     lineUp_ = lineDown_ = rxLastPulse_ = 0;
+    rxUndo_ = {};
     rxDataReady_ = false;
     portEXIT_CRITICAL(&rxMux_);
   }

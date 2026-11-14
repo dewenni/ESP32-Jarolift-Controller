@@ -112,6 +112,12 @@ private:
   unsigned int steadyCount_;
   volatile bool rxDataReady_;
   portMUX_TYPE rxMux_ = portMUX_INITIALIZER_UNLOCKED;
+  // One-edge rollback state; no allocation or additional ISR timer.
+  struct RxEdgeUndo {
+    unsigned long lineUp = 0, lineDown = 0, lastPulse = 0;
+    unsigned int write = 0, sync = 0, firstHigh = 0, high = 0, highIndex = 0;
+    bool capturing = false, riseStored = false, fallStored = false;
+  } rxUndo_;
   unsigned long lineUp_ = 0;
   unsigned long lineDown_ = 0;
   unsigned long rxLastPulse_ = 0;

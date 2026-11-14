@@ -96,3 +96,19 @@ The Logger page automatically refreshes when opened and displays messages in dif
 - [CHANGE] set the internal development version to v1.9.900 in preparation for v1.10.0
 - [DOCS] document Telnet and OTA authentication, upload timeout and firmware rollback behavior
 - [DOCS] add and update the stargazer chart in the English and German READMEs
+
+## RX glitch filtering (hardware test pending)
+
+Adapt Reinhard-M's glitch filter from Banabas/ESP32-Jarolift-PositionController
+PRs #20 and #21 to the existing protected receive buffer. Spikes shorter than
+200 µs no longer split the surrounding pulse. Rollback restores sync and pulse
+state, invalid HIGH widths clear stale partial values, and completed buffers
+remain immutable. Radio settings are unchanged. Synthetic pulse
+regression tests pass; real-world reception still needs comparison on hardware.
+
+Fix channel 16 reception when the final LOW merges into the idle gap: decode the
+already measured last HIGH only if it unambiguously matches the frame's pulse
+clusters. Diagnostics now include `end_high` and `final_high_only`, and count
+validated group bits correctly. Reject incomplete group tails, implausible pulse
+periods and decrypted discriminator bytes inconsistent with the received serial.
+The discriminator check is partial validation, not a checksum for all frame bits.
