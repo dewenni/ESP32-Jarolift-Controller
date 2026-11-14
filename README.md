@@ -680,6 +680,8 @@ There is also a log function with which you can record various messages dependin
 
 <img style="width: 500px;" src="./Doc/webUI_logger.png">
 
+On ESP32-S2, the diagnostic log retains up to **128 entries** to fit its smaller internal data-RAM budget. Other supported ESP32 variants retain up to **200 entries**.
+
 ## Telnet
 
 Telnet provides diagnostic and control commands; `help` lists the available commands. Under **Settings → Access & maintenance → Service access**, set a service password and explicitly enable Telnet. Without a service password, Telnet stays disabled in normal operation, independently of the WebUI password.

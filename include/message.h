@@ -3,7 +3,13 @@
 
 /* D E C L A R A T I O N S ****************************************************/
 
-#define MAX_LOG_LINES 200 // max log lines
+// ESP32-S2 shares its limited internal RAM between instruction and data sections.
+// Keep the log bounded without reducing positioning or remote-mapping capacity.
+#if defined(CONFIG_IDF_TARGET_ESP32S2) && CONFIG_IDF_TARGET_ESP32S2
+#define MAX_LOG_LINES 128
+#else
+#define MAX_LOG_LINES 200
+#endif
 #define MAX_LOG_ENTRY 128 // max length of one entry
 
 struct s_logdata {

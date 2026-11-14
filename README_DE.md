@@ -680,6 +680,8 @@ Außerdem gibt es eine Log-Funktion, mit der je nach Filter verschiedene Meldung
 
 <img style="width: 500px;" src="./Doc/webUI_logger.png">
 
+Beim ESP32-S2 speichert das Diagnose-Logbuch bis zu **128 Einträge**, um den begrenzteren internen Daten-RAM zu berücksichtigen. Andere unterstützte ESP32-Varianten behalten bis zu **200 Einträge**.
+
 ## Telnet
 
 Telnet bietet Diagnose- und Steuerbefehle; `help` zeigt die verfügbaren Befehle an. Unter **Einstellungen → Zugriff & Wartung → Service-Zugänge** ein Service-Passwort setzen und Telnet ausdrücklich aktivieren. Ohne Service-Passwort bleibt Telnet im Normalbetrieb aus, unabhängig vom WebUI-Passwort.
