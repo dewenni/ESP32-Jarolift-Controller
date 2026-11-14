@@ -42,3 +42,21 @@ lokale MQTT-Bibliothek auf dem Host mit simuliertem TCP und simulierter Uhr.
 Der Test prüft Fehler, Timeouts, Backoff, Wiederverbindung, Empfangsfragmente,
 Queue-Grenzen und OTA-Pausen mit AddressSanitizer und UndefinedBehaviorSanitizer.
 Er benötigt einen C++17-Compiler und ersetzt keinen Verbindungstest am ESP.
+
+
+## Warteschlange für Positionsziele
+
+`<prefix>/cmd/position/N` nimmt ganzzahlige Öffnungsziele von 0 bis 100 ohne Retain an.
+Die Positionssteuerung nutzt für MQTT, Home Assistant und WebUI dieselbe feste
+Warteschlange mit bis zu 16 wartenden Aufträgen zusätzlich zur aktiven Fahrt.
+Aufträge werden nacheinander mit Referenzfahrt ausgeführt. Pro Kanal wartet höchstens
+ein Ziel; ein neuer Sollwert ersetzt den wartenden Wert an derselben Stelle.
+Während einer Kalibrierung werden keine Positionsziele angenommen.
+
+Die Annahme eines Ziels bestätigt keine abgeschlossene Motorfahrt. Der vorhandene
+Positionsstatus bleibt bis zur tatsächlichen Abarbeitung davon getrennt. Ablehnungen
+werden wie bisher unter `<prefix>/message` gemeldet. Manuelle Befehle verwerfen den
+Puffer und unterbrechen die automatische Fahrt. Zugeordnete Originalfernbedienungen
+verwerfen wartende Ziele und unterbrechen die aktive Fahrt, wenn diese betroffen ist.
+Neustart, Setup-Mode, OTA oder das Abschalten der Positionssteuerung verwerfen den
+Puffer ebenfalls. Details stehen in [Positionierung.md](Positionierung.md).

@@ -101,7 +101,17 @@ Nach dem Speichern zunächst **25 %, 50 % und 75 %** testen, jeweils auch aus ei
 
 Die Payload ist eine **Ganzzahl von 0 bis 100**, ohne Prozentzeichen oder JSON-Objekt. Bewegungsbefehle **ohne Retain** senden, damit sie nach einem erneuten Verbinden nicht ungewollt wiederholt werden.
 
-Voraussetzungen sind eine global eingeschaltete Positionssteuerung, ein aktivierter und kalibrierter Kanal sowie ein freier automatischer Ablauf. Im Setup-Mode oder während OTA sind keine Prozentfahrten möglich. Weitere Prozentanforderungen werden abgewiesen, solange eine Zielanfahrt oder Kalibrierung läuft beziehungsweise Funkbefehle anstehen. Eine abgewiesene Anforderung wird über `<prefix>/message` mit `invalid or unavailable position target` gemeldet. Prozentziele für Gruppen sind derzeit nicht vorgesehen.
+Voraussetzungen sind eine global eingeschaltete Positionssteuerung sowie ein aktivierter und kalibrierter Kanal. Im Setup-Mode, während OTA oder einer Kalibrierung sowie bei anstehenden manuellen Funkbefehlen werden keine Prozentziele angenommen. Eine abgewiesene Anforderung wird über `<prefix>/message` mit `invalid or unavailable position target` gemeldet. Prozentziele für Gruppen sind derzeit nicht vorgesehen.
+
+### Mehrere Ziele nacheinander ausführen
+
+WebUI, MQTT und Home Assistant nutzen denselben festen RAM-Puffer für **bis zu 16 wartende Aufträge zusätzlich zur laufenden Fahrt**. Die Motorfahrten werden nacheinander ausgeführt, jeweils mit eigener Referenzfahrt. Pro Rollladen bleibt höchstens ein Auftrag im Puffer; ein neuer Sollwert ersetzt dessen wartenden Wert, ohne den Platz zu verändern. Ein neuer Auftrag für den bereits fahrenden Rollladen wird hinter der laufenden Fahrt eingereiht und verändert diese nicht.
+
+Im WebUI können während einer Fahrt Ziele für andere kalibrierte Rollläden vorgegeben werden. **„Ziel · wartet“ in der Beschriftungszeile und ein Spinner anstelle des Play-Symbols** kennzeichnen angenommene Aufträge ohne zusätzliche Textzeile. Der Button-Tooltip zeigt den eingereihten Zielwert und den Platz im Puffer; der Button bleibt zum Ändern eines wartenden Ziels bedienbar. Der aktuelle Öffnungsstatus bleibt davon getrennt und wird nicht auf den wartenden Zielwert gesetzt. Noch wartende Ziele lassen sich über den Slider und Ausführen erneut ändern. Eine Kalibrierung kann erst bei leerem Puffer gestartet werden.
+
+Vor jedem Start prüft der ESP erneut, ob der Kanal aktiviert und gültig kalibriert ist. Nicht mehr verfügbare Kanäle werden übersprungen. Ein Fehler beim Senden beendet die automatische Verarbeitung und verwirft den Rest. Normale manuelle Befehle leeren den Puffer und brechen die aktive automatische Fahrt ab. Ein empfangener zugeordneter Originalfernbedienungsbefehl leert ebenfalls den Puffer; die aktive Fahrt wird dabei nur abgebrochen, wenn ihr Rollladen betroffen ist.
+
+Der Puffer bleibt beim Browser-Refresh oder Schließen des Browsers am ESP erhalten. Er wird nicht in der Konfiguration gespeichert und nach Neustart, OTA, Setup-Mode oder Abschalten der Positionssteuerung nicht fortgesetzt.
 
 ### Normale Befehle
 
@@ -164,7 +174,7 @@ Ein empfangener zugeordneter Befehl für den gerade automatisch bewegten Rolllad
 
 - Es läuft höchstens eine automatische Zielanfahrt oder Kalibrierung gleichzeitig. Normale Steuerbefehle haben Vorrang und beenden eine laufende automatische Sequenz zuerst.
 - Eine reguläre Prozentfahrt wird nach Annahme vom ESP ausgeführt und benötigt keinen geöffneten Browser. Für den Kalibrierungsassistenten gilt dagegen die Lebenszeichenprüfung.
-- Nach einem Abbruch gibt es keinen automatischen Wiederanlauf.
+- Nach einem Abbruch gibt es keinen automatischen Wiederanlauf; wartende Positionsaufträge werden verworfen.
 - Kalibrierdaten bleiben über einen Neustart erhalten; die aktuelle Positionsschätzung wird nicht gespeichert und startet unbekannt.
 - Motor-Anlern-/Entlernbefehle und Änderungen der Endlagen machen die zugehörige Kalibrierung ungültig.
 - Abschalten der Positionssteuerung oder Beginn eines OTA-Updates beendet automatische Abläufe.

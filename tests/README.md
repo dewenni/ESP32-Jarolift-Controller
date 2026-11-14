@@ -36,12 +36,12 @@ Individual scripts can also be run with `python3 tests/test_….py` or
 | Test | Purpose |
 | --- | --- |
 | `test_position_model.cpp` | Direction-specific timing curves, slat times, reference direction, reserve, reversal pause, STOP timing, endpoints and timer rollover. |
-| `test_shutter_position.py` | Actual position controller: target validation, movement sequence, shared status, manual/remote cancellation, calibration ownership/timeout/apply, OTA and invalidation. |
+| `test_shutter_position.py` | Actual position controller: 16-entry FIFO/replacement, queue cancellation/revalidation, target validation, movement sequence, shared status, manual/remote cancellation, calibration ownership/timeout/apply, OTA and invalidation. |
 | `test_mqtt_position.py` | Actual MQTT routing and discovery: 0/100 scale, conditional percentage control, stable entity identity, legacy commands, reconnect and maximum field lengths. |
 | `test_remote_mapping.py` | Actual mapping code: two-press registration, single/group source matching, shared targets, per-motor removal, Unicode, limits, persistence and migration. |
 | `test_rx_glitch.py` | Actual edge-capture methods: short HIGH/LOW disturbances, false sync, stale HIGH invalidation, frozen buffers, timer rollover and deterministic noise. |
 | `test_rx_decode.py` | Actual capture/decoder/KeeLoq methods: all 16 channels, groups, commands, terminal HIGH handling, truncated frames and discriminator mismatch. |
-| `test_position_ui.cjs` | Actual frontend logic: feature/calibration visibility, slider without immediate transmission, explicit execute, calibration steps, apply/cancel and busy state. |
+| `test_position_ui.cjs` | Actual frontend logic: feature/calibration visibility, slider without immediate transmission, explicit execute, calibration steps, apply/cancel, queued target display/replacement and per-channel busy state. |
 | `test_remote_mapping_ui.cjs` | Actual frontend logic: selected motor, confirmation before save, Unicode limit, removal, session ownership and cleanup after disconnect. |
 
 The position-model check is compiled by the suite runner. RF tests extract the

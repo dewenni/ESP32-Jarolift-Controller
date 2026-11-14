@@ -29,7 +29,7 @@ snapshot.channels[0]=[true,-1];update();assert(!box.children.find(n=>n.type==='r
 const status=box.children.find(n=>n.className==='position-channel-status');
 assert(!status.hidden);assert(status.children[0].children[1].textContent==='Position unbekannt');
 snapshot.channels[0]=[true,45];update();assert(status.children[0].children[1].textContent==='45 %');
-snapshot.moving=0;snapshot.phase=1;update();assert(status.children[1].children[1].hidden);assert(status.children[0].children[1].textContent.includes('Referenzfahrt'));
+snapshot.moving=0;snapshot.phase=1;snapshot.remaining=32;update();assert(status.children[0].children[1].textContent.endsWith('32 s'));snapshot.remaining=31;update();assert(status.children[0].children[1].textContent.endsWith('31 s'));assert(status.children[1].children[1].hidden);assert(status.children[0].children[1].textContent.includes('Referenzfahrt'));
 snapshot.moving=-1;snapshot.channels[0]=[false,-1];update();assert(status.hidden);
 snapshot.channels[0]=[true,45];snapshot.enabled=false;update();assert(status.hidden);
 snapshot.enabled=true;update();assert(!status.hidden);
@@ -45,6 +45,22 @@ for(const phase of [2,4])for(let mark=0;mark<3;mark++){
 }
 snapshot.cal.phase=5;update();nodes.get('p04_position_next').click();assert(sent.at(-1).a==='save');snapshot.cal.phase=0;snapshot.notice='saved';update();assert(!nodes.get('p04_position_dialog').open);assert(nodes.get('p04_position_notice').textContent==='Kalibrierung übernommen.');
 snapshot.moving=0;snapshot.phase=1;update();assert(targetButton.disabled && nodes.get('p04_position_begin').disabled);
+// Another calibrated channel stays usable; pending targets show order and can be replaced.
+snapshot.channels[1]=[true,30];snapshot.queue=[[1,65]];update();
+const second=nodes.get('p01_jaro_ch_name_1').parentElement.children.at(-1);
+const waitingLabel=second.children[0], secondSlider=second.children.find(n=>n.type==='range');
+const secondButton=second.children.find(n=>n.className==='position-actions').children[1];
+assert(!secondButton.disabled && !secondSlider.disabled && secondSlider.value==='65');
+assert(waitingLabel.hidden && secondButton['aria-busy']==='true' && secondButton.textContent==='');
+assert(second.children.find(n=>n.className==='position-label').textContent==='Ziel · wartet');
+assert(secondButton.title.includes('65 %') && secondButton.title.includes('Platz 1') && secondButton['aria-label'].includes('Ziel anfahren'));
+secondSlider.value='70';secondSlider.listeners.input();secondButton.click();assert(sent.at(-1).c===1 && sent.at(-1).v===70);
+update();assert(secondSlider.value==='70'); // An unchanged snapshot does not overwrite local edits.
+snapshot.queue=[[1,70]];update();assert(secondButton.title.includes('70 %'));
+nodes.get('cfg_lang').value='1';update();assert(second.children.find(n=>n.className==='position-label').textContent==='Target · queued');assert(secondButton.title.includes('Place 1'));nodes.get('cfg_lang').value='0';update();
+snapshot.cal.phase=1;update();assert(secondButton.disabled);snapshot.cal.phase=0;
+snapshot.moving=1;snapshot.queue=[];update();assert(secondButton.disabled && waitingLabel.hidden);
+snapshot.moving=-1;update();assert(!secondButton.disabled && waitingLabel.hidden && secondButton['aria-busy']==='false' && secondButton.textContent==='▶');
 snapshot.moving=-1;update();nodes.get('p04_service_setup').clientWidth=400;nodes.get('p04_position_begin').click();assert(!nodes.get('p04_position_intro').hidden);nodes.get('p04_position_cancel').click();assert(sent.at(-1).a==='cancel' && !nodes.get('p04_position_dialog').open);
 snapshot.enabled=false;update();assert(box.hidden && box.children.at(-1).hidden);
 snapshot.channels[0]=[false,-1];update();assert(box.hidden && box.children.at(-1).hidden);

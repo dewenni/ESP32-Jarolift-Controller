@@ -119,6 +119,16 @@
 .position-control input[type=range]::-webkit-slider-runnable-track { background:linear-gradient(to right,var(--ui-target) 0 var(--position-progress,50%),var(--ui-rail) var(--position-progress,50%) 100%); }
 .position-control input[type=range]::-moz-range-track { background:linear-gradient(to right,var(--ui-target) 0 var(--position-progress,50%),var(--ui-rail) var(--position-progress,50%) 100%); }
 .position-actions > .position-go { grid-column:2; grid-row:3; width:44px; height:44px; padding:0; margin:.5rem 0 0; font-size:1rem; line-height:1; }
+/* Animate directly in CSS instead of relying on Pico's animated SVG background. */
+.position-actions > .position-go[aria-busy=true]::before {
+  background-image:none; border:2px solid currentColor; border-right-color:transparent;
+  border-radius:50%; filter:none; animation:position-queue-spin 1s linear infinite;
+}
+.position-actions > .position-go[aria-busy=true]:not(:disabled) { pointer-events:auto; }
+@keyframes position-queue-spin { to { transform:rotate(360deg); } }
+@media (prefers-reduced-motion:reduce) {
+  .position-actions > .position-go[aria-busy=true]::before { content:"⌛"; border:0; animation:none; }
+}
 .position-control > .position-ends { grid-column:1; grid-row:4; margin:0; }
 @media (max-width:400px) {
   .position-control input[type=range],.position-control > .position-ends { grid-column:1 / -1; }

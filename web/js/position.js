@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let snapshot, ownToken = 0, pending = false, renderKey = "", intro = false, language = $("cfg_lang").value;
   const connected = () => typeof ws !== "undefined" && ws?.readyState === WebSocket.OPEN;
   const channel = () => Number(select.value);
-  const noticeText = key => ({busy:positionText("pos_busy"), unavailable:positionText("pos_unavailable"), not_calibrated:positionText("pos_not_calibrated"), send_failed:positionText("pos_send_failed"), invalid_times:positionText("pos_invalid_times"), saved:positionText("pos_saved"), cancelled:positionText("pos_cancelled"), timeout:positionText("pos_timeout")}[key] || "");
+  const noticeText = key => ({busy:positionText("pos_busy"), queue_full:positionText("pos_queue_full"), unavailable:positionText("pos_unavailable"), not_calibrated:positionText("pos_not_calibrated"), send_failed:positionText("pos_send_failed"), invalid_times:positionText("pos_invalid_times"), saved:positionText("pos_saved"), cancelled:positionText("pos_cancelled"), timeout:positionText("pos_timeout")}[key] || "");
   const send = (a, extra = {}) => {
     if (!connected()) return false;
     sendData("p04_position_cmd", JSON.stringify({ a, c: channel(), token: ownToken, ...extra }));
@@ -80,7 +80,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   function render() {
     if (!snapshot) return;
-    const s=snapshot, cal=s.cal, active=cal.phase || s.moving>=0;
+    const s=snapshot, cal=s.cal, queue=s.queue || [], active=cal.phase || s.moving>=0 || queue.length;
     $("cfg_position_enable").checked=s.enabled;
     const valid=s.channels[channel()]?.[0];
     const count=s.channels.filter((x,i) => x[0] && !$("p04_shutter_name_"+i).hidden && getComputedStyle($("p04_shutter_name_"+i)).display!=="none").length;
@@ -92,23 +92,35 @@ document.addEventListener("DOMContentLoaded", () => {
     widgets.forEach((w,c) => {
       const [ready,pos]=s.channels[c];w.box.hidden=!s.enabled;
       w.box.classList.toggle("position-uncalibrated",s.enabled && !ready);
+      const queueIndex=queue.findIndex(entry=>entry[0]===c), waiting=queueIndex>=0;
+      const queuedGoal=waiting?queue[queueIndex][1]:null;
+      if(waiting && w.queuedGoal!==queuedGoal) {
+        w.slider.value=String(queuedGoal);w.slider.style.setProperty("--position-progress",queuedGoal+"%");
+        w.row.children[0].textContent=queuedGoal+" %";
+      }
+      w.queuedGoal=queuedGoal;
       w.label.hidden=!s.enabled || ready;w.status.hidden=!s.enabled || !ready;w.goalLabel.hidden=w.ends.hidden=w.row.hidden=!s.enabled || !ready;
-      w.goalLabel.textContent=positionText("pos_goal");
+      w.goalLabel.textContent=positionText(waiting?"pos_queued_goal":"pos_goal");
       w.setupLink.hidden=!s.enabled || ready;w.setupLink.textContent=positionText("pos_calibrate_link");
-      w.button.title=positionText("pos_go");w.button.setAttribute("aria-label",positionText("pos_go"));w.slider.setAttribute("aria-label",positionText("pos_goal"));
+      w.button.textContent=waiting?"":"▶";
+      w.button.setAttribute("aria-busy",String(waiting));
+      w.button.title=waiting?`${positionText("pos_waiting")} · ${queuedGoal} % · ${positionText("pos_queue_place")} ${queueIndex+1}`:positionText("pos_go");
+      w.button.setAttribute("aria-label",waiting?w.button.title+" · "+positionText("pos_go"):positionText("pos_go"));
+      w.slider.setAttribute("aria-label",positionText("pos_goal"));
       w.ends.children[0].textContent=positionText("pos_closed");w.ends.children[1].textContent=positionText("pos_open");
       const moving=s.moving===c;
-      w.label.textContent = !ready ? positionText("pos_missing") : moving ? ["",positionText("pos_reference"),positionText("pos_settle"),positionText("pos_moving")][s.phase]+` · ${s.target} %` : pos<0 ? positionText("pos_unknown") : `${positionText("pos_estimate")}: ${pos} %`;
+      w.label.textContent=positionText("pos_missing");
       // No intermediate position is invented during a reference or target run.
       const known=pos>=0 && !moving;
       w.status.classList.toggle("position-unknown",!known);
       w.status.classList.toggle("position-referencing",moving);
       w.statusTitle.textContent=positionText("pos_estimate");
-      w.statusValue.textContent=moving ? ["",positionText("pos_reference"),positionText("pos_settle"),positionText("pos_moving")][s.phase]+` · ${s.target} %` : known ? `${pos} %` : positionText("pos_unknown");
+      const progress=s.phase===1 && Number.isFinite(s.remaining)?`${Math.max(0,Math.ceil(s.remaining))} s`:`${s.target} %`;
+      w.statusValue.textContent=moving ? ["",positionText("pos_reference"),positionText("pos_settle"),positionText("pos_moving")][s.phase]+` · ${progress}` : known ? `${pos} %` : positionText("pos_unknown");
       w.shutter.style.height=(known?100-pos:100)+"%";
       w.targetLine.hidden=!known;
       w.targetLine.style.height=(100-Number(w.slider.value))+"%";
-      w.slider.hidden=w.button.hidden=!s.enabled || !ready;w.slider.disabled=w.button.disabled=!ready || !!active || !connected();
+      w.slider.hidden=w.button.hidden=!s.enabled || !ready;w.slider.disabled=w.button.disabled=!ready || !!cal.phase || moving || !connected();
     });
     if (!dialog.open || intro) return;
     if (!cal.phase) {closeWizard();ownToken=0;renderKey="";return;}

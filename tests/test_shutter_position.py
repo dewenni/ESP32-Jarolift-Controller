@@ -60,8 +60,10 @@ int main(){
  config.position.enable=false;assert(!shutterPositionTarget(0,"25"));config.position.enable=true;
  auto savedCalibration=config.position.calibration[0];config.position.calibration[0]=PositionCalibration{};assert(!shutterPositionTarget(0,"25"));config.position.calibration[0]=savedCalibration;
  assert(shutterPositionTarget(0,"25"));shutterPositionCyclic();assert(shutterPositionBusy() && sent.back()==CMD_DOWN);
- n=sent.size();target();assert(sent.size()==n && state()["notice"]=="busy");
- clockMs=1000+calibration.referenceTime(false);shutterPositionCyclic();assert(state()["phase"]==int(PositionMove::Settle));
+ assert(state()["remaining"]==32);
+ clockMs+=1000;shutterPositionCyclic();assert(state()["remaining"]==31);
+ n=sent.size();begin();assert(sent.size()==n && state()["notice"]=="busy");
+ clockMs=1000+calibration.referenceTime(false);shutterPositionCyclic();assert(state()["phase"]==int(PositionMove::Settle) && state()["remaining"]==0);
  clockMs+=600;shutterPositionCyclic();assert(sent.back()==CMD_UP);
  clockMs+=8990;shutterPositionCyclic();assert(sent.back()==CMD_STOP && !shutterPositionBusy());assert(state()["channels"][0][1]==25 && mqttPositions.back()==25);
  target();n=sent.size();shutterPositionRemote(1);shutterPositionCyclic();assert(!shutterPositionBusy() && sent.size()==n);assert(state()["channels"][0][1]==-1);
@@ -80,6 +82,51 @@ int main(){
  target();config.position.enable=false;shutterPositionCyclic();assert(!shutterPositionBusy() && sent.back()==CMD_STOP);
  config.position.enable=true;target();EspSysUtil::OTA::getInstance().active=true;shutterPositionCyclic();assert(!shutterPositionBusy() && sent.back()==CMD_STOP);EspSysUtil::OTA::getInstance().active=false;
  shutterPositionInvalidate(0);assert(!config.position.calibration[0].valid());
+
+ // Fixed shared FIFO: 16 unique waiting channels, replacement in place and FIFO dispatch.
+ for(uint8_t ch=0;ch<16;++ch){config.jaro.ch_enable[ch]=true;config.position.calibration[ch]=calibration;}
+ assert(shutterPositionTarget(0,"100"));
+ for(uint8_t ch=0;ch<16;++ch)assert(shutterPositionTarget(ch,"0"));
+ assert(shutterPositionTarget(7,"100"));shutterPositionCyclic();
+ assert(state()["queue"].size()==16 && state()["queue"][7][0]==7 && state()["queue"][7][1]==100);
+ n=sent.size();begin();assert(sent.size()==n && state()["notice"]=="busy");
+ clockMs+=40000;shutterPositionCyclic(); // First request completes; queued shutter 0 starts.
+ assert(state()["moving"]==0 && state()["target"]==0 && state()["queue"].size()==15);
+ for(uint8_t ch=0;ch<16;++ch){
+   assert(state()["moving"]==ch && state()["target"]==(ch==7?100:0));
+   clockMs+=40000;shutterPositionCyclic();
+ }
+ assert(!shutterPositionBusy() && state()["queue"].size()==0 && state()["channels"][7][1]==100);
+ // Queued targets are revalidated; invalid channels are skipped, without blocking later ones.
+ assert(shutterPositionTarget(0,"100"));
+ assert(shutterPositionTarget(1,"0"));assert(shutterPositionTarget(2,"0"));assert(shutterPositionTarget(3,"0"));
+ config.position.calibration[1]=PositionCalibration{};config.jaro.ch_enable[2]=false;
+ clockMs+=40000;shutterPositionCyclic();assert(state()["moving"]==3 && state()["queue"].size()==0);
+ shutterPositionManual(1);shutterPositionCyclic();assert(!shutterPositionBusy());
+ config.position.calibration[1]=calibration;config.jaro.ch_enable[2]=true;
+ // Normal manual commands discard the complete queue and stop the active automatic run.
+ assert(shutterPositionTarget(0,"25"));assert(shutterPositionTarget(1,"75"));
+ shutterPositionManual(2);shutterPositionCyclic();assert(!shutterPositionBusy() && state()["queue"].size()==0 && sent.back()==CMD_STOP);
+ // Remote operation cancels pending automation, but unrelated ongoing motion is not overridden.
+ assert(shutterPositionTarget(0,"25"));assert(shutterPositionTarget(1,"75"));
+ n=sent.size();shutterPositionRemote(2,CMD_UP);shutterPositionCyclic();
+ assert(shutterPositionBusy() && state()["queue"].size()==0 && sent.size()==n);
+ shutterPositionRemote(1,CMD_STOP);shutterPositionCyclic();assert(!shutterPositionBusy());
+ // No queue survives disable/setup/OTA or a radio failure at STOP.
+ for(uint8_t mode=0;mode<3;++mode){
+   assert(shutterPositionTarget(0,"25"));assert(shutterPositionTarget(1,"75"));
+   if(mode==0)config.position.enable=false;
+   if(mode==1)setupMode=true;
+   if(mode==2)EspSysUtil::OTA::getInstance().active=true;
+   shutterPositionCyclic();assert(!shutterPositionBusy());
+   config.position.enable=true;setupMode=false;EspSysUtil::OTA::getInstance().active=false;
+   shutterPositionCyclic();assert(state()["queue"].size()==0);
+ }
+ assert(shutterPositionTarget(0,"25"));assert(shutterPositionTarget(1,"75"));
+ clockMs+=40000;shutterPositionCyclic();clockMs+=600;shutterPositionCyclic();
+ radioOK=false;clockMs+=40000;shutterPositionCyclic();radioOK=true;
+ assert(!shutterPositionBusy() && state()["queue"].size()==0 && state()["notice"]=="send_failed");
+ begin();assert(!shutterPositionTarget(1,"75"));command(R"({"a":"cancel","c":0,"token":7})");
  puts("PASS: actual controller: target sequence, busy/invalid requests, radio failure, manual/remote abort, lease/ownership, calibration commit, disable, OTA, invalidation");
 }
 '''
