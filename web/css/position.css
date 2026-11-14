@@ -124,3 +124,34 @@
   .position-control input[type=range],.position-control > .position-ends { grid-column:1 / -1; }
   .position-actions > .position-go { grid-row:5; }
 }
+
+/* Keep the action target stationary while instructions and timing steps change. */
+#p04_position_intro,
+#p04_position_dialog .position-dialog {
+  box-sizing:border-box;
+  height:min(36rem, calc(100dvh - 2rem));
+  min-height:0;
+  display:grid;
+}
+#p04_position_intro { grid-template-rows:minmax(0,1fr) auto; }
+#p04_position_intro[hidden] { display:none; }
+.position-intro-copy, #p04_position_body { min-height:0; overflow:auto; }
+#p04_position_dialog { overflow:hidden; }
+#p04_position_dialog .position-dialog { grid-template-rows:auto auto minmax(0,1fr) auto; }
+#p04_position_intro > .position-actions,
+#p04_position_dialog .position-dialog > footer {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,2fr);
+  gap:.75rem;
+  margin:1.25rem 0 0;
+  padding:1rem 0 0;
+  border-top:1px solid var(--ui-border);
+  align-items:stretch;
+}
+#p04_position_begin { grid-column:2; }
+#p04_position_intro > .position-actions button,
+#p04_position_dialog .position-dialog > footer button {
+  width:100%; height:4rem; min-width:0; margin:0;
+  padding:.5rem; font-size:.85rem; line-height:1.25;
+  white-space:normal; overflow-wrap:anywhere;
+}
