@@ -42,11 +42,6 @@
 .jarolift-service .svgbtn2 { width: 100%; margin: 0; background-color: var(--ui-rail); background-size: 22px; background-position: 0.8rem center; padding: 0.65rem 0.8rem 0.65rem 2.7rem; text-align: left; white-space: normal; }
 .jarolift-service hr { margin: 0.5rem 0; }
 .jarolift-log-toolbar { grid-template-columns: repeat(2, minmax(0, 1fr)) max-content; max-width: 64rem; }
-.jarolift-help > .grid { display: block; max-width: 64rem !important; margin-bottom: 1rem; padding: 1.25rem; border: 1px solid var(--ui-border); border-radius: 0.75rem; background: var(--ui-surface); overflow-x: auto; }
-.jarolift-help h4 { font-size: 1.1rem; font-weight: 500; }
-.jarolift-help h6 { color: var(--ui-muted); font-size: 0.85rem; font-weight: 400; }
-.jarolift-help > hr { display: none; }
-.jarolift-help td { overflow-wrap: anywhere; }
 .settings-container { flex-wrap: wrap; }
 .settings-container > div { min-width: min(100%, 12rem); }
 @container (max-width: 650px) {

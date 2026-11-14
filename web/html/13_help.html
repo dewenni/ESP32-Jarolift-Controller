@@ -30,177 +30,301 @@
     <!-- Tab-Content -->
     <main class="container">
       <!--SECTION-START-->
-      <div id="tab13" class="tab-content information-page information-page--compact jarolift-help"><header class="page-heading"><h1 data-i18n="help"></h1><p data-i18n="jaro_help_subtitle"></p></header>
-
-        <div class="grid" style="max-width: 800px">
-          <div>
-            <h4 data-i18n="gpio"></h4>
-            <h6 data-i18n="gpio_info"></h6>
-              <table>
-              <tr>
-                <th>Signal</th>
-                <th>GPIO</th>
-              </tr>
-              <tbody>
-                <tr>
-                  <td>GD0</td>
-                  <td>21</td>
-                </tr>
-                <tr>
-                  <td>GD2</td>
-                  <td>22</td>
-                </tr>
-                <tr>
-                  <td>CLK</td>
-                  <td>18</td>
-                </tr>
-                <tr>
-                  <td>MOSI</td>
-                  <td>23</td>
-                </tr>
-                <tr>
-                  <td>MISO</td>
-                  <td>19</td>
-                </tr>
-                <tr>
-                  <td>CS</td>
-                  <td>5</td>
-                </tr>
-              </tbody>
-            </table>
-            <div class="info-box">
-              <div class="info-icon">&#9432;</div>
-              <div class="info-text" data-i18n="gpio_restart_info"></div>
-            </div>
-          </div>
-        </div>
-        <hr />
-        <!--GPIO-END-->
-        <div class="grid" style="max-width: 800px">
-          <div>
-            <h4 data-i18n="mqtt"></h4>
-            <h6 data-i18n="general"></h6>
-            <table>
-              <tr>
-                <th>Command</th>
-                <th>Topic</th>
-                <th>Payload</th>
-              </tr>
-              <tbody>
-                <tr>
-                  <td>Restart ESP</td>
-                  <td>../cmd/restart</td>
-                  <td>none</td>
-                </tr>
-              </tbody>
-            </table>
-            <h6 data-i18n="shutter"></h6>
-            <table>
-              <tr>
-                <th>Command</th>
-                <th>Topic</th>
-                <th>Payload</th>
-              </tr>
-              <tbody>
-                <tr>
-                  <td>Restart ESP</td>
-                  <td>../cmd/restart</td>
-                  <td>none</td>
-                </tr>
-                <tr>
-                  <td>Shutter UP</td>
-                  <td>../cmd/shutter/1 ... cmd/shutter/16</td>
-                  <td>{UP, OPEN, 0}</td>
-                </tr>
-                <tr>
-                  <td>Shutter DOWN</td>
-                  <td>../cmd/shutter/1 ... cmd/shutter/16</td>
-                  <td>{DOWN, CLOSE, 1}</td>
-                </tr>
-                <tr>
-                  <td>Shutter STOP</td>
-                  <td>../cmd/shutter/1 ... cmd/shutter/16</td>
-                  <td>{STOP, 2}</td>
-                </tr>
-                <tr>
-                  <td>Shutter SHADE</td>
-                  <td>../cmd/shutter/1 ... cmd/shutter/16</td>
-                  <td>{SHADE, 3}</td>
-                </tr>
-              </tbody>
-            </table>
-            <h6 data-i18n="groups"></h6>
-            <table>
-              <tr>
-                <th>Command</th>
-                <th>Topic</th>
-                <th>Payload</th>
-              </tr>
-              <tbody>
-                <tr>
-                  <td>Group UP</td>
-                  <td>../cmd/group/1 ... cmd/shutter/6</td>
-                  <td>{UP, OPEN, 0}</td>
-                </tr>
-                <tr>
-                  <td>Group DOWN</td>
-                  <td>../cmd/group/1 ... cmd/shutter/6</td>
-                  <td>{DOWN, CLOSE, 1}</td>
-                </tr>
-                <tr>
-                  <td>Group STOP</td>
-                  <td>../cmd/group/1 ... cmd/shutter/6</td>
-                  <td>{STOP, 2}</td>
-                </tr>
-                <tr>
-                  <td>Group SHADE</td>
-                  <td>../cmd/group/1 ... cmd/shutter/6</td>
-                  <td>{SHADE, 3}</td>
-                </tr>
-              </tbody>
-            </table>
-            <h6 data-i18n="group$ $mask"></h6>
-            <div data-i18n="grp_mask_help"></div><br>
-            <code> Binary: 0b0000000000010101</code><br>
-            <code> Hex: 0x15</code><br>
-            <code> Decimal: 21</code><br><br>
-            
-            <table>
-              <tr>
-                <th>Command</th>
-                <th>Topic</th>
-                <th>Payload</th>
-              </tr>
-              <tbody>
-                <tr>
-                  <td>Group UP</td>
-                  <td>../cmd/group/up</td>
-                  <td>{0b0000000000010101, 0x15, 21}</td>
-                </tr>
-                <tr>
-                  <td>Group DOWN</td>
-                  <td>../cmd/group/down</td>
-                  <td>{0b0000000000010101, 0x15, 21}</td>
-                </tr>
-                <tr>
-                  <td>Group STOP</td>
-                  <td>../cmd/group/stop</td>
-                  <td>{0b0000000000010101, 0x15, 21}</td>
-                </tr>
-                <tr>
-                  <td>Group SHADE</td>
-                  <td>../cmd/group/shade</td>
-                  <td>{0b0000000000010101, 0x15, 21}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="info-box">
-              <div class="info-icon">&#9432;</div>
-              <div class="info-text" data-i18n="mqtt_info2"></div>
-            </div>
-        </div>
-      </div>
+<div id="tab13" class="tab-content information-page information-page--compact jarolift-help">
+<header class="page-heading">
+<h1 data-i18n="help">
+</h1>
+<p data-i18n="jaro_help_subtitle">
+</p>
+</header>
+<p data-i18n="help_intro" class="help-intro">
+</p>
+<nav class="help-shortcuts">
+<a href="#help-operation" data-help-open="help-operation">
+<strong data-i18n="help_operate">
+</strong>
+<span data-i18n="help_operate_hint">
+</span>
+</a>
+<a href="#help-position" data-help-open="help-position">
+<strong data-i18n="help_setup">
+</strong>
+<span data-i18n="help_setup_hint">
+</span>
+</a>
+<a href="#help-problems" data-help-open="help-problems">
+<strong data-i18n="help_solve">
+</strong>
+<span data-i18n="help_solve_hint">
+</span>
+</a>
+</nav>
+<details id="help-operation" class="help-panel" name="jarolift-help" open>
+<summary data-i18n="help_operation">
+</summary>
+<div class="help-content">
+<p data-i18n="help_buttons">
+</p>
+<p data-i18n="help_target">
+</p>
+<p data-i18n="help_estimate" class="help-note">
+</p>
+<div class="tools-actions">
+<button data-i18n="help_channels" type="button" data-ui-local data-help-page="tab1">
+</button>
+</div>
+<h3 data-i18n="help_timer_groups"></h3>
+<p data-i18n="help_groups">
+</p>
+<p data-i18n="help_timer">
+</p>
+<p data-i18n="help_timer_location">
+</p>
+<div class="tools-actions">
+<button data-i18n="help_timers" type="button" data-ui-local data-help-page="tab3">
+</button>
+</div>
+</div>
+</details>
+<details id="help-position" class="help-panel" name="jarolift-help">
+<summary data-i18n="help_position">
+</summary>
+<div class="help-content">
+<p data-i18n="help_position_enable">
+</p>
+<h3 data-i18n="help_reference_title">
+</h3>
+<p data-i18n="help_reference">
+</p>
+<p data-i18n="help_reference_route">
+</p>
+<h3 data-i18n="help_calibration_title">
+</h3>
+<ol>
+<li data-i18n="help_cal1">
+</li>
+<li data-i18n="help_cal2">
+</li>
+<li data-i18n="help_cal3">
+</li>
+<li data-i18n="help_cal4">
+</li>
+<li data-i18n="help_cal5">
+</li>
+</ol>
+<p data-i18n="help_calibration_note" class="help-note">
+</p>
+<div class="tools-actions">
+<button data-i18n="help_service" type="button" data-ui-local data-help-page="tab4">
+</button>
+<button data-i18n="help_settings" type="button" data-ui-local data-help-page="tab12">
+</button>
+</div>
+</div>
+</details>
+<details id="help-remotes" class="help-panel" name="jarolift-help">
+<summary data-i18n="help_remotes">
+</summary>
+<div class="help-content">
+<p data-i18n="help_remote_intro">
+</p>
+<ol>
+<li data-i18n="help_remote1">
+</li>
+<li data-i18n="help_remote2">
+</li>
+<li data-i18n="help_remote3">
+</li>
+</ol>
+<p data-i18n="help_remote_limits">
+</p>
+<p data-i18n="help_remote_delete">
+</p>
+<div class="tools-actions">
+<button data-i18n="help_service" type="button" data-ui-local data-help-page="tab4">
+</button>
+</div>
+</div>
+</details>
+<details id="help-mqtt" class="help-panel" name="jarolift-help">
+<summary data-i18n="help_mqtt_title"></summary>
+<div class="help-content">
+<p data-i18n="help_mqtt_ha">
+</p>
+<p data-i18n="help_ha_status">
+</p>
+<h3 data-i18n="help_mqtt_topics"></h3>
+<p data-i18n="help_mqtt_reference">
+</p>
+<p class="information-note" data-i18n="mqtt_info2">
+</p>
+<div class="help-table">
+<table>
+<thead>
+<tr>
+<th data-i18n="help_topic">
+</th>
+<th data-i18n="help_payload">
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>../cmd/shutter/N</code>
+</td>
+<td data-i18n="help_shutter_payload">
+</td>
+</tr>
+<tr>
+<td>
+<code>../cmd/group/G</code>
+</td>
+<td data-i18n="help_group_payload">
+</td>
+</tr>
+<tr>
+<td>
+<code>../cmd/position/N</code>
+</td>
+<td data-i18n="help_position_payload">
+</td>
+</tr>
+<tr>
+<td>
+<code>../status/shutter/N</code>
+</td>
+<td data-i18n="help_status_payload">
+</td>
+</tr>
+<tr>
+<td>
+<code>../cmd/restart</code>
+</td>
+<td data-i18n="help_restart_payload">
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p data-i18n="help_mqtt_numbers" class="help-note">
+</p>
+<p data-i18n="help_group_mask">
+</p>
+</div>
+</details>
+<details id="help-connections" class="help-panel" name="jarolift-help">
+<summary data-i18n="help_connections">
+</summary>
+<div class="help-content">
+<p data-i18n="help_access">
+</p>
+<p data-i18n="help_setup_access">
+</p>
+<p data-i18n="help_updates">
+</p>
+<div class="tools-actions">
+<button data-i18n="help_tools" type="button" data-ui-local data-help-page="tab11">
+</button>
+<button data-i18n="help_settings" type="button" data-ui-local data-help-page="tab12">
+</button>
+</div>
+</div>
+</details>
+<details id="help-problems" class="help-panel" name="jarolift-help">
+<summary data-i18n="help_problems">
+</summary>
+<div class="help-content">
+<dl>
+<dt data-i18n="help_unknown">
+</dt>
+<dd data-i18n="help_unknown_answer">
+</dd>
+<dt data-i18n="help_missing">
+</dt>
+<dd data-i18n="help_missing_answer">
+</dd>
+<dt data-i18n="help_busy">
+</dt>
+<dd data-i18n="help_busy_answer">
+</dd>
+<dt data-i18n="help_rf">
+</dt>
+<dd data-i18n="help_rf_answer">
+</dd>
+<dt data-i18n="help_network">
+</dt>
+<dd data-i18n="help_network_answer">
+</dd>
+</dl>
+<div class="tools-actions">
+<button data-i18n="help_system" type="button" data-ui-local data-help-page="tab9">
+</button>
+<button data-i18n="help_logger" type="button" data-ui-local data-help-page="tab10">
+</button>
+</div>
+</div>
+</details>
+<details id="help-wiring" class="help-panel" name="jarolift-help">
+<summary data-i18n="help_wiring_title"></summary>
+<div class="help-content">
+<p data-i18n="gpio_info">
+</p>
+<div class="help-table">
+<table>
+<thead>
+<tr>
+<th>CC1101</th>
+<th>GPIO</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GDO0</td>
+<td>21</td>
+</tr>
+<tr>
+<td>GDO2</td>
+<td>22</td>
+</tr>
+<tr>
+<td>CLK</td>
+<td>18</td>
+</tr>
+<tr>
+<td>MOSI</td>
+<td>23</td>
+</tr>
+<tr>
+<td>MISO</td>
+<td>19</td>
+</tr>
+<tr>
+<td>CS</td>
+<td>5</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p data-i18n="help_gpio_note">
+</p>
+</div>
+</details>
+<section class="card help-docs">
+<h2 data-i18n="help_docs">
+</h2>
+<div class="help-doc-links">
+<a data-i18n="help_readme" id="help-readme" href="https://github.com/dewenni/ESP32-Jarolift-Controller/blob/main/README_DE.md" target="_blank" rel="noopener noreferrer">
+</a>
+<a data-i18n="help_doc_position" href="https://github.com/dewenni/ESP32-Jarolift-Controller/blob/main/Doc/Positionierung.md" target="_blank" rel="noopener noreferrer">
+</a>
+<a data-i18n="help_doc_rf" href="https://github.com/dewenni/ESP32-Jarolift-Controller/blob/main/Doc/RF-Empfang.md" target="_blank" rel="noopener noreferrer">
+</a>
+</div>
+<p data-i18n="help_doc_hint" class="information-note">
+</p>
+</section>
+</div>
       <!--SECTION-END-->
     </main>
     <!-- Footer -->
