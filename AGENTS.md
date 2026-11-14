@@ -46,9 +46,10 @@ Repositories ebenfalls zu ändern. Den Umfang aus dem aktuellen Auftrag ableiten
 - `web/output/` und die Firmware-Binaries im jeweiligen Release-Verzeichnis
   werden durch Build-Skripte erzeugt. Änderungen an den Quellen vornehmen,
   nicht ausschließlich an generierten Dateien.
-- Während der Entwicklung generierte Web-Dateien und Binaries standardmäßig
+- Während der Entwicklung generierte Web-Dateien (/web/output/) und Binaries (/release) standardmäßig
   nicht in normale Quellcode-Commits aufnehmen. Lokal dürfen sie für Tests
   aktualisiert werden.
+- ebenso sollten temporäre tests nicht commited werden.
 - Bei einem fertigen Release gehören sowohl die erzeugten Web-Dateien als auch
   die passenden `.bin`-Dateien in den Release-Stand und müssen mit gepusht werden.
 - Keine Versionsanhebung, Tags oder Veröffentlichung ohne entsprechenden Auftrag.
