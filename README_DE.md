@@ -40,6 +40,9 @@ Und wenn du meine Arbeit unterstützen möchtest, kannst auch folgendes nutzen <
 
 Steuerung von Jarolift(TM) TDEF 433MHz Funkrollläden über **ESP32** und **CC1101** Transceiver Modul im asynchronen Modus.
 
+<img style="width: 700px;" src="./Doc/webUI_shutter.png">
+
+
 ## Features
 
 - **Webbasierte Benutzeroberfläche (WebUI):**  

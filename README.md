@@ -40,6 +40,8 @@ And if you'd like to support my work, you can also<p>
 
 Controlling Jarolift(TM) TDEF 433MHz radio shutters via **ESP32** and **CC1101** Transceiver Module in asynchronous mode.
 
+<img style="width: 700px;" src="./Doc/webUI_shutter.png">
+
 ## Features
 
 - **Web-based User Interface (WebUI):**  
@@ -302,7 +304,7 @@ Positioning is enabled globally under **Device**, but each shutter must be calib
 
 Changes are saved automatically. **GPIO and JAROLIFT protocol changes require a restart.** German and English are available for the interface and language-dependent messages.
 
-<img style="width: 500px;" src="./Doc/webUI_settings.png">
+<img style="width: 700px;" src="./Doc/webUI_settings.png">
 
 ## Config Import and Export
 
