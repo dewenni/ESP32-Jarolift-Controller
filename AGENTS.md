@@ -49,7 +49,9 @@ Repositories ebenfalls zu ändern. Den Umfang aus dem aktuellen Auftrag ableiten
 - Während der Entwicklung generierte Web-Dateien (/web/output/) und Binaries (/release) standardmäßig
   nicht in normale Quellcode-Commits aufnehmen. Lokal dürfen sie für Tests
   aktualisiert werden.
-- ebenso sollten temporäre tests nicht commited werden.
+- Nur weiterhin gültige Tests mit dauerhaftem Nutzen für künftige Regressions-
+  oder Systemprüfungen aufheben und committen. Temporäre Prüfskripte, überholte
+  Experimente und reine Darstellungsprüfungen nach Abschluss entfernen.
 - Bei einem fertigen Release gehören sowohl die erzeugten Web-Dateien als auch
   die passenden `.bin`-Dateien in den Release-Stand und müssen mit gepusht werden.
 - Keine Versionsanhebung, Tags oder Veröffentlichung ohne entsprechenden Auftrag.
@@ -103,8 +105,12 @@ Repositories ebenfalls zu ändern. Den Umfang aus dem aktuellen Auftrag ableiten
 
 - Prüfungen passend zur Änderung wählen: etwa Syntax und Darstellung bei UI-
   Änderungen, Builds und gezielte Verhaltenstests bei Firmware-Änderungen.
-- Tests sollen relevantes Verhalten absichern. Keine umfangreichen Tests nur für
-  triviale Format- oder Abstandsänderungen hinzufügen. Wenn die Funtkion fertig ist, können die zusätzlich erstellten Tests auch wieder gelöscht werden.
+- Tests sollen relevantes Verhalten absichern. Nur gültige und künftig wertvolle
+  Regressions- oder Systemtests dauerhaft behalten und committen; nicht automatisch
+  jeden bei der Entwicklung entstandenen Test übernehmen. Temporäre, doppelte oder
+  überholte Prüfungen entfernen. Keine umfangreichen Tests nur für triviale Format-
+  oder Abstandsänderungen hinzufügen. Dauerhafte Tests ausführbar halten und ihre
+  Voraussetzungen, Ausführung sowie Aussagegrenzen dokumentieren.
 - Erfolgreicher Build, Softwaretest und Test auf realer Hardware sind verschiedene
   Nachweise. Nicht behaupten, ein OTA-Update, Funkempfang oder eine Motorfahrt sei
   praktisch getestet worden, wenn nur der Build oder ein Test mit Nachbildungen lief.
