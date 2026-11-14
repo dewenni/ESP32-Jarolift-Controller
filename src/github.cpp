@@ -4,7 +4,7 @@
 #include <message.h>
 
 // Without setCa() the library does not verify the download server certificate.
-// Images are unsigned; the UI offers any different release tag, including older ones.
+// Images are unsigned; older releases are explicitly labelled in the Tools page.
 #define GITHUB_OWNER "dewenni"
 #define GITHUB_REPO "ESP32-Jarolift-Controller"
 
@@ -99,7 +99,7 @@ int ghStartOtaUpdate(GithubRelease release, const char *asset) {
     ESP_LOGI(TAG, "Firmware updated successfully");
   } else {
     ESP_LOGE(TAG, "Firmware update failed: %i", result);
-    ota.freeRelease(release);
+
   }
   return result;
 }
@@ -110,4 +110,7 @@ int ghStartOtaUpdate(GithubRelease release, const char *asset) {
  * @param   release
  * @return  none
  * *******************************************************************/
-void ghFreeRelease(GithubRelease &release) { ota.freeRelease(release); }
+void ghFreeRelease(GithubRelease &release) {
+  ota.freeRelease(release);
+  release = {};
+}
