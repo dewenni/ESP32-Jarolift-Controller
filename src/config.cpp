@@ -5,6 +5,7 @@
 #include <config.h>
 #include <language.h>
 #include <message.h>
+#include <new>
 #include <shutterPosition.h>
 
 /* D E C L A R A T I O N S ****************************************************/
@@ -263,10 +264,9 @@ void configCyclic() {
  * @return  none
  * *******************************************************************/
 void configInitValue() {
-  config.position = s_cfg_position{};
-
-  // Preserve in-class defaults, including auth.enable and log.enable.
-  config = s_config{};
+  // Reconstruct in place: assignment would create a full s_config on the stack.
+  config.~s_config();
+  new (&config) s_config{};
 
   // Logger
   config.log.level = 4;
