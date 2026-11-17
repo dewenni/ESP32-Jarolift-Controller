@@ -1,3 +1,16 @@
+# v2.0.1
+
+This patch release fixes issues in v2.0.0. For the major changes, new features and migration notes, see [v2.0.0](https://github.com/dewenni/ESP32-Jarolift-Controller/releases/tag/v2.0.0).
+
+
+- [FIX] Prevent ESP32-C3 startup stack overflow during configuration initialization when no valid configuration is available (#91)
+- [FIX] Handle 0% and 100% positioning targets as endpoints without queueing full-duration moves
+- [IMPROVE] Show calibrated positioning controls in the GitHub Pages demo
+- [FIX] Select the configured language on first load
+- [UPDATE] EspWebUI 0.0.14
+
+---
+
 # v2.0.0
 
 Version 2.0.0 is a major release with a completely redesigned WebUI, calibrated percentage positioning and a new way to associate original remote controls with shutters. Radio reception has been significantly improved, alongside more reliable connections, updates and configuration storage.
