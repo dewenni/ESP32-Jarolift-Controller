@@ -1247,6 +1247,19 @@ async function loadSimulatedData() {
 
     const simData = await response.json();
     updateJSON(simData); // Aktualisiert die UI mit den Simulationsdaten
+    // Demo only: the real device sends this snapshot through WebSocket.
+    const configResponse = await fetch("config.json");
+    if (!configResponse.ok) throw new Error("Could not load demo configuration");
+    const demoConfig = await configResponse.json();
+    const calibration = demoConfig.position?.calibration || [];
+    window.dispatchEvent(new CustomEvent("webui:message", { detail: {
+      type: "shutterPosition", enabled: !!demoConfig.position?.enable,
+      notice: "", moving: -1, phase: 0, target: 0, remaining: 0, queue: [],
+      channels: Array.from({length: 16}, (_, i) => [
+        !!demoConfig.jaro.ch_enable[i] && calibration[i]?.length === 6 && calibration[i].every(t => t > 0), -1
+      ]),
+      cal: {phase: 0, channel: 0, mark: 0, token: 0, elapsed: 0, times: []}
+    }}));
   } catch (error) {
     console.error("Fehler beim Laden von sim.json:", error);
   }
