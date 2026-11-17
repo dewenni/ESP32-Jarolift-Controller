@@ -2,8 +2,8 @@
 
 ## Geltungsbereich
 
-Diese Datei gilt für `ESP32-Jarolift-Controller`. Gemeinsame Komponenten liegen in
-`EspWebUI`; das verwandte Projekt heißt `ESP_Buderus_KM271`.
+Diese Datei gilt für `ESP-Projekte`. Gemeinsame Komponenten liegen in
+`EspWebUI`; verwandte Projekte heißen z.B. `ESP_Buderus_KM271` und `ESP32-Jarolift-Controller`.
 Änderungen an einem Repository sind nicht automatisch ein Auftrag, die anderen
 Repositories ebenfalls zu ändern. Den Umfang aus dem aktuellen Auftrag ableiten.
 
@@ -21,14 +21,37 @@ Repositories ebenfalls zu ändern. Den Umfang aus dem aktuellen Auftrag ableiten
 - Bereits erteilte Freigaben berücksichtigen und für notwendige, abgedeckte
   Arbeitsschritte nicht erneut nach inhaltlicher Bestätigung fragen.
 
+## Modellauswahl und Reasoning-Aufwand
+
+- Die folgenden Aufgaben verbindlich an Subagenten delegieren; der Hauptagent übernimmt die Koordination und Ergebnisprüfung.
+- Für komplexe Programmierung **GPT Sol (`gpt-6-sol`) mit `reasoning_effort=medium`**
+  verwenden. Dazu gehören Architekturentscheidungen, anspruchsvolle Fehleranalyse,
+  Firmware- und Protokolländerungen sowie Änderungen an zeitkritischen Abläufen.
+- Für einfache organisatorische und redaktionelle Aufgaben **Luna (`gpt-6-luna`)
+  mit `reasoning_effort=high`** verwenden. Dazu gehören Builds, bestehende Tests
+  ausführen, Commit, Merge, Push, GitHub-Verwaltung, Dokumentation sowie Texte
+  lesen und schreiben.
+- Der Hauptagent koordiniert Anforderungen, teilt passende Aufgaben zu, prüft die
+  Ergebnisse der Subagenten und berichtet das Gesamtergebnis. Kurze, direkte
+  Antworten brauchen keinen zusätzlichen Subagenten.
+- Bei gemischten Aufgaben die Teile nach Anspruch trennen. Erfordert beispielsweise
+  ein fehlgeschlagener Build eine komplexe Codeanalyse, diese Analyse mit Sol
+  bearbeiten und einfache Build- oder Dokumentationsarbeit Luna zuweisen.
+- Modell und `reasoning_effort` beim Start eines Subagenten ausdrücklich setzen.
+  Nur bei konkretem Nutzen parallelisieren; konkurrierende Schreibzugriffe und
+  gleichzeitige Builds vermeiden.
+- Modell und Effort über die verfügbaren Modell- oder Delegationsfunktionen
+  einstellen. Diese Datei allein schaltet das aktive Modell nicht um. Wenn die
+  Umgebung die gewünschte Auswahl nicht unterstützt, die Einschränkung kurz
+  nennen und keinen erfolgten Modellwechsel behaupten.
+- Die Modellauswahl erweitert keine Berechtigungen: Bestehende Regeln für
+  Änderungen, Commits, Pushes und Veröffentlichungen gelten unverändert.
+
 ## Branches und Commits
 
 - Vor Änderungen den aktuellen Branch und offene Änderungen prüfen.
-- Für größere Features, Umbauten und Experimente früh einen eigenen Branch
-  vorschlagen. Ist die Umsetzung beauftragt, vor den Änderungen einen passenden
-  Feature- oder Test-Branch anlegen, sofern noch keiner besteht.
-- Kleine, zusammengehörige Korrekturen benötigen nicht zwingend einen neuen
-  Branch. Größere unfertige Änderungen nicht auf `main` ansammeln.
+- Für neue Features immer einen neuen Branch anlegen `feature/xy`
+- Für einen Fix immer einen neuen Branch anlegen `fix/xy`
 - Unabhängige Themen getrennt halten. Wenn eine Aufgabe ein neues Thema berührt,
   die Trennung direkt ansprechen, bevor weitere Änderungen vermischt werden.
 - Nach abgeschlossenen Teilaufgaben aktiv einen sinnvollen Commit und eine kurze
@@ -85,6 +108,7 @@ Repositories ebenfalls zu ändern. Den Umfang aus dem aktuellen Auftrag ableiten
   einer generierten oder heruntergeladenen Kopie unter `.pio/libdeps/`.
 - Umfangreiche Nebenbereinigungen getrennt vorschlagen und nicht mit einer
   funktionalen Änderung vermischen.
+
 
 ## WebUI und Bedienung
 
