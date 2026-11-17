@@ -83,27 +83,25 @@ int main(){
  config.position.enable=true;target();EspSysUtil::OTA::getInstance().active=true;shutterPositionCyclic();assert(!shutterPositionBusy() && sent.back()==CMD_STOP);EspSysUtil::OTA::getInstance().active=false;
  shutterPositionInvalidate(0);assert(!config.position.calibration[0].valid());
 
- // Fixed shared FIFO: 16 unique waiting channels, replacement in place and FIFO dispatch.
+ // Endpoint commands do not own the position FIFO or wait for motor travel.
  for(uint8_t ch=0;ch<16;++ch){config.jaro.ch_enable[ch]=true;config.position.calibration[ch]=calibration;}
- assert(shutterPositionTarget(0,"100"));
+ n=sent.size();
  for(uint8_t ch=0;ch<16;++ch)assert(shutterPositionTarget(ch,"0"));
- assert(shutterPositionTarget(7,"100"));shutterPositionCyclic();
- assert(state()["queue"].size()==16 && state()["queue"][7][0]==7 && state()["queue"][7][1]==100);
- n=sent.size();begin();assert(sent.size()==n && state()["notice"]=="busy");
- clockMs+=40000;shutterPositionCyclic(); // First request completes; queued shutter 0 starts.
- assert(state()["moving"]==0 && state()["target"]==0 && state()["queue"].size()==15);
- for(uint8_t ch=0;ch<16;++ch){
-   assert(state()["moving"]==ch && state()["target"]==(ch==7?100:0));
-   clockMs+=40000;shutterPositionCyclic();
- }
- assert(!shutterPositionBusy() && state()["queue"].size()==0 && state()["channels"][7][1]==100);
- // Queued targets are revalidated; invalid channels are skipped, without blocking later ones.
- assert(shutterPositionTarget(0,"100"));
- assert(shutterPositionTarget(1,"0"));assert(shutterPositionTarget(2,"0"));assert(shutterPositionTarget(3,"0"));
- config.position.calibration[1]=PositionCalibration{};config.jaro.ch_enable[2]=false;
- clockMs+=40000;shutterPositionCyclic();assert(state()["moving"]==3 && state()["queue"].size()==0);
+ shutterPositionCyclic();assert(sent.size()==n+16 && !shutterPositionBusy() && state()["queue"].size()==0);
+ clockMs+=40000;shutterPositionCyclic();assert(state()["channels"][15][1]==0);
+ assert(shutterPositionTarget(0,"100"));assert(!shutterPositionBusy());
+ clockMs+=40000;shutterPositionCyclic();assert(state()["channels"][0][1]==100);
+ // Intermediate moves retain serialization, including queued endpoints, to protect STOP timing.
+ assert(shutterPositionTarget(0,"25"));assert(shutterPositionTarget(1,"0"));assert(shutterPositionTarget(2,"100"));
+ shutterPositionCyclic();assert(state()["queue"].size()==2);
+ clockMs+=40000;shutterPositionCyclic();clockMs+=600;shutterPositionCyclic();clockMs+=40000;shutterPositionCyclic();
+ assert(!shutterPositionBusy() && state()["queue"].size()==0 && sent.back()==CMD_UP);
+ // Fixed shared FIFO still holds 16 intermediate goals, replacing a channel in place.
+ assert(shutterPositionTarget(0,"25"));
+ for(uint8_t ch=0;ch<16;++ch)assert(shutterPositionTarget(ch,"25"));
+ assert(shutterPositionTarget(7,"75"));shutterPositionCyclic();
+ assert(state()["queue"].size()==16 && state()["queue"][7][1]==75);
  shutterPositionManual(1);shutterPositionCyclic();assert(!shutterPositionBusy());
- config.position.calibration[1]=calibration;config.jaro.ch_enable[2]=true;
  // Normal manual commands discard the complete queue and stop the active automatic run.
  assert(shutterPositionTarget(0,"25"));assert(shutterPositionTarget(1,"75"));
  shutterPositionManual(2);shutterPositionCyclic();assert(!shutterPositionBusy() && state()["queue"].size()==0 && sent.back()==CMD_STOP);

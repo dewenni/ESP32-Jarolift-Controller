@@ -91,7 +91,13 @@ bool available(uint8_t ch) {
 bool startTarget(uint8_t ch, uint8_t goal) {
   travel[ch].duration=0;setPosition(ch,-1);notice="";
   if(!send(ch,goal>=50)) {failure("send_failed");return false;}
-  move.begin(ch,goal,config.position.calibration[ch],jaroPositionSentAt());dirty=true;
+  if(goal==0 || goal==100) {
+    // End stops are handled by the motor. Estimate completion without owning the FIFO.
+    shutterPositionCommand(uint16_t(1)<<ch,goal==100?CMD_UP:CMD_DOWN);
+  } else {
+    move.begin(ch,goal,config.position.calibration[ch],jaroPositionSentAt());
+  }
+  dirty=true;
   return true;
 }
 bool requestTarget(uint8_t ch, uint8_t goal) {

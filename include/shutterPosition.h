@@ -10,6 +10,7 @@ void shutterPositionPublish();
 void shutterPositionInvalidate(uint8_t channel);
 bool shutterPositionBusy();
 
-// Accepted targets start immediately or wait in the shared 16-entry FIFO. MQTT payload: 0..100.
+// Intermediate targets use the 16-entry FIFO; endpoints only wait for radio dispatch.
+// An active intermediate move finishes before other targets are sent. MQTT payload: 0..100.
 bool shutterPositionReady(uint8_t channel);
 bool shutterPositionTarget(uint8_t channel, const char *payload);

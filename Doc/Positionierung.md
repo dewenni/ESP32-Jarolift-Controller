@@ -14,7 +14,7 @@ Das Mitlesen zugeordneter Originalfernbedienungen hilft, bekannte Bedienvorgäng
 - Eine elektrische Vor-Ort-Bedienung sendet gegebenenfalls überhaupt kein Funksignal an den ESP.
 - Der ESP kann einen gesendeten Befehl beobachten, aber nicht bestätigen, dass der Motor ihn empfangen und die erwartete Bewegung vollständig ausgeführt hat.
 
-Deshalb fährt **jede Prozentanforderung zuerst eine Endlage an**, auch wenn bereits ein Prozentwert angezeigt wird. Der ESP wartet die vollständige kalibrierte Fahrzeit mit Reserve ab. Die Endlage wird durch die bereits eingerichtete Endabschaltung des Motors bestimmt; der ESP erkennt sie nicht durch einen Sensor. Anschließend startet die berechnete Teilfahrt aus dieser definierten Ausgangslage.
+Deshalb fährt **jede Zwischenposition zuerst eine Endlage an**, auch wenn bereits ein Prozentwert angezeigt wird. Der ESP wartet die vollständige kalibrierte Fahrzeit mit Reserve ab. Die Endlage wird durch die bereits eingerichtete Endabschaltung des Motors bestimmt; der ESP erkennt sie nicht durch einen Sensor. Anschließend startet die berechnete Teilfahrt aus dieser definierten Ausgangslage.
 
 | Gewünschte Öffnung | Ablauf |
 | --- | --- |
@@ -24,6 +24,8 @@ Deshalb fährt **jede Prozentanforderung zuerst eine Endlage an**, auch wenn ber
 | 100 % | Vollständig öffnen. |
 
 Beispiel: Für **25 %** fährt der Rollladen zuerst vollständig zu und öffnet anschließend ein Viertel seiner Höhe. Für **75 %** fährt er zuerst vollständig auf und schließt anschließend bis auf drei Viertel Öffnung. Für genau **50 %** wird die obere Endlage als Referenz verwendet.
+
+**0 % und 100 %** senden direkt AB beziehungsweise AUF. Die Motorfahrt blockiert keine weiteren Endlagenanforderungen; mehrere Rollläden können dadurch nacheinander ihre Funkbefehle erhalten und gleichzeitig fahren. Die Positionsschätzung bleibt bis zum Ablauf der Fahrzeit unbekannt. Während einer laufenden Zwischenpositionsfahrt warten weitere Ziele weiterhin in der Warteschlange, damit deren zeitkritischer STOP nicht verzögert wird.
 
 Die Referenzzeit entspricht der vollen Fahrzeit zuzüglich **5 % Reserve**, mindestens einer und höchstens drei Sekunden. Vor dem Richtungswechsel wartet der ESP **600 ms**. Auch wenn der Rollladen bereits nahe der Endlage steht, wird die volle Referenzzeit abgewartet. Das dauert länger, vermeidet aber das Vertrauen auf eine möglicherweise veraltete Position.
 
