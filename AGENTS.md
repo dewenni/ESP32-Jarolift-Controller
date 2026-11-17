@@ -52,6 +52,8 @@ Repositories ebenfalls zu ändern. Den Umfang aus dem aktuellen Auftrag ableiten
 - Vor Änderungen den aktuellen Branch und offene Änderungen prüfen.
 - Für neue Features immer einen neuen Branch anlegen `feature/xy`
 - Für einen Fix immer einen neuen Branch anlegen `fix/xy`
+- Features und Fixes weiterhin auf eigenen Branches `feature/xy` bzw. `fix/xy` bearbeiten; dafür im bestehenden Projektcheckout den Branch wechseln. Keine zusätzlichen Worktrees anlegen, außer der Nutzer beauftragt sie ausdrücklich.
+- Offene Nutzeränderungen vor einem Branchwechsel schützen. Nicht ungefragt stashen, committen oder verwerfen; wenn ein Wechsel dadurch kollidiert oder Änderungen gefährdet, zuerst klären.
 - Unabhängige Themen getrennt halten. Wenn eine Aufgabe ein neues Thema berührt,
   die Trennung direkt ansprechen, bevor weitere Änderungen vermischt werden.
 - Nach abgeschlossenen Teilaufgaben aktiv einen sinnvollen Commit und eine kurze
