@@ -317,7 +317,7 @@ Use **Tools → Configuration file** to view, export or import `config.json`. Re
 
 ### Base serial migration
 
-The base serial in the WebUI is the starting value for the radio serial the controller transmits. To form the 28-bit radio serial, the firmware shifts the six-digit hexadecimal base serial to the left and appends the channel index. The planned v2.0.2 release (`config.version=8`) reduces this internal shift from 8 to 4 bits. Four bits are enough for the 16 channel indices.
+The base serial in the WebUI is the starting value for the radio serial the controller transmits. To form the 28-bit radio serial, the firmware shifts the six-digit hexadecimal base serial to the left and appends the channel index. Firmware v2.0.2 (`config.version=8`) reduces this internal shift from 8 to 4 bits. Four bits are enough for the 16 channel indices.
 
 To compensate for the new shift, the firmware automatically converts the stored base serial once per configuration with `config.version<8`, both on update and when importing an older backup. For example, under **Settings → Device → JAROLIFT**, `012345` becomes `123450`. The first channel (index `0`) has the same radio serial `1234500` before and after the update.
 

@@ -316,7 +316,7 @@ Unter **Tools → Konfigurationsdatei** lässt sich `config.json` anzeigen, expo
 
 ### Migration der Basisseriennummer
 
-Die Basisseriennummer in der WebUI ist der Ausgangswert für die tatsächlich gesendete Funkseriennummer. Für die 28-Bit-Funkseriennummer verschiebt die Firmware die sechsstellige hexadezimale Basisseriennummer nach links und fügt den Kanalindex an. Mit dem geplanten Release v2.0.2 (`config.version=8`) ändert sich diese interne Verschiebung von 8 auf 4 Bit. Vier Bit reichen für die Indizes der 16 Kanäle.
+Die Basisseriennummer in der WebUI ist der Ausgangswert für die tatsächlich gesendete Funkseriennummer. Für die 28-Bit-Funkseriennummer verschiebt die Firmware die sechsstellige hexadezimale Basisseriennummer nach links und fügt den Kanalindex an. Mit Firmware v2.0.2 (`config.version=8`) ändert sich diese interne Verschiebung von 8 auf 4 Bit. Vier Bit reichen für die Indizes der 16 Kanäle.
 
 Zum Ausgleich rechnet die Firmware die gespeicherte Basisseriennummer einmal pro Konfiguration mit `config.version<8` automatisch um, sowohl beim Update als auch beim Import einer älteren Sicherung. Unter **Einstellungen → Gerät → JAROLIFT** wird zum Beispiel aus `012345` der Wert `123450`. Für den ersten Kanal (Index `0`) ergibt sich vor und nach dem Update dieselbe Funkseriennummer `1234500`.
 

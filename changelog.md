@@ -1,6 +1,8 @@
-# Unreleased
+# v2.0.2
 
-- [FIX] Planned for v2.0.2 (`config.version=8`). Correct the internal base serial shift from 8 to 4 bits when adding the channel index to form the radio serial (#93). To compensate, the firmware converts the stored base serial once per configuration with `config.version<8` when upgrading or importing older backups.
+This patch release fixes issues in v2.0.0. For the major changes, new features and migration notes, see [v2.0.0](https://github.com/dewenni/ESP32-Jarolift-Controller/releases/tag/v2.0.0).
+
+- [FIX] Correct the internal base serial shift from 8 to 4 bits when adding the channel index to form the radio serial (#93). To compensate, the firmware converts the stored base serial once per configuration with `config.version<8` when upgrading or importing older backups. The migrated configuration uses `config.version=8`.
 - The six-digit base serial displayed in the WebUI can change. All 16 channel identities are preserved for installations on v2.0.0 or v2.0.1 and for installations before v2.0.0 with a base serial of `0FFFFF` or less. An installation before v2.0.0 with a higher base serial may need to pair its motors again.
 - Export `config.json` before upgrading. If you return to an older release, restore the backup once the older firmware is running and restart before operating the shutters. Keep the current device counter stored separately in flash. See [Base serial migration](README.md#base-serial-migration).
 - [IMPROVE] Confirm new OTA firmware after 30 seconds of uptime, including when offline.

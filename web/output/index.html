@@ -2467,11 +2467,9 @@
                   data-type="hex"
                   data-length="6"
                   id="cfg_jaro_serial"
-                  oninput="validateHex(this)"
                   pattern="[0-9a-fA-F]{1,6}"
                   title="Enter up to 6 HEX digits"
-                  maxlength="6"
-                  onblur="formatHex(this)"
+                  onblur="if (/^[0-9a-fA-F]{1,6}$/.test(this.value)) formatHex(this)"
                   disabled />
                 <button
                   id="editBtn"
