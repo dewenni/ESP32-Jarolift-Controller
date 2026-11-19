@@ -20,6 +20,9 @@ def main():
         (sys.executable, "test_remote_mapping.py"),
         (sys.executable, "test_rx_glitch.py"),
         (sys.executable, "test_rx_decode.py"),
+        (sys.executable, "test_serial_migration.py"),
+        (sys.executable, "test_serial_tx.py"),
+        (sys.executable, "test_ota_validation.py"),
         ("node", "test_position_ui.cjs"),
         ("node", "test_remote_mapping_ui.cjs"),
     ]
@@ -34,7 +37,7 @@ def main():
     for tool, name in scripts:
         print(f"\n=== {name} ===", flush=True)
         subprocess.run([tool, str(ROOT / "tests" / name)], cwd=ROOT, check=True)
-    print("\nPASS: all 8 host regression checks.", flush=True)
+    print(f"\nPASS: all {1 + len(scripts)} host regression checks.", flush=True)
 
 
 if __name__ == "__main__":

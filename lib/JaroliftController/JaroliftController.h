@@ -77,6 +77,8 @@ public:
   uint8_t getRssi();
 
 private:
+  bool setChannelSerial(uint8_t channel);
+
   // Instanzvariablen (anstatt globaler Variablen)
   GPIO gpio_;
   Config config_;

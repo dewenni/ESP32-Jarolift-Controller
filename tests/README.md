@@ -1,14 +1,16 @@
 # Host regression tests
 
 These tests are maintained checks for positioning, MQTT/Home Assistant discovery,
-remote mapping and RF decoding. They execute application code on the development
-computer with fake clocks, radio/network interfaces or a small DOM harness.
+remote mapping, base serial migration, RF transmission and decoding, and OTA
+confirmation. They execute application code on the development computer with fake
+clocks, radio/network interfaces, an in-memory filesystem or a small DOM harness.
 They do not flash an ESP, contact an MQTT broker or move a shutter.
 
 ## Requirements
 
 - Python 3.9 or newer.
-- Node.js 18 or newer (built-in modules only; no npm installation).
+- Node.js 18 or newer for the WebUI scripts and the base serial input check in
+  `test_serial_migration.py`. These checks use only built-in modules.
 - A C++17 compiler available as `c++`. The RF tests additionally require
   AddressSanitizer and UndefinedBehaviorSanitizer support, as provided by Clang
   or a suitably configured GCC installation.
@@ -39,14 +41,17 @@ Individual scripts can also be run with `python3 tests/test_….py` or
 | `test_shutter_position.py` | Actual position controller: 16-entry FIFO/replacement, queue cancellation/revalidation, target validation, movement sequence, shared status, manual/remote cancellation, calibration ownership/timeout/apply, OTA and invalidation. |
 | `test_mqtt_position.py` | Actual MQTT routing and discovery: 0/100 scale, conditional percentage control, stable entity identity, legacy commands, reconnect and maximum field lengths. |
 | `test_remote_mapping.py` | Actual mapping code: two-press registration, single/group source matching, shared targets, per-motor removal, Unicode, limits, persistence and migration. |
+| `test_serial_migration.py` | Configuration v8 migration through the load path used at boot and for imports, fresh defaults, repeat loads, save failures and recovery. Also checks which base serial inputs the WebUI formats and which the WebSocket accepts. |
+| `test_serial_tx.py` | Radio serial compatibility across every 20-bit legacy base and all 16 channels. Checks KeeLoq keys, discriminator values and UP/DOWN/STOP/group frames with representative bases and boundary values. Also exercises invalid channel indices. |
 | `test_rx_glitch.py` | Actual edge-capture methods: short HIGH/LOW disturbances, false sync, stale HIGH invalidation, frozen buffers, timer rollover and deterministic noise. |
 | `test_rx_decode.py` | Actual capture/decoder/KeeLoq methods: all 16 channels, groups, commands, terminal HIGH handling, truncated frames and discriminator mismatch. |
+| `test_ota_validation.py` | `markAppValid` from `src/main.cpp` with a fake clock and OTA API. Checks offline confirmation at 30 seconds, deferral during active OTA, 10-second retries and no repeat after success. |
 | `test_position_ui.cjs` | Actual frontend logic: feature/calibration visibility, slider without immediate transmission, explicit execute, calibration steps, apply/cancel, queued target display/replacement and per-channel busy state. |
 | `test_remote_mapping_ui.cjs` | Actual frontend logic: selected motor, confirmation before save, Unicode limit, removal, session ownership and cleanup after disconnect. |
 
 The position-model check is compiled by the suite runner. RF tests extract the
-relevant methods and fields from the library source instead of copying the decoder.
-They use fixed-width 32-bit arithmetic to match the ESP and synthetic test keys.
+relevant methods and fields directly from the library source. They use fixed-width
+32-bit arithmetic to match the ESP and synthetic test keys.
 If source boundaries change, adapt this harness rather than duplicating production
 logic. The other C++ integration checks compile the actual source files against
 minimal headers representing the hardware and transport interfaces.
@@ -56,9 +61,12 @@ minimal headers representing the hardware and transport interfaces.
 Passing these checks is not a complete system or hardware test. The UI harness
 checks logic, not browser rendering, real WebSocket behavior or accessibility.
 The RF checks do not measure RF range, ESP interrupt latency or CC1101 registers
-on hardware. The MQTT checks do not run a broker or a real Home Assistant instance.
-Changes still need an appropriate firmware build and targeted device tests for
-calibration, motor movement, radio reception and OTA where affected.
+on hardware. The configuration checks simulate filesystem operations and cannot
+verify power-loss behavior on an ESP. The MQTT checks do not run a broker or a
+real Home Assistant instance. The OTA check simulates calls to the ESP OTA API.
+Actual image confirmation and rollback depend on the bootloader and require a
+device test. Changes still need an appropriate firmware build and targeted
+device tests for calibration, motor movement, radio and OTA where affected.
 
 Keep a test only while it checks a still-valid behavior worth protecting in future
 regression or system checks. Update tests when intended behavior changes. Remove

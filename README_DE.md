@@ -103,6 +103,7 @@ Die Homepage des Projekts ist hier: [Project Home](http://www.bastelbudenbuben.d
   - [Zugänge und Passwörter](#zugänge-und-passwörter)
   - [Konfiguration](#konfiguration)
   - [Konfiguration importieren und exportieren](#konfiguration-importieren-und-exportieren)
+    - [Migration der Basisseriennummer](#migration-der-basisseriennummer)
   - [Anlernen von Rolläden](#anlernen-von-rolläden)
   - [Migration](#migration)
 - [WebUI](#webui)
@@ -262,7 +263,9 @@ upload_flags = --auth=<Service-Passwort>
 
 ArduinoOTA benötigt keinen Benutzernamen. Im Setup-Mode gilt das feste Passwort aus [Zugänge und Passwörter](#zugänge-und-passwörter).
 
-Unterbrochene Browser-Uploads werden nach 60 Sekunden ohne Fortschritt abgebrochen; dabei wird der vorherige Watchdog-Zustand wiederhergestellt. Neue OTA-Firmware wird nach zwei Minuten Laufzeit mit Netzwerkverbindung oder nach zehn Minuten offline bestätigt. Ein Neustart vor dieser Bestätigung kann einen Bootloader-Rollback zur vorherigen Firmware auslösen.
+Unterbrochene Browser-Uploads werden nach 60 Sekunden ohne Fortschritt abgebrochen. Dabei wird der vorherige Watchdog-Zustand wiederhergestellt. Der Controller bestätigt neue OTA-Firmware nach 30 Sekunden Laufzeit, auch ohne Netzwerkverbindung. Ein Neustart vor dieser Bestätigung kann einen Bootloader-Rollback zur vorherigen Firmware auslösen.
+
+Vor dem Update auf v2.0.2 (`config.version=8`) die `config.json` exportieren. Die Sicherung für ein Downgrade oder einen OTA-Rollback aufbewahren. Siehe [Migration der Basisseriennummer](#migration-der-basisseriennummer).
 
 ## Setup Mode
 
@@ -307,10 +310,21 @@ Die Positionssteuerung wird unter **Gerät** zentral aktiviert. Jeder Rollladen 
 
 ## Konfiguration importieren und exportieren
 
-Es gibt es auch einen eingebauten Dateimanager zum Öffnen (anzeigen), Herunterladen (exportieren) und Hochladen (importieren) der Konfigurationsdatei.
-Die Konfiguration wird in der Datei ``config.json`` gespeichert. Zur Sicherung und Wiederherstellung der Konfiguration kannst du diese Datei herunterladen und hochladen.
+Unter **Tools → Konfigurationsdatei** lässt sich `config.json` anzeigen, exportieren und importieren. Nach dem Import einer Sicherung den Controller neu starten, damit die wiederhergestellten JAROLIFT-Einstellungen wirksam werden.
 
 <img style="width: 500px;" src="./Doc/webUI_tools.png">
+
+### Migration der Basisseriennummer
+
+Die Basisseriennummer in der WebUI ist der Ausgangswert für die tatsächlich gesendete Funkseriennummer. Für die 28-Bit-Funkseriennummer verschiebt die Firmware die sechsstellige hexadezimale Basisseriennummer nach links und fügt den Kanalindex an. Mit dem geplanten Release v2.0.2 (`config.version=8`) ändert sich diese interne Verschiebung von 8 auf 4 Bit. Vier Bit reichen für die Indizes der 16 Kanäle.
+
+Zum Ausgleich rechnet die Firmware die gespeicherte Basisseriennummer einmal pro Konfiguration mit `config.version<8` automatisch um, sowohl beim Update als auch beim Import einer älteren Sicherung. Unter **Einstellungen → Gerät → JAROLIFT** wird zum Beispiel aus `012345` der Wert `123450`. Für den ersten Kanal (Index `0`) ergibt sich vor und nach dem Update dieselbe Funkseriennummer `1234500`.
+
+Bei Installationen mit v2.0.0 oder v2.0.1 sowie bei Installationen vor v2.0.0 mit einer Basisseriennummer bis `0FFFFF` bleibt die Funkidentität aller 16 Kanäle erhalten. Bereits angelernte Motoren müssen in diesen Fällen nicht erneut angelernt werden.
+
+Bei Installationen vor v2.0.0 mit einer Basisseriennummer über `0FFFFF` kann erneutes Anlernen erforderlich sein, weil die alte Firmware abweichende Schlüssel oder falsche Befehle erzeugen konnte. Die Warnung richtet sich allein nach der gespeicherten Basisseriennummer und erscheint deshalb bei der Migration einer Basisseriennummer über dieser Grenze auch für Installationen mit v2.0.0 oder v2.0.1.
+
+**Downgrade oder OTA-Rollback.** Bei einer Rückkehr von v2.0.2 (`config.version=8`) auf eine ältere Firmware zuerst die ältere Firmware starten lassen. Dann die vor dem Update gesicherte `config.json` wiederherstellen und den Controller vor der nächsten Rollladenbedienung neu starten. Den aktuellen Gerätezähler des Senders beibehalten. Er liegt separat im Flash. Bei einem geplanten Downgrade den Zählerstand unmittelbar vor dem Firmwarewechsel notieren und nach dem Wiederherstellen der Konfiguration prüfen.
 
 ## Anlernen von Rolläden
 

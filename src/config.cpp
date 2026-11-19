@@ -18,9 +18,10 @@
  * V5: optional calibrated shutter positioning. Older files default to disabled.
  * V6: exact remote signals.
  * V7: learned source bits and automatic groups.
+ * V8: 24-bit Jarolift base serial with a 4-bit channel index.
  */
 
-const int CFG_VERSION = 7;
+const int CFG_VERSION = 8;
 
 char filename[24] = {"/config.json"};
 bool setupMode;
@@ -41,10 +42,9 @@ static bool readConfigDocument(const char *path, JsonDocument &doc) {
 }
 
 static bool loadConfigDocument(JsonDocument &doc) {
-  if (readConfigDocument(filename, doc)) {
-    configRecoveryFile = nullptr;
+  configRecoveryFile = nullptr;
+  if (readConfigDocument(filename, doc))
     return true;
-  }
   // EspWebUI uses .upload; older firmware may leave .tmp after a failed save.
   const char *recoveryFiles[] = {CONFIG_TMP_FILENAME, "/config.json.upload"};
   for (const char *path : recoveryFiles) {
@@ -270,6 +270,7 @@ void configInitValue() {
   // Reconstruct in place: assignment would create a full s_config on the stack.
   config.~s_config();
   new (&config) s_config{};
+  config.version = CFG_VERSION;
 
   // Logger
   config.log.level = 4;
@@ -330,9 +331,10 @@ void configSaveToFile() {
   }
 
   const unsigned long savedHash = EspStrUtil::hash(&config, sizeof(s_config));
+  const uint32_t baseSerial = config.jaro.serial;
   JsonDocument doc; // reserviert 2048 Bytes für das JSON-Objekt
 
-  doc["version"] = CFG_VERSION;
+  doc["version"] = config.version;
 
   doc["lang"] = (config.lang);
 
@@ -430,7 +432,7 @@ void configSaveToFile() {
   }
   doc["jaro"]["masterMSB"] = config.jaro.masterMSB;
   doc["jaro"]["masterLSB"] = config.jaro.masterLSB;
-  doc["jaro"]["serial"] = config.jaro.serial;
+  doc["jaro"]["serial"] = baseSerial;
 
   doc["jaro"]["learn_mode"] = config.jaro.learn_mode;
 
@@ -506,7 +508,8 @@ void configSaveToFile() {
   File check = LittleFS.open(CONFIG_TMP_FILENAME, FILE_READ);
   const bool complete = check && check.size() == expected;
   check.close();
-  if (!complete || !readConfigDocument(CONFIG_TMP_FILENAME, doc)) {
+  if (!complete || !readConfigDocument(CONFIG_TMP_FILENAME, doc) ||
+      doc["version"] != config.version || doc["jaro"]["serial"] != baseSerial) {
     ESP_LOGE(TAG, "Temporary config verification failed; keeping previous file");
     LittleFS.remove(CONFIG_TMP_FILENAME);
     return;
@@ -531,14 +534,14 @@ void configLoadFromFile() {
   // Old configurations have no service section: keep these access paths off.
   config.service = s_cfg_service{};
   JsonDocument doc;
-  if (!loadConfigDocument(doc)) {
+  const bool loaded = loadConfigDocument(doc);
+  const int loadedVersion = loaded ? doc["version"].as<int>() : 0;
+  if (!loaded) {
     ESP_LOGE(TAG, "SETUP-MODE-REASON: Failed to read file, using default configuration");
     configInitValue();
     setupMode = true;
 
   } else {
-
-    config.version = doc["version"];
 
     config.lang = clampLanguageIndex(doc["lang"].as<long>());
 
@@ -546,7 +549,7 @@ void configLoadFromFile() {
     EspStrUtil::readJSONstring(config.wifi.ssid, sizeof(config.wifi.ssid), doc["wifi"]["ssid"]);
     EspStrUtil::readJSONstring(config.wifi.bssid, sizeof(config.wifi.bssid), doc["wifi"]["bssid"] | "");
 
-    if (config.version == 0) {
+    if (loadedVersion == 0) {
       EspStrUtil::readJSONstring(config.wifi.password, sizeof(config.wifi.password), doc["wifi"]["password"]);
     } else {
       EspStrUtil::readJSONstring(encrypted, sizeof(encrypted), doc["wifi"]["password"]);
@@ -585,7 +588,7 @@ void configLoadFromFile() {
 
     EspStrUtil::readJSONstring(config.mqtt.password, sizeof(config.mqtt.password), doc["mqtt"]["password"]);
 
-    if (config.version == 0) {
+    if (loadedVersion == 0) {
       EspStrUtil::readJSONstring(config.mqtt.password, sizeof(config.mqtt.password), doc["mqtt"]["password"]);
     } else {
       EspStrUtil::readJSONstring(encrypted, sizeof(encrypted), doc["mqtt"]["password"]);
@@ -650,7 +653,17 @@ void configLoadFromFile() {
     }
     config.jaro.masterMSB = doc["jaro"]["masterMSB"];
     config.jaro.masterLSB = doc["jaro"]["masterLSB"];
-    config.jaro.serial = doc["jaro"]["serial"];
+    const uint32_t storedSerial = doc["jaro"]["serial"];
+    // Migrate serial numbers from before the v8 format change.
+    if (loadedVersion < 8) {
+      config.jaro.serial = (storedSerial & 0x000FFFFFUL) << 4;
+      ESP_LOGI(TAG, "Base serial migrated: 0x%06lx -> 0x%06lx",
+               (unsigned long)storedSerial, (unsigned long)config.jaro.serial);
+      if (storedSerial > 0x000FFFFFUL)
+        ESP_LOGW(TAG, "Legacy base serial exceeded 0x0FFFFF. Relearning may be required if used with firmware before v2.0.0.");
+    } else {
+      config.jaro.serial = storedSerial;
+    }
     config.jaro.learn_mode = doc["jaro"]["learn_mode"];
 
     JsonArray ch_enable = doc["jaro"]["ch_enable"].as<JsonArray>();
@@ -673,7 +686,7 @@ void configLoadFromFile() {
     for (int i = 0; i < 6; i++) {
       config.jaro.grp_mask[i] = grp_mask[i];
     }
-    remoteMappingLoad(doc["remoteMappings"], config.version);
+    remoteMappingLoad(doc["remoteMappings"], loadedVersion);
 
     JsonArray timers = doc["timer"].as<JsonArray>();
     for (size_t i = 0; i < timers.size() && i < 6; i++) { // Schleife über die Timer
@@ -703,17 +716,17 @@ void configLoadFromFile() {
     setupMode = true;
   }
 
-  configHashInit(); // init hash value
-  if (configRecoveryFile != nullptr)
-    configSavePending = true;
-
-  // save config if version is different
-  if (config.version != CFG_VERSION) {
+  // From here on the in-memory serial is already in the current format.
+  // Retrying a failed save must persist it with the current version as one file.
+  config.version = CFG_VERSION;
+  configHashInit();
+  configSavePending = loadedVersion != CFG_VERSION || configRecoveryFile != nullptr;
+  if (loadedVersion != CFG_VERSION) {
     configSaveToFile();
-    if (!configSavePending)
-      ESP_LOGI(TAG, "config file was updated from version %i to version: %i", config.version, CFG_VERSION);
+    if (!configSavePending && loaded)
+      ESP_LOGI(TAG, "config file was updated from version %i to version: %i", loadedVersion, CFG_VERSION);
   } else {
-    ESP_LOGD(TAG, "config file version %i was successfully loaded", config.version);
+    ESP_LOGD(TAG, "config file version %i was successfully loaded", loadedVersion);
   }
 }
 

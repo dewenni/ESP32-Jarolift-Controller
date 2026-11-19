@@ -28,8 +28,7 @@ static auto &ota = EspSysUtil::OTA::getInstance();
 // The core otherwise confirms a pending image before setup() runs.
 extern "C" bool verifyRollbackLater() { return true; }
 
-static constexpr uint32_t OTA_VALIDATE_MIN_UPTIME = 120000;
-static constexpr uint32_t OTA_VALIDATE_MAX_UPTIME = 600000;
+static constexpr uint32_t OTA_VALIDATE_UPTIME = 30000;
 static bool otaImageValidated = false;
 
 static void handleArduinoOTA() {
@@ -61,8 +60,7 @@ static void markAppValid() {
   if (otaImageValidated || ota.isActive())
     return;
   const uint32_t uptime = millis();
-  if (uptime < OTA_VALIDATE_MAX_UPTIME &&
-      (uptime < OTA_VALIDATE_MIN_UPTIME || !(wifi.connected || eth.connected)))
+  if (uptime < OTA_VALIDATE_UPTIME)
     return;
 
   static uint32_t lastAttempt = 0;

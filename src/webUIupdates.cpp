@@ -449,9 +449,6 @@ void webUIupdates() {
       } else if (config.jaro.masterLSB == 0 || config.jaro.masterMSB == 0) {
         webUI.wsUpdateWebHideElement("errorBar", false);
         webUI.wsUpdateWebText("errorBarText", WEB_TXT::JARO_KEYS_INVALID[config.lang], false);
-      } else if (config.jaro.serial == 0) {
-        webUI.wsUpdateWebHideElement("errorBar", false);
-        webUI.wsUpdateWebText("errorBarText", WEB_TXT::SERIAL_INVALID[config.lang], false);
       } else {
         webUI.wsUpdateWebHideElement("errorBar", true);
       }

@@ -53,7 +53,7 @@ int checkJaroCmd(const char *topicCopy, const char *cmpTopic, int maxChannel) {
   if (strncmp(topicCopy, cmpTopic, cmpTopicLen) == 0) {
     const char *suffix = topicCopy + cmpTopicLen;
     char *endPtr;
-    int channel = strtol(suffix, &endPtr, 10);
+    const long channel = strtol(suffix, &endPtr, 10);
 
     if (*endPtr == '\0' && channel >= 1 && channel <= maxChannel) {
       return channel;

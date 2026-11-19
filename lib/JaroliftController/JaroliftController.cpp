@@ -49,29 +49,41 @@ void JaroliftController::setGPIO(int sck, int miso, int mosi, int cs, int gdo0, 
 
 /**
  *******************************************************************
- * @brief   set serial number (6 of 8 bytes)
+ * @brief   set the 24-bit base serial number (six hex digits)
  * @param   serial
  * @return  none
  * *******************************************************************/
 void JaroliftController::setBaseSerial(uint32_t serial) {
-  if (serial & 0xFFF00000UL)
-    ESP_LOGW(TAG, "[KQ-TX] base serial %08lx exceeds 20 bits; TX base=%05lx",
-             (unsigned long)serial, (unsigned long)(serial & 0x000FFFFFUL));
-  config_.serial = serial;
-  ESP_LOGI(TAG, "Set base serial: 0x%08lx", config_.serial);
+  if (serial > 0x00FFFFFFUL)
+    ESP_LOGW(TAG, "[KQ-TX] base serial %08lx exceeds 24 bits", (unsigned long)serial);
+  config_.serial = serial & 0x00FFFFFFUL;
+  ESP_LOGI(TAG, "Set base serial: 0x%06lx", (unsigned long)config_.serial);
 }
 
 /**
  *******************************************************************
- * @brief   get serial for given channel
- * @param   channel
- * @return  none
+ * @brief   combine the 24-bit base serial with the 4-bit channel index
+ * @param   channel index, 0 to 15
+ * @return  28-bit serial number, or UINT32_MAX for an invalid channel
  * *******************************************************************/
 uint32_t JaroliftController::getSerial(uint8_t channel) {
-  // Only 28 serial bits fit between the hopcode and function nibble.
-  uint32_t serial = ((config_.serial & 0x000FFFFFUL) << 8) | channel;
-  ESP_LOGD(TAG, "serial: 0x%08lx | channel: %d", serial, channel + 1);
+  if (channel >= 16) {
+    ESP_LOGE(TAG, "[KQ-TX] invalid channel=%lu", (unsigned long)channel);
+    return UINT32_MAX;
+  }
+  const uint32_t serial = (config_.serial << 4) | channel;
+  ESP_LOGD(TAG, "serial: 0x%07lx | channel: %lu", (unsigned long)serial, (unsigned long)(channel + 1));
   return serial;
+}
+
+bool JaroliftController::setChannelSerial(uint8_t channel) {
+  const uint32_t serial = getSerial(channel);
+  if (serial == UINT32_MAX) {
+    lastTxOK_ = false;
+    return false;
+  }
+  newSerial_ = serial;
+  return true;
 }
 
 /**
@@ -549,9 +561,8 @@ void IRAM_ATTR JaroliftController::measureRxEdge() {
  * @return  none
  * *******************************************************************/
 void JaroliftController::cmdChannel(commands cmd, uint8_t channel) {
-  if (!initOK_)
+  if (!initOK_ || !setChannelSerial(channel))
     return;
-  newSerial_ = getSerial(channel);
 
   switch (cmd) {
   case CMD_UP:
@@ -702,13 +713,8 @@ void JaroliftController::cmdGroup(commands cmd, uint16_t groupMask) {
  * @return  none
  * *******************************************************************/
 void JaroliftController::cmdLearn(uint8_t channel) {
-  if (!initOK_)
+  if (!initOK_ || !setChannelSerial(channel))
     return;
-  if (channel >= 16) {
-    ESP_LOGE(TAG, "[KQ-TX] LEARN invalid channel=%u", (unsigned int)channel);
-    return;
-  }
-  newSerial_ = getSerial(channel);
   devCount_ = getDeviceCounter();
   button_ = config_.learnMode ? 0xA : 0x1;
   discL_ = discLowArr_[channel];
@@ -760,9 +766,8 @@ void JaroliftController::cmdLearn(uint8_t channel) {
  * @return  none
  * *******************************************************************/
 void JaroliftController::cmdUnlearn(uint8_t channel) {
-  if (!initOK_)
+  if (!initOK_ || !setChannelSerial(channel))
     return;
-  newSerial_ = getSerial(channel);
   devCount_ = getDeviceCounter();
   ESP_LOGD(TAG, "unlearn | Device Counter: %d | Serial: 0x%08llx", devCount_, newSerial_);
   discL_ = discLowArr_[channel];
@@ -811,9 +816,8 @@ void JaroliftController::cmdUnlearn(uint8_t channel) {
  * @return  none
  * *******************************************************************/
 void JaroliftController::cmdSetEndPointUp(uint8_t channel) {
-  if (!initOK_)
+  if (!initOK_ || !setChannelSerial(channel))
     return;
-  newSerial_ = getSerial(channel);
   devCount_ = getDeviceCounter();
   ESP_LOGD(TAG, "set upper end point | Device Counter: %d | Serial: 0x%08llx", devCount_, newSerial_);
   discL_ = discLowArr_[channel];
@@ -861,9 +865,8 @@ void JaroliftController::cmdSetEndPointUp(uint8_t channel) {
  * @return  none
  * *******************************************************************/
 void JaroliftController::cmdDeleteEndPointUp(uint8_t channel) {
-  if (!initOK_)
+  if (!initOK_ || !setChannelSerial(channel))
     return;
-  newSerial_ = getSerial(channel);
   devCount_ = getDeviceCounter();
   ESP_LOGD(TAG, "delete upper end point | Device Counter: %d | Serial: 0x%08llx", devCount_, newSerial_);
   discL_ = discLowArr_[channel];
@@ -911,9 +914,8 @@ void JaroliftController::cmdDeleteEndPointUp(uint8_t channel) {
  * @return  none
  * *******************************************************************/
 void JaroliftController::cmdSetEndPointDown(uint8_t channel) {
-  if (!initOK_)
+  if (!initOK_ || !setChannelSerial(channel))
     return;
-  newSerial_ = getSerial(channel);
   devCount_ = getDeviceCounter();
   ESP_LOGD(TAG, "set lower end point | Device Counter: %d | Serial: 0x%08llx", devCount_, newSerial_);
   discL_ = discLowArr_[channel];
@@ -961,9 +963,8 @@ void JaroliftController::cmdSetEndPointDown(uint8_t channel) {
  * @return  none
  * *******************************************************************/
 void JaroliftController::cmdDeleteEndPointDown(uint8_t channel) {
-  if (!initOK_)
+  if (!initOK_ || !setChannelSerial(channel))
     return;
-  newSerial_ = getSerial(channel);
   devCount_ = getDeviceCounter();
   ESP_LOGD(TAG, "delete lower end point | Device Counter: %d | Serial: 0x%08llx", devCount_, newSerial_);
   discL_ = discLowArr_[channel];

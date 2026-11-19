@@ -101,7 +101,8 @@ The project home is here: [Project Home](http://www.bastelbudenbuben.de/2017/04/
   - [Setup-Mode](#setup-mode)
   - [Access and passwords](#access-and-passwords)
   - [Configuration](#configuration)
-  - [Filemanager](#filemanager)
+  - [Config Import and Export](#config-import-and-export)
+    - [Base serial migration](#base-serial-migration)
   - [Teach-in of roller shutters](#teach-in-of-roller-shutters)
   - [Migration](#migration)
 - [WebUI](#webui)
@@ -263,7 +264,9 @@ upload_flags = --auth=<service-password>
 
 ArduinoOTA does not require a username. In Setup Mode it uses the fixed password described under [Access and passwords](#access-and-passwords).
 
-Interrupted browser uploads are aborted after 60 seconds without progress, restoring the previous watchdog state. New OTA firmware is confirmed after two minutes of uptime with a network connection, or after ten minutes offline. Before confirmation, a reboot can trigger the bootloader rollback to the previous firmware.
+Interrupted browser uploads are aborted after 60 seconds without progress, restoring the previous watchdog state. The controller confirms new OTA firmware after 30 seconds of uptime, including when offline. Before confirmation, a reboot can trigger the bootloader rollback to the previous firmware.
+
+Before updating to v2.0.2 (`config.version=8`), export your `config.json`. Keep the backup for a downgrade or OTA rollback. See [Base serial migration](#base-serial-migration).
 
 ## Setup Mode
 
@@ -308,10 +311,21 @@ Changes are saved automatically. **GPIO and JAROLIFT protocol changes require a 
 
 ## Config Import and Export
 
-there is also a builtin file manager to open (show), download (export) and upload (import) the configuration file.
-The configuration is stored in the ```config.json``` file. To backup and restore the configuration you can download and upload this file.
+Use **Tools → Configuration file** to view, export or import `config.json`. Restart the controller after importing a backup so the restored JAROLIFT settings take effect.
 
 <img style="width: 500px;" src="./Doc/webUI_tools.png">
+
+### Base serial migration
+
+The base serial in the WebUI is the starting value for the radio serial the controller transmits. To form the 28-bit radio serial, the firmware shifts the six-digit hexadecimal base serial to the left and appends the channel index. The planned v2.0.2 release (`config.version=8`) reduces this internal shift from 8 to 4 bits. Four bits are enough for the 16 channel indices.
+
+To compensate for the new shift, the firmware automatically converts the stored base serial once per configuration with `config.version<8`, both on update and when importing an older backup. For example, under **Settings → Device → JAROLIFT**, `012345` becomes `123450`. The first channel (index `0`) has the same radio serial `1234500` before and after the update.
+
+The radio identity of all 16 channels is preserved for installations on v2.0.0 or v2.0.1 and for installations before v2.0.0 with a base serial of `0FFFFF` or less. Motors paired on these installations need no new teach-in.
+
+If an installation predates v2.0.0 and used a base serial above `0FFFFF`, some motors may require a new teach-in because the old firmware could generate different keys or incorrect commands. The warning is based on the stored base serial alone, so it also appears when migrating a base serial above that limit from v2.0.0 or v2.0.1.
+
+**Downgrade or OTA rollback.** If you return from v2.0.2 (`config.version=8`) to an older release, wait for the older firmware to start, restore the pre-update `config.json` and restart before operating the shutters. Keep the current transmitter device counter, which is stored separately in flash. For a planned downgrade, record the counter just before switching firmware and verify it after restoring the configuration.
 
 ## Teach-in of roller shutters
 

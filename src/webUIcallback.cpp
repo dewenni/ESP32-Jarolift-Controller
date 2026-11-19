@@ -266,7 +266,15 @@ void webCallback(const char *elementId, const char *value) {
     jaroCmdReInit();
   }
   if (strcmp(elementId, "cfg_jaro_serial") == 0) {
-    config.jaro.serial = strtoul(value, NULL, 16);
+    const size_t digits = strspn(value, "0123456789abcdefABCDEF");
+    if (digits == 0 || digits > 6 || value[digits] != '\0') {
+      char serial[7];
+      snprintf(serial, sizeof(serial), "%06lx", (unsigned long)(config.jaro.serial & 0x00FFFFFFUL));
+      webUI.wsUpdateWebText(elementId, serial, true);
+      webUI.wsShowInfoMsg(WEB_TXT::SERIAL_INVALID[config.lang]);
+      return;
+    }
+    config.jaro.serial = strtoul(value, nullptr, 16);
     jaroCmdReInit();
   }
   if (strcmp(elementId, "cfg_jaro_learn_mode") == 0) {
@@ -471,7 +479,13 @@ void webCallback(const char *elementId, const char *value) {
 
   // Shutter Service commands
   if (strcmp(elementId, "p04_selected_shutter") == 0) {
-    srvShutter = atoi(value);
+    char *end;
+    const long channel = strtol(value, &end, 10);
+    if (value[0] < '0' || value[0] > '9' || *end != '\0' || channel >= 16) {
+      webUI.wsUpdateWebText(elementId, static_cast<long>(srvShutter), true);
+      return;
+    }
+    srvShutter = static_cast<uint8_t>(channel);
     ESP_LOGD(TAG, "selected service shutter: %i", srvShutter);
   }
   if (strcmp(elementId, "p04_up") == 0) {
