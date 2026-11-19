@@ -15,9 +15,11 @@
  * V2: Added min/max times for timers.
  * V3: Added homee integration enable flag.
  * V4: Added homee 3rd position (generic node profile) toggle.
+ * V5: optional calibrated shutter positioning. Older files default to disabled.
+ * V6: exact remote signals.
+ * V7: learned source bits and automatic groups.
  */
-// V5: optional calibrated shutter positioning. Older files default to disabled.
-// V6: exact remote signals. V7: learned source bits and automatic groups.
+
 const int CFG_VERSION = 7;
 
 char filename[24] = {"/config.json"};
@@ -247,7 +249,8 @@ void configHashInit() {
  * @return  none
  * *******************************************************************/
 void configCyclic() {
-  if (shutterPositionBusy()) return; // Flash writes must not delay timed STOP commands.
+  if (shutterPositionBusy())
+    return; // Flash writes must not delay timed STOP commands.
 
   if (checkTimer.cycleTrigger(1000) && configInitDone) {
     unsigned long hashNew = EspStrUtil::hash(&config, sizeof(s_config));
@@ -315,7 +318,8 @@ void configInitValue() {
  * *******************************************************************/
 void configSaveToFile() {
   configSavePending = true;
-  if (shutterPositionBusy()) return;
+  if (shutterPositionBusy())
+    return;
   // Do not truncate the only surviving copy if recovery could not be committed.
   if (configRecoveryFile != nullptr) {
     if (!LittleFS.rename(configRecoveryFile, filename)) {
@@ -419,8 +423,10 @@ void configSaveToFile() {
   JsonArray calibration = doc["position"]["calibration"].to<JsonArray>();
   for (const auto &c : config.position.calibration) {
     JsonArray times = calibration.add<JsonArray>();
-    for (auto t : c.up) times.add(t);
-    for (auto t : c.down) times.add(t);
+    for (auto t : c.up)
+      times.add(t);
+    for (auto t : c.down)
+      times.add(t);
   }
   doc["jaro"]["masterMSB"] = config.jaro.masterMSB;
   doc["jaro"]["masterLSB"] = config.jaro.masterLSB;
@@ -616,8 +622,7 @@ void configLoadFromFile() {
 
     config.service.telnet_enable = doc["service"]["telnet_enable"] | false;
     const char *serviceCipher = doc["service"]["password"] | "";
-    if (serviceCipher[0] != '\0' &&
-        !EspStrUtil::decryptPassword(serviceCipher, key, config.service.password, sizeof(config.service.password))) {
+    if (serviceCipher[0] != '\0' && !EspStrUtil::decryptPassword(serviceCipher, key, config.service.password, sizeof(config.service.password))) {
       config.service.password[0] = '\0';
       ESP_LOGE(TAG, "Cannot decrypt service password; service access disabled");
     }
@@ -634,13 +639,14 @@ void configLoadFromFile() {
 
     config.position = s_cfg_position{};
     config.position.enable = doc["position"]["enable"] | false;
-    for (uint8_t i=0; i<16; ++i) {
+    for (uint8_t i = 0; i < 16; ++i) {
       auto &c = config.position.calibration[i];
-      for (uint8_t j=0; j<3; ++j) {
+      for (uint8_t j = 0; j < 3; ++j) {
         c.up[j] = doc["position"]["calibration"][i][j] | uint32_t(0);
-        c.down[j] = doc["position"]["calibration"][i][j+3] | uint32_t(0);
+        c.down[j] = doc["position"]["calibration"][i][j + 3] | uint32_t(0);
       }
-      if (!c.valid()) c = PositionCalibration{};
+      if (!c.valid())
+        c = PositionCalibration{};
     }
     config.jaro.masterMSB = doc["jaro"]["masterMSB"];
     config.jaro.masterLSB = doc["jaro"]["masterLSB"];
@@ -667,7 +673,7 @@ void configLoadFromFile() {
     for (int i = 0; i < 6; i++) {
       config.jaro.grp_mask[i] = grp_mask[i];
     }
-    remoteMappingLoad(doc["remoteMappings"],config.version);
+    remoteMappingLoad(doc["remoteMappings"], config.version);
 
     JsonArray timers = doc["timer"].as<JsonArray>();
     for (size_t i = 0; i < timers.size() && i < 6; i++) { // Schleife über die Timer
