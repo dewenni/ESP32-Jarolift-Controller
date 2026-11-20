@@ -353,38 +353,29 @@ Wenn der Rolladen erfolgreich eingelernt wurde, vibriert der Motor erneut.
 
 ## Migration
 
-Es ist möglich, von einer aktuellen Version von [madmartin/Jarolift_MQTT](https://github.com/madmartin/Jarolift_MQTT) zu diesem Projekt zu migrieren.
+Diese Anleitung gilt für ESP32-Firmware ab v2.0.2. Um die angelernten Motoren weiterzuverwenden, die Sendereinstellungen von [madmartin/Jarolift_MQTT](https://github.com/madmartin/Jarolift_MQTT) übernehmen.
 
 ### Ein funktionierendes Setup für dieses Projekt herstellen
 
-- eine funktionierende Version dieses Projekts zum Laufen zu bringen
-- die richtigen GPIO-Einstellungen für den CC1101 setzen
-- die Master Keys setzen
-- den Log-Level im Logger der WebUI auf „Debug“ setzen
+Bei einem OTA-Update einer bestehenden ESP32-Installation vor dem Neustart die Firmwarebestätigung abwarten. Siehe [OTA-Updates](#ota-updates).
+
+Den ESP32 mit den zur CC1101-Verdrahtung passenden GPIO-Einstellungen einrichten und nach GPIO-Änderungen neu starten. Unter **Einstellungen → Gerät → JAROLIFT** die Masterkeys des alten Controllers eintragen.
 
 ### Die richtige Seriennummer ermitteln
 
-- Führe einen Shutter HOCH Befehl des „alten“ Setups `(madmartin/Jarolift_MQTT)` für **Kanal 0!** aus.
-- Du solltest nun eine Debug-Meldung dieses Befehls im Logger der WebUI sehen.  
-Sie enthält eine Meldung mit   `I (220364) JARO: received remote signal | serial: 0c7c00 | ch: 3 | cmd: 0x8, | rssi: -96 dbm` 
-Dies sollte die gleiche Seriennummer sein, die in der WebUI des „alten“ Setups konfiguriert wurde, aber jetzt sind wir sicher, dass wir die richtige haben.
-- Setze diese Seriennummer in der WebUI dieses Projekts in den Einstellungen.
+Nach dem Update die auf dem **alten Jarolift_MQTT-Controller** eingestellte Basisseriennummer am ESP32 unter **Einstellungen → Gerät → JAROLIFT** manuell eintragen. Bis zu sechs Hex-Ziffern ohne `0x` verwenden, zum Beispiel `12DEAF`. Die automatische Umrechnung beim Update erhält die zuvor vom ESP32 verwendeten Funkseriennummern. Die Übernahme der Jarolift_MQTT-Funkidentität erfordert diesen manuellen Schritt. Siehe [Migration der Basisseriennummer](#migration-der-basisseriennummer).
 
+Falls sich die alte Basisseriennummer nicht ablesen lässt, am alten Controller einen einzelnen AUF-Befehl für **Kanal 0** auslösen und die vollständige Funkseriennummer im Logbuch des ESP32 ablesen. `0x` und die letzte Hex-Ziffer entfernen (bei Kanal 0 die `0`). Dann die führenden Nullen so anpassen, dass sechs Hex-Ziffern übrig bleiben. Bei der empfangenen Seriennummer `0x012DEAF0` lautet die einzutragende Basisseriennummer `12DEAF`.
 
 ### Den richtigen Gerätezähler finden
 
-- den aktuellen Gerätezähler der „alten“ Konfiguration auf der System-Seite der WebUI ablesen.
-- den gleichen Wert für den Gerätezähler in den Einstellungen dieses Projekts einstellen.
-
+Nach dem letzten Befehl des alten Controllers dessen aktuellen Gerätezähler auf der **System**-Seite seiner WebUI ablesen. Anschließend den alten Controller ausschalten, damit nur der ESP32 mit dieser Funkidentität sendet. Den abgelesenen Wert unverändert unter **Einstellungen → Gerät → JAROLIFT → Device Counter** eintragen.
 
 ### Die Rollläden definieren
 
-- Definiere die gleichen Rolläden in der gleichen Reihenfolge wie in der „alten“ Einstellung und aktiviere diese.
+Die Rollläden in derselben Kanalreihenfolge einrichten und aktivieren. Der alte Kanal `0` entspricht Kanal `1` in der ESP32-WebUI, der alte Kanal `15` entspricht Kanal `16`.
 
-fertig!  
-Starte nun den ESP neu und teste.  
-Prüfe nach dem Neustart zunächst, ob der Gerätezähler korrekt aus dem EEPROM gelesen wurde. Nur wenn dies der Fall ist, fahre mit dem Test fort.
-Wenn alles richtig gemacht wurde, sollten alle Rollläden wie vorher funktionieren. Wenn nicht, ist eine Einstellung falsch oder du hast zuletzt nicht die neueste Version von `(madmartin/Jarolift_MQTT)` verwendet. In diesem Fall würde ich es vorziehen, eine neue Seriennummer zu setzen, den Gerätezähler zurückzusetzen und die Rolläden neu einzulernen.
+Den ESP32 neu starten und im Logbuch prüfen, ob der übernommene Gerätezähler aus dem Flash geladen wurde. Dann einen bereits angelernten Rollladen mit einem Einzelbefehl testen. Falls er nicht reagiert, die Funkseriennummer für diesen Kanal, die Masterkeys und den übernommenen Zähler prüfen.
 
 -----
 

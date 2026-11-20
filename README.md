@@ -354,36 +354,29 @@ If the roller shutter has been successfully learnt, the motor will vibrate again
 
 ## Migration
 
-It is possible to migrate from a latest version of [madmartin/Jarolift_MQTT](https://github.com/madmartin/Jarolift_MQTT) to this project.
+These instructions apply to ESP32 firmware v2.0.2 or later. To keep the existing motor pairings, transfer the transmitter settings from [madmartin/Jarolift_MQTT](https://github.com/madmartin/Jarolift_MQTT).
 
 ### Get a working Setup of this Project
 
-- get a working version of this project up and running
-- set the right GPIO settings for CC1101
-- set the Master Keys
-- set the Log-Level in the Logger of the WebUI to "Debug"
+If you update an existing ESP32 installation via OTA, wait for firmware confirmation before restarting. See [OTA-Updates](#ota-updates).
+
+Set up the ESP32 with the GPIO assignments for its CC1101 wiring. Restart the ESP32 after any GPIO changes. Under **Settings → Device → JAROLIFT**, enter the same master keys as on the old controller.
 
 ### Get the right serial number
 
-- execute a shutter UP command of "old" Setup `(madmartin/Jarolift_MQTT)` for **channel 0!**.
-- now you should see a debug message of this command in the Logger of the WebUI.  
-It contains a message with `I (220364) JARO: received remote signal | serial: 0c7c00 | ch: 3 | cmd: 0x8, | rssi: -96 dbm` 
-This **serial** number should be the same as configured in the WebUI of the "old" setup, but now we are sure to have the right one.
-- set this serial in the WebUI of this project
+After updating, manually enter the base serial configured on the **old Jarolift_MQTT controller** under **Settings → Device → JAROLIFT** on the ESP32. Use up to six hex digits without `0x`, for example `12DEAF`. The automatic conversion on update preserves the radio serials already used by the ESP32. Transferring the Jarolift_MQTT radio identity requires this manual step. See [Base serial migration](#base-serial-migration).
+
+If you cannot read the old base serial, send an individual UP command on **channel 0** from the old controller and read its full radio serial in the ESP32 Logger. Remove `0x` and the last hex digit (the `0` for channel 0), then adjust the leading zeros to get six hex digits. For a received serial of `0x012DEAF0`, enter `12DEAF` as the base serial.
 
 ### Get the right Device Counter
 
-- read the actual device counter of the "old" setup from the System Page of the WebUI.
-- set the same Device Counter value in the settings of this project.
+After the last command from the old controller, read its current device counter on its WebUI **System** page. Then switch off the old controller so only the ESP32 sends commands with that radio identity. Copy the exact counter value to **Settings → Device → JAROLIFT → Device Counter**.
 
 ### define the Shutter
 
-- define the same shutter as in the "old" setup and activate them.
+Set up and enable the shutters in the same channel order. Old channel `0` corresponds to channel `1` in the ESP32 WebUI, up to old channel `15` on ESP32 channel `16`.
 
-finished!  
-now restart the ESP and test it.  
-After restarting, first check whether the device counter has been read correctly from the EEPROM. Only continue testing if this is the case.
-If everything done correct, all shutters should work like before. If not, some setting is wrong or you haven´t used the latest version of `(madmartin/Jarolift_MQTT)`. In that case I would prefer to set a new Serial number, reset the Device Counter und learn the shutter again.
+Restart the ESP32 and check in the Logger that it loaded the transferred device counter from flash. Then test one previously paired shutter with an individual command. If it does not respond, verify the radio serial for that channel, the master keys and the transferred counter before proceeding.
 
 -----
 
