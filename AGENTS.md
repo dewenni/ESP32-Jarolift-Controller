@@ -24,10 +24,10 @@ Repositories ebenfalls zu ändern. Den Umfang aus dem aktuellen Auftrag ableiten
 ## Modellauswahl und Reasoning-Aufwand
 
 - Die folgenden Aufgaben verbindlich an Subagenten delegieren; der Hauptagent übernimmt die Koordination und Ergebnisprüfung.
-- Für komplexe Programmierung **GPT Sol (`gpt-6.x-sol`) mit `reasoning_effort=medium`**
+- Für komplexe Programmierung **GPT Sol mit `reasoning_effort=medium`**
   verwenden. Dazu gehören Architekturentscheidungen, anspruchsvolle Fehleranalyse,
   Firmware- und Protokolländerungen sowie Änderungen an zeitkritischen Abläufen.
-- Für einfache organisatorische und redaktionelle Aufgaben **Luna (`gpt-6-luna`)
+- Für einfache organisatorische und redaktionelle Aufgaben **Luna
   mit `reasoning_effort=high`** verwenden. Dazu gehören Builds, bestehende Tests
   ausführen, Commit, Merge, Push, GitHub-Verwaltung, Dokumentation sowie Texte
   lesen und schreiben.
