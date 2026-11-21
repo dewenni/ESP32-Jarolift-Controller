@@ -38,7 +38,7 @@ Individual scripts can also be run with `python3 tests/test_….py` or
 | Test | Purpose |
 | --- | --- |
 | `test_position_model.cpp` | Direction-specific timing curves, slat times, reference direction, direct travel between known positions, reserve, reversal pause, STOP timing, endpoints and timer rollover. |
-| `test_shutter_position.py` | Actual position controller: 16-entry FIFO/replacement, queue cancellation/revalidation, target validation, reference/direct movement sequence, unknown-start rejection, same-target no-op, shared status, manual/remote cancellation, calibration ownership/timeout/apply, OTA and invalidation. |
+| `test_shutter_position.py` | Actual position controller with a blocking 340 ms radio simulation: 200 ms collection, grouped reference/endpoint starts, 16 active and 16 waiting targets/replacement, overlapping direct runs, grouped STOPs including the exact 1000/1001 ms boundary and opposite directions, timing within 1 s under simulated load, STOP priority, six short direct runs without an artificial four-channel stall, replanning after a short newcomer, short moves, same-channel follow-ups, queue revalidation, unknown-start rejection, no-op, manual/remote cancellation, calibration ownership/timeout/apply, send failures, OTA and timer rollover. |
 | `test_mqtt_position.py` | Actual MQTT routing and discovery: 0/100 scale, conditional percentage control, stable entity identity, legacy commands, reconnect and maximum field lengths. |
 | `test_remote_mapping.py` | Actual mapping code: two-press registration, single/group source matching, shared targets, per-motor removal, Unicode, limits, persistence and migration. |
 | `test_serial_migration.py` | Configuration v8 migration through the load path used at boot and for imports, fresh defaults, repeat loads, save failures, recovery and reference-setting persistence. Also checks which base serial inputs the WebUI formats and which the WebSocket accepts. |
@@ -46,7 +46,7 @@ Individual scripts can also be run with `python3 tests/test_….py` or
 | `test_rx_glitch.py` | Actual edge-capture methods: short HIGH/LOW disturbances, false sync, stale HIGH invalidation, frozen buffers, timer rollover and deterministic noise. |
 | `test_rx_decode.py` | Actual capture/decoder/KeeLoq methods: all 16 channels, groups, commands, terminal HIGH handling, truncated frames and discriminator mismatch. |
 | `test_ota_validation.py` | `markAppValid` from `src/main.cpp` with a fake clock and OTA API. Checks offline confirmation at 30 seconds, deferral during active OTA, 10-second retries and no repeat after success. |
-| `test_position_ui.cjs` | Actual frontend logic: feature/calibration visibility, slider without immediate transmission, explicit execute, calibration steps, apply/cancel, queued target display/replacement and per-channel busy state. |
+| `test_position_ui.cjs` | Actual frontend logic: feature/calibration visibility, slider without immediate transmission, explicit execute, calibration steps, apply/cancel, queued target display/replacement, multiple independent active phases and per-channel busy state. |
 | `test_remote_mapping_ui.cjs` | Actual frontend logic: selected motor, confirmation before save, Unicode limit, removal, session ownership and cleanup after disconnect. |
 
 The position-model check is compiled by the suite runner. RF tests extract the
@@ -64,7 +64,7 @@ The RF checks do not measure RF range, ESP interrupt latency or CC1101 registers
 on hardware. The configuration checks simulate filesystem operations and cannot
 verify power-loss behavior on an ESP. The MQTT checks do not run a broker or a
 real Home Assistant instance. The OTA check simulates calls to the ESP OTA API.
-Actual image confirmation and rollback depend on the bootloader and require a
+The position test simulates fixed successful transmit timing; it cannot establish a hardware STOP latency bound, NVS worst-case timing or reliable motor reception of group commands. Actual image confirmation and rollback depend on the bootloader and require a
 device test. Changes still need an appropriate firmware build and targeted
 device tests for calibration, motor movement, radio and OTA where affected.
 

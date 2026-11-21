@@ -36,6 +36,7 @@ void jaroCmd(JaroCmdGrpType type, uint16_t group_mask);
 void jaroCmd(JaroCmdSrvType type, uint8_t channel);
 // Immediate, loop-task-only sends for the timed position controller.
 bool jaroPositionSend(uint8_t channel, JaroCmdType type);
+bool jaroPositionGroupSend(uint16_t mask, JaroCmdType type);
 uint32_t jaroPositionSentAt();
 bool jaroCommandsPending();
 

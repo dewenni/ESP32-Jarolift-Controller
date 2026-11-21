@@ -22,15 +22,15 @@ const context=vm.createContext({console,crypto:require('crypto').webcrypto,ws:{r
 vm.runInContext(fs.readFileSync(path.join(root,'web/js/lang.js'),'utf8'),context);
 vm.runInContext(fs.readFileSync(path.join(root,'web/js/position.js'),'utf8'),context);
 docEvents.DOMContentLoaded();winEvents['webui:connected']();assert(sent.at(-1).a==='status');
-let snapshot={enabled:true,notice:'',channels:Array.from({length:16},()=>[false,-1]),moving:-1,phase:0,target:25,cal:{phase:0,channel:0,mark:0,token:0,elapsed:0,times:[2400,15800,28600,12200,26400,29800]}};
+let snapshot={enabled:true,notice:'',channels:Array.from({length:16},()=>[false,-1]),moves:[],cal:{phase:0,channel:0,mark:0,token:0,elapsed:0,times:[2400,15800,28600,12200,26400,29800]}};
 const update=()=>winEvents['webui:message']({detail:{type:'shutterPosition',...snapshot}});
 update();const box=nodes.get('p01_jaro_ch_name_0').parentElement.children.at(-1);assert(!box.hidden && box.children.find(n=>n.type==='range').hidden);assert(box.children.find(n=>n.className==='position-actions').hidden);assert(box.children.find(n=>n.className==='position-label').hidden);assert(!box.children.at(-1).hidden && box.children.at(-1).textContent==='Zur Kalibrierung');
 snapshot.channels[0]=[true,-1];update();assert(!box.children.find(n=>n.type==='range').hidden);assert(!box.children.find(n=>n.className==='position-actions').hidden);assert(box.children.at(-1).hidden);
 const status=box.children.find(n=>n.className==='position-channel-status');
 assert(!status.hidden);assert(status.children[0].children[1].textContent==='Position unbekannt');
 snapshot.channels[0]=[true,45];update();assert(status.children[0].children[1].textContent==='45 %');
-snapshot.moving=0;snapshot.phase=1;snapshot.remaining=32;update();assert(status.children[0].children[1].textContent.endsWith('32 s'));snapshot.remaining=31;update();assert(status.children[0].children[1].textContent.endsWith('31 s'));assert(status.children[1].children[1].hidden);assert(status.children[0].children[1].textContent.includes('Referenzfahrt'));
-snapshot.moving=-1;snapshot.channels[0]=[false,-1];update();assert(status.hidden);
+snapshot.moves=[[0,1,25,32]];update();assert(status.children[0].children[1].textContent.endsWith('32 s'));snapshot.moves[0][3]=31;update();assert(status.children[0].children[1].textContent.endsWith('31 s'));assert(status.children[1].children[1].hidden);assert(status.children[0].children[1].textContent.includes('Referenzfahrt'));
+snapshot.moves=[];snapshot.channels[0]=[false,-1];update();assert(status.hidden);
 snapshot.channels[0]=[true,45];snapshot.enabled=false;update();assert(status.hidden);
 snapshot.enabled=true;update();assert(!status.hidden);
 const targetButton=box.children.find(n=>n.className==='position-actions').children[1];assert(targetButton['aria-label']);
@@ -44,7 +44,7 @@ for(const phase of [2,4])for(let mark=0;mark<3;mark++){
  nodes.get('p04_position_next').click();assert(sent.at(-1).a==='mark');
 }
 snapshot.cal.phase=5;update();nodes.get('p04_position_next').click();assert(sent.at(-1).a==='save');snapshot.cal.phase=0;snapshot.notice='saved';update();assert(!nodes.get('p04_position_dialog').open);assert(nodes.get('p04_position_notice').textContent==='Kalibrierung übernommen.');
-snapshot.moving=0;snapshot.phase=1;update();assert(targetButton.disabled && nodes.get('p04_position_begin').disabled);
+snapshot.moves=[[0,1,25,32]];update();assert(targetButton.disabled && nodes.get('p04_position_begin').disabled);
 // Another calibrated channel stays usable; pending targets show order and can be replaced.
 snapshot.channels[1]=[true,30];snapshot.queue=[[1,65]];update();
 const second=nodes.get('p01_jaro_ch_name_1').parentElement.children.at(-1);
@@ -59,9 +59,15 @@ update();assert(secondSlider.value==='70'); // An unchanged snapshot does not ov
 snapshot.queue=[[1,70]];update();assert(secondButton.title.includes('70 %'));
 nodes.get('cfg_lang').value='1';update();assert(second.children.find(n=>n.className==='position-label').textContent==='Target · queued');assert(secondButton.title.includes('Place 1'));nodes.get('cfg_lang').value='0';update();
 snapshot.cal.phase=1;update();assert(secondButton.disabled);snapshot.cal.phase=0;
-snapshot.moving=1;snapshot.queue=[];update();assert(secondButton.disabled && waitingLabel.hidden);
-snapshot.moving=-1;update();assert(!secondButton.disabled && waitingLabel.hidden && secondButton['aria-busy']==='false' && secondButton.textContent==='▶');
-snapshot.moving=-1;update();nodes.get('p04_service_setup').clientWidth=400;nodes.get('p04_position_begin').click();assert(!nodes.get('p04_position_intro').hidden);nodes.get('p04_position_cancel').click();assert(sent.at(-1).a==='cancel' && !nodes.get('p04_position_dialog').open);
+snapshot.moves=[[1,3,70,0]];snapshot.queue=[];update();assert(secondButton.disabled && waitingLabel.hidden);
+// Multiple active rows retain their own phase/target and leave other channels usable.
+snapshot.moves=[[0,1,25,12],[1,3,70,0]];update();
+assert(targetButton.disabled && secondButton.disabled && nodes.get('p04_position_begin').disabled);
+assert(status.children[0].children[1].textContent.includes('12 s'));
+assert(second.children.find(n=>n.className==='position-channel-status').children[0].children[1].textContent.includes('70 %'));
+
+snapshot.moves=[];update();assert(!secondButton.disabled && waitingLabel.hidden && secondButton['aria-busy']==='false' && secondButton.textContent==='▶');
+snapshot.moves=[];update();nodes.get('p04_service_setup').clientWidth=400;nodes.get('p04_position_begin').click();assert(!nodes.get('p04_position_intro').hidden);nodes.get('p04_position_cancel').click();assert(sent.at(-1).a==='cancel' && !nodes.get('p04_position_dialog').open);
 snapshot.enabled=false;update();assert(box.hidden && box.children.at(-1).hidden);
 snapshot.channels[0]=[false,-1];update();assert(box.hidden && box.children.at(-1).hidden);
 

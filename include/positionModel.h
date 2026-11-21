@@ -39,6 +39,7 @@ public:
   bool opening = false;
   bool targetUp() const { return opening; }
   bool active() const { return phase != Idle; }
+  uint32_t stopSendAt() const { return since + (duration > 110 ? duration - 110 : 0); }
   void begin(uint8_t ch, uint8_t goal, const PositionCalibration &cal, uint32_t sentAt) {
     channel = ch; target = goal; since = sentAt; opening = !referenceUp();
     duration = cal.referenceTime(referenceUp()); phase = Reference;
