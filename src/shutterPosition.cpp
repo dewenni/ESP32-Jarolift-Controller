@@ -8,14 +8,19 @@
 #include <webUI.h>
 
 namespace {
-PositionMove move;
+PositionMove moves[16];
+constexpr uint32_t COLLECT_MS = 200;
+constexpr uint32_t STOP_WINDOW_MS = 1000;
+// Two ~101 ms telegrams, pauses, NVS and its 100 ms delay, plus margin.
+constexpr uint32_t SEND_BUDGET_MS = 450;
+uint32_t collectedAt = 0;
 // At most one waiting target per channel; fixed storage, no heap allocation.
 struct Target { uint8_t channel, goal; } targets[16];
 uint8_t targetCount = 0;
 void clearTargets() { targetCount = 0; }
-Target popTarget() {
-  const Target next = targets[0];
-  for (uint8_t i=1; i<targetCount; ++i) targets[i-1] = targets[i];
+Target popTarget(uint8_t index) {
+  const Target next = targets[index];
+  for (uint8_t i=index+1; i<targetCount; ++i) targets[i-1] = targets[i];
   --targetCount;
   return next;
 }
@@ -49,12 +54,15 @@ void status() {
     JsonArray row = channels.add<JsonArray>();
     row.add(config.position.calibration[i].valid()); row.add(positions[i]);
   }
-  doc["moving"] = move.active() ? int(move.channel) : -1;
-  doc["phase"] = int(move.phase);
-  doc["target"] = move.target;
-  const uint32_t elapsed = millis() - move.since;
-  doc["remaining"] = move.phase == PositionMove::Reference && elapsed < move.duration
-      ? (move.duration - elapsed + 999) / 1000 : 0;
+  JsonArray active = doc["moves"].to<JsonArray>();
+  const uint32_t now = millis();
+  for (const auto &move : moves) if (move.active()) {
+    JsonArray row = active.add<JsonArray>();
+    row.add(move.channel); row.add(int(move.phase)); row.add(move.target);
+    const uint32_t elapsed = now - move.since;
+    row.add(move.phase == PositionMove::Reference && elapsed < move.duration
+        ? (move.duration - elapsed + 999) / 1000 : 0);
+  }
   JsonArray waiting = doc["queue"].to<JsonArray>();
   for (uint8_t i=0; i<targetCount; ++i) {
     JsonArray entry = waiting.add<JsonArray>();
@@ -72,11 +80,12 @@ void status() {
 }
 void cancel(bool stopMotor) {
   clearTargets();
-  if (move.active()) {
-    const uint8_t ch = move.channel;
-    move.cancel(); setPosition(ch,-1);
-    if (stopMotor) jaroPositionSend(ch, CMD_STOP);
+  uint16_t mask = 0;
+  for (auto &move : moves) if (move.active()) {
+    mask |= uint16_t(1) << move.channel;
+    setPosition(move.channel,-1); move.cancel();
   }
+  if (stopMotor && mask) jaroPositionGroupSend(mask,CMD_STOP);
   if (cal.phase) {
     const uint8_t ch=cal.channel; const bool moving=cal.phase==2 || cal.phase==4;
     cal.phase=0; setPosition(ch,-1);
@@ -89,35 +98,95 @@ bool available(uint8_t ch) {
   return ch<16 && config.position.enable && config.jaro.ch_enable[ch] && !setupMode &&
          !EspSysUtil::OTA::getInstance().isActive();
 }
-bool startTarget(uint8_t ch, uint8_t goal) {
-  const int8_t current=positions[ch];
-  const bool direct=!config.position.reference && goal>0 && goal<100;
-  if(direct && current<0) {notice="position_unknown";dirty=true;return false;}
-  notice="";
-  if(direct && current==goal) {dirty=true;return true;}
-  travel[ch].duration=0;setPosition(ch,-1);
-  if(!send(ch,direct ? goal>current : goal>=50)) {failure("send_failed");return false;}
-  if(goal==0 || goal==100) {
-    // End stops are handled by the motor. Estimate completion without owning the FIFO.
-    shutterPositionCommand(uint16_t(1)<<ch,goal==100?CMD_UP:CMD_DOWN);
-  } else if(direct) {
-    move.beginDirect(ch,goal,current,config.position.calibration[ch],jaroPositionSentAt());
-  } else {
-    move.begin(ch,goal,config.position.calibration[ch],jaroPositionSentAt());
+// All deadlines are less than 2^31 ms away, including across millis() rollover.
+struct StopGroup { uint16_t mask = 0; uint32_t earliest = 0, at = 0; };
+StopGroup nextStop(uint32_t now) {
+  StopGroup group;
+  for (const auto &move : moves) if (move.phase == PositionMove::Target) {
+    const uint32_t at = move.stopSendAt();
+    if (!group.mask || int32_t(at-now) < int32_t(group.earliest-now)) {
+      group.mask = uint16_t(1) << move.channel; group.earliest = at;
+    }
   }
-  dirty=true;
-  return true;
+  if (!group.mask) return group;
+  uint32_t span = 0;
+  for (const auto &move : moves) if (move.phase == PositionMove::Target) {
+    const uint32_t offset = move.stopSendAt() - group.earliest;
+    if (offset <= STOP_WINDOW_MS) {
+      group.mask |= uint16_t(1) << move.channel;
+      if (offset > span) span = offset;
+    }
+  }
+  // Replanning cannot postpone the earliest member by more than half the window.
+  group.at = group.earliest + span/2;
+  return group;
+}
+bool canStart(const StopGroup &group, uint32_t now) {
+  // Reserve one complete send before the planned group STOP. Reserving another
+  // half-window before the earliest individual STOP needlessly stalls starts.
+  // Replan after every send; a new short move can then be stopped immediately.
+  return !group.mask || int32_t(group.at-now) > int32_t(SEND_BUDGET_MS);
+}
+void startPending() {
+  // One radio operation per cyclic call; STOP is reconsidered before the next send.
+  if (!targetCount || millis()-collectedAt < COLLECT_MS) return;
+  for (uint8_t i=0; i<targetCount;) {
+    const auto next = targets[i];
+    if (moves[next.channel].active()) {++i;continue;}
+    if (!available(next.channel) || !shutterPositionReady(next.channel)) {
+      popTarget(i); notice="unavailable"; dirty=true; continue;
+    }
+    const uint8_t ch=next.channel, goal=next.goal;
+    if (!config.position.reference && goal>0 && goal<100) {
+      const int8_t current=positions[ch];
+      if (current<0) {popTarget(i);notice="position_unknown";dirty=true;continue;}
+      if (current==goal) {popTarget(i);dirty=true;continue;}
+      popTarget(i);travel[ch].duration=0;setPosition(ch,-1);
+      if (!send(ch,goal>current)) {failure("send_failed");return;}
+      moves[ch].beginDirect(ch,goal,current,config.position.calibration[ch],jaroPositionSentAt());
+    } else {
+      // Reference starts and endpoints share one telegram per direction.
+      const bool up=goal>=50;
+      uint16_t mask=0;
+      for (uint8_t j=i; j<targetCount; ++j) {
+        const auto &t=targets[j];
+        if (!moves[t.channel].active() && available(t.channel) && shutterPositionReady(t.channel) &&
+            (config.position.reference || t.goal==0 || t.goal==100) && (t.goal>=50)==up)
+          mask |= uint16_t(1)<<t.channel;
+      }
+      for (uint8_t channel=0; channel<16; ++channel) if (mask & (uint16_t(1)<<channel)) {
+        travel[channel].duration=0;setPosition(channel,-1);
+      }
+      if (!jaroPositionGroupSend(mask,up?CMD_UP:CMD_DOWN)) {failure("send_failed");return;}
+      const uint32_t sentAt=jaroPositionSentAt();
+      for (uint8_t j=0; j<targetCount;) {
+        const auto t=targets[j];
+        if (!(mask & (uint16_t(1)<<t.channel))) {++j;continue;}
+        popTarget(j);travel[t.channel].duration=0;setPosition(t.channel,-1);
+        if (t.goal==0 || t.goal==100) {
+          // The motor handles the endpoint; do not keep an automatic STOP owner.
+          auto &estimate=travel[t.channel];
+          estimate.since=sentAt;estimate.target=t.goal;
+          estimate.duration=config.position.calibration[t.channel].referenceTime(up);
+        } else moves[t.channel].begin(t.channel,t.goal,config.position.calibration[t.channel],sentAt);
+      }
+    }
+    notice="";dirty=true;return;
+  }
 }
 bool requestTarget(uint8_t ch, uint8_t goal) {
   dirty=true;
   if(!available(ch)) {notice="unavailable";return false;}
   if(cal.phase || jaroCommandsPending()) {notice="busy";return false;}
   if(!shutterPositionReady(ch)) {notice="not_calibrated";return false;}
-  if(!move.active() && !targetCount) return startTarget(ch,goal);
+  if(!config.position.reference && goal>0 && goal<100 && !moves[ch].active() && positions[ch]<0) {
+    notice="position_unknown";return false;
+  }
   for(uint8_t i=0; i<targetCount; ++i) if(targets[i].channel==ch) {
     targets[i].goal=goal;notice="";return true;
   }
   if(targetCount>=16) {notice="queue_full";return false;}
+  if(!targetCount) collectedAt=millis();
   targets[targetCount++]={ch,goal};notice="";
   return true;
 }
@@ -137,19 +206,26 @@ bool shutterPositionTarget(uint8_t ch, const char *payload) {
   return requestTarget(ch,static_cast<uint8_t>(value));
 }
 
-bool shutterPositionBusy() { return move.active() || cal.phase || targetCount; }
+bool shutterPositionBusy() {
+  if (cal.phase || targetCount) return true;
+  for (const auto &move : moves) if (move.active()) return true;
+  return false;
+}
 void shutterPositionManual(uint16_t mask, bool stopMotor) {
-  // One automatic sequence at a time. Other radio commands must not delay its STOP.
+  // Manual radio commands cancel automation before their potentially long transmission.
   if (shutterPositionBusy()) cancel(stopMotor);
   for (uint8_t i=0;i<16;++i) if(mask & (uint16_t(1)<<i)) {travel[i].duration=0;setPosition(i,-1);}
   notice=""; dirty=true;
 }
 void shutterPositionRemote(uint16_t mask, JaroCmdType command) {
   // A received command has already changed the motor state. Do not override it.
-  const bool affected=(move.active() && (mask & (uint16_t(1)<<move.channel))) ||
-                      (cal.phase && (mask & (uint16_t(1)<<cal.channel)));
-  if (affected) cancel(false);
-  else if(mask) clearTargets(); // Do not resume queued automation after manual remote operation.
+  if (mask) clearTargets(); // Do not resume queued automation after remote operation.
+  for (auto &move : moves) if (move.active() && (mask & (uint16_t(1)<<move.channel))) {
+    move.cancel(); setPosition(move.channel,-1);
+  }
+  if (cal.phase && (mask & (uint16_t(1)<<cal.channel))) {
+    setPosition(cal.channel,-1);cal.phase=0;
+  }
   shutterPositionCommand(mask,command);
   dirty=true;
 }
@@ -228,30 +304,37 @@ void shutterPositionCyclic() {
     previousEnable=config.position.enable;previousReference=config.position.reference;dirty=true;
   }
   if(shutterPositionBusy() && (!config.position.enable || setupMode || EspSysUtil::OTA::getInstance().isActive())) failure("cancelled");
-  if((cal.phase && !available(cal.channel)) || (move.active() && (!available(move.channel) || !config.position.calibration[move.channel].valid()))) failure("cancelled");
+  bool invalid=cal.phase && !available(cal.channel);
+  for (const auto &move : moves) if (move.active() &&
+      (!available(move.channel) || !config.position.calibration[move.channel].valid())) invalid=true;
+  if(invalid) failure("cancelled");
   if(cal.phase && (now-cal.lease>6000 || ((cal.phase==2 || cal.phase==4) && now-cal.since>180000))) failure("timeout");
-  const auto action=move.next(now);
-  if(action==PositionMove::MoveToTarget) {
-    if(send(move.channel,move.targetUp())) move.targetStarted(config.position.calibration[move.channel],jaroPositionSentAt());
-    else failure("send_failed");
-    dirty=true;
-  } else if(action==PositionMove::Stop) {
-    const uint8_t ch=move.channel,goal=move.target;
-    const bool sent=jaroPositionSend(ch,CMD_STOP);
-    move.cancel();setPosition(ch,sent?goal:-1);notice=sent?"":"send_failed";
-    if(!sent) clearTargets();
-    dirty=true;
-  } else if(action==PositionMove::Complete) {setPosition(move.channel,move.target);dirty=true;}
+  for (auto &move : moves) if (move.active() && move.phase!=PositionMove::Target) {
+    const auto previous=move.phase;
+    if (move.next(millis())==PositionMove::Complete) setPosition(move.channel,move.target);
+    if (move.phase!=previous) dirty=true;
+  }
   for(uint8_t ch=0;ch<16;++ch) {
     auto &t=travel[ch];
-    if(t.duration && now-t.since>=t.duration) {t.duration=0;setPosition(ch,t.target);}
+    if(t.duration && millis()-t.since>=t.duration) {t.duration=0;setPosition(ch,t.target);}
   }
-  // Revalidate immediately before each queued move; disabled/uncalibrated channels are skipped.
-  while(targetCount && !move.active() && !cal.phase && !jaroCommandsPending()) {
-    const Target next=popTarget();dirty=true;
-    if(!available(next.channel) || !shutterPositionReady(next.channel)) {notice="unavailable";continue;}
-    startTarget(next.channel,next.goal);
+  const uint32_t dispatchAt=millis();
+  const auto group=nextStop(dispatchAt);
+  if (group.mask && int32_t(dispatchAt-group.at)>=0) {
+    if (!jaroPositionGroupSend(group.mask,CMD_STOP)) failure("send_failed");
+    else for (auto &move : moves) if (move.active() && (group.mask & (uint16_t(1)<<move.channel))) {
+      setPosition(move.channel,move.target);move.cancel();
+    }
+    dirty=true;
+  } else if (!cal.phase && !jaroCommandsPending() && canStart(group,dispatchAt)) {
+    bool started=false;
+    for (auto &move : moves) if (move.phase==PositionMove::Settle && millis()-move.since>=600) {
+      if (send(move.channel,move.targetUp())) move.targetStarted(config.position.calibration[move.channel],jaroPositionSentAt());
+      else failure("send_failed");
+      dirty=true;started=true;break;
+    }
+    if (!started) startPending();
   }
   // All timing stays on the ESP. Browsers only receive a small snapshot once per second.
-  if (!EspSysUtil::OTA::getInstance().isActive() && (dirty || (shutterPositionBusy() && now-lastUpdate>=1000))) status();
+  if (!EspSysUtil::OTA::getInstance().isActive() && (dirty || (shutterPositionBusy() && millis()-lastUpdate>=1000))) status();
 }

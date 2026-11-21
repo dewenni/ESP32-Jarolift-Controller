@@ -305,3 +305,13 @@ bool jaroPositionSend(uint8_t channel, JaroCmdType type) {
   }
   return jarolift.lastTxOK();
 }
+bool jaroPositionGroupSend(uint16_t mask, JaroCmdType type) {
+  if (!mask || !jarolift.ready()) return false;
+  switch(type) {
+  case CMD_UP: jarolift.cmdGroup(JaroliftController::CMD_UP, mask); break;
+  case CMD_DOWN: jarolift.cmdGroup(JaroliftController::CMD_DOWN, mask); break;
+  case CMD_STOP: jarolift.cmdGroup(JaroliftController::CMD_STOP, mask); break;
+  default: return false;
+  }
+  return jarolift.lastTxOK();
+}

@@ -25,7 +25,7 @@ Standardmäßig fährt deshalb **jede Zwischenposition zuerst eine Endlage an**,
 
 Beispiel: Für **25 %** fährt der Rollladen zuerst vollständig zu und öffnet anschließend ein Viertel seiner Höhe. Für **75 %** fährt er zuerst vollständig auf und schließt anschließend bis auf drei Viertel Öffnung. Für genau **50 %** wird die obere Endlage als Referenz verwendet.
 
-**0 % und 100 %** senden direkt AB beziehungsweise AUF. Die Motorfahrt blockiert keine weiteren Endlagenanforderungen; mehrere Rollläden können dadurch nacheinander ihre Funkbefehle erhalten und gleichzeitig fahren. Die Positionsschätzung bleibt bis zum Ablauf der Fahrzeit unbekannt. Während einer laufenden Zwischenpositionsfahrt warten weitere Ziele weiterhin in der Warteschlange, damit deren zeitkritischer STOP nicht verzögert wird.
+**0 % und 100 %** senden AB beziehungsweise AUF, bei zeitnahen Anforderungen gemeinsam als Gruppenbefehl je Richtung. Die Motorfahrt blockiert keine weiteren Endlagenanforderungen. Die Positionsschätzung bleibt bis zum Ablauf der Fahrzeit unbekannt. Anstehende STOP-Befehle laufender Teilfahrten haben Vorrang vor weiteren Startbefehlen.
 
 Die Referenzzeit entspricht der vollen Fahrzeit zuzüglich **5 % Reserve**, mindestens einer und höchstens drei Sekunden. Vor dem Richtungswechsel wartet der ESP **600 ms**. Auch wenn der Rollladen bereits nahe der Endlage steht, wird die volle Referenzzeit abgewartet. Das dauert länger, vermeidet aber das Vertrauen auf eine möglicherweise veraltete Position.
 
@@ -39,7 +39,7 @@ Ohne Referenzfahrt fährt der ESP Zwischenziele direkt aus der bekannten Schätz
 
 Nach Neustart, STOP, SCHATTEN oder einer abgebrochenen beziehungsweise fehlgeschlagenen Fahrt ist die Position unbekannt. Zwischenziele werden dann ohne Funkbefehl abgewiesen. Zuerst eine vollständige AUF-/AB-Fahrt (oder 0/100 %) einschließlich der kalibrierten Fahrzeit mit Reserve abwarten. Während dieser Fahrt bleibt der Status unbekannt. Eine abgeschlossene Kalibrierung liefert ebenfalls eine bekannte Endlage.
 
-Der gemeinsame Befehlspuffer bleibt für Zwischenziele aktiv, damit andere Fahrbefehle den zeitkritischen STOP nicht verzögern. Aufeinanderfolgende Ziele werden beim Start aus dem dann aktuellen Status berechnet. Das gilt gleichermaßen für WebUI, MQTT und Home Assistant. Positionen werden beim Neustart nicht als bekannte Werte wiederhergestellt.
+Der gemeinsame Zielpuffer bleibt aktiv. Verschiedene Rollläden können gleichzeitig fahren; ein weiteres Ziel desselben Rollladens wartet auf den Abschluss seiner aktiven Zielanfahrt und wird beim Start aus dem dann aktuellen Status berechnet. Das gilt gleichermaßen für WebUI, MQTT und Home Assistant. Positionen werden beim Neustart nicht als bekannte Werte wiederhergestellt.
 
 ## Wie die Fahrzeit zur Öffnungshöhe passt
 
@@ -115,13 +115,19 @@ Die Payload ist eine **Ganzzahl von 0 bis 100**, ohne Prozentzeichen oder JSON-O
 
 Voraussetzungen sind eine global eingeschaltete Positionssteuerung sowie ein aktivierter und kalibrierter Kanal. Im Setup-Mode, während OTA oder einer Kalibrierung sowie bei anstehenden manuellen Funkbefehlen werden keine Prozentziele angenommen. Eine abgewiesene Anforderung wird über `<prefix>/message` mit `invalid or unavailable position target` gemeldet. Prozentziele für Gruppen sind derzeit nicht vorgesehen.
 
-### Mehrere Ziele nacheinander ausführen
+### Mehrere Ziele parallel ausführen
 
-WebUI, MQTT und Home Assistant nutzen denselben festen RAM-Puffer für **bis zu 16 wartende Aufträge zusätzlich zur laufenden Fahrt**. Die Motorfahrten werden nacheinander ausgeführt, je nach globaler Einstellung mit oder ohne Referenzfahrt. Pro Rollladen bleibt höchstens ein Auftrag im Puffer; ein neuer Sollwert ersetzt dessen wartenden Wert, ohne den Platz zu verändern. Ein neuer Auftrag für den bereits fahrenden Rollladen wird hinter der laufenden Fahrt eingereiht und verändert diese nicht.
+WebUI, MQTT und Home Assistant nutzen denselben festen RAM-Puffer für **bis zu 16 wartende Aufträge zusätzlich zu bis zu 16 aktiven Zielanfahrten**. Die Motorfahrten verschiedener Kanäle können sich überlappen, je nach globaler Einstellung mit oder ohne Referenzfahrt. Pro Rollladen bleibt höchstens ein Auftrag im Puffer; ein neuer Sollwert ersetzt dessen wartenden Wert, ohne den Platz zu verändern. Ein neuer Auftrag für den bereits fahrenden Rollladen wird hinter der laufenden Fahrt eingereiht und verändert diese nicht.
+
+Neue Anforderungen werden zunächst **200 ms gesammelt**. Weitere Vorgaben verlängern dieses Fenster nicht. Mit Referenzfahrt starten die verfügbaren Kanäle gemeinsam je Richtung über höchstens zwei Gruppenbefehle; AUF und AB werden wegen des einzelnen Funkmoduls zeitlich versetzt gesendet. Jeder Kanal wartet anschließend seine eigene kalibrierte Referenzzeit einschließlich Reserve und mindestens 600 ms Umkehrpause ab. Danach starten die individuellen Teilfahrten nacheinander, ohne auf deren Abschluss zu warten. Ohne Referenzfahrt starten die Teilfahrten direkt nacheinander aus der bekannten Schätzung.
+
+Die berechneten STOP-Zeitpunkte werden gemeinsam ausgewertet. Zeitpunkte mit einem Abstand von höchstens **1.000 ms zum frühesten STOP** werden zu einem Gruppen-STOP zusammengefasst. Gesendet wird zur Mitte zwischen frühestem und spätestem Zeitpunkt mit dem vorhandenen Telegrammvorlauf. Dadurch entsteht planmäßig eine zusätzliche Abweichung von höchstens etwa **±0,5 Sekunden**, zuzüglich Software-, Funk- und Motorlaufzeiteinflüssen. Neue Mitglieder können den frühesten STOP höchstens um diese halbe Fensterbreite verschieben. Der angezeigte Zielwert bleibt eine zeitbasierte Schätzung.
+
+Vor weiteren Startbefehlen hält der ESP eine Reserve für die blockierende Funkübertragung frei. Ein bevorstehender STOP kann deshalb die Startfolge unterbrechen. Sehr kurze Teilfahrten werden frühestens nach Rückkehr des Startbefehls gestoppt; sie können entsprechend überfahren werden. Die angenommene normale Befehlsdauer beträgt etwa 340 ms, die Planungsreserve 450 ms. Die angestrebte Gesamtabweichung von ungefähr einer Sekunde ist keine garantierte Echtzeitgrenze und muss unter Last am Gerät geprüft werden.
 
 Im WebUI können während einer Fahrt Ziele für andere kalibrierte Rollläden vorgegeben werden. **„Ziel · wartet“ in der Beschriftungszeile und ein Spinner anstelle des Play-Symbols** kennzeichnen angenommene Aufträge ohne zusätzliche Textzeile. Der Button-Tooltip zeigt den eingereihten Zielwert und den Platz im Puffer; der Button bleibt zum Ändern eines wartenden Ziels bedienbar. Der aktuelle Öffnungsstatus bleibt davon getrennt und wird nicht auf den wartenden Zielwert gesetzt. Noch wartende Ziele lassen sich über den Slider und Ausführen erneut ändern. Eine Kalibrierung kann erst bei leerem Puffer gestartet werden.
 
-Vor jedem Start prüft der ESP erneut, ob der Kanal aktiviert und gültig kalibriert ist. Nicht mehr verfügbare Kanäle werden übersprungen. Ohne Referenzfahrt muss beim Start eines Zwischenziels zusätzlich eine bekannte Position vorliegen; andernfalls wird der Auftrag ohne Funkbefehl übersprungen. Ein Fehler beim Senden beendet die automatische Verarbeitung und verwirft den Rest. Normale manuelle Befehle leeren den Puffer und brechen die aktive automatische Fahrt ab. Ein empfangener zugeordneter Originalfernbedienungsbefehl leert ebenfalls den Puffer; die aktive Fahrt wird dabei nur abgebrochen, wenn ihr Rollladen betroffen ist.
+Vor jedem Start prüft der ESP erneut, ob der Kanal aktiviert und gültig kalibriert ist. Nicht mehr verfügbare Kanäle werden übersprungen. Ohne Referenzfahrt muss beim Start eines Zwischenziels zusätzlich eine bekannte Position vorliegen; andernfalls wird der Auftrag ohne Funkbefehl übersprungen. Ein Fehler beim Senden beendet die automatische Verarbeitung, verwirft den Rest und löst einen bestmöglichen Gruppen-STOP der noch aktiven Zielanfahrten aus. Normale manuelle Befehle leeren den Puffer und brechen alle aktiven automatischen Zielanfahrten mit einem Gruppen-STOP ab. Ein empfangener zugeordneter Originalfernbedienungsbefehl leert ebenfalls den Puffer; nur betroffene Zielanfahrten werden ohne Gegenbefehl abgebrochen. Andere aktive Kanäle laufen weiter.
 
 Der Puffer bleibt beim Browser-Refresh oder Schließen des Browsers am ESP erhalten. Er wird nicht in der Konfiguration gespeichert und nach Neustart, OTA, Setup-Mode oder Abschalten der Positionssteuerung nicht fortgesetzt.
 
@@ -184,7 +190,7 @@ Ein empfangener zugeordneter Befehl für den gerade automatisch bewegten Rolllad
 
 ## Verhalten bei Abbruch und Neustart
 
-- Es läuft höchstens eine automatische Zielanfahrt oder Kalibrierung gleichzeitig. Normale Steuerbefehle haben Vorrang und beenden eine laufende automatische Sequenz zuerst.
+- Bis zu 16 automatische Zielanfahrten können gleichzeitig aktiv sein. Eine Kalibrierung bleibt exklusiv und kann erst ohne aktive Zielanfahrten und wartende Aufträge beginnen. Normale Steuerbefehle haben Vorrang und beenden aktive automatische Zielanfahrten zuerst.
 - Eine reguläre Prozentfahrt wird nach Annahme vom ESP ausgeführt und benötigt keinen geöffneten Browser. Für den Kalibrierungsassistenten gilt dagegen die Lebenszeichenprüfung.
 - Nach einem Abbruch gibt es keinen automatischen Wiederanlauf; wartende Positionsaufträge werden verworfen.
 - Kalibrierdaten bleiben über einen Neustart erhalten; die aktuelle Positionsschätzung wird nicht gespeichert und startet unbekannt.

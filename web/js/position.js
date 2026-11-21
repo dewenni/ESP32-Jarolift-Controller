@@ -80,7 +80,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   function render() {
     if (!snapshot) return;
-    const s=snapshot, cal=s.cal, queue=s.queue || [], active=cal.phase || s.moving>=0 || queue.length;
+    const s=snapshot, cal=s.cal, queue=s.queue || [], moves=s.moves || [], active=cal.phase || moves.length || queue.length;
     $("cfg_position_enable").checked=s.enabled;
     $("cfg_position_reference").checked=s.reference!==false;
     const valid=s.channels[channel()]?.[0];
@@ -109,15 +109,15 @@ document.addEventListener("DOMContentLoaded", () => {
       w.button.setAttribute("aria-label",waiting?w.button.title+" · "+positionText("pos_go"):positionText("pos_go"));
       w.slider.setAttribute("aria-label",positionText("pos_goal"));
       w.ends.children[0].textContent=positionText("pos_closed");w.ends.children[1].textContent=positionText("pos_open");
-      const moving=s.moving===c;
+      const move=moves.find(entry=>entry[0]===c), moving=!!move;
       w.label.textContent=positionText("pos_missing");
       // No intermediate position is invented during a reference or target run.
       const known=pos>=0 && !moving;
       w.status.classList.toggle("position-unknown",!known);
       w.status.classList.toggle("position-referencing",moving);
       w.statusTitle.textContent=positionText("pos_estimate");
-      const progress=s.phase===1 && Number.isFinite(s.remaining)?`${Math.max(0,Math.ceil(s.remaining))} s`:`${s.target} %`;
-      w.statusValue.textContent=moving ? ["",positionText("pos_reference"),positionText("pos_settle"),positionText("pos_moving")][s.phase]+` · ${progress}` : known ? `${pos} %` : positionText(s.reference===false?"pos_direct_unknown":"pos_unknown");
+      const progress=move?.[1]===1?`${move[3]} s`:`${move?.[2]} %`;
+      w.statusValue.textContent=moving ? ["",positionText("pos_reference"),positionText("pos_settle"),positionText("pos_moving")][move[1]]+` · ${progress}` : known ? `${pos} %` : positionText(s.reference===false?"pos_direct_unknown":"pos_unknown");
       w.shutter.style.height=(known?100-pos:100)+"%";
       w.targetLine.hidden=!known;
       w.targetLine.style.height=(100-Number(w.slider.value))+"%";
