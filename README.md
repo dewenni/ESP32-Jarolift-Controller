@@ -63,7 +63,7 @@ define shutter groups to control several shutters at once
 stand alone timer function with fixed time, sunrise or sunset as trigger.
 
 - **Time-based percentage positioning:**
-Optional percentage targets with a reference run and per-shutter calibration. WebUI, MQTT and Home Assistant share the estimated opening: 0% closed, 100% open.
+Optional percentage targets with optional referencing and per-shutter calibration. WebUI, MQTT and Home Assistant share the estimated opening: 0% closed, 100% open.
 
 - **Original remote registration:**
 Assign captured single channels to one or several shutters on the Service page. Received individual and group commands update the shared status.
@@ -407,7 +407,7 @@ With positioning disabled globally, the additional position section is hidden. W
 
 - **Not calibrated:** only a compact notice and a link to calibration appear below the normal buttons.
 - **Calibrated:** a small shutter graphic and estimated opening are shown, together with a target slider and a separate execute button. Moving the slider selects a target; only pressing the execute button starts the movement.
-- **Position unknown:** no measured position is implied. A percentage target can still be requested because it starts with a reference run.
+- **Position unknown:** no measured position is implied. With referencing enabled, a percentage target can still be requested. Without referencing, first allow a full UP/DOWN run to complete.
 
 <img style="width: 500px;" src="./Doc/webUI_shutter.png">
 
@@ -440,7 +440,7 @@ The motors do not report their position or end stops. Positioning therefore uses
 
 Enable the feature under **Settings → Device → Position control**. It is optional and applies globally; only individually calibrated shutters receive percentage controls. Other shutters remain usable with their normal buttons.
 
-Every percentage request first travels to a known end position, regardless of the previously estimated position:
+By default, every percentage request first travels to a known end position, regardless of the previously estimated position:
 
 | Target opening | Movement |
 | --- | --- |
@@ -450,6 +450,8 @@ Every percentage request first travels to a known end position, regardless of th
 | 100% | Fully open. |
 
 The reference run uses the full calibrated travel time plus a reserve of 5%, at least one second and at most three seconds. The direction-change pause is 600 ms. This deliberately takes longer than a direct move, but avoids relying on a remembered starting position after unobserved remote operation.
+
+Under **Settings → Device → Position control → Reference run before positioning**, referencing can be disabled when shutters are controlled exclusively through the ESP. Intermediate moves then use the known estimated position directly. After restart, STOP, SHADE or cancellation, first allow a full UP/DOWN run to complete; intermediate targets are rejected until then. 0/100% remain available. Intermediate moves retain the shared queue to protect STOP timing.
 
 ### Calibrating a shutter
 
@@ -629,7 +631,7 @@ payload:    {None}
 
 ### Percentage targets / Home Assistant
 
-With positioning enabled globally and valid channel calibration, `../cmd/position/1` through `/16` accept integer opening targets from 0 (closed) to 100 (open), without retain. The same reference sequence as the WebUI is used. Discovery automatically adds percentage control for eligible channels and removes it when disabled or uncalibrated. OPEN/CLOSE/STOP remain available; group percentage moves are not included.
+With positioning enabled globally and valid channel calibration, `../cmd/position/1` through `/16` accept integer opening targets from 0 (closed) to 100 (open), without retain. The same reference setting as the WebUI is used. Discovery automatically adds percentage control for eligible channels and removes it when disabled or uncalibrated. OPEN/CLOSE/STOP remain available; group percentage moves are not included.
 
 ### Remotes
 

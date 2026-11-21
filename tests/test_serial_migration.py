@@ -164,6 +164,7 @@ void expectMigration(int version, uint32_t oldSerial, uint32_t newSerial) {
   unsigned renames = LittleFS.renames;
   configLoadFromFile();
   assert(config.version == 8 && config.jaro.serial == newSerial);
+  assert(config.position.reference);
   assert(config.jaro.masterMSB == 0x23456789 && config.jaro.masterLSB == 0x87654321);
   assert(config.jaro.learn_mode && config.jaro.ch_enable[2] && config.jaro.grp_mask[0] == 0x8084);
   assert(mappings[0]["serial"] == 0x01234567 && loadedMappingVersion == version);
@@ -179,6 +180,15 @@ int main() {
   configLoadFromFile(); // Fresh installation with no file.
   assert(setupMode && config.version == 8 && config.jaro.serial == 0);
   expectFile(configPath, 8, 0);
+  assert(config.position.reference); // Missing field keeps the established reference behavior.
+  config.position.reference = false;
+  configSaveToFile();
+  config.position.reference = true;
+  configLoadFromFile();
+  assert(!config.position.reference);
+  JsonDocument savedPosition;
+  assert(!deserializeJson(savedPosition, LittleFS.files.at(configPath)));
+  assert(savedPosition["position"]["reference"] == false);
   config.jaro.serial = 0xABCDEF;
   configCyclic();
   configLoadFromFile();

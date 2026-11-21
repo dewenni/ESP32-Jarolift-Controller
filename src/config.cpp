@@ -422,6 +422,7 @@ void configSaveToFile() {
   doc["logger"]["order"] = config.log.order;
 
   doc["position"]["enable"] = config.position.enable;
+  doc["position"]["reference"] = config.position.reference;
   JsonArray calibration = doc["position"]["calibration"].to<JsonArray>();
   for (const auto &c : config.position.calibration) {
     JsonArray times = calibration.add<JsonArray>();
@@ -642,6 +643,7 @@ void configLoadFromFile() {
 
     config.position = s_cfg_position{};
     config.position.enable = doc["position"]["enable"] | false;
+    config.position.reference = doc["position"]["reference"] | true;
     for (uint8_t i = 0; i < 16; ++i) {
       auto &c = config.position.calibration[i];
       for (uint8_t j = 0; j < 3; ++j) {

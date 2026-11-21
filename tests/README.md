@@ -37,11 +37,11 @@ Individual scripts can also be run with `python3 tests/test_….py` or
 
 | Test | Purpose |
 | --- | --- |
-| `test_position_model.cpp` | Direction-specific timing curves, slat times, reference direction, reserve, reversal pause, STOP timing, endpoints and timer rollover. |
-| `test_shutter_position.py` | Actual position controller: 16-entry FIFO/replacement, queue cancellation/revalidation, target validation, movement sequence, shared status, manual/remote cancellation, calibration ownership/timeout/apply, OTA and invalidation. |
+| `test_position_model.cpp` | Direction-specific timing curves, slat times, reference direction, direct travel between known positions, reserve, reversal pause, STOP timing, endpoints and timer rollover. |
+| `test_shutter_position.py` | Actual position controller: 16-entry FIFO/replacement, queue cancellation/revalidation, target validation, reference/direct movement sequence, unknown-start rejection, same-target no-op, shared status, manual/remote cancellation, calibration ownership/timeout/apply, OTA and invalidation. |
 | `test_mqtt_position.py` | Actual MQTT routing and discovery: 0/100 scale, conditional percentage control, stable entity identity, legacy commands, reconnect and maximum field lengths. |
 | `test_remote_mapping.py` | Actual mapping code: two-press registration, single/group source matching, shared targets, per-motor removal, Unicode, limits, persistence and migration. |
-| `test_serial_migration.py` | Configuration v8 migration through the load path used at boot and for imports, fresh defaults, repeat loads, save failures and recovery. Also checks which base serial inputs the WebUI formats and which the WebSocket accepts. |
+| `test_serial_migration.py` | Configuration v8 migration through the load path used at boot and for imports, fresh defaults, repeat loads, save failures, recovery and reference-setting persistence. Also checks which base serial inputs the WebUI formats and which the WebSocket accepts. |
 | `test_serial_tx.py` | Radio serial compatibility across every 20-bit legacy base and all 16 channels. Checks KeeLoq keys, discriminator values and UP/DOWN/STOP/group frames with representative bases and boundary values. Also exercises invalid channel indices. |
 | `test_rx_glitch.py` | Actual edge-capture methods: short HIGH/LOW disturbances, false sync, stale HIGH invalidation, frozen buffers, timer rollover and deterministic noise. |
 | `test_rx_decode.py` | Actual capture/decoder/KeeLoq methods: all 16 channels, groups, commands, terminal HIGH handling, truncated frames and discriminator mismatch. |

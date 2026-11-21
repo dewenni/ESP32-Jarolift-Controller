@@ -33,6 +33,16 @@ int main() {
     m.begin(1,endpoint,c,0);
     assert(m.next(c.referenceTime(endpoint==100))==PositionMove::Complete && !m.active());
   }
+  // Direct travel uses the directional curve difference, including endpoint slat phases.
+  m.beginDirect(2,75,25,c,1000);
+  assert(m.phase==PositionMove::Target && m.targetUp() && m.duration==13100);
+  assert(m.next(13989)==PositionMove::None && m.next(13990)==PositionMove::Stop);
+  m.beginDirect(2,25,75,c,1000);
+  assert(!m.targetUp() && m.duration==13200);
+  m.beginDirect(2,25,0,c,0);assert(m.duration==9100 && m.targetUp());
+  m.beginDirect(2,75,100,c,0);assert(m.duration==6100 && !m.targetUp());
+  m.beginDirect(2,51,50,c,UINT32_MAX-20);
+  assert(m.next(uint32_t(m.since+m.duration-110))==PositionMove::Stop);
   // Timing survives the millis() wrap and can be cancelled in every phase.
   m.begin(1,25,c,UINT32_MAX-10000);
   assert(m.next(uint32_t(m.since+m.duration))==PositionMove::None && m.phase==PositionMove::Settle);

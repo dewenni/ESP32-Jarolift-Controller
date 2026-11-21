@@ -133,6 +133,7 @@ struct s_cfg_homee {
 
 struct s_cfg_position {
   bool enable = false;
+  bool reference = true;
   PositionCalibration calibration[16];
 };
 

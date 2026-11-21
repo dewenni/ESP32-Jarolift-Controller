@@ -4,7 +4,7 @@ Die optionale Positionssteuerung ermöglicht eine prozentuale Öffnung der Rolll
 
 **0 % bedeutet vollständig geschlossen, 100 % vollständig geöffnet.** Gemeint ist die Öffnungshöhe, nicht der Lamellenabstand. Die Motoren liefern keine Positions- oder Endlagenrückmeldung. Alle angezeigten Positionen sind deshalb zeitbasierte Schätzungen.
 
-## Warum jede Prozentfahrt eine Referenzfahrt benötigt
+## Referenzfahrt oder direkte Positionsfahrt
 
 Eine reine Zeitsteuerung muss wissen, von welcher Position sie startet. Ein gespeicherter Prozentwert reicht dafür nicht zuverlässig aus: Der Rollladen kann seitdem mit einer Originalfernbedienung oder direkt vor Ort über einen elektrischen Taster bedient worden sein. Auch ein Neustart oder ein nicht empfangener Funkbefehl macht den bisherigen Stand unsicher.
 
@@ -14,7 +14,7 @@ Das Mitlesen zugeordneter Originalfernbedienungen hilft, bekannte Bedienvorgäng
 - Eine elektrische Vor-Ort-Bedienung sendet gegebenenfalls überhaupt kein Funksignal an den ESP.
 - Der ESP kann einen gesendeten Befehl beobachten, aber nicht bestätigen, dass der Motor ihn empfangen und die erwartete Bewegung vollständig ausgeführt hat.
 
-Deshalb fährt **jede Zwischenposition zuerst eine Endlage an**, auch wenn bereits ein Prozentwert angezeigt wird. Der ESP wartet die vollständige kalibrierte Fahrzeit mit Reserve ab. Die Endlage wird durch die bereits eingerichtete Endabschaltung des Motors bestimmt; der ESP erkennt sie nicht durch einen Sensor. Anschließend startet die berechnete Teilfahrt aus dieser definierten Ausgangslage.
+Standardmäßig fährt deshalb **jede Zwischenposition zuerst eine Endlage an**, auch wenn bereits ein Prozentwert angezeigt wird. Der ESP wartet die vollständige kalibrierte Fahrzeit mit Reserve ab. Die Endlage wird durch die bereits eingerichtete Endabschaltung des Motors bestimmt; der ESP erkennt sie nicht durch einen Sensor. Anschließend startet die berechnete Teilfahrt aus dieser definierten Ausgangslage.
 
 | Gewünschte Öffnung | Ablauf |
 | --- | --- |
@@ -30,6 +30,16 @@ Beispiel: Für **25 %** fährt der Rollladen zuerst vollständig zu und öffnet 
 Die Referenzzeit entspricht der vollen Fahrzeit zuzüglich **5 % Reserve**, mindestens einer und höchstens drei Sekunden. Vor dem Richtungswechsel wartet der ESP **600 ms**. Auch wenn der Rollladen bereits nahe der Endlage steht, wird die volle Referenzzeit abgewartet. Das dauert länger, vermeidet aber das Vertrauen auf eine möglicherweise veraltete Position.
 
 Die Referenzfahrt verbessert die Wiederholbarkeit unter normalen Betriebsbedingungen. Sie ist keine Positionsmessung und gleicht beispielsweise einen blockierten Motor, einen verpassten Funkbefehl oder eine gleichzeitige unbemerkte Vor-Ort-Bedienung während der Fahrt nicht aus.
+
+### Referenzfahrt optional ausschalten
+
+Unter **Einstellungen → Gerät → Positionssteuerung → Referenzfahrt vor Positionsvorgabe** lässt sich die Referenzfahrt global ausschalten. Bei bestehenden Konfigurationen bleibt sie eingeschaltet. Ausschalten ist für Anlagen gedacht, die ausschließlich über den ESP bedient werden; unbemerkte externe Bedienung kann die Schätzung verfälschen.
+
+Ohne Referenzfahrt fährt der ESP Zwischenziele direkt aus der bekannten Schätzposition an. Er berechnet die Zeitdifferenz auf der kalibrierten Kennlinie der jeweiligen Fahrtrichtung. Ein bereits erreichter Sollwert löst keinen weiteren Funkbefehl aus. **0 % und 100 % fahren weiterhin vollständig zur jeweiligen Endlage.**
+
+Nach Neustart, STOP, SCHATTEN oder einer abgebrochenen beziehungsweise fehlgeschlagenen Fahrt ist die Position unbekannt. Zwischenziele werden dann ohne Funkbefehl abgewiesen. Zuerst eine vollständige AUF-/AB-Fahrt (oder 0/100 %) einschließlich der kalibrierten Fahrzeit mit Reserve abwarten. Während dieser Fahrt bleibt der Status unbekannt. Eine abgeschlossene Kalibrierung liefert ebenfalls eine bekannte Endlage.
+
+Der gemeinsame Befehlspuffer bleibt für Zwischenziele aktiv, damit andere Fahrbefehle den zeitkritischen STOP nicht verzögern. Aufeinanderfolgende Ziele werden beim Start aus dem dann aktuellen Status berechnet. Das gilt gleichermaßen für WebUI, MQTT und Home Assistant. Positionen werden beim Neustart nicht als bekannte Werte wiederhergestellt.
 
 ## Wie die Fahrzeit zur Öffnungshöhe passt
 
@@ -97,7 +107,7 @@ Nach dem Speichern zunächst **25 %, 50 % und 75 %** testen, jeweils auch aus ei
 
 | Topic | Payload | Bedeutung |
 | --- | --- | --- |
-| `<prefix>/cmd/position/1` | `25` | Rollladen 1 nach Referenzfahrt auf 25 % Öffnung fahren. |
+| `<prefix>/cmd/position/1` | `25` | Rollladen 1 je nach Einstellung mit oder ohne Referenzfahrt auf 25 % Öffnung fahren. |
 | `<prefix>/cmd/position/1` | `0` | Vollständig schließen. |
 | `<prefix>/cmd/position/1` | `100` | Vollständig öffnen. |
 
@@ -107,11 +117,11 @@ Voraussetzungen sind eine global eingeschaltete Positionssteuerung sowie ein akt
 
 ### Mehrere Ziele nacheinander ausführen
 
-WebUI, MQTT und Home Assistant nutzen denselben festen RAM-Puffer für **bis zu 16 wartende Aufträge zusätzlich zur laufenden Fahrt**. Die Motorfahrten werden nacheinander ausgeführt, jeweils mit eigener Referenzfahrt. Pro Rollladen bleibt höchstens ein Auftrag im Puffer; ein neuer Sollwert ersetzt dessen wartenden Wert, ohne den Platz zu verändern. Ein neuer Auftrag für den bereits fahrenden Rollladen wird hinter der laufenden Fahrt eingereiht und verändert diese nicht.
+WebUI, MQTT und Home Assistant nutzen denselben festen RAM-Puffer für **bis zu 16 wartende Aufträge zusätzlich zur laufenden Fahrt**. Die Motorfahrten werden nacheinander ausgeführt, je nach globaler Einstellung mit oder ohne Referenzfahrt. Pro Rollladen bleibt höchstens ein Auftrag im Puffer; ein neuer Sollwert ersetzt dessen wartenden Wert, ohne den Platz zu verändern. Ein neuer Auftrag für den bereits fahrenden Rollladen wird hinter der laufenden Fahrt eingereiht und verändert diese nicht.
 
 Im WebUI können während einer Fahrt Ziele für andere kalibrierte Rollläden vorgegeben werden. **„Ziel · wartet“ in der Beschriftungszeile und ein Spinner anstelle des Play-Symbols** kennzeichnen angenommene Aufträge ohne zusätzliche Textzeile. Der Button-Tooltip zeigt den eingereihten Zielwert und den Platz im Puffer; der Button bleibt zum Ändern eines wartenden Ziels bedienbar. Der aktuelle Öffnungsstatus bleibt davon getrennt und wird nicht auf den wartenden Zielwert gesetzt. Noch wartende Ziele lassen sich über den Slider und Ausführen erneut ändern. Eine Kalibrierung kann erst bei leerem Puffer gestartet werden.
 
-Vor jedem Start prüft der ESP erneut, ob der Kanal aktiviert und gültig kalibriert ist. Nicht mehr verfügbare Kanäle werden übersprungen. Ein Fehler beim Senden beendet die automatische Verarbeitung und verwirft den Rest. Normale manuelle Befehle leeren den Puffer und brechen die aktive automatische Fahrt ab. Ein empfangener zugeordneter Originalfernbedienungsbefehl leert ebenfalls den Puffer; die aktive Fahrt wird dabei nur abgebrochen, wenn ihr Rollladen betroffen ist.
+Vor jedem Start prüft der ESP erneut, ob der Kanal aktiviert und gültig kalibriert ist. Nicht mehr verfügbare Kanäle werden übersprungen. Ohne Referenzfahrt muss beim Start eines Zwischenziels zusätzlich eine bekannte Position vorliegen; andernfalls wird der Auftrag ohne Funkbefehl übersprungen. Ein Fehler beim Senden beendet die automatische Verarbeitung und verwirft den Rest. Normale manuelle Befehle leeren den Puffer und brechen die aktive automatische Fahrt ab. Ein empfangener zugeordneter Originalfernbedienungsbefehl leert ebenfalls den Puffer; die aktive Fahrt wird dabei nur abgebrochen, wenn ihr Rollladen betroffen ist.
 
 Der Puffer bleibt beim Browser-Refresh oder Schließen des Browsers am ESP erhalten. Er wird nicht in der Konfiguration gespeichert und nach Neustart, OTA, Setup-Mode oder Abschalten der Positionssteuerung nicht fortgesetzt.
 
@@ -158,7 +168,7 @@ Für einen Rollladen ergänzt Discovery die Prozentsteuerung nur, wenn die Funkt
 | Gewünschte Position setzen | `<prefix>/cmd/position/N` |
 | Geschätzte Position lesen | `<prefix>/status/shutter/N` |
 
-Im Cover einen Öffnungswert wählen beziehungsweise in einer Automatisierung eine Zielposition setzen. Auch hier gilt **0 % geschlossen, 100 % geöffnet** und es wird stets dieselbe Referenzfahrt wie im WebUI ausgeführt. AUF/AB/STOP bleiben unabhängig von der optionalen Prozentsteuerung verfügbar.
+Im Cover einen Öffnungswert wählen beziehungsweise in einer Automatisierung eine Zielposition setzen. Auch hier gilt **0 % geschlossen, 100 % geöffnet** und es gilt dieselbe Einstellung zur Referenzfahrt wie im WebUI. AUF/AB/STOP bleiben unabhängig von der optionalen Prozentsteuerung verfügbar.
 
 Wird die Funktion ausgeschaltet oder die Kalibrierung ungültig, entfernt Discovery die Prozentsteuerung für diesen Kanal wieder. Änderungen sowie ein MQTT-Reconnect aktualisieren die Discovery-Konfiguration.
 
@@ -170,7 +180,7 @@ Originalfernbedienungen werden unter **Service → Rollladen auswählen → Orig
 
 Ein empfangener zugeordneter Befehl für den gerade automatisch bewegten Rollladen bricht dessen Zielanfahrt beziehungsweise Kalibrierung ab. Der ESP verfolgt anschließend den neuen Befehl. Wiederholtelegramme derselben laufenden AUF-/AB-Fahrt starten die Wartezeit nicht ständig neu.
 
-**Nicht beobachtbare Bedienung bleibt nicht beobachtbar.** Wird der Motor über einen elektrischen Taster oder eine nicht empfangene Fernbedienung bewegt, kann der angezeigte Stand veralten. Deshalb bleibt die Referenzfahrt auch bei eingerichteter Fernbedienungszuordnung erforderlich.
+**Nicht beobachtbare Bedienung bleibt nicht beobachtbar.** Wird der Motor über einen elektrischen Taster oder eine nicht empfangene Fernbedienung bewegt, kann der angezeigte Stand veralten. Bei Nutzung solcher Bedienwege sollte die Referenzfahrt auch bei eingerichteter Fernbedienungszuordnung eingeschaltet bleiben.
 
 ## Verhalten bei Abbruch und Neustart
 

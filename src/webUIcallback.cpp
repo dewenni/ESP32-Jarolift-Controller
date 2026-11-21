@@ -28,6 +28,11 @@ void webCallback(const char *elementId, const char *value) {
     return;
   }
 
+  if (strcmp(elementId, "cfg_position_reference") == 0) {
+    config.position.reference = EspStrUtil::stringToBool(value);
+    return;
+  }
+
   // ------------------------------------------------------------------
   // GitHub / Version
   // ------------------------------------------------------------------

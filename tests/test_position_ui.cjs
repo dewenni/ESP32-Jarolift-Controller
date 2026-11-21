@@ -14,7 +14,7 @@ class Node {
 function node(id){const n=new Node();n.id=id;return n;}
 const html=fs.readFileSync(path.join(root,'web/html/04_service.html'),'utf8');
 for(const [,id] of html.matchAll(/id="([^"]+)"/g))node(id);
-node('cfg_lang').value='0';node('cfg_position_enable');
+node('cfg_lang').value='0';node('cfg_position_enable');node('cfg_position_reference');
 for(let i=0;i<16;i++){const n=node('p01_jaro_ch_name_'+i);n.parentElement=new Node();}
 nodes.get('p04_position_dialog').parentElement=new Node();nodes.get('p04_service_setup').clientWidth=1000;
 const select=nodes.get('p04_selected_shutter');select.value='0';select.selectedOptions=[{textContent:'Wohnzimmer'}];
@@ -64,4 +64,11 @@ snapshot.moving=-1;update();assert(!secondButton.disabled && waitingLabel.hidden
 snapshot.moving=-1;update();nodes.get('p04_service_setup').clientWidth=400;nodes.get('p04_position_begin').click();assert(!nodes.get('p04_position_intro').hidden);nodes.get('p04_position_cancel').click();assert(sent.at(-1).a==='cancel' && !nodes.get('p04_position_dialog').open);
 snapshot.enabled=false;update();assert(box.hidden && box.children.at(-1).hidden);
 snapshot.channels[0]=[false,-1];update();assert(box.hidden && box.children.at(-1).hidden);
+
+// Direct mode explains the required starting position on the affected channel.
+snapshot.enabled=true;snapshot.reference=false;snapshot.channels[0]=[true,-1];snapshot.notice='position_unknown';update();
+assert(!nodes.get('cfg_position_reference').checked);
+assert(status.children[0].children[1].textContent.includes('zuerst vollständig AUF'));
+assert(nodes.get('p04_position_notice').textContent.includes('zuerst vollständig AUF'));
+nodes.get('cfg_lang').value='1';update();assert(status.children[0].children[1].textContent.includes('full UP or DOWN'));
 console.log('PASS: real UI: status sync, calibrated widgets, target request, guided markers, inline/modal layout, apply/cancel, busy state and disabled feature');

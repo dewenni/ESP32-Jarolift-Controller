@@ -64,7 +64,7 @@ Definiere bis zu 6 Rollladengruppen, um mehrere Rollläden auf einmal zu steuern
 für Stand-Alone Anwendung auch mit integrierter Timer Funktion mit fester Uhrzeit, Sonnenaufgang oder Sonnenuntergang als Auslöser.
 
 - **Zeitbasierte Positionssteuerung:**
-Optionale Prozentziele mit Referenzfahrt und individueller Kalibrierung je Rollladen. WebUI, MQTT und Home Assistant verwenden dieselbe geschätzte Öffnung: 0 % geschlossen, 100 % geöffnet.
+Optionale Prozentziele mit abschaltbarer Referenzfahrt und individueller Kalibrierung je Rollladen. WebUI, MQTT und Home Assistant verwenden dieselbe geschätzte Öffnung: 0 % geschlossen, 100 % geöffnet.
 
 - **Originalfernbedienungen zuordnen:**
 Einzelkanäle per Service-Dialog einem oder mehreren Rollläden zuordnen. Empfangene Einzel- und Gruppenbefehle werden für den gemeinsamen Status berücksichtigt.
@@ -406,7 +406,7 @@ Bei global ausgeschalteter Positionssteuerung wird kein zusätzlicher Positionsb
 
 - **Nicht kalibriert:** Unter den normalen Tasten erscheinen nur ein kompakter Hinweis und der Link zur Kalibrierung.
 - **Kalibriert:** Eine kleine Rollladengrafik und die geschätzte Öffnung werden angezeigt, dazu Zielslider und separater Ausführen-Button. Verschieben des Sliders wählt nur den Sollwert; erst der Button startet die Fahrt.
-- **Position unbekannt:** Es wird keine gemessene Position vorgetäuscht. Ein Prozentziel kann trotzdem angefahren werden, da zuvor eine Referenzfahrt erfolgt.
+- **Position unbekannt:** Es wird keine gemessene Position vorgetäuscht. Mit Referenzfahrt kann trotzdem ein Prozentziel angefahren werden. Ohne Referenzfahrt zuerst eine vollständige AUF-/AB-Fahrt abwarten.
 
 <img style="width: 500px;" src="./Doc/webUI_shutter.png">
 
@@ -438,7 +438,7 @@ Die Motoren melden weder Position noch Endlage zurück. Die Positionssteuerung a
 
 Unter **Einstellungen → Gerät → Positionssteuerung** wird die optionale Funktion global aktiviert. Prozentcontrols erscheinen nur bei individuell kalibrierten Rollläden. Andere Rollläden bleiben über die normalen Tasten bedienbar.
 
-Jede Prozentanforderung fährt zuerst eine bekannte Endlage an, unabhängig von der zuvor geschätzten Position:
+Standardmäßig fährt jede Prozentanforderung zuerst eine bekannte Endlage an, unabhängig von der zuvor geschätzten Position:
 
 | Zielöffnung | Ablauf |
 | --- | --- |
@@ -448,6 +448,8 @@ Jede Prozentanforderung fährt zuerst eine bekannte Endlage an, unabhängig von 
 | 100 % | Vollständig öffnen. |
 
 Die Referenzfahrt verwendet die vollständige kalibrierte Fahrzeit mit 5 % Reserve, mindestens einer und höchstens drei Sekunden. Vor dem Richtungswechsel liegt eine Pause von 600 ms. Das dauert bewusst länger als eine direkte Fahrt, vermeidet aber die Abhängigkeit von einem gemerkten Ausgangswert nach unbemerkter Fernbedienungsbetätigung.
+
+Unter **Einstellungen → Gerät → Positionssteuerung → Referenzfahrt vor Positionsvorgabe** kann die Referenzfahrt ausgeschaltet werden, wenn ausschließlich der ESP die Rollläden bedient. Zwischenziele werden dann direkt aus einer bekannten Schätzposition berechnet. Nach Neustart, STOP, SCHATTEN oder Abbruch zuerst vollständig AUF oder AB fahren lassen; bis dahin werden Zwischenziele abgewiesen. 0/100 % bleiben möglich. Der Befehlspuffer für Zwischenziele bleibt aktiv, um die STOP-Zeitpunkte zu schützen.
 
 ### Einen Rollladen kalibrieren
 
@@ -628,7 +630,7 @@ payload:    {None}
 
 ### Prozentziele / Home Assistant
 
-Bei global aktivierter Positionssteuerung und gültiger Kanalkalibrierung akzeptiert `../cmd/position/1` bis `/16` Ganzzahlen von 0 (geschlossen) bis 100 (geöffnet), ohne Retain. Die Fahrt nutzt dieselbe Referenzfahrt wie im WebUI. Discovery ergänzt die Prozentsteuerung automatisch für diese Kanäle und entfernt sie beim Deaktivieren oder bei ungültiger Kalibrierung. AUF/AB/STOP bleiben verfügbar; Gruppen-Prozentfahrten sind nicht enthalten.
+Bei global aktivierter Positionssteuerung und gültiger Kanalkalibrierung akzeptiert `../cmd/position/1` bis `/16` Ganzzahlen von 0 (geschlossen) bis 100 (geöffnet), ohne Retain. Die Fahrt nutzt dieselbe Einstellung zur Referenzfahrt wie im WebUI. Discovery ergänzt die Prozentsteuerung automatisch für diese Kanäle und entfernt sie beim Deaktivieren oder bei ungültiger Kalibrierung. AUF/AB/STOP bleiben verfügbar; Gruppen-Prozentfahrten sind nicht enthalten.
 
 ### Remotes (Fernbedienungen)
 

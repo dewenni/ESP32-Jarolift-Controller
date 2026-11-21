@@ -34,7 +34,7 @@ void setPosition(uint8_t ch, int8_t value) {
   positions[ch]=value; mqttSendPosition(ch,value); dirty=true;
 }
 
-bool previousEnable = false;
+bool previousEnable = false, previousReference = true;
 const char *notice = "";
 
 bool send(uint8_t ch, bool up) { return jaroPositionSend(ch, up ? CMD_UP : CMD_DOWN); }
@@ -42,6 +42,7 @@ void status() {
   JsonDocument doc;
   doc["type"] = "shutterPosition";
   doc["enabled"] = config.position.enable;
+  doc["reference"] = config.position.reference;
   doc["notice"] = notice;
   JsonArray channels = doc["channels"].to<JsonArray>();
   for (uint8_t i=0; i<16; ++i) {
@@ -89,11 +90,18 @@ bool available(uint8_t ch) {
          !EspSysUtil::OTA::getInstance().isActive();
 }
 bool startTarget(uint8_t ch, uint8_t goal) {
-  travel[ch].duration=0;setPosition(ch,-1);notice="";
-  if(!send(ch,goal>=50)) {failure("send_failed");return false;}
+  const int8_t current=positions[ch];
+  const bool direct=!config.position.reference && goal>0 && goal<100;
+  if(direct && current<0) {notice="position_unknown";dirty=true;return false;}
+  notice="";
+  if(direct && current==goal) {dirty=true;return true;}
+  travel[ch].duration=0;setPosition(ch,-1);
+  if(!send(ch,direct ? goal>current : goal>=50)) {failure("send_failed");return false;}
   if(goal==0 || goal==100) {
     // End stops are handled by the motor. Estimate completion without owning the FIFO.
     shutterPositionCommand(uint16_t(1)<<ch,goal==100?CMD_UP:CMD_DOWN);
+  } else if(direct) {
+    move.beginDirect(ch,goal,current,config.position.calibration[ch],jaroPositionSentAt());
   } else {
     move.begin(ch,goal,config.position.calibration[ch],jaroPositionSentAt());
   }
@@ -216,7 +224,9 @@ void shutterPositionWebCommand(const char *payload) {
 }
 void shutterPositionCyclic() {
   const uint32_t now=millis();
-  if (previousEnable != config.position.enable) {previousEnable=config.position.enable;dirty=true;}
+  if (previousEnable != config.position.enable || previousReference != config.position.reference) {
+    previousEnable=config.position.enable;previousReference=config.position.reference;dirty=true;
+  }
   if(shutterPositionBusy() && (!config.position.enable || setupMode || EspSysUtil::OTA::getInstance().isActive())) failure("cancelled");
   if((cal.phase && !available(cal.channel)) || (move.active() && (!available(move.channel) || !config.position.calibration[move.channel].valid()))) failure("cancelled");
   if(cal.phase && (now-cal.lease>6000 || ((cal.phase==2 || cal.phase==4) && now-cal.since>180000))) failure("timeout");

@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let snapshot, ownToken = 0, pending = false, renderKey = "", intro = false, language = $("cfg_lang").value;
   const connected = () => typeof ws !== "undefined" && ws?.readyState === WebSocket.OPEN;
   const channel = () => Number(select.value);
-  const noticeText = key => ({busy:positionText("pos_busy"), queue_full:positionText("pos_queue_full"), unavailable:positionText("pos_unavailable"), not_calibrated:positionText("pos_not_calibrated"), send_failed:positionText("pos_send_failed"), invalid_times:positionText("pos_invalid_times"), saved:positionText("pos_saved"), cancelled:positionText("pos_cancelled"), timeout:positionText("pos_timeout")}[key] || "");
+  const noticeText = key => ({busy:positionText("pos_busy"), queue_full:positionText("pos_queue_full"), unavailable:positionText("pos_unavailable"), not_calibrated:positionText("pos_not_calibrated"), position_unknown:positionText("pos_direct_unknown"), send_failed:positionText("pos_send_failed"), invalid_times:positionText("pos_invalid_times"), saved:positionText("pos_saved"), cancelled:positionText("pos_cancelled"), timeout:positionText("pos_timeout")}[key] || "");
   const send = (a, extra = {}) => {
     if (!connected()) return false;
     sendData("p04_position_cmd", JSON.stringify({ a, c: channel(), token: ownToken, ...extra }));
@@ -82,6 +82,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!snapshot) return;
     const s=snapshot, cal=s.cal, queue=s.queue || [], active=cal.phase || s.moving>=0 || queue.length;
     $("cfg_position_enable").checked=s.enabled;
+    $("cfg_position_reference").checked=s.reference!==false;
     const valid=s.channels[channel()]?.[0];
     const count=s.channels.filter((x,i) => x[0] && !$("p04_shutter_name_"+i).hidden && getComputedStyle($("p04_shutter_name_"+i)).display!=="none").length;
     $("p04_position_summary").textContent=s.enabled ? `${count} ${positionText("pos_total")} · ${positionText(valid?"pos_ready":"pos_missing")}` : positionText("pos_disabled");
@@ -116,7 +117,7 @@ document.addEventListener("DOMContentLoaded", () => {
       w.status.classList.toggle("position-referencing",moving);
       w.statusTitle.textContent=positionText("pos_estimate");
       const progress=s.phase===1 && Number.isFinite(s.remaining)?`${Math.max(0,Math.ceil(s.remaining))} s`:`${s.target} %`;
-      w.statusValue.textContent=moving ? ["",positionText("pos_reference"),positionText("pos_settle"),positionText("pos_moving")][s.phase]+` · ${progress}` : known ? `${pos} %` : positionText("pos_unknown");
+      w.statusValue.textContent=moving ? ["",positionText("pos_reference"),positionText("pos_settle"),positionText("pos_moving")][s.phase]+` · ${progress}` : known ? `${pos} %` : positionText(s.reference===false?"pos_direct_unknown":"pos_unknown");
       w.shutter.style.height=(known?100-pos:100)+"%";
       w.targetLine.hidden=!known;
       w.targetLine.style.height=(100-Number(w.slider.value))+"%";

@@ -36,14 +36,21 @@ public:
   uint8_t channel = 0, target = 0;
   uint32_t since = 0, duration = 0;
   bool referenceUp() const { return target >= 50; }
-  bool targetUp() const { return !referenceUp(); }
+  bool opening = false;
+  bool targetUp() const { return opening; }
   bool active() const { return phase != Idle; }
   void begin(uint8_t ch, uint8_t goal, const PositionCalibration &cal, uint32_t sentAt) {
-    channel = ch; target = goal; since = sentAt;
+    channel = ch; target = goal; since = sentAt; opening = !referenceUp();
     duration = cal.referenceTime(referenceUp()); phase = Reference;
   }
   void targetStarted(const PositionCalibration &cal, uint32_t sentAt) {
     since = sentAt; duration = cal.timeTo(target, targetUp()); phase = Target;
+  }
+  void beginDirect(uint8_t ch, uint8_t goal, uint8_t current, const PositionCalibration &cal, uint32_t sentAt) {
+    channel = ch; target = goal; since = sentAt; opening = goal > current;
+    const uint32_t from = cal.timeTo(current, opening), to = cal.timeTo(goal, opening);
+    duration = to - from;
+    phase = Target;
   }
   Action next(uint32_t now) {
     const uint32_t elapsed = now - since; // wrap-safe for the bounded durations

@@ -7,7 +7,7 @@ ROOT = Path(__file__).resolve().parents[1]
 HEADERS = {
     'Arduino.h': '#pragma once\n#include <cstdint>\n#include <cstring>\nuint32_t millis();\n',
     'EspSysUtil.h': '#pragma once\nnamespace EspSysUtil { struct OTA { static OTA &getInstance(); bool active=false; bool isActive() {return active;} }; }\n',
-    'config.h': '#pragma once\n#include <positionModel.h>\nstruct Config {struct {bool enable=false; PositionCalibration calibration[16];} position; struct {bool ch_enable[16]={};} jaro;};\nextern Config config; extern bool setupMode;\n',
+    'config.h': '#pragma once\n#include <positionModel.h>\nstruct Config {struct {bool enable=false; bool reference=true; PositionCalibration calibration[16];} position; struct {bool ch_enable[16]={};} jaro;};\nextern Config config; extern bool setupMode;\n',
     'jarolift.h': '#pragma once\n#include <cstdint>\nenum JaroCmdType {CMD_UP,CMD_DOWN,CMD_STOP,CMD_SHADE};\nvoid mqttSendPosition(uint8_t,int8_t); bool jaroPositionSend(uint8_t,JaroCmdType); uint32_t jaroPositionSentAt(); bool jaroCommandsPending();\n',
     'webUI.h': '#pragma once\n#include <ArduinoJson.h>\n#include <string>\nstruct Web {std::string data; void wsUpdateWebJSON(JsonDocument &doc) {data.clear();serializeJson(doc,data);}};extern Web webUI;\n',
 }
@@ -125,6 +125,32 @@ int main(){
  radioOK=false;clockMs+=40000;shutterPositionCyclic();radioOK=true;
  assert(!shutterPositionBusy() && state()["queue"].size()==0 && state()["notice"]=="send_failed");
  begin();assert(!shutterPositionTarget(1,"75"));command(R"({"a":"cancel","c":0,"token":7})");
+ // Direct positioning requires a completed known start and uses the shared queue.
+ config.position.reference=false;shutterPositionCyclic();assert(state()["reference"]==false);
+ shutterPositionRemote(1,CMD_STOP);shutterPositionCyclic();n=sent.size();
+ assert(!shutterPositionTarget(0,"25"));shutterPositionCyclic();
+ assert(sent.size()==n && state()["notice"]=="position_unknown" && state()["reference"]==false);
+ assert(shutterPositionTarget(0,"0"));
+ assert(!shutterPositionTarget(0,"25")); // Endpoint travel has not finished yet.
+ clockMs+=calibration.referenceTime(false);shutterPositionCyclic();
+ assert(state()["channels"][0][1]==0);
+ assert(shutterPositionTarget(0,"25"));shutterPositionCyclic();
+ assert(sent.back()==CMD_UP && state()["phase"]==int(PositionMove::Target));
+ assert(shutterPositionTarget(0,"75")); // Re-evaluate start at dequeue, after 25% finishes.
+ clockMs+=8989;shutterPositionCyclic();assert(sent.back()==CMD_UP);
+ clockMs+=1;shutterPositionCyclic();assert(sent.back()==CMD_UP && shutterPositionBusy());
+ clockMs+=12990;shutterPositionCyclic();assert(sent.back()==CMD_STOP && !shutterPositionBusy());
+ assert(state()["channels"][0][1]==75);
+ n=sent.size();assert(shutterPositionTarget(0,"75"));assert(sent.size()==n && !shutterPositionBusy());
+ assert(shutterPositionTarget(0,"25"));assert(sent.back()==CMD_DOWN);
+ clockMs+=13089;shutterPositionCyclic();assert(sent.back()==CMD_DOWN);
+ clockMs+=1;shutterPositionCyclic();assert(sent.back()==CMD_STOP && !shutterPositionBusy());
+ assert(state()["channels"][0][1]==25);
+ shutterPositionRemote(1,CMD_SHADE);n=sent.size();assert(!shutterPositionTarget(0,"50"));assert(sent.size()==n);
+ assert(shutterPositionTarget(0,"100"));clockMs+=calibration.referenceTime(true);shutterPositionCyclic();
+ assert(state()["channels"][0][1]==100);
+ config.position.reference=true;assert(shutterPositionTarget(0,"25"));
+ shutterPositionCyclic();assert(state()["phase"]==int(PositionMove::Reference));shutterPositionManual(1);
  puts("PASS: actual controller: target sequence, busy/invalid requests, radio failure, manual/remote abort, lease/ownership, calibration commit, disable, OTA, invalidation");
 }
 '''
