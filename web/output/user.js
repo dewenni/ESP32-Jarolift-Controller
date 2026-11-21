@@ -187,8 +187,8 @@ const user_translations = {
   help_operation: {"de": "Rollläden bedienen", "en": "Operate shutters"},
   help_position_enable: {"de": "Unter Einstellungen → Gerät → Positionssteuerung die Funktion global einschalten. Nur einzeln kalibrierte Rollläden erhalten Prozentcontrols. Andere Rollläden bleiben über die normalen Tasten bedienbar.", "en": "Enable Settings → Device → Position control globally. Percentage controls appear only for individually calibrated shutters. Other shutters retain their normal buttons."},
   help_reference_title: {"de": "Warum zuerst eine Referenzfahrt?", "en": "Why a reference run first?"},
-  help_reference: {"de": "Der Motor meldet seine Position nicht zurück. Originalfernbedienungen können unbemerkt bleiben, und ein elektrischer Taster vor Ort sendet gegebenenfalls gar kein Funksignal. Deshalb ersetzt auch eine registrierte Fernbedienung keine Referenzfahrt.", "en": "The motor does not report its position. Original remote commands can be missed, and a local electrical switch may send no radio signal at all. Registering remotes therefore cannot replace a reference run."},
-  help_reference_route: {"de": "Ziele unter 50 %: zuerst vollständig schließen, dann bis zum Ziel öffnen. Ab 50 %: zuerst vollständig öffnen, dann bis zum Ziel schließen. 0/100 % fahren nur zur jeweiligen Endlage. Die volle Referenzzeit mit Reserve wird auch dann abgewartet, wenn der Rollladen bereits nahe der Endlage steht.", "en": "Targets below 50%: fully close, then open to the target. From 50%: fully open, then close to the target. 0/100% only travel to the relevant end position. The full reference time plus reserve is used even when the shutter is already near that end position."},
+  help_reference: {"de": "Der Motor meldet seine Position nicht zurück. Originalfernbedienungen oder elektrische Taster können unbemerkt bleiben. Deshalb ist die Referenzfahrt standardmäßig aktiv. Wer ausschließlich über den ESP steuert, kann sie unter Einstellungen → Gerät → Positionssteuerung ausschalten. Zwischenziele werden dann aus der bekannten Schätzposition direkt angefahren.", "en": "The motor does not report its position. Original remotes or local electrical switches can go unnoticed. Referencing is therefore enabled by default. When controlling exclusively through the ESP, disable it under Settings → Device → Position control. Intermediate targets then move directly from the known estimated position."},
+  help_reference_route: {"de": "Mit Referenzfahrt: unter 50 % zuerst vollständig schließen, ab 50 % zuerst vollständig öffnen, dann zum Ziel fahren. Die volle Referenzzeit mit Reserve wird abgewartet. 0/100 % fahren unabhängig von der Einstellung zur jeweiligen Endlage.", "en": "With referencing: below 50%, fully close first; from 50%, fully open first, then move to the target. The full reference time plus reserve is used. Regardless of this setting, 0/100% travel to the relevant end position."},
   help_calibration_title: {"de": "Kalibrierung in fünf Schritten", "en": "Calibration in five steps"},
   help_cal1: {"de": "Motor-Endlagen vorher einrichten und die halbe Öffnungshöhe markieren. Den Rollladen direkt beobachten.", "en": "Set the motor end positions first and mark half the opening height. Keep the shutter in direct view."},
   help_cal2: {"de": "Unter Service den Rollladen auswählen, vollständig schließen und die Kalibrierung starten.", "en": "Select the shutter on Service, close it fully and start calibration."},
@@ -219,7 +219,7 @@ const user_translations = {
   help_tools: {"de": "Zu den Tools", "en": "Go to Tools"},
   help_connections: {"de": "Zugänge und Updates", "en": "Access and updates"},
   help_unknown: {"de": "Position unbekannt", "en": "Position unknown"},
-  help_unknown_answer: {"de": "Nach Neustart, STOP oder SCHATTEN fehlt eine verlässliche Ausgangslage. Bei gültiger Kalibrierung kann trotzdem ein Prozentziel angefordert werden: Die Referenzfahrt stellt den Ausgangspunkt neu her.", "en": "After restart, STOP or SHADE, the starting position is uncertain. With valid calibration you can still request a percentage target: the reference run establishes a new starting point."},
+  help_unknown_answer: {"de": "Nach Neustart, STOP oder SCHATTEN fehlt eine verlässliche Ausgangslage. Mit Referenzfahrt stellt ein Prozentziel den Ausgangspunkt neu her. Ohne Referenzfahrt werden Zwischenziele abgewiesen, bis eine vollständige AUF-/AB-Fahrt beendet ist.", "en": "After restart, STOP or SHADE, the starting position is uncertain. With referencing enabled, a percentage target establishes a new starting point. Without referencing, intermediate targets are rejected until a full UP/DOWN run has completed."},
   help_missing: {"de": "Keine Prozentsteuerung sichtbar", "en": "No percentage controls"},
   help_missing_answer: {"de": "Globalen Schalter unter Gerät sowie Aktivierung und Kalibrierung dieses Rollladens prüfen. Nach Endlagen- oder Motor-Anlernbefehlen ist erneut zu kalibrieren.", "en": "Check the global switch under Device and this shutter’s activation and calibration. Recalibrate after end-position or motor-pairing commands."},
   help_busy: {"de": "Ziel wird nicht angenommen", "en": "Target is rejected"},
@@ -308,9 +308,12 @@ const user_translations = {
   pos_recalibrate: {de:"Neu kalibrieren", en:"Recalibrate"},
   pos_notes: {de:"Hinweise zur Positionierung", en:"Positioning notes"},
   pos_visual_hint: {de:"Darstellung zur Orientierung", en:"Illustration for guidance"},
+  pos_reference_enable: {"de": "Referenzfahrt vor Positionsvorgabe", "en": "Reference run before positioning"},
+  pos_reference_settings_hint: {"de": "Standardmäßig aktiv: Zwischenziele zuerst über eine Endlage anfahren. Nur bei ausschließlicher Steuerung über den ESP ausschalten. Ohne Referenzfahrt ist eine bekannte Position erforderlich; nach Neustart, STOP oder SCHATTEN zuerst vollständig AUF oder AB fahren lassen.", "en": "Enabled by default: approach intermediate targets via an end position. Disable only when controlling exclusively through the ESP. Without referencing, a known position is required; after restart, STOP or SHADE, first allow a full UP or DOWN run."},
+  pos_direct_unknown: {"de": "Position unbekannt – zuerst vollständig AUF oder AB fahren lassen.", "en": "Position unknown – first allow a full UP or DOWN run."},
   pos_title: {"de": "Positionssteuerung", "en": "Position control"},
   pos_enable: {"de": "Prozentuale Steuerung verwenden", "en": "Enable percentage control"},
-  pos_settings_hint: {"de": "Je Rollladen auf der Service-Seite kalibrieren. Vor jeder Prozentfahrt wird zuerst vollständig geschlossen oder geöffnet.", "en": "Calibrate each shutter on the Service page. Each percentage move first fully closes or opens the shutter."},
+  pos_settings_hint: {"de": "Je Rollladen auf der Service-Seite kalibrieren. Alle Positionen sind zeitbasierte Schätzwerte ohne Motorrückmeldung.", "en": "Calibrate each shutter on the Service page. All positions are time-based estimates without motor feedback."},
   pos_calibration: {"de": "Positionskalibrierung", "en": "Position calibration"},
   pos_service_hint: {"de": "Zwei vollständige Messfahrten für den ausgewählten Rollladen. Die Motor-Endlagen müssen bereits eingerichtet sein.", "en": "Two complete measurement runs for the selected shutter. Motor end limits must already be set."},
   pos_remote_hint: {"de": "Originalfernbedienungen müssen unter Gerät zugeordnet sein, damit empfangene Befehle eine Zielanfahrt abbrechen können.", "en": "Assign original remotes under Device so received commands can cancel a target move."},
@@ -363,7 +366,7 @@ const user_translations = {
   pos_total: {"de": "Kanäle eingerichtet", "en": "channels calibrated"},
   pos_no_link: {"de": "Keine Verbindung zum ESP. Kalibrierung wird automatisch abgebrochen.", "en": "No connection to ESP. Calibration will be cancelled automatically."},
   pos_time: {"de": "Zeit seit Fahrtbeginn", "en": "Time since movement started"},
-  pos_reference_hint: {"de": "Ziel unter 50 %: zuerst schließen. Ab 50 %: zuerst öffnen. Die Position wird zeitbasiert geschätzt.", "en": "Below 50%: close first. At 50% and above: open first. Position is estimated from time."},
+  pos_reference_hint: {"de": "Mit Referenzfahrt: Ziel unter 50 % zuerst schließen, ab 50 % zuerst öffnen. Ohne Referenzfahrt direkt aus bekannter Position fahren. Die Position wird zeitbasiert geschätzt.", "en": "With referencing: below 50%, close first; at 50% and above, open first. Without referencing, move directly from a known position. Position is estimated from time."},
   ui_reload: { de: "Seite neu laden", en: "Reload page" },
   info_firmware_used: { de: "Firmware-Speicher belegt", en: "Firmware storage used" },
   info_ram_free: { de: "RAM frei", en: "Free RAM" },
@@ -735,7 +738,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let snapshot, ownToken = 0, pending = false, renderKey = "", intro = false, language = $("cfg_lang").value;
   const connected = () => typeof ws !== "undefined" && ws?.readyState === WebSocket.OPEN;
   const channel = () => Number(select.value);
-  const noticeText = key => ({busy:positionText("pos_busy"), queue_full:positionText("pos_queue_full"), unavailable:positionText("pos_unavailable"), not_calibrated:positionText("pos_not_calibrated"), send_failed:positionText("pos_send_failed"), invalid_times:positionText("pos_invalid_times"), saved:positionText("pos_saved"), cancelled:positionText("pos_cancelled"), timeout:positionText("pos_timeout")}[key] || "");
+  const noticeText = key => ({busy:positionText("pos_busy"), queue_full:positionText("pos_queue_full"), unavailable:positionText("pos_unavailable"), not_calibrated:positionText("pos_not_calibrated"), position_unknown:positionText("pos_direct_unknown"), send_failed:positionText("pos_send_failed"), invalid_times:positionText("pos_invalid_times"), saved:positionText("pos_saved"), cancelled:positionText("pos_cancelled"), timeout:positionText("pos_timeout")}[key] || "");
   const send = (a, extra = {}) => {
     if (!connected()) return false;
     sendData("p04_position_cmd", JSON.stringify({ a, c: channel(), token: ownToken, ...extra }));
@@ -790,8 +793,9 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   function render() {
     if (!snapshot) return;
-    const s=snapshot, cal=s.cal, queue=s.queue || [], active=cal.phase || s.moving>=0 || queue.length;
+    const s=snapshot, cal=s.cal, queue=s.queue || [], moves=s.moves || [], active=cal.phase || moves.length || queue.length;
     $("cfg_position_enable").checked=s.enabled;
+    $("cfg_position_reference").checked=s.reference!==false;
     const valid=s.channels[channel()]?.[0];
     const count=s.channels.filter((x,i) => x[0] && !$("p04_shutter_name_"+i).hidden && getComputedStyle($("p04_shutter_name_"+i)).display!=="none").length;
     $("p04_position_summary").textContent=s.enabled ? `${count} ${positionText("pos_total")} · ${positionText(valid?"pos_ready":"pos_missing")}` : positionText("pos_disabled");
@@ -818,15 +822,15 @@ document.addEventListener("DOMContentLoaded", () => {
       w.button.setAttribute("aria-label",waiting?w.button.title+" · "+positionText("pos_go"):positionText("pos_go"));
       w.slider.setAttribute("aria-label",positionText("pos_goal"));
       w.ends.children[0].textContent=positionText("pos_closed");w.ends.children[1].textContent=positionText("pos_open");
-      const moving=s.moving===c;
+      const move=moves.find(entry=>entry[0]===c), moving=!!move;
       w.label.textContent=positionText("pos_missing");
       // No intermediate position is invented during a reference or target run.
       const known=pos>=0 && !moving;
       w.status.classList.toggle("position-unknown",!known);
       w.status.classList.toggle("position-referencing",moving);
       w.statusTitle.textContent=positionText("pos_estimate");
-      const progress=s.phase===1 && Number.isFinite(s.remaining)?`${Math.max(0,Math.ceil(s.remaining))} s`:`${s.target} %`;
-      w.statusValue.textContent=moving ? ["",positionText("pos_reference"),positionText("pos_settle"),positionText("pos_moving")][s.phase]+` · ${progress}` : known ? `${pos} %` : positionText("pos_unknown");
+      const progress=move?.[1]===1?`${move[3]} s`:`${move?.[2]} %`;
+      w.statusValue.textContent=moving ? ["",positionText("pos_reference"),positionText("pos_settle"),positionText("pos_moving")][move[1]]+` · ${progress}` : known ? `${pos} %` : positionText(s.reference===false?"pos_direct_unknown":"pos_unknown");
       w.shutter.style.height=(known?100-pos:100)+"%";
       w.targetLine.hidden=!known;
       w.targetLine.style.height=(100-Number(w.slider.value))+"%";

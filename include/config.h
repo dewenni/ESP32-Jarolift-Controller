@@ -7,7 +7,7 @@
 /*-------------------------------------------------------------------------------
 General Configuration
 --------------------------------------------------------------------------------*/
-#define VERSION "v2.0.2" // internal program version
+#define VERSION "v2.1.0" // internal program version
 
 #define WIFI_RECONNECT 30000     // Delay between wifi reconnection tries
 #define MQTT_RECONNECT 10000     // Delay between mqtt reconnection tries

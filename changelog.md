@@ -1,3 +1,17 @@
+# v2.1.0
+
+- [FEATURE] Run up to 16 calibrated shutter target sequences concurrently, with a shared buffer for 16 additional waiting targets across WebUI, MQTT and Home Assistant.
+- [FEATURE] Make reference runs before intermediate targets optional. Existing configurations keep referencing enabled; direct runs require a known position estimate.
+- [IMPROVE] Collect requests for 200 ms and combine reference and endpoint starts into one group command per direction.
+- [IMPROVE] Combine STOP deadlines within a one-second window into group commands, adding up to approximately ±0.5 seconds of planned timing deviation. Prioritize upcoming STOPs while allowing further starts when a complete radio operation fits before the planned group STOP.
+- [IMPROVE] Show the independent phase and target of each active run in the WebUI. Keep calibration exclusive and preserve per-channel waiting-target replacement.
+- [IMPROVE] Cancel concurrent target runs with a group STOP for manual ESP commands; received associated remote commands cancel only affected runs. Both discard waiting targets.
+- [TEST] Extend controller tests with blocking radio timing, 16 concurrent runs, STOP-window boundaries, short moves, timer rollover, aborts and send failures; extend WebUI tests for multiple active channels.
+
+Positions remain time-based estimates without motor feedback. MQTT topics, the 0% closed / 100% open scale and existing calibration data are unchanged. See [positioning and calibration](Doc/Positionierung.md) for operation and limits.
+
+---
+
 # v2.0.2
 
 This patch release fixes issues in v2.0.0. For the major changes, new features and migration notes, see [v2.0.0](https://github.com/dewenni/ESP32-Jarolift-Controller/releases/tag/v2.0.0).
