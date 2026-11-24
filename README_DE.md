@@ -310,7 +310,13 @@ Die Positionssteuerung wird unter **Gerät** zentral aktiviert. Jeder Rollladen 
 
 ## Konfiguration importieren und exportieren
 
-Unter **Tools → Konfigurationsdatei** lässt sich `config.json` anzeigen, exportieren und importieren. Nach dem Import einer Sicherung den Controller neu starten, damit die wiederhergestellten JAROLIFT-Einstellungen wirksam werden.
+Unter **Tools → Konfiguration** lässt sich `config.json` anzeigen, exportieren und importieren. Der Name der ausgewählten Importdatei ist beliebig; übernommen wird sie immer als `config.json`. Vor dem Ersetzen wird gültiges JSON mit dem projektspezifischen Abschnitt geprüft. Nach erfolgreichem Import oder Wiederherstellen startet das Gerät automatisch neu.
+
+**Backup auf dem Gerät** kopiert die bereits gespeicherte Konfiguration nach `config_backup.json`. Das Wiederherstellen ersetzt die aktuelle Konfiguration; das Backup bleibt erhalten. Beide Dateien zeigen ihren letzten Speicherzeitpunkt, bei fehlender gültiger Gerätezeit „Zeitpunkt unbekannt“. Schreib- oder Platzfehler lassen die bisherige Zieldatei bestehen.
+
+Mit **Backup exportieren** lässt sich der gesicherte Stand direkt als `config_backup.json` herunterladen, ohne ihn vorher wiederherzustellen.
+
+Das lokale Backup liegt auf demselben Flash und ersetzt keinen Export auf den Computer. Es enthält Zugangsdaten und sichert ausschließlich die Konfiguration, keine separat gespeicherten Zähler oder Verlaufsdaten. Exportierte Dateien vertraulich behandeln und nicht unbereinigt veröffentlichen.
 
 <img style="width: 500px;" src="./Doc/webUI_tools.png">
 

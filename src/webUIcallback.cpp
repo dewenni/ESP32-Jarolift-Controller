@@ -33,6 +33,8 @@ void webCallback(const char *elementId, const char *value) {
     return;
   }
 
+  if (webUI.handleConfigFileCommand(elementId, value)) return;
+
   // ------------------------------------------------------------------
   // GitHub / Version
   // ------------------------------------------------------------------

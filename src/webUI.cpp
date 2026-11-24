@@ -5,6 +5,7 @@
 #include <language.h>
 #include <message.h>
 #include <webUI.h>
+#include <shutterPosition.h>
 #include <webUIupdates.h>
 
 const int MAX_WS_CLIENT = 3;
@@ -138,6 +139,9 @@ static void checkWebOtaTimeout() {
  * @return  none
  * *******************************************************************/
 void webUISetup() {
+  webUI.setConfigFileSection("jaro");
+  webUI.setCallbackConfigFileReady([]() { return !ota.isActive() && !shutterPositionBusy(); });
+
 
   webUI.setCallbackOta(handleWebOta);
 
@@ -147,11 +151,11 @@ void webUISetup() {
       webUI.wsUpdateWebText("upload_status_txt", msg, false);
       break;
     case EspWebUI::UPLOAD_FINISH:
-      webUI.wsUpdateWebText("upload_status_txt", msg, false);
-      configLoadFromFile(); // load configuration
-      applyWebAccessSettings();
-      webUI.wsUpdateWebLanguage(LANG::CODE[config.lang]);
-      webUI.wsLoadConfigWebUI(); // update webUI settings
+      // Executed on the loop task after the checked file was committed.
+      // Reboot before configCyclic can save the old in-memory configuration.
+      EspSysUtil::RestartReason::saveLocal("configuration restored/imported");
+      delay(300);
+      ESP.restart();
       break;
     case EspWebUI::UPLOAD_ERROR:
       webUI.wsUpdateWebText("upload_status_txt", msg, false);

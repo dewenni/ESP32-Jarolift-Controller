@@ -311,7 +311,13 @@ Changes are saved automatically. **GPIO and JAROLIFT protocol changes require a 
 
 ## Config Import and Export
 
-Use **Tools → Configuration file** to view, export or import `config.json`. Restart the controller after importing a backup so the restored JAROLIFT settings take effect.
+Under **Tools → Configuration**, view, export or import `config.json`. The selected import file may have any name; it is always stored as `config.json`. Valid JSON with the project's section is checked before replacement. The device restarts automatically after a successful import or restore.
+
+**Backup on device** copies the already saved configuration to `config_backup.json`. Restoring replaces the current configuration and keeps the backup. Both files show their last save time, or “Time unknown” if no valid device time was available. Write or space errors preserve the previous destination file.
+
+Use **Export backup** to download the saved snapshot as `config_backup.json` without restoring it first.
+
+The local backup uses the same flash and does not replace exporting a copy to a computer. It contains credentials and covers configuration only, not separately stored counters or history. Treat exported files as private and do not publish them unredacted.
 
 <img style="width: 500px;" src="./Doc/webUI_tools.png">
 
