@@ -8,7 +8,7 @@
 #define Dusk2Dawn_h
 
   #include "Arduino.h"
-  #include <Math.h>
+  #include <math.h>
 
   class Dusk2Dawn {
     public:
