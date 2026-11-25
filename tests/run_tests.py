@@ -23,6 +23,7 @@ def main():
         (sys.executable, "test_serial_migration.py"),
         (sys.executable, "test_serial_tx.py"),
         (sys.executable, "test_ota_validation.py"),
+        (sys.executable, "test_sim_generation.py"),
         ("node", "test_position_ui.cjs"),
         ("node", "test_remote_mapping_ui.cjs"),
     ]

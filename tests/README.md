@@ -46,6 +46,7 @@ Individual scripts can also be run with `python3 tests/test_….py` or
 | `test_rx_glitch.py` | Actual edge-capture methods: short HIGH/LOW disturbances, false sync, stale HIGH invalidation, frozen buffers, timer rollover and deterministic noise. |
 | `test_rx_decode.py` | Actual capture/decoder/KeeLoq methods: all 16 channels, groups, commands, terminal HIGH handling, truncated frames and discriminator mismatch. |
 | `test_ota_validation.py` | `markAppValid` from `src/main.cpp` with a fake clock and OTA API. Checks offline confirmation at 30 seconds, deferral during active OTA, 10-second retries and no repeat after success. |
+| `test_sim_generation.py` | Demo generation without `web/output`, unchanged repeat runs, version updates and preservation of simulation source data. |
 | `test_position_ui.cjs` | Actual frontend logic: feature/calibration visibility, slider without immediate transmission, explicit execute, calibration steps, apply/cancel, queued target display/replacement, multiple independent active phases and per-channel busy state. |
 | `test_remote_mapping_ui.cjs` | Actual frontend logic: selected motor, confirmation before save, Unicode limit, removal, session ownership and cleanup after disconnect. |
 
